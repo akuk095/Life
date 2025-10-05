@@ -3,23 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Essential Life Skills Guide</title>
+    <title>Card Wallet</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+            min-height: 100vh; 
+            padding: 20px; 
+            overflow-x: hidden;
+        }
+        
+        /* Wallet View Styles */
+        .wallet-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            perspective: 2000px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .wallet-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .wallet-header.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .wallet-header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        
+        .wallet-header p {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+        
+        .card-stack {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 500px;
+            margin: 0 auto;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .card-stack.expanded {
+            max-width: 1200px;
+            height: 90vh;
+        }
+        
+        .wallet-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center center;
+            overflow: hidden;
+        }
+        
+        .wallet-card:hover:not(.expanded) {
+            transform: translateY(-10px) scale(1.02) !important;
+        }
+        
+        .wallet-card.expanded {
+            cursor: default;
+            z-index: 1000 !important;
+            transform: translateY(0) scale(1) rotateX(0deg) !important;
+        }
+        
+        /* Card Preview (Mini Version) */
+        .card-preview {
+            padding: 30px;
+            pointer-events: none;
+        }
+        
+        .wallet-card.expanded .card-preview {
+            display: none;
+        }
+        
+        .preview-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .preview-header h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .preview-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .preview-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        /* Full Card Content */
+        .card-full-content {
+            display: none;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .wallet-card.expanded .card-full-content {
+            display: block;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.1);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(0,0,0,0.2);
+            transform: rotate(90deg);
+        }
+        
+        /* Life Skills App Styles */
+        .header { 
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); 
+            color: white; 
+            padding: 40px 30px; 
+            text-align: center; 
+            position: relative; 
+        }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
-		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
-		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px;}
+        .header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
+        .header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px;}
         .edit-toggle { position: absolute; top: 20px; right: 30px; }
         .edit-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
         .edit-btn:hover { background: white; color: #3498db; }
         .edit-btn.active { background: #27ae60; border-color: #27ae60; }
-		.emoji-picker {  position: absolute;  background: white;  border: 1px solid #ccc;  border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 30px);  gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;}
-		.emoji-picker button { font-size: 20px; background: none;  border: none;  cursor: pointer; transition: transform 0.2s;}
-		.emoji-picker button:hover { transform: scale(1.2);}
+        .emoji-picker { position: absolute; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 30px); gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;}
+        .emoji-picker button { font-size: 20px; background: none; border: none; cursor: pointer; transition: transform 0.2s;}
+        .emoji-picker button:hover { transform: scale(1.2);}
         .nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; flex-wrap: wrap; }
         .tab-wrapper { display: flex; align-items: center; gap: 5px; }
         .nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; }
@@ -29,7 +204,7 @@
         .delete-tab-btn:hover { background: #c0392b; transform: scale(1.1); }
         .add-category-tab { background: #27ae60 !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
         .add-category-tab:hover { background: #229954 !important; }
-        .content-area { padding: 30px; }
+        .content-area { padding: 30px; max-height: calc(90vh - 200px); overflow-y: auto; }
         .category { display: none; }
         .category.active { display: block; }
         .skill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
@@ -57,476 +232,738 @@
         .add-skill-btn { background: #3498db; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: 100%; margin-top: 20px; transition: all 0.3s ease; display: none; }
         .add-skill-btn:hover { background: #2980b9; }
         .edit-mode .add-skill-btn { display: block; }
-        @media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
+        
+        /* Add New Card Button */
+        .add-card-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(39, 174, 96, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .add-card-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 30px rgba(39, 174, 96, 0.6);
+        }
+        
+        .delete-card-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+        
+        .wallet-card:hover .delete-card-btn {
+            opacity: 1;
+        }
+        
+        .wallet-card.expanded .delete-card-btn {
+            display: none;
+        }
+        
+        .delete-card-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 768px) { 
+            .skill-grid { grid-template-columns: 1fr; }
+            .wallet-header h1 { font-size: 32px; }
+            .card-stack { max-width: 340px; height: 450px; }
+        }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            <h1>📚 Essential Life Skills Guide</h1>
-            <p>Fundamental knowledge everyone should have to navigate life successfully</p>
+    <div class="wallet-container" id="walletContainer">
+        <div class="wallet-header" id="walletHeader">
+            <h1>🎴 My Card Wallet</h1>
+            <p>Swipe through your life management cards</p>
         </div>
-        <div class="nav-tabs" id="navTabs"></div>
-        <div class="content-area" id="contentArea"></div>
+        <div class="card-stack" id="cardStack"></div>
     </div>
+    
+    <button class="add-card-btn" id="addCardBtn" onclick="addNewCard()">+</button>
+
     <script>
-// Initialize Firebase - REPLACE WITH YOUR CONFIG
-const firebaseConfig = {
-  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
-  authDomain: "life-akuk095.firebaseapp.com",
-  databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "life-akuk095",
-  storageBucket: "life-akuk095.firebasestorage.app",
-  messagingSenderId: "80383828301",
-  appId: "1:80383828301:web:7c001b7375f63fc5055704",
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
-// Default data structure
-let categories = [
-    {
-        name: "Health & Body", 
-        icon: "💪", 
-        intro: "Understanding your body and maintaining your health.", 
-        skills: [
-            {
-                title: "Basic Hygiene", 
-                icon: "🧼", 
-                items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
-            }
-        ]
-    },
-    {
-        name: "Daily Living", 
-        icon: "🏡", 
-        intro: "Practical skills to manage your home and everyday responsibilities.", 
-        skills: [
-            {
-                title: "Household Basics", 
-                icon: "🧹", 
-                items: ["Do laundry", "Clean regularly", "Take out trash"]
-            }
-        ]
-    }
-];
-
-let checkedItems = {};
-let editMode = false;
-let activeTabIndex = 0;
-let appIcon = "📚"; 
-let appTitle = "Essential Life Skills Guide";
-let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
-
-// Load data from Firebase on startup
-function loadFromFirebase() {
-    database.ref('categories').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            categories = data;
-        }
-        renderTabs();
-        renderContent();
-    });
-    
-    database.ref('checkedItems').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            checkedItems = data;
-            renderContent();
-        }
-    });
-
-    database.ref('appTitle').once('value', (snapshot) => {
-        if (snapshot.val()) appTitle = snapshot.val();
-        renderHeader();
-    });
-
-    database.ref('appSubtitle').once('value', (snapshot) => {
-        if (snapshot.val()) appSubtitle = snapshot.val();
-        renderHeader();
-    });
-
-database.ref('appIcon').once('value', (snapshot) => {
-    if (snapshot.val() !== null) appIcon = snapshot.val();
-    renderHeader();
-});
-	
-}
-function saveHeader() {
-    database.ref('appTitle').set(appTitle);
-    database.ref('appSubtitle').set(appSubtitle);
-    database.ref('appIcon').set(appIcon);
-}
-
-
-function renderHeader() {
-    const header = document.querySelector('.header');
-    header.innerHTML = `
-        <div class="edit-toggle">
-            <button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">
-                ${editMode ? 'Done' : 'Edit'}
-            </button>
-        </div>
-       <h1>
-    <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-        ${appIcon ? appIcon : "🚫"}
-    </span>
-    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
-        ${appTitle}
-    </span>
-</h1>
-
-
-        <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
-    `;
-
-    if (editMode) {
-        header.querySelector('h1 span').addEventListener('blur', (e) => {
-            appTitle = e.target.textContent.trim();
-            saveHeader();
-        });
-        header.querySelector('p').addEventListener('blur', (e) => {
-            appSubtitle = e.target.textContent.trim();
-            saveHeader();
-        });
-    }
-}
-function showEmojiPicker(target, callback) {
-    // Remove any existing picker
-    const oldPicker = document.querySelector('.emoji-picker');
-    if (oldPicker) oldPicker.remove();
-
-    const picker = document.createElement('div');
-    picker.className = 'emoji-picker';
-
-    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","🚫"];
-    
-    emojis.forEach(e => {
-        const btn = document.createElement('button');
-        btn.textContent = e;
-        btn.onclick = () => {
-            callback(e === "🚫" ? "" : e); // 🚫 means no icon
-            picker.remove();
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
+            authDomain: "life-akuk095.firebaseapp.com",
+            databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "life-akuk095",
+            storageBucket: "life-akuk095.firebasestorage.app",
+            messagingSenderId: "80383828301",
+            appId: "1:80383828301:web:7c001b7375f63fc5055704",
         };
-        picker.appendChild(btn);
-    });
 
-    document.body.appendChild(picker);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-    // Position near target
-    const rect = target.getBoundingClientRect();
-    picker.style.top = `${rect.bottom + window.scrollY + 5}px`;
-    picker.style.left = `${rect.left + window.scrollX}px`;
-}
+        let cards = [];
+        let expandedCardId = null;
+        let touchStartX = 0;
+        let touchStartY = 0;
 
-// Save categories to Firebase
-function saveCategories() {
-    database.ref('categories').set(categories);
-}
-
-// Save checked items to Firebase
-function saveCheckedItems() {
-    database.ref('checkedItems').set(checkedItems);
-}
-
-function renderTabs() { 
-    const navTabs = document.getElementById('navTabs'); 
-    navTabs.innerHTML = ''; 
-    
-    categories.forEach((cat, i) => { 
-        const tabWrapper = document.createElement('div');
-        tabWrapper.className = 'tab-wrapper';
-        
-        const tab = document.createElement('button'); 
-        tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
-        tab.textContent = `${cat.icon} ${cat.name}`; 
-        tab.onclick = () => switchTab(i); 
-        tabWrapper.appendChild(tab);
-        
-        if (editMode) {
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-tab-btn';
-            deleteBtn.textContent = '×';
-            deleteBtn.onclick = (e) => {
-                e.stopPropagation();
-                deleteCategory(i);
-            };
-            tabWrapper.appendChild(deleteBtn);
-        }
-        
-        navTabs.appendChild(tabWrapper); 
-    }); 
-    
-    if (editMode) {
-        const addCategoryBtn = document.createElement('button');
-        addCategoryBtn.className = 'nav-tab add-category-tab';
-        addCategoryBtn.textContent = '+';
-        addCategoryBtn.onclick = addCategory;
-        navTabs.appendChild(addCategoryBtn);
-    }
-}
-
-function renderContent() { 
-    const contentArea = document.getElementById('contentArea'); 
-    contentArea.innerHTML = ''; 
-    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
-    
-    categories.forEach((cat, catIndex) => { 
-        const catDiv = document.createElement('div'); 
-        catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); 
-        
-        const intro = document.createElement('div'); 
-        intro.className = 'category-intro'; 
-        const h2 = document.createElement('h2'); 
-        h2.innerHTML = `
-   		<span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
-	   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span> `;
-        const p = document.createElement('p'); 
-        p.className = editMode ? 'editable' : ''; 
-        p.contentEditable = editMode; 
-        p.textContent = cat.intro; 
-        intro.appendChild(h2); 
-        intro.appendChild(p); 
-        
-        if (editMode) { 
-            h2.querySelector('.editable').addEventListener('blur', (e) => { 
-                categories[catIndex].name = e.target.textContent.trim(); 
-                saveCategories();
-                renderTabs();
-            }); 
-            p.addEventListener('blur', (e) => { 
-                categories[catIndex].intro = e.target.textContent.trim(); 
-                saveCategories();
-            }); 
-        } 
-        
-        catDiv.appendChild(intro); 
-        
-        const grid = document.createElement('div'); 
-        grid.className = 'skill-grid'; 
-        
-        cat.skills.forEach((skill, skillIndex) => { 
-            const card = document.createElement('div'); 
-            card.className = 'skill-card'; 
-            
-            const titleDiv = document.createElement('div'); 
-            titleDiv.className = 'skill-title'; 
-            titleDiv.innerHTML = `
-   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-`;
-
-            
-            if (editMode) { 
-                const deleteSkillBtn = document.createElement('button');
-                deleteSkillBtn.className = 'delete-btn';
-                deleteSkillBtn.textContent = '×';
-                deleteSkillBtn.onclick = () => deleteSkill(catIndex, skillIndex);
-                titleDiv.appendChild(deleteSkillBtn);
-                
-                titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
-                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
-                    saveCategories();
-                }); 
-            } 
-            
-            card.appendChild(titleDiv); 
-            
-            skill.items.forEach((item, itemIndex) => { 
-                const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
-                const checkItem = document.createElement('div'); 
-                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); 
-                if (!editMode) checkItem.onclick = () => toggleCheck(itemId); 
-                
-                const checkbox = document.createElement('div');
-                checkbox.className = 'checkbox';
-                checkItem.appendChild(checkbox);
-                
-                const textDiv = document.createElement('div');
-                textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
-                textDiv.contentEditable = editMode;
-                textDiv.textContent = item;
-                checkItem.appendChild(textDiv);
-                
-                if (editMode) {
-                    const deleteItemBtn = document.createElement('button');
-                    deleteItemBtn.className = 'delete-btn';
-                    deleteItemBtn.textContent = '×';
-                    deleteItemBtn.onclick = () => deleteItem(catIndex, skillIndex, itemIndex);
-                    checkItem.appendChild(deleteItemBtn);
-                    
-                    textDiv.addEventListener('blur', (e) => { 
-                        categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
-                        saveCategories();
-                    }); 
+        // Default card data
+        const defaultCardData = {
+            appIcon: "📚",
+            appTitle: "Essential Life Skills",
+            appSubtitle: "Fundamental knowledge everyone should have",
+            categories: [
+                {
+                    name: "Health & Body",
+                    icon: "💪",
+                    intro: "Understanding your body and maintaining your health.",
+                    skills: [
+                        {
+                            title: "Basic Hygiene",
+                            icon: "🧼",
+                            items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
+                        }
+                    ]
+                },
+                {
+                    name: "Daily Living",
+                    icon: "🏡",
+                    intro: "Practical skills to manage your home and everyday responsibilities.",
+                    skills: [
+                        {
+                            title: "Household Basics",
+                            icon: "🧹",
+                            items: ["Do laundry", "Clean regularly", "Take out trash"]
+                        }
+                    ]
                 }
-                
-                card.appendChild(checkItem); 
-            }); 
-            
-            const addItemBtn = document.createElement('button'); 
-            addItemBtn.className = 'add-item-btn'; 
-            addItemBtn.textContent = '+ Add Item'; 
-            addItemBtn.onclick = () => addItem(catIndex, skillIndex); 
-            card.appendChild(addItemBtn); 
-            
-            grid.appendChild(card); 
-        }); 
-        
-        catDiv.appendChild(grid); 
-        
-        const addSkillBtn = document.createElement('button'); 
-        addSkillBtn.className = 'add-skill-btn'; 
-        addSkillBtn.textContent = '+ Add New Card'; 
-        addSkillBtn.onclick = () => addSkill(catIndex); 
-        catDiv.appendChild(addSkillBtn); 
-        
-        contentArea.appendChild(catDiv); 
-    }); 
-}
-
-function switchTab(index) { 
-    activeTabIndex = index; 
-    renderTabs();
-    const cats = document.querySelectorAll('.category'); 
-    cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); 
-}
-
-function toggleCheck(itemId) { 
-    if (editMode) return; 
-    checkedItems[itemId] = !checkedItems[itemId]; 
-    saveCheckedItems();
-    renderContent(); 
-}
-
-function toggleEditMode() { 
-    editMode = !editMode; 
-    const btn = document.getElementById('editModeBtn'); 
-    btn.textContent = editMode ? 'Done' : 'Edit'; 
-    btn.classList.toggle('active', editMode); 
-    renderHeader();
-    renderTabs();
-    renderContent(); 
-}
-
-function editAppIcon(el) {
-    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","🚫"];
-    let menu = document.createElement("div");
-    menu.style.position = "absolute";
-    menu.style.background = "white";
-    menu.style.border = "1px solid #ccc";
-    menu.style.padding = "5px";
-    menu.style.borderRadius = "8px";
-    menu.style.display = "grid";
-    menu.style.gridTemplateColumns = "repeat(6, 1fr)";
-    menu.style.gap = "5px";
-    menu.style.zIndex = 1000;
-
-    emojis.forEach(e => {
-        let btn = document.createElement("button");
-        btn.textContent = e;
-        btn.style.fontSize = "20px";
-        btn.style.cursor = "pointer";
-        btn.style.background = "none";
-        btn.style.border = "none";
-        btn.onclick = () => {
-            appIcon = (e === "🚫") ? "" : e; // 🚫 means no icon
-            saveHeader();
-            renderHeader();
-            document.body.removeChild(menu);
+            ],
+            checkedItems: {},
+            editMode: false,
+            activeTabIndex: 0
         };
-        menu.appendChild(btn);
-    });
 
-    // place menu below icon
-    const rect = el.getBoundingClientRect();
-    menu.style.left = rect.left + "px";
-    menu.style.top = rect.bottom + "px";
-    document.body.appendChild(menu);
-}
-
-
-function addSkill(catIndex) { 
-    categories[catIndex].skills.push({ 
-        title: "New Skill", 
-        icon: "✨", 
-        items: ["New item - click to edit"] 
-    }); 
-    saveCategories();
-    renderContent(); 
-}
-function editSkillIcon(catIndex, skillIndex, el) {
-    showEmojiPicker(el, (emoji) => {
-        categories[catIndex].skills[skillIndex].icon = emoji;
-        saveCategories();
-        renderContent();
-    });
-}
-
-function deleteSkill(catIndex, skillIndex) { 
-    if (confirm('Delete this skill?')) { 
-        categories[catIndex].skills.splice(skillIndex, 1); 
-        saveCategories();
-        renderContent(); 
-    } 
-}
-
-function deleteItem(catIndex, skillIndex, itemIndex) { 
-    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
-    saveCategories();
-    renderContent(); 
-}
-
-function addItem(catIndex, skillIndex) { 
-    categories[catIndex].skills[skillIndex].items.push("New item"); 
-    saveCategories();
-    renderContent(); 
-}
-
-function addCategory() {
-    categories.push({
-        name: "New Category",
-        icon: "📌",
-        intro: "Click to edit this description",
-        skills: []
-    });
-    activeTabIndex = categories.length - 1;
-    saveCategories();
-    renderTabs();
-    renderContent();
-}
-function editCategoryIcon(catIndex, el) {
-    showEmojiPicker(el, (emoji) => {
-        categories[catIndex].icon = emoji;
-        saveCategories();
-        renderTabs();
-        renderContent();
-    });
-}
-
-function deleteCategory(catIndex) {
-    if (confirm('Delete this entire category?')) {
-        categories.splice(catIndex, 1);
-        if (activeTabIndex >= categories.length) {
-            activeTabIndex = Math.max(0, categories.length - 1);
+        // Load cards from Firebase
+        function loadCards() {
+            database.ref('cards').once('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && Object.keys(data).length > 0) {
+                    cards = Object.entries(data).map(([id, cardData]) => ({
+                        id,
+                        ...cardData
+                    }));
+                } else {
+                    // Create initial cards
+                    createInitialCards();
+                }
+                renderCardStack();
+            });
         }
-        saveCategories();
-        renderTabs();
-        renderContent();
-    }
-}
 
-// Load data when page loads
-loadFromFirebase();
+        function createInitialCards() {
+            const initialTitles = ["Life Skills", "Work Goals", "Personal Growth"];
+            initialTitles.forEach(title => {
+                const cardId = Date.now() + Math.random().toString(36).substr(2, 9);
+                const cardData = { ...defaultCardData, appTitle: title };
+                cards.push({ id: cardId, ...cardData });
+                database.ref(`cards/${cardId}`).set(cardData);
+            });
+        }
+
+        function saveCard(cardId) {
+            const card = cards.find(c => c.id === cardId);
+            if (card) {
+                const { id, ...cardData } = card;
+                database.ref(`cards/${cardId}`).set(cardData);
+            }
+        }
+
+        function renderCardStack() {
+            const cardStack = document.getElementById('cardStack');
+            cardStack.innerHTML = '';
+
+            cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'wallet-card';
+                cardEl.id = `card-${card.id}`;
+                cardEl.dataset.cardId = card.id;
+
+                // Calculate stack position
+                const offset = index * 20;
+                const scale = 1 - (index * 0.05);
+                const rotateX = index * 2;
+                
+                cardEl.style.transform = `translateY(${offset}px) scale(${scale}) rotateX(${rotateX}deg)`;
+                cardEl.style.zIndex = cards.length - index;
+
+                // Delete card button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-card-btn';
+                deleteBtn.textContent = '×';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteCard(card.id);
+                };
+                cardEl.appendChild(deleteBtn);
+
+                // Card preview
+                const preview = createCardPreview(card);
+                cardEl.appendChild(preview);
+
+                // Full content
+                const fullContent = createFullContent(card);
+                cardEl.appendChild(fullContent);
+
+                // Click to expand
+                cardEl.onclick = () => expandCard(card.id);
+
+                // Touch events for swipe
+                cardEl.addEventListener('touchstart', handleTouchStart);
+                cardEl.addEventListener('touchmove', handleTouchMove);
+                cardEl.addEventListener('touchend', handleTouchEnd);
+
+                cardStack.appendChild(cardEl);
+            });
+        }
+
+        function createCardPreview(card) {
+            const preview = document.createElement('div');
+            preview.className = 'card-preview';
+            
+            const totalCategories = card.categories?.length || 0;
+            const totalSkills = card.categories?.reduce((sum, cat) => sum + (cat.skills?.length || 0), 0) || 0;
+            const totalItems = card.categories?.reduce((sum, cat) => 
+                sum + cat.skills?.reduce((s, skill) => s + (skill.items?.length || 0), 0), 0) || 0;
+            const checkedCount = Object.values(card.checkedItems || {}).filter(v => v).length;
+
+            preview.innerHTML = `
+                <div class="preview-header">
+                    <h2>${card.appIcon || '📚'} ${card.appTitle || 'Untitled Card'}</h2>
+                    <p>${card.appSubtitle || 'Click to open'}</p>
+                </div>
+                <div class="preview-stats">
+                    <div class="stat-box">
+                        <div class="stat-number">${totalCategories}</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${totalSkills}</div>
+                        <div class="stat-label">Skills</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${checkedCount}/${totalItems}</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                </div>
+            `;
+            return preview;
+        }
+
+        function createFullContent(card) {
+            const fullContent = document.createElement('div');
+            fullContent.className = 'card-full-content';
+            fullContent.id = `content-${card.id}`;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.textContent = '×';
+            closeBtn.onclick = (e) => {
+                e.stopPropagation();
+                collapseCard();
+            };
+            fullContent.appendChild(closeBtn);
+
+            const header = createHeader(card);
+            fullContent.appendChild(header);
+
+            const navTabs = document.createElement('div');
+            navTabs.className = 'nav-tabs';
+            navTabs.id = `nav-${card.id}`;
+            fullContent.appendChild(navTabs);
+
+            const contentArea = document.createElement('div');
+            contentArea.className = 'content-area';
+            contentArea.id = `area-${card.id}`;
+            fullContent.appendChild(contentArea);
+
+            return fullContent;
+        }
+
+        function createHeader(card) {
+            const header = document.createElement('div');
+            header.className = 'header';
+            header.innerHTML = `
+                <div class="edit-toggle">
+                    <button class="edit-btn ${card.editMode ? 'active' : ''}" onclick="toggleEditMode('${card.id}')">
+                        ${card.editMode ? 'Done' : 'Edit'}
+                    </button>
+                </div>
+                <h1>
+                    <span class="editable-icon" ${card.editMode ? `onclick="editAppIcon('${card.id}', this)"` : ''}>
+                        ${card.appIcon || '📚'}
+                    </span>
+                    <span class="${card.editMode ? 'editable' : ''}" contenteditable="${card.editMode}">
+                        ${card.appTitle || 'Untitled'}
+                    </span>
+                </h1>
+                <p class="${card.editMode ? 'editable' : ''}" contenteditable="${card.editMode}">
+                    ${card.appSubtitle || ''}
+                </p>
+            `;
+
+            if (card.editMode) {
+                header.querySelector('h1 span:nth-child(2)').addEventListener('blur', (e) => {
+                    card.appTitle = e.target.textContent.trim();
+                    saveCard(card.id);
+                    renderCardStack();
+                });
+                header.querySelector('p').addEventListener('blur', (e) => {
+                    card.appSubtitle = e.target.textContent.trim();
+                    saveCard(card.id);
+                });
+            }
+
+            return header;
+        }
+
+        function expandCard(cardId) {
+            if (expandedCardId) return;
+            
+            expandedCardId = cardId;
+            const card = cards.find(c => c.id === cardId);
+            const cardEl = document.getElementById(`card-${cardId}`);
+            
+            document.getElementById('walletHeader').classList.add('hidden');
+            document.getElementById('cardStack').classList.add('expanded');
+            cardEl.classList.add('expanded');
+            
+            renderCardContent(card);
+        }
+
+        function collapseCard() {
+            if (!expandedCardId) return;
+            
+            const cardEl = document.getElementById(`card-${expandedCardId}`);
+            cardEl.classList.remove('expanded');
+            document.getElementById('cardStack').classList.remove('expanded');
+            document.getElementById('walletHeader').classList.remove('hidden');
+            
+            expandedCardId = null;
+            
+            setTimeout(() => renderCardStack(), 100);
+        }
+
+        function renderCardContent(card) {
+            const navTabs = document.getElementById(`nav-${card.id}`);
+            const contentArea = document.getElementById(`area-${card.id}`);
+            
+            navTabs.innerHTML = '';
+            contentArea.innerHTML = '';
+            contentArea.className = 'content-area' + (card.editMode ? ' edit-mode' : '');
+
+            // Render tabs
+            (card.categories || []).forEach((cat, i) => {
+                const tabWrapper = document.createElement('div');
+                tabWrapper.className = 'tab-wrapper';
+
+                const tab = document.createElement('button');
+                tab.className = 'nav-tab' + (i === card.activeTabIndex ? ' active' : '');
+                tab.textContent = `${cat.icon} ${cat.name}`;
+                tab.onclick = () => switchTab(card.id, i);
+                tabWrapper.appendChild(tab);
+
+                if (card.editMode) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-tab-btn';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteCategory(card.id, i);
+                    };
+                    tabWrapper.appendChild(deleteBtn);
+                }
+
+                navTabs.appendChild(tabWrapper);
+            });
+
+            if (card.editMode) {
+                const addBtn = document.createElement('button');
+                addBtn.className = 'nav-tab add-category-tab';
+                addBtn.textContent = '+';
+                addBtn.onclick = () => addCategory(card.id);
+                navTabs.appendChild(addBtn);
+            }
+
+            // Render content
+            (card.categories || []).forEach((cat, catIndex) => {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'category' + (catIndex === card.activeTabIndex ? ' active' : '');
+
+                const intro = document.createElement('div');
+                intro.className = 'category-intro';
+                intro.innerHTML = `
+                    <h2>
+                        <span class="editable-icon" ${card.editMode ? `onclick="editCategoryIcon('${card.id}', ${catIndex}, this)"` : ''}>${cat.icon || ''}</span>
+                        <span class="${card.editMode ? 'editable' : ''}" contenteditable="${card.editMode}">${cat.name}</span>
+                    </h2>
+                    <p class="${card.editMode ? 'editable' : ''}" contenteditable="${card.editMode}">${cat.intro}</p>
+                `;
+
+                if (card.editMode) {
+                    intro.querySelector('h2 .editable').addEventListener('blur', (e) => {
+                        card.categories[catIndex].name = e.target.textContent.trim();
+                        saveCard(card.id);
+                        renderCardContent(card);
+                    });
+                    intro.querySelector('p').addEventListener('blur', (e) => {
+                        card.categories[catIndex].intro = e.target.textContent.trim();
+                        saveCard(card.id);
+                    });
+                }
+
+                catDiv.appendChild(intro);
+
+                const grid = document.createElement('div');
+                grid.className = 'skill-grid';
+
+                (cat.skills || []).forEach((skill, skillIndex) => {
+                    const skillCard = document.createElement('div');
+                    skillCard.className = 'skill-card';
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'skill-title';
+                    titleDiv.innerHTML = `
+                        <span class="editable-icon" ${card.editMode ? `onclick="editSkillIcon('${card.id}', ${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ''}</span>
+                        <span class="${card.editMode ? 'editable' : ''}" contenteditable="${card.editMode}">${skill.title}</span>
+                    `;
+
+                    if (card.editMode) {
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.textContent = '×';
+                        deleteBtn.onclick = () => deleteSkill(card.id, catIndex, skillIndex);
+                        titleDiv.appendChild(deleteBtn);
+
+                        titleDiv.querySelector('.editable').addEventListener('blur', (e) => {
+                            card.categories[catIndex].skills[skillIndex].title = e.target.textContent.trim();
+                            saveCard(card.id);
+                        });
+                    }
+
+                    skillCard.appendChild(titleDiv);
+
+                    (skill.items || []).forEach((item, itemIndex) => {
+                        const itemId = `${catIndex}-${skillIndex}-${itemIndex}`;
+                        const checkItem = document.createElement('div');
+                        checkItem.className = 'checklist-item' + (card.checkedItems[itemId] ? ' checked' : '');
+                        if (!card.editMode) checkItem.onclick = () => toggleCheck(card.id, itemId);
+
+                        const checkbox = document.createElement('div');
+                        checkbox.className = 'checkbox';
+                        checkItem.appendChild(checkbox);
+
+                        const textDiv = document.createElement('div');
+                        textDiv.className = 'checklist-text' + (card.editMode ? ' editable' : '');
+                        textDiv.contentEditable = card.editMode;
+                        textDiv.textContent = item;
+                        checkItem.appendChild(textDiv);
+
+                        if (card.editMode) {
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.className = 'delete-btn';
+                            deleteBtn.textContent = '×';
+                            deleteBtn.onclick = () => deleteItem(card.id, catIndex, skillIndex, itemIndex);
+                            checkItem.appendChild(deleteBtn);
+
+                            textDiv.addEventListener('blur', (e) => {
+                                card.categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim();
+                                saveCard(card.id);
+                            });
+                        }
+
+                        skillCard.appendChild(checkItem);
+                    });
+
+                    if (card.editMode) {
+                        const addItemBtn = document.createElement('button');
+                        addItemBtn.className = 'add-item-btn';
+                        addItemBtn.textContent = '+ Add Item';
+                        addItemBtn.onclick = () => addItem(card.id, catIndex, skillIndex);
+                        skillCard.appendChild(addItemBtn);
+                    }
+
+                    grid.appendChild(skillCard);
+                });
+
+                catDiv.appendChild(grid);
+
+                if (card.editMode) {
+                    const addSkillBtn = document.createElement('button');
+                    addSkillBtn.className = 'add-skill-btn';
+                    addSkillBtn.textContent = '+ Add New Card';
+                    addSkillBtn.onclick = () => addSkill(card.id, catIndex);
+                    catDiv.appendChild(addSkillBtn);
+                }
+
+                contentArea.appendChild(catDiv);
+            });
+        }
+
+        function switchTab(cardId, index) {
+            const card = cards.find(c => c.id === cardId);
+            card.activeTabIndex = index;
+            saveCard(cardId);
+            renderCardContent(card);
+        }
+
+        function toggleCheck(cardId, itemId) {
+            const card = cards.find(c => c.id === cardId);
+            if (card.editMode) return;
+            card.checkedItems[itemId] = !card.checkedItems[itemId];
+            saveCard(cardId);
+            renderCardContent(card);
+        }
+
+        function toggleEditMode(cardId) {
+            const card = cards.find(c => c.id === cardId);
+            card.editMode = !card.editMode;
+            saveCard(cardId);
+            renderCardContent(card);
+        }
+
+        function editAppIcon(cardId, el) {
+            showEmojiPicker(el, (emoji) => {
+                const card = cards.find(c => c.id === cardId);
+                card.appIcon = emoji;
+                saveCard(cardId);
+                renderCardContent(card);
+            });
+        }
+
+        function editCategoryIcon(cardId, catIndex, el) {
+            showEmojiPicker(el, (emoji) => {
+                const card = cards.find(c => c.id === cardId);
+                card.categories[catIndex].icon = emoji;
+                saveCard(cardId);
+                renderCardContent(card);
+            });
+        }
+
+        function editSkillIcon(cardId, catIndex, skillIndex, el) {
+            showEmojiPicker(el, (emoji) => {
+                const card = cards.find(c => c.id === cardId);
+                card.categories[catIndex].skills[skillIndex].icon = emoji;
+                saveCard(cardId);
+                renderCardContent(card);
+            });
+        }
+
+        function showEmojiPicker(target, callback) {
+            const oldPicker = document.querySelector('.emoji-picker');
+            if (oldPicker) oldPicker.remove();
+
+            const picker = document.createElement('div');
+            picker.className = 'emoji-picker';
+
+            const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","❤️","🎯","🚀","🌟","🎨","🚫"];
+
+            emojis.forEach(e => {
+                const btn = document.createElement('button');
+                btn.textContent = e;
+                btn.onclick = () => {
+                    callback(e === "🚫" ? "" : e);
+                    picker.remove();
+                };
+                picker.appendChild(btn);
+            });
+
+            document.body.appendChild(picker);
+
+            const rect = target.getBoundingClientRect();
+            picker.style.top = `${rect.bottom + window.scrollY + 5}px`;
+            picker.style.left = `${rect.left + window.scrollX}px`;
+
+            setTimeout(() => {
+                document.addEventListener('click', function closePicker(e) {
+                    if (!picker.contains(e.target)) {
+                        picker.remove();
+                        document.removeEventListener('click', closePicker);
+                    }
+                });
+            }, 100);
+        }
+
+        function addSkill(cardId, catIndex) {
+            const card = cards.find(c => c.id === cardId);
+            card.categories[catIndex].skills.push({
+                title: "New Skill",
+                icon: "✨",
+                items: ["New item - click to edit"]
+            });
+            saveCard(cardId);
+            renderCardContent(card);
+        }
+
+        function deleteSkill(cardId, catIndex, skillIndex) {
+            if (confirm('Delete this skill?')) {
+                const card = cards.find(c => c.id === cardId);
+                card.categories[catIndex].skills.splice(skillIndex, 1);
+                saveCard(cardId);
+                renderCardContent(card);
+            }
+        }
+
+        function addItem(cardId, catIndex, skillIndex) {
+            const card = cards.find(c => c.id === cardId);
+            card.categories[catIndex].skills[skillIndex].items.push("New item");
+            saveCard(cardId);
+            renderCardContent(card);
+        }
+
+        function deleteItem(cardId, catIndex, skillIndex, itemIndex) {
+            const card = cards.find(c => c.id === cardId);
+            card.categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
+            saveCard(cardId);
+            renderCardContent(card);
+        }
+
+        function addCategory(cardId) {
+            const card = cards.find(c => c.id === cardId);
+            card.categories.push({
+                name: "New Category",
+                icon: "📌",
+                intro: "Click to edit this description",
+                skills: []
+            });
+            card.activeTabIndex = card.categories.length - 1;
+            saveCard(cardId);
+            renderCardContent(card);
+        }
+
+        function deleteCategory(cardId, catIndex) {
+            if (confirm('Delete this entire category?')) {
+                const card = cards.find(c => c.id === cardId);
+                card.categories.splice(catIndex, 1);
+                if (card.activeTabIndex >= card.categories.length) {
+                    card.activeTabIndex = Math.max(0, card.categories.length - 1);
+                }
+                saveCard(cardId);
+                renderCardContent(card);
+            }
+        }
+
+        function addNewCard() {
+            const cardId = Date.now() + Math.random().toString(36).substr(2, 9);
+            const newCard = { 
+                id: cardId, 
+                ...defaultCardData,
+                appTitle: "New Card",
+                appSubtitle: "Click to customize"
+            };
+            cards.push(newCard);
+            saveCard(cardId);
+            renderCardStack();
+        }
+
+        function deleteCard(cardId) {
+            if (cards.length <= 1) {
+                alert("You must keep at least one card!");
+                return;
+            }
+            if (confirm('Delete this card? This action cannot be undone.')) {
+                cards = cards.filter(c => c.id !== cardId);
+                database.ref(`cards/${cardId}`).remove();
+                renderCardStack();
+            }
+        }
+
+        // Touch/Swipe handling
+        function handleTouchStart(e) {
+            if (!expandedCardId) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+
+        function handleTouchMove(e) {
+            if (!expandedCardId) return;
+            // Prevent default to avoid scrolling while swiping
+            const touchX = e.touches[0].clientX;
+            const diffX = Math.abs(touchX - touchStartX);
+            if (diffX > 30) {
+                e.preventDefault();
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!expandedCardId) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffX = touchEndX - touchStartX;
+            const diffY = Math.abs(touchEndY - touchStartY);
+
+            // Horizontal swipe detected (and not vertical scroll)
+            if (Math.abs(diffX) > 100 && diffY < 50) {
+                collapseCard();
+            }
+        }
+
+        // Mouse swipe for desktop
+        let mouseStartX = 0;
+        let mouseStartY = 0;
+        let isDragging = false;
+
+        document.addEventListener('mousedown', (e) => {
+            if (!expandedCardId) return;
+            if (e.target.closest('.edit-btn, .editable, button, .checkbox')) return;
+            
+            mouseStartX = e.clientX;
+            mouseStartY = e.clientY;
+            isDragging = true;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging || !expandedCardId) return;
+            const diffX = Math.abs(e.clientX - mouseStartX);
+            if (diffX > 30) {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (!isDragging || !expandedCardId) return;
+            
+            const diffX = e.clientX - mouseStartX;
+            const diffY = Math.abs(e.clientY - mouseStartY);
+
+            if (Math.abs(diffX) > 150 && diffY < 100) {
+                collapseCard();
+            }
+            
+            isDragging = false;
+        });
+
+        // Initialize
+        loadCards();
     </script>
 </body>
 </html>
-
-
-
