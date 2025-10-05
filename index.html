@@ -54,6 +54,8 @@
         .edit-mode .add-skill-btn { display: block; }
         @media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -66,11 +68,82 @@
         <div class="content-area" id="contentArea"></div>
     </div>
     <script>
+// Initialize Firebase - REPLACE WITH YOUR CONFIG
+const firebaseConfig = {
+    apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
+    authDomain: "life-akuk095.firebaseapp.com",
+    databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "life-akuk095",
+    storageBucket: "life-akuk095.firebasestorage.app",
+    messagingSenderId: "80383828301",
+    appId: "1:80383828301:web:7c001b7375f63fc5055704"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// Default data structure
 let categories = [
-    {name: "Health & Body", icon: "💪", intro: "Understanding your body and maintaining your health.", skills: [{title: "Basic Hygiene", icon: "🧼", items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]}]},
-    {name: "Daily Living", icon: "🏡", intro: "Practical skills to manage your home and everyday responsibilities.", skills: [{title: "Household Basics", icon: "🧹", items: ["Do laundry", "Clean regularly", "Take out trash"]}]}
+    {
+        name: "Health & Body", 
+        icon: "💪", 
+        intro: "Understanding your body and maintaining your health.", 
+        skills: [
+            {
+                title: "Basic Hygiene", 
+                icon: "🧼", 
+                items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
+            }
+        ]
+    },
+    {
+        name: "Daily Living", 
+        icon: "🏡", 
+        intro: "Practical skills to manage your home and everyday responsibilities.", 
+        skills: [
+            {
+                title: "Household Basics", 
+                icon: "🧹", 
+                items: ["Do laundry", "Clean regularly", "Take out trash"]
+            }
+        ]
+    }
 ];
-let checkedItems = {}, editMode = false, activeTabIndex = 0;
+
+let checkedItems = {};
+let editMode = false;
+let activeTabIndex = 0;
+
+// Load data from Firebase on startup
+function loadFromFirebase() {
+    database.ref('categories').once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            categories = data;
+        }
+        renderTabs();
+        renderContent();
+    });
+    
+    database.ref('checkedItems').once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            checkedItems = data;
+            renderContent();
+        }
+    });
+}
+
+// Save categories to Firebase
+function saveCategories() {
+    database.ref('categories').set(categories);
+}
+
+// Save checked items to Firebase
+function saveCheckedItems() {
+    database.ref('checkedItems').set(checkedItems);
+}
 
 function renderTabs() { 
     const navTabs = document.getElementById('navTabs'); 
@@ -132,10 +205,12 @@ function renderContent() {
         if (editMode) { 
             h2.querySelector('.editable').addEventListener('blur', (e) => { 
                 categories[catIndex].name = e.target.textContent.trim(); 
+                saveCategories();
                 renderTabs();
             }); 
             p.addEventListener('blur', (e) => { 
                 categories[catIndex].intro = e.target.textContent.trim(); 
+                saveCategories();
             }); 
         } 
         
@@ -161,6 +236,7 @@ function renderContent() {
                 
                 titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
                     categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
+                    saveCategories();
                 }); 
             } 
             
@@ -191,6 +267,7 @@ function renderContent() {
                     
                     textDiv.addEventListener('blur', (e) => { 
                         categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
+                        saveCategories();
                     }); 
                 }
                 
@@ -228,6 +305,7 @@ function switchTab(index) {
 function toggleCheck(itemId) { 
     if (editMode) return; 
     checkedItems[itemId] = !checkedItems[itemId]; 
+    saveCheckedItems();
     renderContent(); 
 }
 
@@ -246,23 +324,27 @@ function addSkill(catIndex) {
         icon: "✨", 
         items: ["New item - click to edit"] 
     }); 
+    saveCategories();
     renderContent(); 
 }
 
 function deleteSkill(catIndex, skillIndex) { 
     if (confirm('Delete this skill?')) { 
         categories[catIndex].skills.splice(skillIndex, 1); 
+        saveCategories();
         renderContent(); 
     } 
 }
 
 function deleteItem(catIndex, skillIndex, itemIndex) { 
     categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
+    saveCategories();
     renderContent(); 
 }
 
 function addItem(catIndex, skillIndex) { 
     categories[catIndex].skills[skillIndex].items.push("New item"); 
+    saveCategories();
     renderContent(); 
 }
 
@@ -274,6 +356,7 @@ function addCategory() {
         skills: []
     });
     activeTabIndex = categories.length - 1;
+    saveCategories();
     renderTabs();
     renderContent();
 }
@@ -284,13 +367,14 @@ function deleteCategory(catIndex) {
         if (activeTabIndex >= categories.length) {
             activeTabIndex = Math.max(0, categories.length - 1);
         }
+        saveCategories();
         renderTabs();
         renderContent();
     }
 }
 
-renderTabs(); 
-renderContent();
+// Load data when page loads
+loadFromFirebase();
     </script>
 </body>
 </html>
