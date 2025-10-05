@@ -258,12 +258,11 @@ function editAppIcon(el) {
     if (!editMode) return;
     showEmojiPicker(el, (emoji) => {
         saveState();
-        appTitle = (emoji ? emoji + " " : "") + appTitle.replace(/^(\p{Emoji_Presentation}|\p{Emoji}\s*)?/u, "").trim(); 
+        appIcon = emoji; // Simply set the icon (empty string if 🚫 was selected)
         saveHeader();
         renderHeader();
     });
 }
-
 // Save categories to Firebase
 function saveCategories() {
     database.ref('categories').set(categories);
@@ -545,6 +544,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
