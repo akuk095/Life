@@ -281,12 +281,14 @@ function renderContent() {
         const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); 
         
+        // Category intro
         const intro = document.createElement('div'); 
         intro.className = 'category-intro'; 
         const h2 = document.createElement('h2'); 
         h2.innerHTML = `
-   		<span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
-	   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span> `;
+            <span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
+            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>
+        `;
         const p = document.createElement('p'); 
         p.className = editMode ? 'editable' : ''; 
         p.contentEditable = editMode; 
@@ -308,6 +310,7 @@ function renderContent() {
         
         catDiv.appendChild(intro); 
         
+        // Skill grid
         const grid = document.createElement('div'); 
         grid.className = 'skill-grid'; 
         
@@ -315,13 +318,13 @@ function renderContent() {
             const card = document.createElement('div'); 
             card.className = 'skill-card'; 
             
+            // Skill title
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
             titleDiv.innerHTML = `
-   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-`;
-
+                <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
+                <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+            `;
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -338,6 +341,7 @@ function renderContent() {
             
             card.appendChild(titleDiv); 
             
+            // Skill items
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
@@ -370,6 +374,7 @@ function renderContent() {
                 card.appendChild(checkItem); 
             }); 
             
+            // Add item button
             const addItemBtn = document.createElement('button'); 
             addItemBtn.className = 'add-item-btn'; 
             addItemBtn.textContent = '+ Add Item'; 
@@ -381,6 +386,7 @@ function renderContent() {
         
         catDiv.appendChild(grid); 
         
+        // Always show "Add New Card" button, even if category has no skills
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
         addSkillBtn.textContent = '+ Add New Card'; 
@@ -390,6 +396,7 @@ function renderContent() {
         contentArea.appendChild(catDiv); 
     }); 
 }
+
 
 function switchTab(index) { 
     activeTabIndex = index; 
@@ -527,6 +534,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
