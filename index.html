@@ -17,7 +17,7 @@
         .edit-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
         .edit-btn:hover { background: white; color: #3498db; }
         .edit-btn.active { background: #27ae60; border-color: #27ae60; }
-		.emoji-picker {  position: absolute;  background: white;  border: 1px solid #ccc;  border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 30px);  gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;}
+		.emoji-picker {  position: absolute;  background: white;  border: 1px solid #ccc;  border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(8, 30px);  gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto;}
 		.emoji-picker button { font-size: 20px; background: none;  border: none;  cursor: pointer; transition: transform 0.2s;}
 		.emoji-picker button:hover { transform: scale(1.2);}
         .nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; flex-wrap: wrap; }
@@ -536,6 +536,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
