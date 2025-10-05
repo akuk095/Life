@@ -11,11 +11,15 @@
         .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
-	.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
+		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
+		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px;}
         .edit-toggle { position: absolute; top: 20px; right: 30px; }
         .edit-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
         .edit-btn:hover { background: white; color: #3498db; }
         .edit-btn.active { background: #27ae60; border-color: #27ae60; }
+		.emoji-picker {  position: absolute;  background: white;  border: 1px solid #ccc;  border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 30px);  gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;}
+		.emoji-picker button { font-size: 20px; background: none;  border: none;  cursor: pointer; transition: transform 0.2s;}
+		.emoji-picker button:hover { transform: scale(1.2);}
         .nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; flex-wrap: wrap; }
         .tab-wrapper { display: flex; align-items: center; gap: 5px; }
         .nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; }
@@ -115,7 +119,8 @@ let categories = [
 let checkedItems = {};
 let editMode = false;
 let activeTabIndex = 0;
-let appTitle = "📚 Essential Life Skills Guide";
+let appIcon = "📚"; 
+let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 
 // Load data from Firebase on startup
@@ -146,13 +151,19 @@ function loadFromFirebase() {
         if (snapshot.val()) appSubtitle = snapshot.val();
         renderHeader();
     });
-}
 
-// Save title + subtitle to Firebase
+database.ref('appIcon').once('value', (snapshot) => {
+    if (snapshot.val() !== null) appIcon = snapshot.val();
+    renderHeader();
+});
+	
+}
 function saveHeader() {
     database.ref('appTitle').set(appTitle);
     database.ref('appSubtitle').set(appSubtitle);
+    database.ref('appIcon').set(appIcon);
 }
+
 
 function renderHeader() {
     const header = document.querySelector('.header');
@@ -162,9 +173,16 @@ function renderHeader() {
                 ${editMode ? 'Done' : 'Edit'}
             </button>
         </div>
-        <h1>
-            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appTitle}</span>
-        </h1>
+       <h1>
+    <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
+        ${appIcon ? appIcon : "🚫"}
+    </span>
+    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
+        ${appTitle}
+    </span>
+</h1>
+
+
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
@@ -179,6 +197,34 @@ function renderHeader() {
         });
     }
 }
+function showEmojiPicker(target, callback) {
+    // Remove any existing picker
+    const oldPicker = document.querySelector('.emoji-picker');
+    if (oldPicker) oldPicker.remove();
+
+    const picker = document.createElement('div');
+    picker.className = 'emoji-picker';
+
+    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","🚫"];
+    
+    emojis.forEach(e => {
+        const btn = document.createElement('button');
+        btn.textContent = e;
+        btn.onclick = () => {
+            callback(e === "🚫" ? "" : e); // 🚫 means no icon
+            picker.remove();
+        };
+        picker.appendChild(btn);
+    });
+
+    document.body.appendChild(picker);
+
+    // Position near target
+    const rect = target.getBoundingClientRect();
+    picker.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    picker.style.left = `${rect.left + window.scrollX}px`;
+}
+
 // Save categories to Firebase
 function saveCategories() {
     database.ref('categories').set(categories);
@@ -238,7 +284,9 @@ function renderContent() {
         const intro = document.createElement('div'); 
         intro.className = 'category-intro'; 
         const h2 = document.createElement('h2'); 
-        h2.innerHTML = `${cat.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>`; 
+        h2.innerHTML = `
+   		<span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
+	   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span> `;
         const p = document.createElement('p'); 
         p.className = editMode ? 'editable' : ''; 
         p.contentEditable = editMode; 
@@ -269,7 +317,11 @@ function renderContent() {
             
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
-            titleDiv.innerHTML = `${skill.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>`; 
+            titleDiv.innerHTML = `
+   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
+   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+`;
+
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -363,6 +415,42 @@ function toggleEditMode() {
     renderContent(); 
 }
 
+function editAppIcon(el) {
+    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","🚫"];
+    let menu = document.createElement("div");
+    menu.style.position = "absolute";
+    menu.style.background = "white";
+    menu.style.border = "1px solid #ccc";
+    menu.style.padding = "5px";
+    menu.style.borderRadius = "8px";
+    menu.style.display = "grid";
+    menu.style.gridTemplateColumns = "repeat(6, 1fr)";
+    menu.style.gap = "5px";
+    menu.style.zIndex = 1000;
+
+    emojis.forEach(e => {
+        let btn = document.createElement("button");
+        btn.textContent = e;
+        btn.style.fontSize = "20px";
+        btn.style.cursor = "pointer";
+        btn.style.background = "none";
+        btn.style.border = "none";
+        btn.onclick = () => {
+            appIcon = (e === "🚫") ? "" : e; // 🚫 means no icon
+            saveHeader();
+            renderHeader();
+            document.body.removeChild(menu);
+        };
+        menu.appendChild(btn);
+    });
+
+    // place menu below icon
+    const rect = el.getBoundingClientRect();
+    menu.style.left = rect.left + "px";
+    menu.style.top = rect.bottom + "px";
+    document.body.appendChild(menu);
+}
+
 
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
@@ -372,6 +460,13 @@ function addSkill(catIndex) {
     }); 
     saveCategories();
     renderContent(); 
+}
+function editSkillIcon(catIndex, skillIndex, el) {
+    showEmojiPicker(el, (emoji) => {
+        categories[catIndex].skills[skillIndex].icon = emoji;
+        saveCategories();
+        renderContent();
+    });
 }
 
 function deleteSkill(catIndex, skillIndex) { 
@@ -406,6 +501,14 @@ function addCategory() {
     renderTabs();
     renderContent();
 }
+function editCategoryIcon(catIndex, el) {
+    showEmojiPicker(el, (emoji) => {
+        categories[catIndex].icon = emoji;
+        saveCategories();
+        renderTabs();
+        renderContent();
+    });
+}
 
 function deleteCategory(catIndex) {
     if (confirm('Delete this entire category?')) {
@@ -424,4 +527,5 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
