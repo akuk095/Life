@@ -12,7 +12,7 @@
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
-		..header .editable-icon { cursor: pointer;  margin-right: 8px; font-size: 32px;  color: #fff; opacity: 0.6; transition: opacity 0.2s ease;}
+		.header .editable-icon { cursor: pointer;  margin-right: 8px; font-size: 32px;  color: #fff; opacity: 0.6; transition: opacity 0.2s ease;}
 		.header .editable-icon:hover { opacity: 1; }
         .edit-toggle { position: absolute; top: 20px; right: 30px; }
         .edit-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
@@ -180,7 +180,7 @@ function renderHeader() {
         ${editMode ? 'onclick="editAppIcon(this)"' : ''}
         style="display:inline-block; width:32px; text-align:center;"
     >
-        ${appIcon ? appIcon : "+"}
+        ${appIcon ? appIcon : (editMode ? "+" : "")}
     </span>
     <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
         ${appTitle}
@@ -190,10 +190,11 @@ function renderHeader() {
     `;
 
     if (editMode) {
-        header.querySelector('h1 span').addEventListener('blur', (e) => {
+        header.querySelector('h1 .editable').addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
+
         header.querySelector('p').addEventListener('blur', (e) => {
             appSubtitle = e.target.textContent.trim();
             saveHeader();
@@ -530,6 +531,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
