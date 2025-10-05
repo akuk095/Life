@@ -174,20 +174,22 @@ function renderHeader() {
             </button>
         </div>
         <h1>
-    <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-        ${appIcon ? appIcon : "🚫"}
-    </span>
-    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
-        ${appTitle}
-    </span>
-</h1>
-
-
+            <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
+                ${
+                    editMode
+                        ? (appIcon ? appIcon : "🚫")   // in edit mode, always show something (emoji OR 🚫 placeholder)
+                        : (appIcon ? appIcon : "")    // in view mode, show emoji OR nothing
+                }
+            </span>
+            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
+                ${appTitle}
+            </span>
+        </h1>
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
     if (editMode) {
-        header.querySelector('h1 span').addEventListener('blur', (e) => {
+        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
@@ -197,6 +199,7 @@ function renderHeader() {
         });
     }
 }
+
 function showEmojiPicker(target, callback) {
     // Remove any existing picker
     const oldPicker = document.querySelector('.emoji-picker');
@@ -537,6 +540,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
