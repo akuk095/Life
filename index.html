@@ -171,36 +171,47 @@ function saveHeader() {
 function renderHeader() {
     const header = document.querySelector('.header');
     header.innerHTML = `
+        <div class="undo-redo-btns" style="display: ${editMode ? 'flex' : 'none'}">
+            <button onclick="undo()">Undo</button>
+            <button onclick="redo()">Redo</button>
+        </div>
+
         <div class="edit-toggle">
             <button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">
                 ${editMode ? 'Done' : 'Edit'}
             </button>
         </div>
+
         <h1>
             <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-                ${appIcon && appIcon !== "" ? appIcon : (editMode ? "🚫" : "")}
+                ${appIcon || (editMode ? "🚫" : "")}
             </span>
-            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
-                ${appTitle}
-            </span>
+            <span class="editable-header-title" contenteditable="${editMode}">${appTitle}</span>
         </h1>
-        <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
+
+        <p class="editable-header-subtitle" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
     if (editMode) {
-        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
-            saveState(); 
+        // Title
+        const titleEl = header.querySelector('.editable-header-title');
+        titleEl.focus();
+        titleEl.addEventListener('blur', (e) => {
+            saveState();
             appTitle = e.target.textContent.trim();
-            saveHeader();
+            saveHeader(); // save to Firebase
         });
-        header.querySelector('p').addEventListener('blur', (e) => {
-            saveState(); 
+
+        // Subtitle
+        const subEl = header.querySelector('.editable-header-subtitle');
+        subEl.addEventListener('blur', (e) => {
+            saveState();
             appSubtitle = e.target.textContent.trim();
-            saveHeader();
+            saveHeader(); // save to Firebase
         });
     }
-    renderUndoRedoButtons();
 }
+
 
 function renderUndoRedoButtons() {
     // Remove existing buttons
@@ -544,6 +555,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
