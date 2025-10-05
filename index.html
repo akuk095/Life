@@ -11,10 +11,7 @@
         .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
-       .header .editable:focus {  outline: 2px solid #fff;    background: rgba(255, 255, 255, 0.2);   color: #fff; }
-        .header .undo-redo-btns { position: absolute; top: 20px; left: 30px; display: flex; gap: 8px;}
-.header .undo-redo-btns button { padding: 6px 12px; font-size: 14px; border-radius: 6px; border: none; cursor: pointer; background: #3498db; color: white; font-weight: bold; transition: all 0.2s ease;}
-.header .undo-redo-btns button:hover { background: #2980b9;}
+	.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
         .edit-toggle { position: absolute; top: 20px; right: 30px; }
         .edit-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
         .edit-btn:hover { background: white; color: #3498db; }
@@ -24,9 +21,6 @@
         .nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; }
         .nav-tab:hover { background: #e9ecef; color: #495057; }
         .nav-tab.active { color: #3498db; border-bottom-color: #3498db; background: white; }
-        .emoji-picker { position: absolute; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 30px); gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;}
-        .emoji-picker button { font-size: 20px; background: none;  border: none; cursor: pointer;  transition: transform 0.2s;}
-        .emoji-picker button:hover { transform: scale(1.2);}
         .delete-tab-btn { width: 18px; height: 18px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; font-size: 11px; font-weight: bold; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; }
         .delete-tab-btn:hover { background: #c0392b; transform: scale(1.1); }
         .add-category-tab { background: #27ae60 !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
@@ -68,8 +62,8 @@
     <div class="container">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            <h1 id="mainTitle">📚 Essential Life Skills Guide</h1>
-            <p id="mainSubtitle">Fundamental knowledge everyone should have to navigate life successfully</p>
+            <h1>📚 Essential Life Skills Guide</h1>
+            <p>Fundamental knowledge everyone should have to navigate life successfully</p>
         </div>
         <div class="nav-tabs" id="navTabs"></div>
         <div class="content-area" id="contentArea"></div>
@@ -77,13 +71,13 @@
     <script>
 // Initialize Firebase - REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
-  authDomain: "life-akuk095.firebaseapp.com",
-  databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "life-akuk095",
-  storageBucket: "life-akuk095.firebasestorage.app",
-  messagingSenderId: "80383828301",
-  appId: "1:80383828301:web:7c001b7375f63fc5055704",
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
 };
 
 // Initialize Firebase
@@ -121,9 +115,7 @@ let categories = [
 let checkedItems = {};
 let editMode = false;
 let activeTabIndex = 0;
-// Default app title and subtitle
-let appIcon = "📚"; // default icon
-let appTitle = "Essential Life Skills Guide";
+let appTitle = "📚 Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 
 // Load data from Firebase on startup
@@ -154,18 +146,12 @@ function loadFromFirebase() {
         if (snapshot.val()) appSubtitle = snapshot.val();
         renderHeader();
     });
-    
-    database.ref('appIcon').once('value', (snapshot) => {
-    if (snapshot.val() !== null) appIcon = snapshot.val();
-    renderHeader();
-});
 }
 
 // Save title + subtitle to Firebase
 function saveHeader() {
     database.ref('appTitle').set(appTitle);
     database.ref('appSubtitle').set(appSubtitle);
-    database.ref('appIcon').set(appIcon);
 }
 
 function renderHeader() {
@@ -177,92 +163,22 @@ function renderHeader() {
             </button>
         </div>
         <h1>
-            <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-                ${appIcon && appIcon !== "" ? appIcon : (editMode ? "🚫" : "")}
-            </span>
-            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
-                ${appTitle}
-            </span>
+            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appTitle}</span>
         </h1>
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
     if (editMode) {
-        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
-            saveState(); 
+        header.querySelector('h1 span').addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
         header.querySelector('p').addEventListener('blur', (e) => {
-            saveState(); 
             appSubtitle = e.target.textContent.trim();
             saveHeader();
         });
     }
 }
-
-function renderUndoRedoButtons() {
-    // Remove existing buttons
-    const existing = document.querySelector('.header .undo-redo-btns');
-    if (existing) existing.remove();
-
-    if (!editMode) return; // only show in edit mode
-
-    const container = document.createElement('div');
-    container.className = 'undo-redo-btns';
-
-    const undoBtn = document.createElement('button');
-    undoBtn.textContent = 'Undo';
-    undoBtn.onclick = undo;
-
-    const redoBtn = document.createElement('button');
-    redoBtn.textContent = 'Redo';
-    redoBtn.onclick = redo;
-
-    container.appendChild(undoBtn);
-    container.appendChild(redoBtn);
-
-    document.querySelector('.header').appendChild(container);
-}
-
-function showEmojiPicker(target, callback) {
-    // Remove any existing picker
-    const oldPicker = document.querySelector('.emoji-picker');
-    if (oldPicker) oldPicker.remove();
-
-    const picker = document.createElement('div');
-    picker.className = 'emoji-picker';
-
-    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","🚫"];
-    
-    emojis.forEach(e => {
-        const btn = document.createElement('button');
-        btn.textContent = e;
-        btn.onclick = () => {
-            saveState();
-            callback(e === "🚫" ? "" : e); // 🚫 means no icon
-            picker.remove();
-        };
-        picker.appendChild(btn);
-    });
-
-    document.body.appendChild(picker);
-
-    // Position near target
-    const rect = target.getBoundingClientRect();
-    picker.style.top = `${rect.bottom + window.scrollY + 5}px`;
-    picker.style.left = `${rect.left + window.scrollX}px`;
-}
-function editAppIcon(el) {
-    if (!editMode) return;
-    showEmojiPicker(el, (emoji) => {
-        saveState();
-        appTitle = (emoji ? emoji + " " : "") + appTitle.replace(/^(\p{Emoji_Presentation}|\p{Emoji}\s*)?/u, "").trim(); 
-        saveHeader();
-        renderHeader();
-    });
-}
-
 // Save categories to Firebase
 function saveCategories() {
     database.ref('categories').set(categories);
@@ -322,11 +238,7 @@ function renderContent() {
         const intro = document.createElement('div'); 
         intro.className = 'category-intro'; 
         const h2 = document.createElement('h2'); 
-        h2.innerHTML = `
-   <span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>
-`;
-
+        h2.innerHTML = `${cat.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>`; 
         const p = document.createElement('p'); 
         p.className = editMode ? 'editable' : ''; 
         p.contentEditable = editMode; 
@@ -336,14 +248,12 @@ function renderContent() {
         
         if (editMode) { 
             h2.querySelector('.editable').addEventListener('blur', (e) => { 
-                saveState();
-                categories[catIndex].name = e.target.textContent.trim();  
+                categories[catIndex].name = e.target.textContent.trim(); 
                 saveCategories();
                 renderTabs();
             }); 
             p.addEventListener('blur', (e) => { 
-                saveState();
-                categories[catIndex].intro = e.target.textContent.trim();  
+                categories[catIndex].intro = e.target.textContent.trim(); 
                 saveCategories();
             }); 
         } 
@@ -359,11 +269,7 @@ function renderContent() {
             
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
-           titleDiv.innerHTML = `
-   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-`;
-
+            titleDiv.innerHTML = `${skill.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>`; 
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -373,8 +279,7 @@ function renderContent() {
                 titleDiv.appendChild(deleteSkillBtn);
                 
                 titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
-                    saveState();
-                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim();  
+                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
                     saveCategories();
                 }); 
             } 
@@ -405,7 +310,6 @@ function renderContent() {
                     checkItem.appendChild(deleteItemBtn);
                     
                     textDiv.addEventListener('blur', (e) => { 
-                        saveState(); 
                         categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
                         saveCategories();
                     }); 
@@ -444,7 +348,6 @@ function switchTab(index) {
 
 function toggleCheck(itemId) { 
     if (editMode) return; 
-    saveState(); 
     checkedItems[itemId] = !checkedItems[itemId]; 
     saveCheckedItems();
     renderContent(); 
@@ -458,66 +361,10 @@ function toggleEditMode() {
     renderHeader();
     renderTabs();
     renderContent(); 
-    renderUndoRedoButtons(); 
-}
-function editSkillIcon(catIndex, skillIndex, el) {
-    showEmojiPicker(el, (emoji) => {
-        saveState();
-        categories[catIndex].skills[skillIndex].icon = emoji;
-        saveCategories();
-        renderContent();
-    });
-}
-
-function editCategoryIcon(catIndex, el) {
-    showEmojiPicker(el, (emoji) => {
-        saveState(); 
-        categories[catIndex].icon = emoji;
-        saveCategories();
-        renderTabs();
-        renderContent();
-    });
-}
-function editAppIcon(el) {
-    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","🚫"];
-    let menu = document.createElement("div");
-    menu.style.position = "absolute";
-    menu.style.background = "white";
-    menu.style.border = "1px solid #ccc";
-    menu.style.padding = "5px";
-    menu.style.borderRadius = "8px";
-    menu.style.display = "grid";
-    menu.style.gridTemplateColumns = "repeat(6, 1fr)";
-    menu.style.gap = "5px";
-    menu.style.zIndex = 1000;
-
-    emojis.forEach(e => {
-        let btn = document.createElement("button");
-        btn.textContent = e;
-        btn.style.fontSize = "20px";
-        btn.style.cursor = "pointer";
-        btn.style.background = "none";
-        btn.style.border = "none";
-        btn.onclick = () => {
-            saveState();
-            appIcon = (e === "🚫") ? "" : e; // 🚫 = no icon (empty in DB) 
-            saveHeader();
-            renderHeader();
-            document.body.removeChild(menu);
-        };
-        menu.appendChild(btn);
-    });
-
-    // position menu under the icon
-    const rect = el.getBoundingClientRect();
-    menu.style.left = rect.left + "px";
-    menu.style.top = rect.bottom + "px";
-    document.body.appendChild(menu);
 }
 
 
 function addSkill(catIndex) { 
-    saveState();
     categories[catIndex].skills.push({ 
         title: "New Skill", 
         icon: "✨", 
@@ -529,29 +376,25 @@ function addSkill(catIndex) {
 
 function deleteSkill(catIndex, skillIndex) { 
     if (confirm('Delete this skill?')) { 
-        saveState();
-        categories[catIndex].skills.splice(skillIndex, 1);  
+        categories[catIndex].skills.splice(skillIndex, 1); 
         saveCategories();
         renderContent(); 
     } 
 }
 
 function deleteItem(catIndex, skillIndex, itemIndex) { 
-    saveState();
-    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);  
+    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
     saveCategories();
     renderContent(); 
 }
 
 function addItem(catIndex, skillIndex) { 
-    saveState();
-    categories[catIndex].skills[skillIndex].items.push("New item");  
+    categories[catIndex].skills[skillIndex].items.push("New item"); 
     saveCategories();
     renderContent(); 
 }
 
 function addCategory() {
-    saveState();
     categories.push({
         name: "New Category",
         icon: "📌",
@@ -566,7 +409,6 @@ function addCategory() {
 
 function deleteCategory(catIndex) {
     if (confirm('Delete this entire category?')) {
-        saveState(); 
         categories.splice(catIndex, 1);
         if (activeTabIndex >= categories.length) {
             activeTabIndex = Math.max(0, categories.length - 1);
@@ -582,4 +424,3 @@ loadFromFirebase();
     </script>
 </body>
 </html>
-
