@@ -1505,7 +1505,23 @@ grid.className = 'emoji-grid';
 }
 
        
-        loadFromFirebase();
+       // Load any existing local data first for immediate display
+const savedChecklist = localStorage.getItem('lifeSkillsChecklist');
+if (savedChecklist) {
+    try {
+        checkedItems = JSON.parse(savedChecklist);
+    } catch (e) {
+        console.error('Error loading checklist:', e);
+    }
+}
+
+// Render immediately with default data
+renderHeader();
+renderTabs();
+renderContent();
+
+// Then load from Firebase (will update when ready)
+loadFromFirebase();
     </script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
