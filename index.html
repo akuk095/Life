@@ -72,6 +72,10 @@
         <div class="nav-tabs" id="navTabs"></div>
         <div class="content-area" id="contentArea"></div>
     </div>
+	<div style="position:fixed; bottom:20px; right:20px; display:flex; gap:10px; z-index:1000;">
+        <button onclick="undo()" style="padding:10px 15px; border-radius:6px; background:#f39c12; color:white; border:none;">↩️ Undo</button>
+        <button onclick="redo()" style="padding:10px 15px; border-radius:6px; background:#27ae60; color:white; border:none;">↪️ Redo</button>
+    </div>
     <script>
 // Initialize Firebase - REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
@@ -122,6 +126,8 @@ let activeTabIndex = 0;
 let appIcon = "📚"; 
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
+let history = [];
+let redoStack = [];
 
 // Load data from Firebase on startup
 function loadFromFirebase() {
@@ -197,6 +203,14 @@ function renderHeader() {
         });
     }
 }
+function saveState() {
+    history.push(JSON.stringify(categories));
+    // Limit history to last 50 changes
+    if (history.length > 50) history.shift();
+    // Clear redo stack whenever a new change occurs
+    redoStack = [];
+}
+
 function showEmojiPicker(target, callback) {
     // Remove any existing picker
     const oldPicker = document.querySelector('.emoji-picker');
@@ -366,8 +380,9 @@ function renderContent() {
                     checkItem.appendChild(deleteItemBtn);
                     
                     textDiv.addEventListener('blur', (e) => { 
-                        categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
-                        saveCategories();
+                         saveState();
+						categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
+                       saveCategories();
                     }); 
                 }
                 
@@ -421,6 +436,23 @@ function toggleEditMode() {
     renderTabs();
     renderContent(); 
 }
+function undo() {
+    if (history.length === 0) return;
+    redoStack.push(JSON.stringify(categories)); // save current state for redo
+    categories = JSON.parse(history.pop()); // restore previous state
+    saveCategories();
+    renderTabs();
+    renderContent();
+}
+
+function redo() {
+    if (redoStack.length === 0) return;
+    history.push(JSON.stringify(categories)); // save current state for undo
+    categories = JSON.parse(redoStack.pop()); // restore redo state
+    saveCategories();
+    renderTabs();
+    renderContent();
+}
 
 function editAppIcon(el) {
     const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","🚫"];
@@ -460,7 +492,8 @@ function editAppIcon(el) {
 
 
 function addSkill(catIndex) { 
-    categories[catIndex].skills.push({ 
+     saveState(); 
+	categories[catIndex].skills.push({ 
         title: "New Skill", 
         icon: "✨", 
         items: ["New item - click to edit"] 
@@ -470,7 +503,8 @@ function addSkill(catIndex) {
 }
 function editSkillIcon(catIndex, skillIndex, el) {
     showEmojiPicker(el, (emoji) => {
-        categories[catIndex].skills[skillIndex].icon = emoji;
+        saveState(); 
+		categories[catIndex].skills[skillIndex].icon = emoji;
         saveCategories();
         renderContent();
     });
@@ -478,20 +512,23 @@ function editSkillIcon(catIndex, skillIndex, el) {
 
 function deleteSkill(catIndex, skillIndex) { 
     if (confirm('Delete this skill?')) { 
-        categories[catIndex].skills.splice(skillIndex, 1); 
+        saveState(); 
+		categories[catIndex].skills.splice(skillIndex, 1); 
         saveCategories();
         renderContent(); 
     } 
 }
 
 function deleteItem(catIndex, skillIndex, itemIndex) { 
-    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
+    saveState(); 
+	categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
     saveCategories();
     renderContent(); 
 }
 
 function addItem(catIndex, skillIndex) { 
-    categories[catIndex].skills[skillIndex].items.push("New item"); 
+    saveState(); 
+	categories[catIndex].skills[skillIndex].items.push("New item"); 
     saveCategories();
     renderContent(); 
 }
@@ -509,7 +546,8 @@ function addCategory() {
             }
         ]
     });
-    activeTabIndex = categories.length - 1;
+   saveState(); 
+	activeTabIndex = categories.length - 1;
     saveCategories();
     renderTabs();
     renderContent();
@@ -517,7 +555,8 @@ function addCategory() {
 
 function editCategoryIcon(catIndex, el) {
     showEmojiPicker(el, (emoji) => {
-        categories[catIndex].icon = emoji;
+        saveState(); 
+		categories[catIndex].icon = emoji;
         saveCategories();
         renderTabs();
         renderContent();
@@ -526,7 +565,8 @@ function editCategoryIcon(catIndex, el) {
 
 function deleteCategory(catIndex) {
     if (confirm('Delete this entire category?')) {
-        categories.splice(catIndex, 1);
+        saveState(); 
+		categories.splice(catIndex, 1);
         if (activeTabIndex >= categories.length) {
             activeTabIndex = Math.max(0, categories.length - 1);
         }
@@ -541,6 +581,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
