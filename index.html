@@ -114,6 +114,9 @@ let categories = [
 let checkedItems = {};
 let editMode = false;
 let activeTabIndex = 0;
+// Default app title and subtitle
+let appTitle = "Essential Life Skills Guide";
+let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 
 // Load data from Firebase on startup
 function loadFromFirebase() {
@@ -133,6 +136,48 @@ function loadFromFirebase() {
             renderContent();
         }
     });
+
+    database.ref('appTitle').once('value', (snapshot) => {
+        if (snapshot.val()) appTitle = snapshot.val();
+        renderHeader();
+    });
+
+    database.ref('appSubtitle').once('value', (snapshot) => {
+        if (snapshot.val()) appSubtitle = snapshot.val();
+        renderHeader();
+    });
+}
+
+// Save title + subtitle to Firebase
+function saveHeader() {
+    database.ref('appTitle').set(appTitle);
+    database.ref('appSubtitle').set(appSubtitle);
+}
+
+function renderHeader() {
+    const header = document.querySelector('.header');
+    header.innerHTML = `
+        <div class="edit-toggle">
+            <button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">
+                ${editMode ? 'Done' : 'Edit'}
+            </button>
+        </div>
+        <h1>
+            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appTitle}</span>
+        </h1>
+        <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
+    `;
+
+    if (editMode) {
+        header.querySelector('h1 span').addEventListener('blur', (e) => {
+            appTitle = e.target.textContent.trim();
+            saveHeader();
+        });
+        header.querySelector('p').addEventListener('blur', (e) => {
+            appSubtitle = e.target.textContent.trim();
+            saveHeader();
+        });
+    }
 }
 
 // Save categories to Firebase
@@ -314,9 +359,11 @@ function toggleEditMode() {
     const btn = document.getElementById('editModeBtn'); 
     btn.textContent = editMode ? 'Done' : 'Edit'; 
     btn.classList.toggle('active', editMode); 
+    renderHeader();
     renderTabs();
     renderContent(); 
 }
+
 
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
@@ -378,3 +425,4 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
