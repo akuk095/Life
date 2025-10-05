@@ -21,6 +21,9 @@
         .nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; }
         .nav-tab:hover { background: #e9ecef; color: #495057; }
         .nav-tab.active { color: #3498db; border-bottom-color: #3498db; background: white; }
+        .emoji-picker { position: absolute; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 30px); gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;}
+        .emoji-picker button { font-size: 20px; background: none;  border: none; cursor: pointer;  transition: transform 0.2s;}
+        .emoji-picker button:hover { transform: scale(1.2);}
         .delete-tab-btn { width: 18px; height: 18px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; font-size: 11px; font-weight: bold; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; }
         .delete-tab-btn:hover { background: #c0392b; transform: scale(1.1); }
         .add-category-tab { background: #27ae60 !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
@@ -116,6 +119,7 @@ let checkedItems = {};
 let editMode = false;
 let activeTabIndex = 0;
 // Default app title and subtitle
+let appIcon = "📚"; // default icon
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 
@@ -147,12 +151,18 @@ function loadFromFirebase() {
         if (snapshot.val()) appSubtitle = snapshot.val();
         renderHeader();
     });
+    
+    database.ref('appIcon').once('value', (snapshot) => {
+    if (snapshot.val() !== null) appIcon = snapshot.val();
+    renderHeader();
+});
 }
 
 // Save title + subtitle to Firebase
 function saveHeader() {
     database.ref('appTitle').set(appTitle);
     database.ref('appSubtitle').set(appSubtitle);
+    database.ref('appIcon').set(appIcon);
 }
 
 function renderHeader() {
@@ -164,8 +174,14 @@ function renderHeader() {
             </button>
         </div>
         <h1>
-            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appTitle}</span>
-        </h1>
+    <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
+        ${appIcon ? appIcon : "🚫"}
+    </span>
+    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
+        ${appTitle}
+    </span>
+</h1>
+
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
@@ -179,6 +195,41 @@ function renderHeader() {
             saveHeader();
         });
     }
+}
+function showEmojiPicker(target, callback) {
+    // Remove any existing picker
+    const oldPicker = document.querySelector('.emoji-picker');
+    if (oldPicker) oldPicker.remove();
+
+    const picker = document.createElement('div');
+    picker.className = 'emoji-picker';
+
+    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","🚫"];
+    
+    emojis.forEach(e => {
+        const btn = document.createElement('button');
+        btn.textContent = e;
+        btn.onclick = () => {
+            callback(e === "🚫" ? "" : e); // 🚫 means no icon
+            picker.remove();
+        };
+        picker.appendChild(btn);
+    });
+
+    document.body.appendChild(picker);
+
+    // Position near target
+    const rect = target.getBoundingClientRect();
+    picker.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    picker.style.left = `${rect.left + window.scrollX}px`;
+}
+function editAppIcon(el) {
+    if (!editMode) return;
+    showEmojiPicker(el, (emoji) => {
+        appTitle = (emoji ? emoji + " " : "") + appTitle.replace(/^(\p{Emoji_Presentation}|\p{Emoji}\s*)?/u, "").trim();
+        saveHeader();
+        renderHeader();
+    });
 }
 
 // Save categories to Firebase
@@ -240,7 +291,11 @@ function renderContent() {
         const intro = document.createElement('div'); 
         intro.className = 'category-intro'; 
         const h2 = document.createElement('h2'); 
-        h2.innerHTML = `${cat.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>`; 
+        h2.innerHTML = `
+   <span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
+   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>
+`;
+
         const p = document.createElement('p'); 
         p.className = editMode ? 'editable' : ''; 
         p.contentEditable = editMode; 
@@ -271,7 +326,11 @@ function renderContent() {
             
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
-            titleDiv.innerHTML = `${skill.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>`; 
+           titleDiv.innerHTML = `
+   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
+   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+`;
+
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -364,7 +423,57 @@ function toggleEditMode() {
     renderTabs();
     renderContent(); 
 }
+function editSkillIcon(catIndex, skillIndex, el) {
+    showEmojiPicker(el, (emoji) => {
+        categories[catIndex].skills[skillIndex].icon = emoji;
+        saveCategories();
+        renderContent();
+    });
+}
 
+function editCategoryIcon(catIndex, el) {
+    showEmojiPicker(el, (emoji) => {
+        categories[catIndex].icon = emoji;
+        saveCategories();
+        renderTabs();
+        renderContent();
+    });
+}
+function editAppIcon(el) {
+    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","🚫"];
+    let menu = document.createElement("div");
+    menu.style.position = "absolute";
+    menu.style.background = "white";
+    menu.style.border = "1px solid #ccc";
+    menu.style.padding = "5px";
+    menu.style.borderRadius = "8px";
+    menu.style.display = "grid";
+    menu.style.gridTemplateColumns = "repeat(6, 1fr)";
+    menu.style.gap = "5px";
+    menu.style.zIndex = 1000;
+
+    emojis.forEach(e => {
+        let btn = document.createElement("button");
+        btn.textContent = e;
+        btn.style.fontSize = "20px";
+        btn.style.cursor = "pointer";
+        btn.style.background = "none";
+        btn.style.border = "none";
+        btn.onclick = () => {
+            appIcon = (e === "🚫") ? "" : e; // 🚫 means no icon
+            saveHeader();
+            renderHeader();
+            document.body.removeChild(menu);
+        };
+        menu.appendChild(btn);
+    });
+
+    // place menu below icon
+    const rect = el.getBoundingClientRect();
+    menu.style.left = rect.left + "px";
+    menu.style.top = rect.bottom + "px";
+    document.body.appendChild(menu);
+}
 
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
@@ -426,5 +535,6 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
