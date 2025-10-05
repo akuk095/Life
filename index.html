@@ -12,6 +12,9 @@
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
        .header .editable:focus {  outline: 2px solid #fff;    background: rgba(255, 255, 255, 0.2);   color: #fff; }
+        .header .undo-redo-btns { position: absolute; top: 20px; left: 30px; display: flex; gap: 8px;}
+.header .undo-redo-btns button { padding: 6px 12px; font-size: 14px; border-radius: 6px; border: none; cursor: pointer; background: #3498db; color: white; font-weight: bold; transition: all 0.2s ease;}
+.header .undo-redo-btns button:hover { background: #2980b9;}
         .edit-toggle { position: absolute; top: 20px; right: 30px; }
         .edit-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
         .edit-btn:hover { background: white; color: #3498db; }
@@ -186,16 +189,41 @@ function renderHeader() {
 
     if (editMode) {
         header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
+            saveState(); 
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
         header.querySelector('p').addEventListener('blur', (e) => {
+            saveState(); 
             appSubtitle = e.target.textContent.trim();
             saveHeader();
         });
     }
 }
 
+function renderUndoRedoButtons() {
+    // Remove existing buttons
+    const existing = document.querySelector('.header .undo-redo-btns');
+    if (existing) existing.remove();
+
+    if (!editMode) return; // only show in edit mode
+
+    const container = document.createElement('div');
+    container.className = 'undo-redo-btns';
+
+    const undoBtn = document.createElement('button');
+    undoBtn.textContent = 'Undo';
+    undoBtn.onclick = undo;
+
+    const redoBtn = document.createElement('button');
+    redoBtn.textContent = 'Redo';
+    redoBtn.onclick = redo;
+
+    container.appendChild(undoBtn);
+    container.appendChild(redoBtn);
+
+    document.querySelector('.header').appendChild(container);
+}
 
 function showEmojiPicker(target, callback) {
     // Remove any existing picker
@@ -211,6 +239,7 @@ function showEmojiPicker(target, callback) {
         const btn = document.createElement('button');
         btn.textContent = e;
         btn.onclick = () => {
+            saveState();
             callback(e === "🚫" ? "" : e); // 🚫 means no icon
             picker.remove();
         };
@@ -227,7 +256,8 @@ function showEmojiPicker(target, callback) {
 function editAppIcon(el) {
     if (!editMode) return;
     showEmojiPicker(el, (emoji) => {
-        appTitle = (emoji ? emoji + " " : "") + appTitle.replace(/^(\p{Emoji_Presentation}|\p{Emoji}\s*)?/u, "").trim();
+        saveState();
+        appTitle = (emoji ? emoji + " " : "") + appTitle.replace(/^(\p{Emoji_Presentation}|\p{Emoji}\s*)?/u, "").trim(); 
         saveHeader();
         renderHeader();
     });
@@ -306,12 +336,14 @@ function renderContent() {
         
         if (editMode) { 
             h2.querySelector('.editable').addEventListener('blur', (e) => { 
-                categories[catIndex].name = e.target.textContent.trim(); 
+                saveState();
+                categories[catIndex].name = e.target.textContent.trim();  
                 saveCategories();
                 renderTabs();
             }); 
             p.addEventListener('blur', (e) => { 
-                categories[catIndex].intro = e.target.textContent.trim(); 
+                saveState();
+                categories[catIndex].intro = e.target.textContent.trim();  
                 saveCategories();
             }); 
         } 
@@ -341,7 +373,8 @@ function renderContent() {
                 titleDiv.appendChild(deleteSkillBtn);
                 
                 titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
-                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
+                    saveState();
+                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim();  
                     saveCategories();
                 }); 
             } 
@@ -372,6 +405,7 @@ function renderContent() {
                     checkItem.appendChild(deleteItemBtn);
                     
                     textDiv.addEventListener('blur', (e) => { 
+                        saveState(); 
                         categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
                         saveCategories();
                     }); 
@@ -410,6 +444,7 @@ function switchTab(index) {
 
 function toggleCheck(itemId) { 
     if (editMode) return; 
+    saveState(); 
     checkedItems[itemId] = !checkedItems[itemId]; 
     saveCheckedItems();
     renderContent(); 
@@ -423,9 +458,11 @@ function toggleEditMode() {
     renderHeader();
     renderTabs();
     renderContent(); 
+    renderUndoRedoButtons(); 
 }
 function editSkillIcon(catIndex, skillIndex, el) {
     showEmojiPicker(el, (emoji) => {
+        saveState();
         categories[catIndex].skills[skillIndex].icon = emoji;
         saveCategories();
         renderContent();
@@ -434,6 +471,7 @@ function editSkillIcon(catIndex, skillIndex, el) {
 
 function editCategoryIcon(catIndex, el) {
     showEmojiPicker(el, (emoji) => {
+        saveState(); 
         categories[catIndex].icon = emoji;
         saveCategories();
         renderTabs();
@@ -461,7 +499,8 @@ function editAppIcon(el) {
         btn.style.background = "none";
         btn.style.border = "none";
         btn.onclick = () => {
-            appIcon = (e === "🚫") ? "" : e; // 🚫 = no icon (empty in DB)
+            saveState();
+            appIcon = (e === "🚫") ? "" : e; // 🚫 = no icon (empty in DB) 
             saveHeader();
             renderHeader();
             document.body.removeChild(menu);
@@ -478,6 +517,7 @@ function editAppIcon(el) {
 
 
 function addSkill(catIndex) { 
+    saveState();
     categories[catIndex].skills.push({ 
         title: "New Skill", 
         icon: "✨", 
@@ -489,25 +529,29 @@ function addSkill(catIndex) {
 
 function deleteSkill(catIndex, skillIndex) { 
     if (confirm('Delete this skill?')) { 
-        categories[catIndex].skills.splice(skillIndex, 1); 
+        saveState();
+        categories[catIndex].skills.splice(skillIndex, 1);  
         saveCategories();
         renderContent(); 
     } 
 }
 
 function deleteItem(catIndex, skillIndex, itemIndex) { 
-    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
+    saveState();
+    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);  
     saveCategories();
     renderContent(); 
 }
 
 function addItem(catIndex, skillIndex) { 
-    categories[catIndex].skills[skillIndex].items.push("New item"); 
+    saveState();
+    categories[catIndex].skills[skillIndex].items.push("New item");  
     saveCategories();
     renderContent(); 
 }
 
 function addCategory() {
+    saveState();
     categories.push({
         name: "New Category",
         icon: "📌",
@@ -522,6 +566,7 @@ function addCategory() {
 
 function deleteCategory(catIndex) {
     if (confirm('Delete this entire category?')) {
+        saveState(); 
         categories.splice(catIndex, 1);
         if (activeTabIndex >= categories.length) {
             activeTabIndex = Math.max(0, categories.length - 1);
@@ -537,6 +582,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
