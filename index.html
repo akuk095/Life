@@ -63,8 +63,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div id="cardContainer"></div>
-	<div class="container">
+    <div class="container">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
             <h1>📚 Essential Life Skills Guide</h1>
@@ -73,19 +72,6 @@
         <div class="nav-tabs" id="navTabs"></div>
         <div class="content-area" id="contentArea"></div>
     </div>
-	<!-- Undo / Redo buttons -->
-<div style="position:fixed; bottom:20px; right:20px; display:flex; gap:2px; z-index:1000;">
-	<button onclick="createNewCard()"> Create New</button>
-    <button onclick="undo()" 
-        style="width:45px; height:45px; border-radius:12px; background:rgba(255,255,255,0.8); border:none; font-size:22px; color:#3498db; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
-        ↩
-    </button>
-    <button onclick="redo()" 
-        style="width:45px; height:45px; border-radius:12px; background:rgba(255,255,255,0.8); border:none; font-size:22px; color:#3498db; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
-        ↪
-    </button>
-</div>
-
     <script>
 // Initialize Firebase - REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
@@ -136,13 +122,7 @@ let activeTabIndex = 0;
 let appIcon = "📚"; 
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
-let history = [];
-let redoStack = [];
-let cards = []; // array to hold all card instances
-let activeCardIndex = 0;
-let defaultCategories = [
-  // your default categories & skills
-];		
+
 // Load data from Firebase on startup
 function loadFromFirebase() {
     database.ref('categories').once('value', (snapshot) => {
@@ -217,14 +197,6 @@ function renderHeader() {
         });
     }
 }
-function saveState() {
-    history.push(JSON.stringify(categories));
-    // Limit history to last 50 changes
-    if (history.length > 50) history.shift();
-    // Clear redo stack whenever a new change occurs
-    redoStack = [];
-}
-
 function showEmojiPicker(target, callback) {
     // Remove any existing picker
     const oldPicker = document.querySelector('.emoji-picker');
@@ -309,14 +281,12 @@ function renderContent() {
         const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); 
         
-        // Category intro
         const intro = document.createElement('div'); 
         intro.className = 'category-intro'; 
         const h2 = document.createElement('h2'); 
         h2.innerHTML = `
-            <span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
-            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>
-        `;
+   		<span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
+	   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span> `;
         const p = document.createElement('p'); 
         p.className = editMode ? 'editable' : ''; 
         p.contentEditable = editMode; 
@@ -338,7 +308,6 @@ function renderContent() {
         
         catDiv.appendChild(intro); 
         
-        // Skill grid
         const grid = document.createElement('div'); 
         grid.className = 'skill-grid'; 
         
@@ -346,13 +315,13 @@ function renderContent() {
             const card = document.createElement('div'); 
             card.className = 'skill-card'; 
             
-            // Skill title
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
             titleDiv.innerHTML = `
-                <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
-                <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-            `;
+   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
+   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+`;
+
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -369,7 +338,6 @@ function renderContent() {
             
             card.appendChild(titleDiv); 
             
-            // Skill items
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
@@ -394,16 +362,14 @@ function renderContent() {
                     checkItem.appendChild(deleteItemBtn);
                     
                     textDiv.addEventListener('blur', (e) => { 
-                         saveState();
-						categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
-                       saveCategories();
+                        categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
+                        saveCategories();
                     }); 
                 }
                 
                 card.appendChild(checkItem); 
             }); 
             
-            // Add item button
             const addItemBtn = document.createElement('button'); 
             addItemBtn.className = 'add-item-btn'; 
             addItemBtn.textContent = '+ Add Item'; 
@@ -415,17 +381,15 @@ function renderContent() {
         
         catDiv.appendChild(grid); 
         
-        // Always show "Add New Skill Card" button, even if category has no skills
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
-        addSkillBtn.textContent = '+ Add New Skill Card'; 
+        addSkillBtn.textContent = '+ Add New Card'; 
         addSkillBtn.onclick = () => addSkill(catIndex); 
         catDiv.appendChild(addSkillBtn); 
         
         contentArea.appendChild(catDiv); 
     }); 
 }
-
 
 function switchTab(index) { 
     activeTabIndex = index; 
@@ -449,23 +413,6 @@ function toggleEditMode() {
     renderHeader();
     renderTabs();
     renderContent(); 
-}
-function undo() {
-    if (history.length === 0) return;
-    redoStack.push(JSON.stringify(categories)); // save current state for redo
-    categories = JSON.parse(history.pop()); // restore previous state
-    saveCategories();
-    renderTabs();
-    renderContent();
-}
-
-function redo() {
-    if (redoStack.length === 0) return;
-    history.push(JSON.stringify(categories)); // save current state for undo
-    categories = JSON.parse(redoStack.pop()); // restore redo state
-    saveCategories();
-    renderTabs();
-    renderContent();
 }
 
 function editAppIcon(el) {
@@ -506,8 +453,7 @@ function editAppIcon(el) {
 
 
 function addSkill(catIndex) { 
-     saveState(); 
-	categories[catIndex].skills.push({ 
+    categories[catIndex].skills.push({ 
         title: "New Skill", 
         icon: "✨", 
         items: ["New item - click to edit"] 
@@ -517,8 +463,7 @@ function addSkill(catIndex) {
 }
 function editSkillIcon(catIndex, skillIndex, el) {
     showEmojiPicker(el, (emoji) => {
-        saveState(); 
-		categories[catIndex].skills[skillIndex].icon = emoji;
+        categories[catIndex].skills[skillIndex].icon = emoji;
         saveCategories();
         renderContent();
     });
@@ -526,23 +471,20 @@ function editSkillIcon(catIndex, skillIndex, el) {
 
 function deleteSkill(catIndex, skillIndex) { 
     if (confirm('Delete this skill?')) { 
-        saveState(); 
-		categories[catIndex].skills.splice(skillIndex, 1); 
+        categories[catIndex].skills.splice(skillIndex, 1); 
         saveCategories();
         renderContent(); 
     } 
 }
 
 function deleteItem(catIndex, skillIndex, itemIndex) { 
-    saveState(); 
-	categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
+    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
     saveCategories();
     renderContent(); 
 }
 
 function addItem(catIndex, skillIndex) { 
-    saveState(); 
-	categories[catIndex].skills[skillIndex].items.push("New item"); 
+    categories[catIndex].skills[skillIndex].items.push("New item"); 
     saveCategories();
     renderContent(); 
 }
@@ -552,25 +494,16 @@ function addCategory() {
         name: "New Category",
         icon: "📌",
         intro: "Click to edit this description",
-        skills: [
-            {
-                title: "New Skill",
-                icon: "✨",
-                items: ["New item - click to edit"]
-            }
-        ]
+        skills: []
     });
-   saveState(); 
-	activeTabIndex = categories.length - 1;
+    activeTabIndex = categories.length - 1;
     saveCategories();
     renderTabs();
     renderContent();
 }
-
 function editCategoryIcon(catIndex, el) {
     showEmojiPicker(el, (emoji) => {
-        saveState(); 
-		categories[catIndex].icon = emoji;
+        categories[catIndex].icon = emoji;
         saveCategories();
         renderTabs();
         renderContent();
@@ -579,8 +512,7 @@ function editCategoryIcon(catIndex, el) {
 
 function deleteCategory(catIndex) {
     if (confirm('Delete this entire category?')) {
-        saveState(); 
-		categories.splice(catIndex, 1);
+        categories.splice(catIndex, 1);
         if (activeTabIndex >= categories.length) {
             activeTabIndex = Math.max(0, categories.length - 1);
         }
@@ -589,83 +521,12 @@ function deleteCategory(catIndex) {
         renderContent();
     }
 }
-function createNewCard() {
-    const cardData = {
-        categories: JSON.parse(JSON.stringify(defaultCategories)),
-        checkedItems: {},
-        appTitle: "📚 Essential Life Skills Guide",
-        appSubtitle: "Fundamental knowledge everyone should have to navigate life successfully",
-        appIcon: "📚"
-    };
-    cards.push(cardData);
-    activeCardIndex = cards.length - 1;
-    renderCards();
-}
 
-function renderCards() {
-    const container = document.getElementById('cardContainer');
-    container.innerHTML = '';
-
-    cards.forEach((card, i) => {
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'container';
-        cardDiv.style.position = 'absolute';
-        cardDiv.style.top = `${i*10}px`;
-        cardDiv.style.left = `${i*10}px`;
-        cardDiv.style.width = '100%';
-        cardDiv.style.cursor = 'pointer';
-        cardDiv.style.zIndex = i === activeCardIndex ? 100 : i;
-
-        cardDiv.onclick = () => {
-            activeCardIndex = i;
-            renderCards();
-        };
-
-        cardDiv.innerHTML = generateCardContent(card, i);
-        container.appendChild(cardDiv);
-    });
-}
-
-function generateCardContent(cardData, cardIndex) {
-    return `
-        <div class="header">
-            <h1>${cardData.appIcon} ${cardData.appTitle}</h1>
-            <p>${cardData.appSubtitle}</p>
-        </div>
-        <div class="content-area">
-            ${cardData.categories.map(cat => `
-                <div class="category active">
-                    <div class="category-intro">
-                        <h2>${cat.icon} ${cat.name}</h2>
-                        <p>${cat.intro}</p>
-                    </div>
-                    <div class="skill-grid">
-                        ${cat.skills.map(skill => `
-                            <div class="skill-card">
-                                <div class="skill-title">${skill.icon} ${skill.title}</div>
-                                ${skill.items.map(item => `<div class="checklist-item">${item}</div>`).join('')}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
 // Load data when page loads
 loadFromFirebase();
-
-// initialise first card only if no cards exist yet
-if (cards.length === 0) {
-    createNewCard();
-}    </script>
+    </script>
 </body>
 </html>
-
-
-
-
-
 
 
 
