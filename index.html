@@ -63,7 +63,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div id="cardContainer"></div>
+	<div class="container">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
             <h1>📚 Essential Life Skills Guide</h1>
@@ -74,6 +75,7 @@
     </div>
 	<!-- Undo / Redo buttons -->
 <div style="position:fixed; bottom:20px; right:20px; display:flex; gap:2px; z-index:1000;">
+	<button onclick="createNewCard()"> Create New</button>
     <button onclick="undo()" 
         style="width:45px; height:45px; border-radius:12px; background:rgba(255,255,255,0.8); border:none; font-size:22px; color:#3498db; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
         ↩
@@ -136,7 +138,11 @@ let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 let history = [];
 let redoStack = [];
-
+let cards = []; // array to hold all card instances
+let activeCardIndex = 0;
+let defaultCategories = [
+  // your default categories & skills
+];		
 // Load data from Firebase on startup
 function loadFromFirebase() {
     database.ref('categories').once('value', (snapshot) => {
@@ -409,10 +415,10 @@ function renderContent() {
         
         catDiv.appendChild(grid); 
         
-        // Always show "Add New Card" button, even if category has no skills
+        // Always show "Add New Skill Card" button, even if category has no skills
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
-        addSkillBtn.textContent = '+ Add New Card'; 
+        addSkillBtn.textContent = '+ Add New Skill Card'; 
         addSkillBtn.onclick = () => addSkill(catIndex); 
         catDiv.appendChild(addSkillBtn); 
         
@@ -583,12 +589,79 @@ function deleteCategory(catIndex) {
         renderContent();
     }
 }
+function createNewCard() {
+    const cardData = {
+        categories: JSON.parse(JSON.stringify(defaultCategories)),
+        checkedItems: {},
+        appTitle: "📚 Essential Life Skills Guide",
+        appSubtitle: "Fundamental knowledge everyone should have to navigate life successfully",
+        appIcon: "📚"
+    };
+    cards.push(cardData);
+    activeCardIndex = cards.length - 1;
+    renderCards();
+}
 
+function renderCards() {
+    const container = document.getElementById('cardContainer');
+    container.innerHTML = '';
+
+    cards.forEach((card, i) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'container';
+        cardDiv.style.position = 'absolute';
+        cardDiv.style.top = `${i*10}px`;
+        cardDiv.style.left = `${i*10}px`;
+        cardDiv.style.width = '100%';
+        cardDiv.style.cursor = 'pointer';
+        cardDiv.style.zIndex = i === activeCardIndex ? 100 : i;
+
+        cardDiv.onclick = () => {
+            activeCardIndex = i;
+            renderCards();
+        };
+
+        cardDiv.innerHTML = generateCardContent(card, i);
+        container.appendChild(cardDiv);
+    });
+}
+
+function generateCardContent(cardData, cardIndex) {
+    return `
+        <div class="header">
+            <h1>${cardData.appIcon} ${cardData.appTitle}</h1>
+            <p>${cardData.appSubtitle}</p>
+        </div>
+        <div class="content-area">
+            ${cardData.categories.map(cat => `
+                <div class="category active">
+                    <div class="category-intro">
+                        <h2>${cat.icon} ${cat.name}</h2>
+                        <p>${cat.intro}</p>
+                    </div>
+                    <div class="skill-grid">
+                        ${cat.skills.map(skill => `
+                            <div class="skill-card">
+                                <div class="skill-title">${skill.icon} ${skill.title}</div>
+                                ${skill.items.map(item => `<div class="checklist-item">${item}</div>`).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
 // Load data when page loads
 loadFromFirebase();
-    </script>
+
+// initialise first card only if no cards exist yet
+if (cards.length === 0) {
+    createNewCard();
+}    </script>
 </body>
 </html>
+
 
 
 
