@@ -171,57 +171,45 @@ function saveHeader() {
 function renderHeader() {
     const header = document.querySelector('.header');
     header.innerHTML = `
-        <div class="undo-redo-btns" style="display: ${editMode ? 'flex' : 'none'}">
-            <button onclick="undo()">Undo</button>
-            <button onclick="redo()">Redo</button>
-        </div>
-
         <div class="edit-toggle">
             <button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">
                 ${editMode ? 'Done' : 'Edit'}
             </button>
         </div>
-
+        <div class="undo-redo-btns"></div> <!-- container always exists -->
         <h1>
             <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-                ${appIcon || (editMode ? "🚫" : "")}
+                ${appIcon && appIcon !== "" ? appIcon : (editMode ? "🚫" : "")}
             </span>
-            <span class="editable-header-title" contenteditable="${editMode}">${appTitle}</span>
+            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
+                ${appTitle}
+            </span>
         </h1>
-
-        <p class="editable-header-subtitle" contenteditable="${editMode}">${appSubtitle}</p>
+        <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
     if (editMode) {
-        // Title
-        const titleEl = header.querySelector('.editable-header-title');
-        titleEl.focus();
-        titleEl.addEventListener('blur', (e) => {
-            saveState();
+        // Title & subtitle blur events
+        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
+            saveState(); 
             appTitle = e.target.textContent.trim();
-            saveHeader(); // save to Firebase
+            saveHeader();
         });
-
-        // Subtitle
-        const subEl = header.querySelector('.editable-header-subtitle');
-        subEl.addEventListener('blur', (e) => {
-            saveState();
+        header.querySelector('p').addEventListener('blur', (e) => {
+            saveState(); 
             appSubtitle = e.target.textContent.trim();
-            saveHeader(); // save to Firebase
+            saveHeader();
         });
     }
+
+    renderUndoRedoButtons(); // safe to call now
 }
 
-
 function renderUndoRedoButtons() {
-    // Remove existing buttons
-    const existing = document.querySelector('.header .undo-redo-btns');
-    if (existing) existing.remove();
+    const container = document.querySelector('.header .undo-redo-btns');
+    container.innerHTML = ''; // clear old buttons
 
     if (!editMode) return; // only show in edit mode
-
-    const container = document.createElement('div');
-    container.className = 'undo-redo-btns';
 
     const undoBtn = document.createElement('button');
     undoBtn.textContent = 'Undo';
@@ -233,9 +221,8 @@ function renderUndoRedoButtons() {
 
     container.appendChild(undoBtn);
     container.appendChild(redoBtn);
-
-    document.querySelector('.header').appendChild(container);
 }
+
 
 function showEmojiPicker(target, callback) {
     // Remove any existing picker
@@ -287,17 +274,17 @@ function saveCheckedItems() {
 function renderTabs() { 
     const navTabs = document.getElementById('navTabs'); 
     navTabs.innerHTML = ''; 
-    
+
     categories.forEach((cat, i) => { 
         const tabWrapper = document.createElement('div');
         tabWrapper.className = 'tab-wrapper';
-        
+
         const tab = document.createElement('button'); 
         tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
-        tab.textContent = `${cat.icon} ${cat.name}`; 
+        tab.textContent = `${cat.icon || ''} ${cat.name}`; 
         tab.onclick = () => switchTab(i); 
         tabWrapper.appendChild(tab);
-        
+
         if (editMode) {
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-tab-btn';
@@ -308,10 +295,10 @@ function renderTabs() {
             };
             tabWrapper.appendChild(deleteBtn);
         }
-        
+
         navTabs.appendChild(tabWrapper); 
     }); 
-    
+
     if (editMode) {
         const addCategoryBtn = document.createElement('button');
         addCategoryBtn.className = 'nav-tab add-category-tab';
@@ -325,123 +312,130 @@ function renderContent() {
     const contentArea = document.getElementById('contentArea'); 
     contentArea.innerHTML = ''; 
     contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
-    
+
     categories.forEach((cat, catIndex) => { 
         const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); 
-        
+
+        // Category header
         const intro = document.createElement('div'); 
         intro.className = 'category-intro'; 
+
         const h2 = document.createElement('h2'); 
         h2.innerHTML = `
-   <span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>
-`;
+            <span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ''}</span>
+            <span class="editable-cat-name" contenteditable="${editMode}">${cat.name}</span>
+        `;
 
         const p = document.createElement('p'); 
-        p.className = editMode ? 'editable' : ''; 
+        p.className = editMode ? 'editable-cat-intro' : ''; 
         p.contentEditable = editMode; 
         p.textContent = cat.intro; 
+
         intro.appendChild(h2); 
         intro.appendChild(p); 
-        
-        if (editMode) { 
-            h2.querySelector('.editable').addEventListener('blur', (e) => { 
-                saveState();
-                categories[catIndex].name = e.target.textContent.trim();  
-                saveCategories();
-                renderTabs();
-            }); 
-            p.addEventListener('blur', (e) => { 
-                saveState();
-                categories[catIndex].intro = e.target.textContent.trim();  
-                saveCategories();
-            }); 
-        } 
-        
         catDiv.appendChild(intro); 
-        
+
+        if (editMode) {
+            h2.querySelector('.editable-cat-name').addEventListener('blur', (e) => {
+                saveState();
+                categories[catIndex].name = e.target.textContent.trim();
+                saveCategories();
+                renderTabs(); // refresh tabs to reflect name change
+            });
+
+            p.addEventListener('blur', (e) => {
+                saveState();
+                categories[catIndex].intro = e.target.textContent.trim();
+                saveCategories();
+            });
+        }
+
+        // Skills grid
         const grid = document.createElement('div'); 
         grid.className = 'skill-grid'; 
-        
+
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
             card.className = 'skill-card'; 
-            
+
+            // Skill title
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
-           titleDiv.innerHTML = `
-   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-`;
+            titleDiv.innerHTML = `
+                <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ''}</span>
+                <span class="editable-skill-title" contenteditable="${editMode}">${skill.title}</span>
+            `;
 
-            
-            if (editMode) { 
+            if (editMode) {
                 const deleteSkillBtn = document.createElement('button');
                 deleteSkillBtn.className = 'delete-btn';
                 deleteSkillBtn.textContent = '×';
                 deleteSkillBtn.onclick = () => deleteSkill(catIndex, skillIndex);
                 titleDiv.appendChild(deleteSkillBtn);
-                
-                titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
+
+                titleDiv.querySelector('.editable-skill-title').addEventListener('blur', (e) => {
                     saveState();
-                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim();  
+                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim();
                     saveCategories();
-                }); 
-            } 
-            
+                });
+            }
+
             card.appendChild(titleDiv); 
-            
+
+            // Skill items
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
                 checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); 
                 if (!editMode) checkItem.onclick = () => toggleCheck(itemId); 
-                
+
                 const checkbox = document.createElement('div');
                 checkbox.className = 'checkbox';
                 checkItem.appendChild(checkbox);
-                
+
                 const textDiv = document.createElement('div');
-                textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
+                textDiv.className = 'checklist-text' + (editMode ? ' editable-item-text' : '');
                 textDiv.contentEditable = editMode;
                 textDiv.textContent = item;
                 checkItem.appendChild(textDiv);
-                
+
                 if (editMode) {
                     const deleteItemBtn = document.createElement('button');
                     deleteItemBtn.className = 'delete-btn';
                     deleteItemBtn.textContent = '×';
                     deleteItemBtn.onclick = () => deleteItem(catIndex, skillIndex, itemIndex);
                     checkItem.appendChild(deleteItemBtn);
-                    
-                    textDiv.addEventListener('blur', (e) => { 
-                        saveState(); 
-                        categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
+
+                    textDiv.addEventListener('blur', (e) => {
+                        saveState();
+                        categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim();
                         saveCategories();
-                    }); 
+                    });
                 }
-                
+
                 card.appendChild(checkItem); 
-            }); 
-            
+            });
+
+            // Add Item button
             const addItemBtn = document.createElement('button'); 
             addItemBtn.className = 'add-item-btn'; 
             addItemBtn.textContent = '+ Add Item'; 
             addItemBtn.onclick = () => addItem(catIndex, skillIndex); 
             card.appendChild(addItemBtn); 
-            
+
             grid.appendChild(card); 
         }); 
-        
+
         catDiv.appendChild(grid); 
-        
+
+        // Add Skill button
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
         addSkillBtn.textContent = '+ Add New Card'; 
         addSkillBtn.onclick = () => addSkill(catIndex); 
         catDiv.appendChild(addSkillBtn); 
-        
+
         contentArea.appendChild(catDiv); 
     }); 
 }
@@ -555,6 +549,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
