@@ -11,17 +11,19 @@
         .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
-        .sync-status { position: absolute; top: 20px; left: 30px; font-size: 12px; padding: 6px 12px; border-radius: 20px; background: rgba(255,255,255,0.2); }
-        .sync-status.synced { background: rgba(46, 204, 113, 0.3); }
-        .sync-status.syncing { background: rgba(241, 196, 15, 0.3); }
         .edit-toggle { position: absolute; top: 20px; right: 30px; }
         .edit-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
         .edit-btn:hover { background: white; color: #3498db; }
         .edit-btn.active { background: #27ae60; border-color: #27ae60; }
         .nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; flex-wrap: wrap; }
+        .tab-wrapper { display: flex; align-items: center; gap: 5px; }
         .nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; }
         .nav-tab:hover { background: #e9ecef; color: #495057; }
         .nav-tab.active { color: #3498db; border-bottom-color: #3498db; background: white; }
+        .delete-tab-btn { width: 18px; height: 18px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; font-size: 11px; font-weight: bold; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; }
+        .delete-tab-btn:hover { background: #c0392b; transform: scale(1.1); }
+        .add-category-tab { background: #27ae60 !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
+        .add-category-tab:hover { background: #229954 !important; }
         .content-area { padding: 30px; }
         .category { display: none; }
         .category.active { display: block; }
@@ -44,16 +46,18 @@
         .delete-btn { width: 18px; height: 18px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center; margin-left: 8px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; }
         .delete-btn:hover { background: #c0392b; transform: scale(1.1); }
         .edit-mode .delete-btn { display: inline-flex; }
-        .add-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 14px; font-weight: 600; display: none; width: 100%; }
-        .add-btn:hover { background: #229954; }
-        .edit-mode .add-btn { display: block; }
+        .add-item-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 14px; font-weight: 600; display: none; width: 100%; }
+        .add-item-btn:hover { background: #229954; }
+        .edit-mode .add-item-btn { display: block; }
+        .add-skill-btn { background: #3498db; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: 100%; margin-top: 20px; transition: all 0.3s ease; display: none; }
+        .add-skill-btn:hover { background: #2980b9; }
+        .edit-mode .add-skill-btn { display: block; }
         @media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="sync-status" id="syncStatus">Connecting...</div>
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
             <h1>📚 Essential Life Skills Guide</h1>
             <p>Fundamental knowledge everyone should have to navigate life successfully</p>
@@ -61,34 +65,232 @@
         <div class="nav-tabs" id="navTabs"></div>
         <div class="content-area" id="contentArea"></div>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
-  authDomain: "life-akuk095.firebaseapp.com",
-  databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "life-akuk095",
-  storageBucket: "life-akuk095.firebasestorage.app",
-  messagingSenderId: "80383828301",
-  appId: "1:80383828301:web:7c001b7375f63fc5055704"
-};
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-let categories = [{name: "Health & Body", icon: "💪", intro: "Understanding your body and maintaining your health.", skills: [{title: "Basic Hygiene", icon: "🧼", items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]}]}];
-let checkedItems = {}, editMode = false, activeTabIndex = 0, isLoadingFromFirebase = false;
-function updateSyncStatus(status) { const el = document.getElementById('syncStatus'); el.className = 'sync-status'; if (status === 'synced') { el.textContent = '✓ Synced'; el.classList.add('synced'); } else if (status === 'syncing') { el.textContent = '⟳ Syncing...'; el.classList.add('syncing'); } else { el.textContent = 'Connecting...'; } }
-function saveToFirebase() { if (isLoadingFromFirebase) return; updateSyncStatus('syncing'); database.ref('lifeSkills').set({categories, checkedItems, lastUpdated: Date.now()}).then(() => updateSyncStatus('synced')).catch((e) => console.error('Error:', e)); }
-function loadFromFirebase() { isLoadingFromFirebase = true; updateSyncStatus('syncing'); database.ref('lifeSkills').once('value').then((snapshot) => { const data = snapshot.val(); if (data) { if (data.categories) categories = data.categories; if (data.checkedItems) checkedItems = data.checkedItems; renderTabs(); renderContent(); } updateSyncStatus('synced'); isLoadingFromFirebase = false; database.ref('lifeSkills').on('value', (snapshot) => { if (!isLoadingFromFirebase) { const data = snapshot.val(); if (data) { if (data.categories) categories = data.categories; if (data.checkedItems) checkedItems = data.checkedItems; renderTabs(); renderContent(); updateSyncStatus('synced'); } } }); }).catch((e) => { console.error('Error:', e); isLoadingFromFirebase = false; }); }
-function renderTabs() { const navTabs = document.getElementById('navTabs'); navTabs.innerHTML = ''; categories.forEach((cat, i) => { const tab = document.createElement('button'); tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); tab.textContent = `${cat.icon} ${cat.name}`; tab.onclick = () => switchTab(i); navTabs.appendChild(tab); }); }
-function renderContent() { const contentArea = document.getElementById('contentArea'); contentArea.innerHTML = ''; contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); categories.forEach((cat, catIndex) => { const catDiv = document.createElement('div'); catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); const intro = document.createElement('div'); intro.className = 'category-intro'; const h2 = document.createElement('h2'); h2.innerHTML = `${cat.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}" data-cat="${catIndex}" data-field="name">${cat.name}</span>`; const p = document.createElement('p'); p.className = editMode ? 'editable' : ''; p.contentEditable = editMode; p.setAttribute('data-cat', catIndex); p.setAttribute('data-field', 'intro'); p.textContent = cat.intro; intro.appendChild(h2); intro.appendChild(p); if (editMode) { h2.querySelector('.editable').addEventListener('blur', (e) => { categories[catIndex].name = e.target.textContent.trim(); saveToFirebase(); }); p.addEventListener('blur', (e) => { categories[catIndex].intro = e.target.textContent.trim(); saveToFirebase(); }); } catDiv.appendChild(intro); const grid = document.createElement('div'); grid.className = 'skill-grid'; cat.skills.forEach((skill, skillIndex) => { const card = document.createElement('div'); card.className = 'skill-card'; const titleDiv = document.createElement('div'); titleDiv.className = 'skill-title'; titleDiv.innerHTML = `${skill.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}" data-cat="${catIndex}" data-skill="${skillIndex}">${skill.title}</span><button class="delete-btn" onclick="deleteSkill(${catIndex}, ${skillIndex})">×</button>`; if (editMode) { titleDiv.querySelector('.editable').addEventListener('blur', (e) => { categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); saveToFirebase(); }); } card.appendChild(titleDiv); skill.items.forEach((item, itemIndex) => { const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; const checkItem = document.createElement('div'); checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); if (!editMode) checkItem.onclick = () => toggleCheck(itemId); checkItem.innerHTML = `<div class="checkbox"></div><div class="checklist-text ${editMode ? 'editable' : ''}" contenteditable="${editMode}" data-cat="${catIndex}" data-skill="${skillIndex}" data-item="${itemIndex}">${item}</div><button class="delete-btn" onclick="deleteItem(${catIndex}, ${skillIndex}, ${itemIndex})">×</button>`; if (editMode) { checkItem.querySelector('.checklist-text').addEventListener('blur', (e) => { categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); saveToFirebase(); }); } card.appendChild(checkItem); }); const addBtn = document.createElement('button'); addBtn.className = 'add-btn'; addBtn.textContent = '+ Add Item'; addBtn.onclick = () => addItem(catIndex, skillIndex); card.appendChild(addBtn); grid.appendChild(card); }); catDiv.appendChild(grid); contentArea.appendChild(catDiv); }); }
-function switchTab(index) { activeTabIndex = index; const tabs = document.querySelectorAll('.nav-tab'); const cats = document.querySelectorAll('.category'); tabs.forEach((tab, i) => tab.classList.toggle('active', i === activeTabIndex)); cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); }
-function toggleCheck(itemId) { if (editMode) return; checkedItems[itemId] = !checkedItems[itemId]; saveToFirebase(); renderContent(); }
-function toggleEditMode() { editMode = !editMode; const btn = document.getElementById('editModeBtn'); btn.textContent = editMode ? 'Done' : 'Edit'; btn.classList.toggle('active', editMode); renderContent(); }
-function deleteSkill(catIndex, skillIndex) { if (confirm('Delete this skill?')) { categories[catIndex].skills.splice(skillIndex, 1); saveToFirebase(); renderContent(); } }
-function deleteItem(catIndex, skillIndex, itemIndex) { categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); saveToFirebase(); renderContent(); }
-function addItem(catIndex, skillIndex) { categories[catIndex].skills[skillIndex].items.push("New item"); saveToFirebase(); renderContent(); }
-loadFromFirebase(); renderTabs(); renderContent();
+let categories = [
+    {name: "Health & Body", icon: "💪", intro: "Understanding your body and maintaining your health.", skills: [{title: "Basic Hygiene", icon: "🧼", items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]}]},
+    {name: "Daily Living", icon: "🏡", intro: "Practical skills to manage your home and everyday responsibilities.", skills: [{title: "Household Basics", icon: "🧹", items: ["Do laundry", "Clean regularly", "Take out trash"]}]}
+];
+let checkedItems = {}, editMode = false, activeTabIndex = 0;
+
+function renderTabs() { 
+    const navTabs = document.getElementById('navTabs'); 
+    navTabs.innerHTML = ''; 
+    
+    categories.forEach((cat, i) => { 
+        const tabWrapper = document.createElement('div');
+        tabWrapper.className = 'tab-wrapper';
+        
+        const tab = document.createElement('button'); 
+        tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
+        tab.textContent = `${cat.icon} ${cat.name}`; 
+        tab.onclick = () => switchTab(i); 
+        tabWrapper.appendChild(tab);
+        
+        if (editMode) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-tab-btn';
+            deleteBtn.textContent = '×';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteCategory(i);
+            };
+            tabWrapper.appendChild(deleteBtn);
+        }
+        
+        navTabs.appendChild(tabWrapper); 
+    }); 
+    
+    if (editMode) {
+        const addCategoryBtn = document.createElement('button');
+        addCategoryBtn.className = 'nav-tab add-category-tab';
+        addCategoryBtn.textContent = '+';
+        addCategoryBtn.onclick = addCategory;
+        navTabs.appendChild(addCategoryBtn);
+    }
+}
+
+function renderContent() { 
+    const contentArea = document.getElementById('contentArea'); 
+    contentArea.innerHTML = ''; 
+    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
+    
+    categories.forEach((cat, catIndex) => { 
+        const catDiv = document.createElement('div'); 
+        catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); 
+        
+        const intro = document.createElement('div'); 
+        intro.className = 'category-intro'; 
+        const h2 = document.createElement('h2'); 
+        h2.innerHTML = `${cat.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>`; 
+        const p = document.createElement('p'); 
+        p.className = editMode ? 'editable' : ''; 
+        p.contentEditable = editMode; 
+        p.textContent = cat.intro; 
+        intro.appendChild(h2); 
+        intro.appendChild(p); 
+        
+        if (editMode) { 
+            h2.querySelector('.editable').addEventListener('blur', (e) => { 
+                categories[catIndex].name = e.target.textContent.trim(); 
+                renderTabs();
+            }); 
+            p.addEventListener('blur', (e) => { 
+                categories[catIndex].intro = e.target.textContent.trim(); 
+            }); 
+        } 
+        
+        catDiv.appendChild(intro); 
+        
+        const grid = document.createElement('div'); 
+        grid.className = 'skill-grid'; 
+        
+        cat.skills.forEach((skill, skillIndex) => { 
+            const card = document.createElement('div'); 
+            card.className = 'skill-card'; 
+            
+            const titleDiv = document.createElement('div'); 
+            titleDiv.className = 'skill-title'; 
+            titleDiv.innerHTML = `${skill.icon} <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>`; 
+            
+            if (editMode) { 
+                const deleteSkillBtn = document.createElement('button');
+                deleteSkillBtn.className = 'delete-btn';
+                deleteSkillBtn.textContent = '×';
+                deleteSkillBtn.onclick = () => deleteSkill(catIndex, skillIndex);
+                titleDiv.appendChild(deleteSkillBtn);
+                
+                titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
+                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
+                }); 
+            } 
+            
+            card.appendChild(titleDiv); 
+            
+            skill.items.forEach((item, itemIndex) => { 
+                const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
+                const checkItem = document.createElement('div'); 
+                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); 
+                if (!editMode) checkItem.onclick = () => toggleCheck(itemId); 
+                
+                const checkbox = document.createElement('div');
+                checkbox.className = 'checkbox';
+                checkItem.appendChild(checkbox);
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
+                textDiv.contentEditable = editMode;
+                textDiv.textContent = item;
+                checkItem.appendChild(textDiv);
+                
+                if (editMode) {
+                    const deleteItemBtn = document.createElement('button');
+                    deleteItemBtn.className = 'delete-btn';
+                    deleteItemBtn.textContent = '×';
+                    deleteItemBtn.onclick = () => deleteItem(catIndex, skillIndex, itemIndex);
+                    checkItem.appendChild(deleteItemBtn);
+                    
+                    textDiv.addEventListener('blur', (e) => { 
+                        categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
+                    }); 
+                }
+                
+                card.appendChild(checkItem); 
+            }); 
+            
+            const addItemBtn = document.createElement('button'); 
+            addItemBtn.className = 'add-item-btn'; 
+            addItemBtn.textContent = '+ Add Item'; 
+            addItemBtn.onclick = () => addItem(catIndex, skillIndex); 
+            card.appendChild(addItemBtn); 
+            
+            grid.appendChild(card); 
+        }); 
+        
+        catDiv.appendChild(grid); 
+        
+        const addSkillBtn = document.createElement('button'); 
+        addSkillBtn.className = 'add-skill-btn'; 
+        addSkillBtn.textContent = '+ Add New Card'; 
+        addSkillBtn.onclick = () => addSkill(catIndex); 
+        catDiv.appendChild(addSkillBtn); 
+        
+        contentArea.appendChild(catDiv); 
+    }); 
+}
+
+function switchTab(index) { 
+    activeTabIndex = index; 
+    renderTabs();
+    const cats = document.querySelectorAll('.category'); 
+    cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); 
+}
+
+function toggleCheck(itemId) { 
+    if (editMode) return; 
+    checkedItems[itemId] = !checkedItems[itemId]; 
+    renderContent(); 
+}
+
+function toggleEditMode() { 
+    editMode = !editMode; 
+    const btn = document.getElementById('editModeBtn'); 
+    btn.textContent = editMode ? 'Done' : 'Edit'; 
+    btn.classList.toggle('active', editMode); 
+    renderTabs();
+    renderContent(); 
+}
+
+function addSkill(catIndex) { 
+    categories[catIndex].skills.push({ 
+        title: "New Skill", 
+        icon: "✨", 
+        items: ["New item - click to edit"] 
+    }); 
+    renderContent(); 
+}
+
+function deleteSkill(catIndex, skillIndex) { 
+    if (confirm('Delete this skill?')) { 
+        categories[catIndex].skills.splice(skillIndex, 1); 
+        renderContent(); 
+    } 
+}
+
+function deleteItem(catIndex, skillIndex, itemIndex) { 
+    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
+    renderContent(); 
+}
+
+function addItem(catIndex, skillIndex) { 
+    categories[catIndex].skills[skillIndex].items.push("New item"); 
+    renderContent(); 
+}
+
+function addCategory() {
+    categories.push({
+        name: "New Category",
+        icon: "📌",
+        intro: "Click to edit this description",
+        skills: []
+    });
+    activeTabIndex = categories.length - 1;
+    renderTabs();
+    renderContent();
+}
+
+function deleteCategory(catIndex) {
+    if (confirm('Delete this entire category?')) {
+        categories.splice(catIndex, 1);
+        if (activeTabIndex >= categories.length) {
+            activeTabIndex = Math.max(0, categories.length - 1);
+        }
+        renderTabs();
+        renderContent();
+    }
+}
+
+renderTabs(); 
+renderContent();
     </script>
 </body>
 </html>
