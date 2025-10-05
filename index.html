@@ -171,47 +171,35 @@ function saveHeader() {
 function renderHeader() {
     const header = document.querySelector('.header');
     header.innerHTML = `
-        <div class="undo-redo-btns" style="display: ${editMode ? 'flex' : 'none'}">
-            <button onclick="undo()">Undo</button>
-            <button onclick="redo()">Redo</button>
-        </div>
-
         <div class="edit-toggle">
             <button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">
                 ${editMode ? 'Done' : 'Edit'}
             </button>
         </div>
-
         <h1>
             <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-                ${appIcon || (editMode ? "🚫" : "")}
+                ${appIcon && appIcon !== "" ? appIcon : (editMode ? "🚫" : "")}
             </span>
-            <span class="editable-header-title" contenteditable="${editMode}">${appTitle}</span>
+            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
+                ${appTitle}
+            </span>
         </h1>
-
-        <p class="editable-header-subtitle" contenteditable="${editMode}">${appSubtitle}</p>
+        <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
     if (editMode) {
-        // Title
-        const titleEl = header.querySelector('.editable-header-title');
-        titleEl.focus();
-        titleEl.addEventListener('blur', (e) => {
-            saveState();
+        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
+            saveState(); 
             appTitle = e.target.textContent.trim();
-            saveHeader(); // save to Firebase
+            saveHeader();
         });
-
-        // Subtitle
-        const subEl = header.querySelector('.editable-header-subtitle');
-        subEl.addEventListener('blur', (e) => {
-            saveState();
+        header.querySelector('p').addEventListener('blur', (e) => {
+            saveState(); 
             appSubtitle = e.target.textContent.trim();
-            saveHeader(); // save to Firebase
+            saveHeader();
         });
     }
 }
-
 
 function renderUndoRedoButtons() {
     // Remove existing buttons
@@ -269,11 +257,12 @@ function editAppIcon(el) {
     if (!editMode) return;
     showEmojiPicker(el, (emoji) => {
         saveState();
-        appIcon = emoji; // Simply set the icon (empty string if 🚫 was selected)
+        appTitle = (emoji ? emoji + " " : "") + appTitle.replace(/^(\p{Emoji_Presentation}|\p{Emoji}\s*)?/u, "").trim(); 
         saveHeader();
         renderHeader();
     });
 }
+
 // Save categories to Firebase
 function saveCategories() {
     database.ref('categories').set(categories);
@@ -489,6 +478,44 @@ function editCategoryIcon(catIndex, el) {
         renderContent();
     });
 }
+function editAppIcon(el) {
+    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","🚫"];
+    let menu = document.createElement("div");
+    menu.style.position = "absolute";
+    menu.style.background = "white";
+    menu.style.border = "1px solid #ccc";
+    menu.style.padding = "5px";
+    menu.style.borderRadius = "8px";
+    menu.style.display = "grid";
+    menu.style.gridTemplateColumns = "repeat(6, 1fr)";
+    menu.style.gap = "5px";
+    menu.style.zIndex = 1000;
+
+    emojis.forEach(e => {
+        let btn = document.createElement("button");
+        btn.textContent = e;
+        btn.style.fontSize = "20px";
+        btn.style.cursor = "pointer";
+        btn.style.background = "none";
+        btn.style.border = "none";
+        btn.onclick = () => {
+            saveState();
+            appIcon = (e === "🚫") ? "" : e; // 🚫 = no icon (empty in DB) 
+            saveHeader();
+            renderHeader();
+            document.body.removeChild(menu);
+        };
+        menu.appendChild(btn);
+    });
+
+    // position menu under the icon
+    const rect = el.getBoundingClientRect();
+    menu.style.left = rect.left + "px";
+    menu.style.top = rect.bottom + "px";
+    document.body.appendChild(menu);
+}
+
+
 function addSkill(catIndex) { 
     saveState();
     categories[catIndex].skills.push({ 
@@ -555,3 +582,4 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
