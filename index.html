@@ -1109,18 +1109,17 @@ grid.className = 'emoji-grid';
             }
         }
 
-       function selectEmoji(emoji, targetElement, targetType, indices) {
+      function selectEmoji(emoji, targetElement, targetType, indices) {
     if (targetType === 'category') {
         categories[indices.catIndex].icon = emoji;
     } else if (targetType === 'skill') {
         categories[indices.catIndex].skills[indices.skillIndex].icon = emoji;
     } else if (targetType === 'header') {
         headerData.emoji = emoji;
-        saveHeaderData();
-        renderHeader();
     }
     
-    saveCategories();
+    saveToFirebase(); // Just this
+    renderHeader();
     renderTabs();
     renderContent();
     hideEmojiPicker();
@@ -1132,12 +1131,14 @@ grid.className = 'emoji-grid';
             }
         });
 
-        function renderHeader() {
-            const headerElement = document.querySelector('.header');
-            const editToggle = headerElement.querySelector('.edit-toggle');
-            
-            headerElement.innerHTML = '';
-            headerElement.appendChild(editToggle);
+       function renderHeader() {
+    const headerElement = document.querySelector('.header');
+    const syncStatus = headerElement.querySelector('.sync-status');
+    const editToggle = headerElement.querySelector('.edit-toggle');
+    
+    headerElement.innerHTML = '';
+    if (syncStatus) headerElement.appendChild(syncStatus); // Add this check
+    headerElement.appendChild(editToggle);
             
             const h1 = document.createElement('h1');
             
@@ -1160,7 +1161,7 @@ grid.className = 'emoji-grid';
             if (editMode) {
                 titleSpan.addEventListener('blur', (e) => {
                     headerData.title = e.target.textContent.trim();
-                    saveHeaderData();
+                    saveToFirebase();
                 });
             }
             
@@ -1175,7 +1176,7 @@ grid.className = 'emoji-grid';
             if (editMode) {
                 p.addEventListener('blur', (e) => {
                     headerData.subtitle = e.target.textContent.trim();
-                    saveHeaderData();
+                    saveToFirebase();
                 });
             }
             headerElement.appendChild(p);
@@ -1263,7 +1264,7 @@ grid.className = 'emoji-grid';
                         const textContent = e.target.textContent.trim();
                         const nameWithoutIcon = textContent.replace(/^[\u{1F300}-\u{1F9FF}]\s*/u, '');
                         categories[catIndex].name = nameWithoutIcon;
-                        saveCategories();
+                        saveToFirebase();
                     });
                     p.addEventListener('blur', (e) => saveEdit(e, catIndex, 'intro'));
                 }
@@ -1408,8 +1409,7 @@ grid.className = 'emoji-grid';
                 btn.textContent = 'Edit';
                 btn.classList.remove('active');
                 contentArea.classList.remove('edit-mode');
-                saveCategories();
-                saveHeaderData();
+                saveToFirebase();
                 hideEmojiPicker();
             }
             
@@ -1426,31 +1426,31 @@ grid.className = 'emoji-grid';
             } else {
                 categories[catIndex][field] = newValue;
             }
-            saveCategories();
+            saveToFirebase();
         }
 
         function saveSkillEdit(e, catIndex, skillIndex, field) {
             const newValue = e.target.textContent.trim();
             categories[catIndex].skills[skillIndex][field] = newValue;
-            saveCategories();
+            saveToFirebase();
         }
 
         function saveItemEdit(e, catIndex, skillIndex, itemIndex) {
             const newValue = e.target.textContent.trim();
             categories[catIndex].skills[skillIndex].items[itemIndex] = newValue;
-            saveCategories();
+            saveToFirebase();
         }
 
         function addItem(catIndex, skillIndex) {
             categories[catIndex].skills[skillIndex].items.push('New item - click to edit');
-            saveCategories();
+            saveToFirebase();
             renderContent();
         }
 
         function deleteItem(catIndex, skillIndex, itemIndex) {
             if (confirm('Are you sure you want to delete this item?')) {
                 categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
-                saveCategories();
+                saveToFirebase();
                 renderContent();
             }
         }
@@ -1461,14 +1461,14 @@ grid.className = 'emoji-grid';
                 icon: "✨",
                 items: ["New item - click to edit"]
             });
-            saveCategories();
+            saveToFirebase();
             renderContent();
         }
 
         function deleteSkill(catIndex, skillIndex) {
             if (confirm('Are you sure you want to delete this skill card?')) {
                 categories[catIndex].skills.splice(skillIndex, 1);
-                saveCategories();
+                saveToFirebase();
                 renderContent();
             }
         }
@@ -1480,7 +1480,7 @@ grid.className = 'emoji-grid';
                 intro: "Click to edit this description",
                 skills: []
             });
-            saveCategories();
+            saveToFirebase();
             renderTabs();
             renderContent();
             switchTab(categories.length - 1);
@@ -1492,20 +1492,12 @@ grid.className = 'emoji-grid';
                 if (activeTabIndex >= categories.length) {
                     activeTabIndex = Math.max(0, categories.length - 1);
                 }
-                saveCategories();
+                saveToFirebase();
                 renderTabs();
                 renderContent();
                 switchTab(activeTabIndex);
             }
         }
-
-        function saveCategories() {
-    saveToFirebase();
-}
-
-        function saveHeaderData() {
-    saveToFirebase();
-}
 
        
        // Load any existing local data first for immediate display
