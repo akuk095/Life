@@ -28,6 +28,8 @@
         .nav-tab.active { color: #3498db; border-bottom-color: #3498db; background: white; }
         .delete-tab-btn { width: 18px; height: 18px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; font-size: 11px; font-weight: bold; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; }
         .delete-tab-btn:hover { background: #c0392b; transform: scale(1.1); }
+		.small-icon-delete { position: absolute; top: -4px; right: -4px;  width: 16px; height: 16px; border-radius: 50%; background: #e74c3c; color: white; border: none; font-size: 10px; font-weight: bold; cursor: pointer;  display: flex; align-items: center; justify-content: center; line-height: 1; padding: 0; z-index: 10; transition: all 0.2s ease; }
+		.small-icon-delete:hover { background: #c0392b; transform: scale(1.1);}
         .add-category-tab { background: #27ae60 !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
         .add-category-tab:hover { background: #229954 !important; }
         .content-area { padding: 30px; }
@@ -175,17 +177,20 @@ function renderHeader() {
             </button>
         </div>
      <h1>
-    <span 
-        class="icon editable-icon" 
-        ${editMode ? 'onclick="editAppIcon(this)"' : ''}
-        style="display:inline-block; width:32px; text-align:center;"
-    >
-        ${appIcon ? appIcon : (editMode ? "+" : "")}
+    <span class="icon-wrapper" style="position: relative; display: inline-block; width: 32px; text-align: center;">
+        <span 
+            class="icon editable-icon" 
+            ${editMode ? 'onclick="editAppIcon(this)"' : ''}
+        >
+            ${appIcon && appIcon !== "removed" ? appIcon : "+"}
+        </span>
+        ${editMode && appIcon && appIcon !== "removed" ? `<button class="delete-btn small-icon-delete" onclick="removeAppIcon(event)">×</button>` : ""}
     </span>
     <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
         ${appTitle}
     </span>
 </h1>
+
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
@@ -472,6 +477,12 @@ function editSkillIcon(catIndex, skillIndex, el) {
         renderContent();
     });
 }
+function removeAppIcon(event) {
+    event.stopPropagation(); // prevent emoji picker from opening
+    appIcon = "removed";     // special removed state
+    saveHeader();
+    renderHeader();
+}
 
 function deleteSkill(catIndex, skillIndex) { 
     if (confirm('Delete this skill?')) { 
@@ -531,6 +542,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
