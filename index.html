@@ -61,8 +61,8 @@
     <div class="container">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            <h1>📚 Essential Life Skills Guide</h1>
-            <p>Fundamental knowledge everyone should have to navigate life successfully</p>
+            <h1 id="mainTitle">📚 Essential Life Skills Guide</h1>
+            <p id="mainSubtitle">Fundamental knowledge everyone should have to navigate life successfully</p>
         </div>
         <div class="nav-tabs" id="navTabs"></div>
         <div class="content-area" id="contentArea"></div>
@@ -70,13 +70,13 @@
     <script>
 // Initialize Firebase - REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
-    apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
-    authDomain: "life-akuk095.firebaseapp.com",
-    databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "life-akuk095",
-    storageBucket: "life-akuk095.firebasestorage.app",
-    messagingSenderId: "80383828301",
-    appId: "1:80383828301:web:7c001b7375f63fc5055704"
+  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
+  authDomain: "life-akuk095.firebaseapp.com",
+  databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "life-akuk095",
+  storageBucket: "life-akuk095.firebasestorage.app",
+  messagingSenderId: "80383828301",
+  appId: "1:80383828301:web:7c001b7375f63fc5055704",
 };
 
 // Initialize Firebase
