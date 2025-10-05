@@ -501,13 +501,20 @@ function addCategory() {
         name: "New Category",
         icon: "📌",
         intro: "Click to edit this description",
-        skills: []
+        skills: [
+            {
+                title: "New Skill",
+                icon: "✨",
+                items: ["New item - click to edit"]
+            }
+        ]
     });
     activeTabIndex = categories.length - 1;
     saveCategories();
     renderTabs();
     renderContent();
 }
+
 function editCategoryIcon(catIndex, el) {
     showEmojiPicker(el, (emoji) => {
         categories[catIndex].icon = emoji;
@@ -534,6 +541,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
