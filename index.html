@@ -478,44 +478,6 @@ function editCategoryIcon(catIndex, el) {
         renderContent();
     });
 }
-function editAppIcon(el) {
-    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","🚫"];
-    let menu = document.createElement("div");
-    menu.style.position = "absolute";
-    menu.style.background = "white";
-    menu.style.border = "1px solid #ccc";
-    menu.style.padding = "5px";
-    menu.style.borderRadius = "8px";
-    menu.style.display = "grid";
-    menu.style.gridTemplateColumns = "repeat(6, 1fr)";
-    menu.style.gap = "5px";
-    menu.style.zIndex = 1000;
-
-    emojis.forEach(e => {
-        let btn = document.createElement("button");
-        btn.textContent = e;
-        btn.style.fontSize = "20px";
-        btn.style.cursor = "pointer";
-        btn.style.background = "none";
-        btn.style.border = "none";
-        btn.onclick = () => {
-            saveState();
-            appIcon = (e === "🚫") ? "" : e; // 🚫 = no icon (empty in DB) 
-            saveHeader();
-            renderHeader();
-            document.body.removeChild(menu);
-        };
-        menu.appendChild(btn);
-    });
-
-    // position menu under the icon
-    const rect = el.getBoundingClientRect();
-    menu.style.left = rect.left + "px";
-    menu.style.top = rect.bottom + "px";
-    document.body.appendChild(menu);
-}
-
-
 function addSkill(catIndex) { 
     saveState();
     categories[catIndex].skills.push({ 
@@ -582,6 +544,7 @@ loadFromFirebase();
     </script>
 </body>
 </html>
+
 
 
 
