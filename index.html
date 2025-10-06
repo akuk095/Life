@@ -22,7 +22,10 @@
 		.edit-toggle { position: absolute; top: 10px; right: 10px; }
         .edit-btn { background: none; color: white; border: none; padding: 4px 8px; cursor: pointer; font-size: 28px; font-weight: 600; transition: all 0.3s ease; line-height: 1;}
         .edit-btn:hover { opacity: 0.7; }
-        .emoji-picker {  position: absolute;  background: white;  border: 1px solid #ccc;  border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(8, 30px);  gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto;}
+        .save-btn { position: absolute; top: 10px; left: 10px; background: #27ae60; color: white; border: none; padding: 8px 16px; cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 6px; transition: all 0.3s ease; display: none; }
+		.save-btn:hover { background: #229954; }
+		.save-btn.show { display: block; }
+		.emoji-picker {  position: absolute;  background: white;  border: 1px solid #ccc;  border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(8, 30px);  gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto;}
 		.emoji-picker button { font-size: 20px; background: none;  border: none;  cursor: pointer; transition: transform 0.2s;}
 		.emoji-picker button:hover { transform: scale(1.2);}
         .nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; flex-wrap: wrap; }
@@ -274,6 +277,7 @@ function saveHeader() {
 function renderHeader() {
     const header = document.querySelector('.header');
     header.innerHTML = `
+${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</button>' : ''}
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
     <div class="dropdown-menu" id="dropdownMenu">
@@ -293,7 +297,7 @@ function renderHeader() {
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
-if (editMode) {
+    if (editMode) {
         header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
@@ -304,7 +308,13 @@ if (editMode) {
         });
     }
 }
-
+function saveAndExitEdit() {
+    editMode = false;
+    renderHeader();
+    renderTabs();
+    renderContent();
+    alert('Changes saved!'); 
+}
 function showEmojiPicker(target, callback) {
     // Remove any existing picker
     const oldPicker = document.querySelector('.emoji-picker');
@@ -648,3 +658,4 @@ loadFromFirebase();
 
 </body>
 </html>
+
