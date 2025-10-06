@@ -294,19 +294,11 @@ function renderHeader() {
     `;
 
 if (editMode) {
-    // Title span
-    const titleSpan = header.querySelector('h1 .editable');
-    if (titleSpan) {
-        titleSpan.addEventListener('blur', (e) => {
+        header.querySelector('h1 span').addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
-    }
-
-    // Subtitle paragraph
-    const subtitleP = header.querySelector('p.editable');
-    if (subtitleP) {
-        subtitleP.addEventListener('blur', (e) => {
+        header.querySelector('p').addEventListener('blur', (e) => {
             appSubtitle = e.target.textContent.trim();
             saveHeader();
         });
@@ -656,6 +648,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
