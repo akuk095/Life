@@ -294,7 +294,7 @@ function renderHeader() {
     `;
 
 if (editMode) {
-        header.querySelector('h1 span').addEventListener('blur', (e) => {
+        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
@@ -648,6 +648,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
