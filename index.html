@@ -323,15 +323,16 @@ function showEmojiPicker(target, callback) {
     const picker = document.createElement('div');
     picker.className = 'emoji-picker';
 
-    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊",
-"🚫"];
+    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊","🚫"];
     
     emojis.forEach(e => {
         const btn = document.createElement('button');
         btn.textContent = e;
-        btn.onclick = () => {
-            callback(e === "🚫" ? "" : e); // 🚫 means no icon
+        btn.onclick = (event) => {
+            event.stopPropagation(); // Prevent triggering the outside click
+            callback(e === "🚫" ? "" : e);
             picker.remove();
+            document.removeEventListener('click', outsideClickHandler);
         };
         picker.appendChild(btn);
     });
@@ -342,8 +343,20 @@ function showEmojiPicker(target, callback) {
     const rect = target.getBoundingClientRect();
     picker.style.top = `${rect.bottom + window.scrollY + 5}px`;
     picker.style.left = `${rect.left + window.scrollX}px`;
-}
 
+    // Close picker when clicking outside
+    const outsideClickHandler = (event) => {
+        if (!picker.contains(event.target) && event.target !== target) {
+            picker.remove();
+            document.removeEventListener('click', outsideClickHandler);
+        }
+    };
+
+    // Add listener after a small delay to prevent immediate closing
+    setTimeout(() => {
+        document.addEventListener('click', outsideClickHandler);
+    }, 10);
+}
 // Save categories to Firebase
 function saveCategories() {
     database.ref(`guides/${currentGuideId}/categories`).set(categories);
@@ -535,9 +548,17 @@ function toggleEditMode() {
 }
 
 function editAppIcon(el) {
-    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊"
-,"🚫"];
+    // Check if picker already exists and remove it
+    const existingMenu = document.querySelector('.temp-emoji-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+        return; // Toggle off if clicking the same icon
+    }
+
+    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊","🚫"];
+    
     let menu = document.createElement("div");
+    menu.className = "temp-emoji-menu"; // Add class for easy selection
     menu.style.position = "absolute";
     menu.style.background = "white";
     menu.style.border = "1px solid #ccc";
@@ -547,6 +568,7 @@ function editAppIcon(el) {
     menu.style.gridTemplateColumns = "repeat(6, 1fr)";
     menu.style.gap = "5px";
     menu.style.zIndex = 1000;
+    menu.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
 
     emojis.forEach(e => {
         let btn = document.createElement("button");
@@ -555,23 +577,36 @@ function editAppIcon(el) {
         btn.style.cursor = "pointer";
         btn.style.background = "none";
         btn.style.border = "none";
-        btn.onclick = () => {
-            appIcon = (e === "🚫") ? "" : e; // 🚫 means no icon
+        btn.onclick = (event) => {
+            event.stopPropagation();
+            appIcon = (e === "🚫") ? "" : e;
             saveHeader();
             renderHeader();
-            document.body.removeChild(menu);
+            menu.remove();
+            document.removeEventListener('click', outsideClickHandler);
         };
         menu.appendChild(btn);
     });
 
-    // place menu below icon
+    // Place menu below icon
     const rect = el.getBoundingClientRect();
     menu.style.left = rect.left + "px";
-    menu.style.top = rect.bottom + "px";
+    menu.style.top = rect.bottom + window.scrollY + "px";
     document.body.appendChild(menu);
+
+    // Close menu when clicking outside
+    const outsideClickHandler = (event) => {
+        if (!menu.contains(event.target) && event.target !== el) {
+            menu.remove();
+            document.removeEventListener('click', outsideClickHandler);
+        }
+    };
+
+    // Add listener after a small delay
+    setTimeout(() => {
+        document.addEventListener('click', outsideClickHandler);
+    }, 10);
 }
-
-
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
         title: "New Skill", 
@@ -658,4 +693,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
