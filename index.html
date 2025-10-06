@@ -7,13 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); min-height: 100vh; padding: 20px; }
-        .guide-selector { display: flex; gap: 10px; justify-content: center; margin-top: 20px;}
-		#guideSelect { background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;}
-		#guideSelect:hover { background: rgba(255,255,255,0.3);}
-		#guideSelect option { background: #2c3e50; color: white;}
-		.new-guide-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease;}
-		.new-guide-btn:hover { background: white; color: #3498db;}
-		.container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
         .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
@@ -69,7 +63,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-	    <div class="container">
+	<div style="text-align:center; margin-bottom:20px;">
+  <select id="guideSelect" onchange="switchGuide(this.value)">
+    <option value="defaultGuide">📚 Essential Life Skills Guide</option>
+  </select>
+  <button onclick="createNewGuide()">+ New Guide</button>
+</div>
+    <div class="container">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
             <h1>📚 Essential Life Skills Guide</h1>
@@ -172,17 +172,16 @@ database.ref(`guides/${currentGuideId}/appIcon`).once('value', (snapshot) => {
 });
 	
 }
-function loadGuideList() {
+		function loadGuideList() {
     database.ref('guides').once('value', (snapshot) => {
         const guides = snapshot.val() || {};
         const select = document.getElementById('guideSelect');
         select.innerHTML = '';
         for (let id in guides) {
-            const icon = guides[id].appIcon || '📚';
             const title = guides[id].appTitle || id;
             const option = document.createElement('option');
             option.value = id;
-            option.textContent = `${icon} ${title}`;
+            option.textContent = title;
             select.appendChild(option);
         }
         select.value = currentGuideId;
@@ -243,18 +242,13 @@ function renderHeader() {
         ${appTitle}
     </span>
 </h1>
+
+
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
-        
-        <div class="guide-selector">
-            <select id="guideSelect" onchange="switchGuide(this.value)">
-                <option value="defaultGuide">📚 Essential Life Skills Guide</option>
-            </select>
-            <button class="new-guide-btn" onclick="createNewGuide()">+ New Guide</button>
-        </div>
     `;
 
     if (editMode) {
-        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
+        header.querySelector('h1 span').addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
@@ -600,9 +594,8 @@ function deleteCategory(catIndex) {
 
 // Load data when page loads
 loadFromFirebase();
-loadGuideList();
+		loadGuideList();
 
     </script>
 </body>
 </html>
-
