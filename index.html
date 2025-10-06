@@ -7,7 +7,16 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .board-selector { background: #f8f9fa; padding: 15px 30px; border-bottom: 2px solid #dee2e6; display: flex; align-items: center; gap: 10px; overflow-x: auto;}
+		.board-tab { padding: 10px 20px; background: white; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; font-weight: 500; color: #495057; transition: all 0.3s ease; white-space: nowrap; display: flex; align-items: center; gap: 8px;}
+		.board-tab:hover { border-color: #3498db; color: #3498db;}
+		.board-tab.active { background: #3498db; color: white; border-color: #3498db;}
+		.board-tab .delete-board-btn { margin-left: 5px; background: rgba(231, 76, 60, 0.8); width: 18px; height: 18px; border-radius: 50%; border: none; color: white; cursor: pointer; font-size: 11px; font-weight: bold; line-height: 1; padding: 0; display: none;}
+		.edit-mode .board-tab .delete-board-btn { display: inline-flex; align-items: center; justify-content: center;}
+		.board-tab .delete-board-btn:hover { background: #c0392b;}
+		.add-board-btn { padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap; transition: all 0.3s ease;}
+		.add-board-btn:hover {  background: #229954;}
+		.container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
         .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
@@ -88,84 +97,173 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// Default data structure
-let categories = [
+// Board management
+let boards = [
     {
-        name: "Health & Body", 
-        icon: "💪", 
-        intro: "Understanding your body and maintaining your health.", 
-        skills: [
+        id: 'board1',
+        name: 'Essential Life Skills',
+        icon: '📚',
+        title: 'Essential Life Skills Guide',
+        subtitle: 'Fundamental knowledge everyone should have to navigate life successfully',
+        categories: [
             {
-                title: "Basic Hygiene", 
-                icon: "🧼", 
-                items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
-            }
-        ]
-    },
-    {
-        name: "Daily Living", 
-        icon: "🏡", 
-        intro: "Practical skills to manage your home and everyday responsibilities.", 
-        skills: [
+                name: "Health & Body", 
+                icon: "💪", 
+                intro: "Understanding your body and maintaining your health.", 
+                skills: [
+                    {
+                        title: "Basic Hygiene", 
+                        icon: "🧼", 
+                        items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
+                    }
+                ]
+            },
             {
-                title: "Household Basics", 
-                icon: "🧹", 
-                items: ["Do laundry", "Clean regularly", "Take out trash"]
+                name: "Daily Living", 
+                icon: "🏡", 
+                intro: "Practical skills to manage your home and everyday responsibilities.", 
+                skills: [
+                    {
+                        title: "Household Basics", 
+                        icon: "🧹", 
+                        items: ["Do laundry", "Clean regularly", "Take out trash"]
+                    }
+                ]
             }
-        ]
+        ],
+        checkedItems: {}
     }
 ];
 
-let checkedItems = {};
+let currentBoardIndex = 0;
 let editMode = false;
 let activeTabIndex = 0;
-let appIcon = "📚"; 
-let appTitle = "Essential Life Skills Guide";
-let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
+
+// Helper functions to get current board data
+function getCurrentBoard() {
+    return boards[currentBoardIndex];
+}
+
+function getCurrentCategories() {
+    return getCurrentBoard().categories;
+}
+
+function getCurrentCheckedItems() {
+    return getCurrentBoard().checkedItems;
+}
 
 // Load data from Firebase on startup
 function loadFromFirebase() {
-    database.ref('categories').once('value', (snapshot) => {
+    database.ref('boards').once('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            categories = data;
+            boards = data;
         }
+        renderBoardSelector();
         renderTabs();
         renderContent();
     });
+}
+
+// Save boards to Firebase
+function saveBoards() {
+    database.ref('boards').set(boards);
+}
+
+function renderBoardSelector() {
+    let selector = document.querySelector('.board-selector');
+    if (!selector) {
+        selector = document.createElement('div');
+        selector.className = 'board-selector';
+        const container = document.querySelector('.container');
+        const header = document.querySelector('.header');
+        container.insertBefore(selector, header.nextSibling);
+    }
     
-    database.ref('checkedItems').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            checkedItems = data;
-            renderContent();
-        }
+    selector.innerHTML = '';
+    
+    boards.forEach((board, index) => {
+        const boardTab = document.createElement('div');
+        boardTab.className = 'board-tab' + (index === currentBoardIndex ? ' active' : '');
+        boardTab.innerHTML = `
+            <span>${board.icon} ${board.name}</span>
+            ${editMode && boards.length > 1 ? `<button class="delete-board-btn" onclick="event.stopPropagation(); deleteBoard(${index})">×</button>` : ''}
+        `;
+        boardTab.onclick = () => switchBoard(index);
+        selector.appendChild(boardTab);
     });
+    
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-board-btn';
+    addBtn.textContent = '+ New Board';
+    addBtn.onclick = addBoard;
+    selector.appendChild(addBtn);
+}
 
-    database.ref('appTitle').once('value', (snapshot) => {
-        if (snapshot.val()) appTitle = snapshot.val();
-        renderHeader();
-    });
-
-    database.ref('appSubtitle').once('value', (snapshot) => {
-        if (snapshot.val()) appSubtitle = snapshot.val();
-        renderHeader();
-    });
-
-database.ref('appIcon').once('value', (snapshot) => {
-    if (snapshot.val() !== null) appIcon = snapshot.val();
+function switchBoard(index) {
+    currentBoardIndex = index;
+    activeTabIndex = 0;
+    renderBoardSelector();
     renderHeader();
-});
-	
-}
-function saveHeader() {
-    database.ref('appTitle').set(appTitle);
-    database.ref('appSubtitle').set(appSubtitle);
-    database.ref('appIcon').set(appIcon);
+    renderTabs();
+    renderContent();
 }
 
+function addBoard() {
+    const newBoard = {
+        id: 'board' + Date.now(),
+        name: 'New Board',
+        icon: '📋',
+        title: 'New Board',
+        subtitle: 'Click Edit to customize',
+        categories: [
+            {
+                name: "Category", 
+                icon: "📌", 
+                intro: "Add your description here", 
+                skills: [
+                    {
+                        title: "New Skill", 
+                        icon: "✨", 
+                        items: ["New item - click Edit to customize"]
+                    }
+                ]
+            }
+        ],
+        checkedItems: {}
+    };
+    
+    boards.push(newBoard);
+    currentBoardIndex = boards.length - 1;
+    activeTabIndex = 0;
+    saveBoards();
+    renderBoardSelector();
+    renderHeader();
+    renderTabs();
+    renderContent();
+}
+
+function deleteBoard(index) {
+    if (boards.length === 1) {
+        alert("You can't delete the last board!");
+        return;
+    }
+    
+    if (confirm(`Delete board "${boards[index].name}"?`)) {
+        boards.splice(index, 1);
+        if (currentBoardIndex >= boards.length) {
+            currentBoardIndex = boards.length - 1;
+        }
+        saveBoards();
+        renderBoardSelector();
+        renderHeader();
+        renderTabs();
+        renderContent();
+    }
+}
 
 function renderHeader() {
+    const board = getCurrentBoard();
     const header = document.querySelector('.header');
     header.innerHTML = `
         <div class="edit-toggle">
@@ -173,46 +271,43 @@ function renderHeader() {
                 ${editMode ? 'Done' : 'Edit'}
             </button>
         </div>
-       <h1>
-    <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-        ${appIcon ? appIcon : "🚫"}
-    </span>
-    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
-        ${appTitle}
-    </span>
-</h1>
-
-
-        <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
+        <h1>
+            <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
+                ${board.icon || "🚫"}
+            </span>
+            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
+                ${board.title}
+            </span>
+        </h1>
+        <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${board.subtitle}</p>
     `;
 
     if (editMode) {
-        header.querySelector('h1 span').addEventListener('blur', (e) => {
-            appTitle = e.target.textContent.trim();
-            saveHeader();
+        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
+            board.title = e.target.textContent.trim();
+            saveBoards();
         });
         header.querySelector('p').addEventListener('blur', (e) => {
-            appSubtitle = e.target.textContent.trim();
-            saveHeader();
+            board.subtitle = e.target.textContent.trim();
+            saveBoards();
         });
     }
 }
+
 function showEmojiPicker(target, callback) {
-    // Remove any existing picker
     const oldPicker = document.querySelector('.emoji-picker');
     if (oldPicker) oldPicker.remove();
 
     const picker = document.createElement('div');
     picker.className = 'emoji-picker';
 
-    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊",
-"🚫"];
+    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊","🚫"];
     
     emojis.forEach(e => {
         const btn = document.createElement('button');
         btn.textContent = e;
         btn.onclick = () => {
-            callback(e === "🚫" ? "" : e); // 🚫 means no icon
+            callback(e === "🚫" ? "" : e);
             picker.remove();
         };
         picker.appendChild(btn);
@@ -220,23 +315,13 @@ function showEmojiPicker(target, callback) {
 
     document.body.appendChild(picker);
 
-    // Position near target
     const rect = target.getBoundingClientRect();
     picker.style.top = `${rect.bottom + window.scrollY + 5}px`;
     picker.style.left = `${rect.left + window.scrollX}px`;
 }
 
-// Save categories to Firebase
-function saveCategories() {
-    database.ref('categories').set(categories);
-}
-
-// Save checked items to Firebase
-function saveCheckedItems() {
-    database.ref('checkedItems').set(checkedItems);
-}
-
 function renderTabs() { 
+    const categories = getCurrentCategories();
     const navTabs = document.getElementById('navTabs'); 
     navTabs.innerHTML = ''; 
     
@@ -274,6 +359,8 @@ function renderTabs() {
 }
 
 function renderContent() { 
+    const categories = getCurrentCategories();
+    const checkedItems = getCurrentCheckedItems();
     const contentArea = document.getElementById('contentArea'); 
     contentArea.innerHTML = ''; 
     contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
@@ -286,8 +373,9 @@ function renderContent() {
         intro.className = 'category-intro'; 
         const h2 = document.createElement('h2'); 
         h2.innerHTML = `
-   		<span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
-	   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span> `;
+            <span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
+            <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span>
+        `;
         const p = document.createElement('p'); 
         p.className = editMode ? 'editable' : ''; 
         p.contentEditable = editMode; 
@@ -298,12 +386,12 @@ function renderContent() {
         if (editMode) { 
             h2.querySelector('.editable').addEventListener('blur', (e) => { 
                 categories[catIndex].name = e.target.textContent.trim(); 
-                saveCategories();
+                saveBoards();
                 renderTabs();
             }); 
             p.addEventListener('blur', (e) => { 
                 categories[catIndex].intro = e.target.textContent.trim(); 
-                saveCategories();
+                saveBoards();
             }); 
         } 
         
@@ -319,10 +407,9 @@ function renderContent() {
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
             titleDiv.innerHTML = `
-   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-`;
-
+                <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
+                <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+            `;
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -333,7 +420,7 @@ function renderContent() {
                 
                 titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
                     categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
-                    saveCategories();
+                    saveBoards();
                 }); 
             } 
             
@@ -364,7 +451,7 @@ function renderContent() {
                     
                     textDiv.addEventListener('blur', (e) => { 
                         categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
-                        saveCategories();
+                        saveBoards();
                     }); 
                 }
                 
@@ -401,8 +488,9 @@ function switchTab(index) {
 
 function toggleCheck(itemId) { 
     if (editMode) return; 
+    const checkedItems = getCurrentCheckedItems();
     checkedItems[itemId] = !checkedItems[itemId]; 
-    saveCheckedItems();
+    saveBoards();
     renderContent(); 
 }
 
@@ -411,87 +499,68 @@ function toggleEditMode() {
     const btn = document.getElementById('editModeBtn'); 
     btn.textContent = editMode ? 'Done' : 'Edit'; 
     btn.classList.toggle('active', editMode); 
+    renderBoardSelector();
     renderHeader();
     renderTabs();
     renderContent(); 
 }
 
 function editAppIcon(el) {
-    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊"
-,"🚫"];
-    let menu = document.createElement("div");
-    menu.style.position = "absolute";
-    menu.style.background = "white";
-    menu.style.border = "1px solid #ccc";
-    menu.style.padding = "5px";
-    menu.style.borderRadius = "8px";
-    menu.style.display = "grid";
-    menu.style.gridTemplateColumns = "repeat(6, 1fr)";
-    menu.style.gap = "5px";
-    menu.style.zIndex = 1000;
-
-    emojis.forEach(e => {
-        let btn = document.createElement("button");
-        btn.textContent = e;
-        btn.style.fontSize = "20px";
-        btn.style.cursor = "pointer";
-        btn.style.background = "none";
-        btn.style.border = "none";
-        btn.onclick = () => {
-            appIcon = (e === "🚫") ? "" : e; // 🚫 means no icon
-            saveHeader();
-            renderHeader();
-            document.body.removeChild(menu);
-        };
-        menu.appendChild(btn);
+    showEmojiPicker(el, (emoji) => {
+        const board = getCurrentBoard();
+        board.icon = emoji;
+        board.name = board.title; // Keep board name in sync
+        saveBoards();
+        renderBoardSelector();
+        renderHeader();
     });
-
-    // place menu below icon
-    const rect = el.getBoundingClientRect();
-    menu.style.left = rect.left + "px";
-    menu.style.top = rect.bottom + "px";
-    document.body.appendChild(menu);
 }
 
-
 function addSkill(catIndex) { 
+    const categories = getCurrentCategories();
     categories[catIndex].skills.push({ 
         title: "New Skill", 
         icon: "✨", 
         items: ["New item - click to edit"] 
     }); 
-    saveCategories();
+    saveBoards();
     renderContent(); 
 }
+
 function editSkillIcon(catIndex, skillIndex, el) {
     showEmojiPicker(el, (emoji) => {
+        const categories = getCurrentCategories();
         categories[catIndex].skills[skillIndex].icon = emoji;
-        saveCategories();
+        saveBoards();
         renderContent();
     });
 }
 
 function deleteSkill(catIndex, skillIndex) { 
     if (confirm('Delete this skill?')) { 
+        const categories = getCurrentCategories();
         categories[catIndex].skills.splice(skillIndex, 1); 
-        saveCategories();
+        saveBoards();
         renderContent(); 
     } 
 }
 
 function deleteItem(catIndex, skillIndex, itemIndex) { 
+    const categories = getCurrentCategories();
     categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
-    saveCategories();
+    saveBoards();
     renderContent(); 
 }
 
 function addItem(catIndex, skillIndex) { 
+    const categories = getCurrentCategories();
     categories[catIndex].skills[skillIndex].items.push("New item"); 
-    saveCategories();
+    saveBoards();
     renderContent(); 
 }
 
 function addCategory() {
+    const categories = getCurrentCategories();
     categories.push({
         name: "New Category",
         icon: "📌",
@@ -505,27 +574,29 @@ function addCategory() {
         ]
     });
     activeTabIndex = categories.length - 1;
-    saveCategories();
+    saveBoards();
     renderTabs();
     renderContent();
 }
 
 function editCategoryIcon(catIndex, el) {
     showEmojiPicker(el, (emoji) => {
+        const categories = getCurrentCategories();
         categories[catIndex].icon = emoji;
-        saveCategories();
+        saveBoards();
         renderTabs();
         renderContent();
     });
 }
 
 function deleteCategory(catIndex) {
+    const categories = getCurrentCategories();
     if (confirm('Delete this entire category?')) {
         categories.splice(catIndex, 1);
         if (activeTabIndex >= categories.length) {
             activeTabIndex = Math.max(0, categories.length - 1);
         }
-        saveCategories();
+        saveBoards();
         renderTabs();
         renderContent();
     }
@@ -533,12 +604,3 @@ function deleteCategory(catIndex) {
 
 // Load data when page loads
 loadFromFirebase();
-    </script>
-</body>
-</html>
-
-
-
-
-
-
