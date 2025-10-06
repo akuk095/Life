@@ -290,22 +290,21 @@ function renderHeader() {
         ${appTitle}
     </span>
 </h1>
-
-
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
 if (editMode) {
+    // Title
     const titleSpan = header.querySelector('h1 span.editable');
-    const subtitleP = header.querySelector('p');
-    
     if (titleSpan) {
         titleSpan.addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
     }
-    
+
+    // Subtitle
+    const subtitleP = header.querySelector('p');
     if (subtitleP) {
         subtitleP.addEventListener('blur', (e) => {
             appSubtitle = e.target.textContent.trim();
@@ -313,6 +312,7 @@ if (editMode) {
         });
     }
 }
+
 function showEmojiPicker(target, callback) {
     // Remove any existing picker
     const oldPicker = document.querySelector('.emoji-picker');
@@ -656,6 +656,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
