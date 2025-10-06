@@ -57,7 +57,12 @@
         .add-skill-btn { background: #3498db; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: 100%; margin-top: 20px; transition: all 0.3s ease; display: none; }
         .add-skill-btn:hover { background: #2980b9; }
         .edit-mode .add-skill-btn { display: block; }
+		.floating-add-btn { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; border-radius: 12px; background-color: #5f9ea0; color: white; font-size: 28px; font-weight: bold; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.2s ease-in-out; z-index: 1000;}
+		.floating-add-btn:hover { transform: scale(1.1); background-color: #4a8587;}
         @media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
+		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
+		.floating-add-btn {  animation: fadeIn 0.3s ease-in-out;}
+
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -67,7 +72,6 @@
   <select id="guideSelect" onchange="switchGuide(this.value)">
     <option value="defaultGuide">📚 Essential Life Skills Guide</option>
   </select>
-  <button onclick="createNewGuide()">+ New Guide</button>
 </div>
     <div class="container">
         <div class="header">
@@ -597,5 +601,8 @@ loadFromFirebase();
 		loadGuideList();
 
     </script>
+	<button class="floating-add-btn" onclick="createNewGuide()">+</button>
+
 </body>
 </html>
+
