@@ -7,24 +7,8 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); min-height: 100vh; padding: 20px; }
-		.guide-switcher-container { width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-		.guide-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; width: 100%; }
-		.guide-card { height: 400px; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: all 0.3s ease; cursor: pointer; position: relative; }
-		.guide-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(52, 152, 219, 0.4); }
-		.guide-card-icon { font-size: 72px; margin-bottom: 20px; }
-		.guide-card-title { font-size: 24px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
-		.guide-card-subtitle { font-size: 14px; color: #7f8c8d; line-height: 1.6; }
-		.guide-card .delete-guide-btn { position: absolute; top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; font-size: 18px; opacity: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
-		.guide-card:hover .delete-guide-btn { opacity: 1; }
-		.guide-card .delete-guide-btn:hover { background: #c0392b; transform: scale(1.1); }
-		.new-guide-card { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: 3px dashed rgba(255,255,255,0.5); }
-		.new-guide-card .guide-card-icon { font-size: 96px; }
-		.new-guide-card .guide-card-title { color: white; font-size: 28px; }
-		.guide-view { display: none; }
-		.guide-view.active { display: block; }
-		.guide-switcher-container.hidden { display: none; }
-		.container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
-		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
@@ -80,9 +64,16 @@
         .edit-mode .add-skill-btn { display: block; }
 		.floating-add-btn { position: fixed; bottom: 25px; right: 25px; width: 75px; height: 75px; border-radius: 18px; background-color: rgba(52, 152, 219, 0.5); color: white; font-size: 42px; font-weight: bold; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.2s ease-in-out; z-index: 1000; }
 		.floating-add-btn:hover { transform: scale(1.1); background-color: rgba(41, 128, 185, 0.7); }
-		.guide-view.active ~ .floating-add-btn { display: none; }
         @media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
+		.guide-switcher { perspective: 1500px; width: 100%; max-width: 1200px; margin: 0 auto 40px; height: 800px; position: relative; }
+		.guide-card { position: absolute; width: 100%; height: 100%; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+		.guide-card:nth-child(1) { transform: translateX(0px) scale(1); z-index: 3; opacity: 1; }
+		.guide-card:nth-child(2) { transform: translateX(80px) scale(0.95); z-index: 2; opacity: 0.7; }
+		.guide-card:nth-child(3) { transform: translateX(160px) scale(0.9); z-index: 1; opacity: 0.5; }
+		.guide-card:nth-child(n+4) { transform: translateX(240px) scale(0.85); z-index: 0; opacity: 0.3; }
+		.guide-card:hover { transform: translateX(0px) scale(1.02) !important; z-index: 10 !important; }
+		.guide-card .container { margin: 0; }
 		.floating-add-btn {  animation: fadeIn 0.3s ease-in-out;}
 
     </style>
@@ -90,13 +81,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-<!-- Guide Switcher View -->
-<div class="guide-switcher-container" id="guideSwitcher">
-    <div class="guide-cards" id="guideCards"></div>
-</div>
-
-<!-- Individual Guide View -->
-<div class="guide-view" id="guideView">
+<div class="guide-switcher" id="guideSwitcher"></div>
     <div class="container">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
@@ -106,7 +91,6 @@
         <div class="nav-tabs" id="navTabs"></div>
         <div class="content-area" id="contentArea"></div>
     </div>
-</div>
     <script>
 // Initialize Firebase - REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
@@ -157,16 +141,7 @@ let activeTabIndex = 0;
 let appIcon = "📚"; 
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
-let allGuides = {};
-let guidesList = [];
-let isDragging = false;
-let startX = 0;
-let currentTranslate = 0;
-let prevTranslate = 0;
-let currentGuideIndex = 0;
-let viewMode = 'switcher'; // 'switcher' or 'guide'
 
-		
 // Load data from Firebase on startup
 function loadFromFirebase() {
    database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
@@ -212,76 +187,43 @@ database.ref(`guides/${currentGuideId}/appIcon`).once('value', (snapshot) => {
 }
 function loadGuideList() {
     database.ref('guides').once('value', (snapshot) => {
-        allGuides = snapshot.val() || {};
-        guidesList = Object.keys(allGuides);
-        renderGuideCards();
+        const guides = snapshot.val() || {};
+        const switcher = document.getElementById('guideSwitcher');
+        switcher.innerHTML = '';
+        
+        let index = 0;
+        for (let id in guides) {
+            const guideData = guides[id];
+            const card = document.createElement('div');
+            card.className = 'guide-card';
+            card.onclick = () => switchGuide(id);
+            
+            // Clone the current container structure
+            card.innerHTML = `
+                <div class="container">
+                    <div class="header">
+                        <h1>${guideData.appIcon || '📚'} ${guideData.appTitle || id}</h1>
+                        <p>${guideData.appSubtitle || 'Click to open'}</p>
+                    </div>
+                    <div style="padding: 20px; background: white; text-align: center; color: #666;">
+                        Click to open this guide
+                    </div>
+                </div>
+            `;
+            
+            switcher.appendChild(card);
+            index++;
+        }
     });
 }
-
 function switchGuide(id) {
     currentGuideId = id;
-    currentGuideIndex = guidesList.indexOf(id);
-    loadFromFirebase();
-    renderGuideCards();
-}
-function renderGuideCards() {
-    const container = document.getElementById('guideCards');
-    container.innerHTML = '';
-    
-    // Render all guide cards
-    guidesList.forEach((id) => {
-        const guide = allGuides[id];
-        const card = document.createElement('div');
-        card.className = 'guide-card';
-        card.onclick = () => openGuide(id);
-        
-        card.innerHTML = `
-            <button class="delete-guide-btn" onclick="event.stopPropagation(); deleteGuideById('${id}')">×</button>
-            <div class="guide-card-icon">${guide.appIcon || '📚'}</div>
-            <div class="guide-card-title">${guide.appTitle || id}</div>
-            <div class="guide-card-subtitle">${(guide.appSubtitle || '').substring(0, 80)}...</div>
-        `;
-        container.appendChild(card);
-    });
-    
-    // Add "new guide" card
-    const newCard = document.createElement('div');
-    newCard.className = 'guide-card new-guide-card';
-    newCard.onclick = createNewGuide;
-    newCard.innerHTML = `
-        <div class="guide-card-icon">+</div>
-        <div class="guide-card-title">Create New Guide</div>
-    `;
-    container.appendChild(newCard);
-}
-		function openGuide(id) {
-    currentGuideId = id;
-    viewMode = 'guide';
-    document.getElementById('guideSwitcher').classList.add('hidden');
-    document.getElementById('guideView').classList.add('active');
+    // Hide the switcher and show the main container
+    document.getElementById('guideSwitcher').style.display = 'none';
+    document.querySelector('body > .container').style.display = 'block';
     loadFromFirebase();
 }
 
-function showGuideSwitcher() {
-    viewMode = 'switcher';
-    document.getElementById('guideSwitcher').classList.remove('hidden');
-    document.getElementById('guideView').classList.remove('active');
-    loadGuideList();
-}
-		function deleteGuideById(id) {
-    if (id === 'defaultGuide') {
-        alert("Cannot delete the default guide!");
-        return;
-    }
-    if (confirm("Delete this entire guide? This cannot be undone.")) {
-        database.ref(`guides/${id}`).remove();
-        if (currentGuideId === id) {
-            currentGuideId = 'defaultGuide';
-            loadFromFirebase();
-        }
-        loadGuideList();
-    }
-}
 function createNewGuide() {
     const id = prompt("Enter a name or ID for this new guide:");
     if (!id) return;
@@ -357,7 +299,6 @@ function renderHeader() {
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
     <div class="dropdown-menu" id="dropdownMenu">
-		<button onclick="showGuideSwitcher()">All Guides</button>
         <button onclick="toggleEditMode()">Edit</button>
         <button onclick="duplicateGuide()">Duplicate</button>
         <button onclick="deleteGuide()">Delete</button>
@@ -461,7 +402,11 @@ function renderTabs() {
         navTabs.appendChild(addCategoryBtn);
     }
 }
-
+function showGuideSwitcher() {
+    document.getElementById('guideSwitcher').style.display = 'block';
+    document.querySelector('body > .container').style.display = 'none';
+    loadGuideList();
+}
 function renderContent() { 
     const contentArea = document.getElementById('contentArea'); 
     contentArea.innerHTML = ''; 
@@ -720,11 +665,12 @@ function deleteCategory(catIndex) {
     }
 }
 
-showGuideSwitcher();
+// Load data when page loads
+loadFromFirebase();
+		loadGuideList();
 
     </script>
-	<button class="floating-add-btn" onclick="createNewGuide()">+</button>
+	<button class="floating-add-btn" onclick="showGuideSwitcher()">≡</button>
 
 </body>
 </html>
-
