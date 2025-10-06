@@ -7,7 +7,18 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .guide-switcher-container { width: 100%; overflow: hidden; padding: 20px 0 30px; margin-bottom: 20px; }
+		.guide-cards { display: flex; gap: 20px; transition: transform 0.3s ease; padding: 0 calc(50% - 175px); touch-action: pan-y; cursor: grab; }
+		.guide-cards.dragging { cursor: grabbing; transition: none; }
+		.guide-card { min-width: 350px; height: 200px; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: all 0.3s ease; cursor: pointer; position: relative; flex-shrink: 0; }
+		.guide-card:not(.active) { opacity: 0.6; transform: scale(0.9); }
+		.guide-card.active { opacity: 1; transform: scale(1); box-shadow: 0 15px 40px rgba(52, 152, 219, 0.4); }
+		.guide-card-icon { font-size: 48px; margin-bottom: 15px; }
+		.guide-card-title { font-size: 20px; font-weight: 600; color: #2c3e50; margin-bottom: 8px; }
+		.guide-card-subtitle { font-size: 13px; color: #7f8c8d; line-height: 1.4; }
+		.new-guide-card { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: 2px dashed rgba(255,255,255,0.5); }
+		.new-guide-card .guide-card-icon { font-size: 64px; }
+		.new-guide-card .guide-card-title { color: white; }.container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
         .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
@@ -73,10 +84,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-	<div style="text-align:center; margin-bottom:20px;">
-  <select id="guideSelect" onchange="switchGuide(this.value)">
-    <option value="defaultGuide">📚 Essential Life Skills Guide</option>
-  </select>
+<div class="guide-switcher-container">
+    <div class="guide-cards" id="guideCards"></div>
 </div>
     <div class="container">
         <div class="header">
@@ -137,7 +146,14 @@ let activeTabIndex = 0;
 let appIcon = "📚"; 
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
-
+let allGuides = {};
+let guidesList = [];
+let isDragging = false;
+let startX = 0;
+let currentTranslate = 0;
+let prevTranslate = 0;
+let currentGuideIndex = 0;
+		
 // Load data from Firebase on startup
 function loadFromFirebase() {
    database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
@@ -181,27 +197,129 @@ database.ref(`guides/${currentGuideId}/appIcon`).once('value', (snapshot) => {
 });
 	
 }
-		function loadGuideList() {
+function loadGuideList() {
     database.ref('guides').once('value', (snapshot) => {
-        const guides = snapshot.val() || {};
-        const select = document.getElementById('guideSelect');
-        select.innerHTML = '';
-        for (let id in guides) {
-            const title = guides[id].appTitle || id;
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = title;
-            select.appendChild(option);
-        }
-        select.value = currentGuideId;
+        allGuides = snapshot.val() || {};
+        guidesList = Object.keys(allGuides);
+        renderGuideCards();
     });
 }
 
 function switchGuide(id) {
     currentGuideId = id;
+    currentGuideIndex = guidesList.indexOf(id);
     loadFromFirebase();
+    renderGuideCards();
+}
+function renderGuideCards() {
+    const container = document.getElementById('guideCards');
+    container.innerHTML = '';
+    
+    // Find current guide index
+    currentGuideIndex = guidesList.indexOf(currentGuideId);
+    if (currentGuideIndex === -1) currentGuideIndex = 0;
+    
+    // Render all guide cards
+    guidesList.forEach((id, index) => {
+        const guide = allGuides[id];
+        const card = document.createElement('div');
+        card.className = 'guide-card' + (index === currentGuideIndex ? ' active' : '');
+        card.onclick = () => switchGuide(id);
+        
+        card.innerHTML = `
+            <button class="delete-guide-btn" onclick="event.stopPropagation(); deleteGuideById('${id}')">×</button>
+            <div class="guide-card-icon">${guide.appIcon || '📚'}</div>
+            <div class="guide-card-title">${guide.appTitle || id}</div>
+            <div class="guide-card-subtitle">${(guide.appSubtitle || '').substring(0, 60)}...</div>
+        `;
+        container.appendChild(card);
+    });
+    
+    // Add "new guide" card
+    const newCard = document.createElement('div');
+    newCard.className = 'guide-card new-guide-card';
+    newCard.onclick = createNewGuide;
+    newCard.innerHTML = `
+        <div class="guide-card-icon">+</div>
+        <div class="guide-card-title">Create New Guide</div>
+    `;
+    container.appendChild(newCard);
+    
+    // Set initial position
+    updateCardsPosition();
+    setupSwipeListeners();
+}
+		function setupSwipeListeners() {
+    const cards = document.getElementById('guideCards');
+    
+    // Mouse events
+    cards.addEventListener('mousedown', dragStart);
+    cards.addEventListener('mousemove', drag);
+    cards.addEventListener('mouseup', dragEnd);
+    cards.addEventListener('mouseleave', dragEnd);
+    
+    // Touch events
+    cards.addEventListener('touchstart', dragStart);
+    cards.addEventListener('touchmove', drag);
+    cards.addEventListener('touchend', dragEnd);
 }
 
+function dragStart(e) {
+    isDragging = true;
+    startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+    document.getElementById('guideCards').classList.add('dragging');
+}
+
+function drag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+    const diff = currentX - startX;
+    currentTranslate = prevTranslate + diff;
+    
+    document.getElementById('guideCards').style.transform = `translateX(${currentTranslate}px)`;
+}
+
+function dragEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    const movedBy = currentTranslate - prevTranslate;
+    
+    // If moved enough, switch guide
+    if (movedBy < -100 && currentGuideIndex < guidesList.length - 1) {
+        currentGuideIndex++;
+        switchGuide(guidesList[currentGuideIndex]);
+    } else if (movedBy > 100 && currentGuideIndex > 0) {
+        currentGuideIndex--;
+        switchGuide(guidesList[currentGuideIndex]);
+    }
+    
+    updateCardsPosition();
+    document.getElementById('guideCards').classList.remove('dragging');
+}
+
+function updateCardsPosition() {
+    const cardWidth = 370; // 350px + 20px gap
+    prevTranslate = -currentGuideIndex * cardWidth;
+    currentTranslate = prevTranslate;
+    document.getElementById('guideCards').style.transform = `translateX(${currentTranslate}px)`;
+}
+		function deleteGuideById(id) {
+    if (id === 'defaultGuide') {
+        alert("Cannot delete the default guide!");
+        return;
+    }
+    if (confirm("Delete this entire guide? This cannot be undone.")) {
+        database.ref(`guides/${id}`).remove();
+        if (currentGuideId === id) {
+            currentGuideId = 'defaultGuide';
+            loadFromFirebase();
+        }
+        loadGuideList();
+    }
+}
 function createNewGuide() {
     const id = prompt("Enter a name or ID for this new guide:");
     if (!id) return;
