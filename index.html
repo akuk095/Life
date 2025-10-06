@@ -198,15 +198,25 @@ function loadGuideList() {
             card.className = 'guide-card';
             card.onclick = () => switchGuide(id);
             
-            // Clone the current container structure
+            // Create full preview of the guide
             card.innerHTML = `
                 <div class="container">
                     <div class="header">
                         <h1>${guideData.appIcon || '📚'} ${guideData.appTitle || id}</h1>
-                        <p>${guideData.appSubtitle || 'Click to open'}</p>
+                        <p>${guideData.appSubtitle || ''}</p>
                     </div>
-                    <div style="padding: 20px; background: white; text-align: center; color: #666;">
-                        Click to open this guide
+                    <div class="nav-tabs">
+                        ${(guideData.categories || []).map(cat => 
+                            `<button class="nav-tab">${cat.icon} ${cat.name}</button>`
+                        ).join('')}
+                    </div>
+                    <div class="content-area" style="padding: 20px;">
+                        ${guideData.categories && guideData.categories[0] ? `
+                            <div class="category-intro">
+                                <h2>${guideData.categories[0].icon} ${guideData.categories[0].name}</h2>
+                                <p>${guideData.categories[0].intro}</p>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -674,3 +684,4 @@ loadFromFirebase();
 
 </body>
 </html>
+
