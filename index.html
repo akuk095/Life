@@ -7,19 +7,24 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); min-height: 100vh; padding: 20px; }
-        .guide-switcher-container { width: 100%; overflow: hidden; padding: 20px 0 30px; margin-bottom: 20px; }
-		.guide-cards { display: flex; gap: 20px; transition: transform 0.3s ease; padding: 0 calc(50% - 175px); touch-action: pan-y; cursor: grab; }
-		.guide-cards.dragging { cursor: grabbing; transition: none; }
-		.guide-card { min-width: 350px; height: 200px; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: all 0.3s ease; cursor: pointer; position: relative; flex-shrink: 0; }
-		.guide-card:not(.active) { opacity: 0.6; transform: scale(0.9); }
-		.guide-card.active { opacity: 1; transform: scale(1); box-shadow: 0 15px 40px rgba(52, 152, 219, 0.4); }
-		.guide-card-icon { font-size: 48px; margin-bottom: 15px; }
-		.guide-card-title { font-size: 20px; font-weight: 600; color: #2c3e50; margin-bottom: 8px; }
-		.guide-card-subtitle { font-size: 13px; color: #7f8c8d; line-height: 1.4; }
-		.new-guide-card { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: 2px dashed rgba(255,255,255,0.5); }
-		.new-guide-card .guide-card-icon { font-size: 64px; }
-		.new-guide-card .guide-card-title { color: white; }.container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
+		.guide-switcher-container { width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+		.guide-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; width: 100%; }
+		.guide-card { height: 400px; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: all 0.3s ease; cursor: pointer; position: relative; }
+		.guide-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(52, 152, 219, 0.4); }
+		.guide-card-icon { font-size: 72px; margin-bottom: 20px; }
+		.guide-card-title { font-size: 24px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
+		.guide-card-subtitle { font-size: 14px; color: #7f8c8d; line-height: 1.6; }
+		.guide-card .delete-guide-btn { position: absolute; top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; font-size: 18px; opacity: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+		.guide-card:hover .delete-guide-btn { opacity: 1; }
+		.guide-card .delete-guide-btn:hover { background: #c0392b; transform: scale(1.1); }
+		.new-guide-card { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: 3px dashed rgba(255,255,255,0.5); }
+		.new-guide-card .guide-card-icon { font-size: 96px; }
+		.new-guide-card .guide-card-title { color: white; font-size: 28px; }
+		.guide-view { display: none; }
+		.guide-view.active { display: block; }
+		.guide-switcher-container.hidden { display: none; }
+		.container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
@@ -75,6 +80,7 @@
         .edit-mode .add-skill-btn { display: block; }
 		.floating-add-btn { position: fixed; bottom: 25px; right: 25px; width: 75px; height: 75px; border-radius: 18px; background-color: rgba(52, 152, 219, 0.5); color: white; font-size: 42px; font-weight: bold; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.2s ease-in-out; z-index: 1000; }
 		.floating-add-btn:hover { transform: scale(1.1); background-color: rgba(41, 128, 185, 0.7); }
+		.guide-view.active ~ .floating-add-btn { display: none; }
         @media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
 		.floating-add-btn {  animation: fadeIn 0.3s ease-in-out;}
@@ -84,9 +90,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-<div class="guide-switcher-container">
+<!-- Guide Switcher View -->
+<div class="guide-switcher-container" id="guideSwitcher">
     <div class="guide-cards" id="guideCards"></div>
 </div>
+
+<!-- Individual Guide View -->
+<div class="guide-view" id="guideView">
     <div class="container">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
@@ -96,6 +106,7 @@
         <div class="nav-tabs" id="navTabs"></div>
         <div class="content-area" id="contentArea"></div>
     </div>
+</div>
     <script>
 // Initialize Firebase - REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
@@ -153,6 +164,8 @@ let startX = 0;
 let currentTranslate = 0;
 let prevTranslate = 0;
 let currentGuideIndex = 0;
+let viewMode = 'switcher'; // 'switcher' or 'guide'
+
 		
 // Load data from Firebase on startup
 function loadFromFirebase() {
@@ -215,22 +228,18 @@ function renderGuideCards() {
     const container = document.getElementById('guideCards');
     container.innerHTML = '';
     
-    // Find current guide index
-    currentGuideIndex = guidesList.indexOf(currentGuideId);
-    if (currentGuideIndex === -1) currentGuideIndex = 0;
-    
     // Render all guide cards
-    guidesList.forEach((id, index) => {
+    guidesList.forEach((id) => {
         const guide = allGuides[id];
         const card = document.createElement('div');
-        card.className = 'guide-card' + (index === currentGuideIndex ? ' active' : '');
-        card.onclick = () => switchGuide(id);
+        card.className = 'guide-card';
+        card.onclick = () => openGuide(id);
         
         card.innerHTML = `
             <button class="delete-guide-btn" onclick="event.stopPropagation(); deleteGuideById('${id}')">×</button>
             <div class="guide-card-icon">${guide.appIcon || '📚'}</div>
             <div class="guide-card-title">${guide.appTitle || id}</div>
-            <div class="guide-card-subtitle">${(guide.appSubtitle || '').substring(0, 60)}...</div>
+            <div class="guide-card-subtitle">${(guide.appSubtitle || '').substring(0, 80)}...</div>
         `;
         container.appendChild(card);
     });
@@ -244,67 +253,20 @@ function renderGuideCards() {
         <div class="guide-card-title">Create New Guide</div>
     `;
     container.appendChild(newCard);
-    
-    // Set initial position
-    updateCardsPosition();
-    setupSwipeListeners();
 }
-		function setupSwipeListeners() {
-    const cards = document.getElementById('guideCards');
-    
-    // Mouse events
-    cards.addEventListener('mousedown', dragStart);
-    cards.addEventListener('mousemove', drag);
-    cards.addEventListener('mouseup', dragEnd);
-    cards.addEventListener('mouseleave', dragEnd);
-    
-    // Touch events
-    cards.addEventListener('touchstart', dragStart);
-    cards.addEventListener('touchmove', drag);
-    cards.addEventListener('touchend', dragEnd);
+		function openGuide(id) {
+    currentGuideId = id;
+    viewMode = 'guide';
+    document.getElementById('guideSwitcher').classList.add('hidden');
+    document.getElementById('guideView').classList.add('active');
+    loadFromFirebase();
 }
 
-function dragStart(e) {
-    isDragging = true;
-    startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
-    document.getElementById('guideCards').classList.add('dragging');
-}
-
-function drag(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    
-    const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
-    const diff = currentX - startX;
-    currentTranslate = prevTranslate + diff;
-    
-    document.getElementById('guideCards').style.transform = `translateX(${currentTranslate}px)`;
-}
-
-function dragEnd() {
-    if (!isDragging) return;
-    isDragging = false;
-    
-    const movedBy = currentTranslate - prevTranslate;
-    
-    // If moved enough, switch guide
-    if (movedBy < -100 && currentGuideIndex < guidesList.length - 1) {
-        currentGuideIndex++;
-        switchGuide(guidesList[currentGuideIndex]);
-    } else if (movedBy > 100 && currentGuideIndex > 0) {
-        currentGuideIndex--;
-        switchGuide(guidesList[currentGuideIndex]);
-    }
-    
-    updateCardsPosition();
-    document.getElementById('guideCards').classList.remove('dragging');
-}
-
-function updateCardsPosition() {
-    const cardWidth = 370; // 350px + 20px gap
-    prevTranslate = -currentGuideIndex * cardWidth;
-    currentTranslate = prevTranslate;
-    document.getElementById('guideCards').style.transform = `translateX(${currentTranslate}px)`;
+function showGuideSwitcher() {
+    viewMode = 'switcher';
+    document.getElementById('guideSwitcher').classList.remove('hidden');
+    document.getElementById('guideView').classList.remove('active');
+    loadGuideList();
 }
 		function deleteGuideById(id) {
     if (id === 'defaultGuide') {
@@ -395,6 +357,7 @@ function renderHeader() {
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
     <div class="dropdown-menu" id="dropdownMenu">
+		<button onclick="showGuideSwitcher()">All Guides</button>
         <button onclick="toggleEditMode()">Edit</button>
         <button onclick="duplicateGuide()">Duplicate</button>
         <button onclick="deleteGuide()">Delete</button>
@@ -757,12 +720,11 @@ function deleteCategory(catIndex) {
     }
 }
 
-// Load data when page loads
-loadFromFirebase();
-		loadGuideList();
+showGuideSwitcher();
 
     </script>
 	<button class="floating-add-btn" onclick="createNewGuide()">+</button>
 
 </body>
 </html>
+
