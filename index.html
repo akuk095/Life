@@ -66,14 +66,14 @@
 		.floating-add-btn:hover { transform: scale(1.1); background-color: rgba(41, 128, 185, 0.7); }
         @media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
-		.guide-switcher { perspective: 1500px; width: 100%; max-width: 1200px; margin: 0 auto 40px; height: 800px; position: relative; }
-		.guide-card { position: absolute; width: 100%; height: 100%; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-		.guide-card:nth-child(1) { transform: translateX(0px) scale(1); z-index: 3; opacity: 1; }
-		.guide-card:nth-child(2) { transform: translateX(80px) scale(0.95); z-index: 2; opacity: 0.7; }
-		.guide-card:nth-child(3) { transform: translateX(160px) scale(0.9); z-index: 1; opacity: 0.5; }
-		.guide-card:nth-child(n+4) { transform: translateX(240px) scale(0.85); z-index: 0; opacity: 0.3; }
-		.guide-card:hover { transform: translateX(0px) scale(1.02) !important; z-index: 10 !important; }
-		.guide-card .container { margin: 0; }
+		.guide-switcher { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 20px; }
+		.guide-cards-wrapper { position: relative; width: 100%; max-width: 400px; height: 80vh; max-height: 700px; }
+		.guide-card { position: absolute; width: 100%; height: 100%; border-radius: 16px; background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; overflow: hidden; touch-action: pan-y; }
+		.guide-card .container { margin: 0; box-shadow: none; height: 100%; overflow-y: auto; }
+		.guide-card:nth-child(1) { transform: translateX(0%) scale(1); z-index: 10; opacity: 1; }
+		.guide-card:nth-child(2) { transform: translateX(5%) scale(0.95); z-index: 9; opacity: 0.7; }
+		.guide-card:nth-child(3) { transform: translateX(10%) scale(0.9); z-index: 8; opacity: 0.5; }
+		.guide-card:nth-child(n+4) { transform: translateX(15%) scale(0.85); z-index: 7; opacity: 0.3; }
 		.floating-add-btn {  animation: fadeIn 0.3s ease-in-out;}
 
     </style>
@@ -141,7 +141,9 @@ let activeTabIndex = 0;
 let appIcon = "📚"; 
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
-
+let allGuides = [];
+let currentCardIndex = 0;
+		
 // Load data from Firebase on startup
 function loadFromFirebase() {
    database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
@@ -188,52 +190,120 @@ database.ref(`guides/${currentGuideId}/appIcon`).once('value', (snapshot) => {
 function loadGuideList() {
     database.ref('guides').once('value', (snapshot) => {
         const guides = snapshot.val() || {};
-        const switcher = document.getElementById('guideSwitcher');
-        switcher.innerHTML = '';
+        allGuides = Object.keys(guides).map(id => ({id, data: guides[id]}));
         
-        let index = 0;
-        for (let id in guides) {
-            const guideData = guides[id];
+        const switcher = document.getElementById('guideSwitcher');
+        switcher.innerHTML = '<div class="guide-cards-wrapper" id="guideCardsWrapper"></div>';
+        const wrapper = document.getElementById('guideCardsWrapper');
+        
+        allGuides.forEach((guide, index) => {
             const card = document.createElement('div');
             card.className = 'guide-card';
-            card.onclick = () => switchGuide(id);
+            card.dataset.guideId = guide.id;
             
-            // Create full preview of the guide
             card.innerHTML = `
                 <div class="container">
                     <div class="header">
-                        <h1>${guideData.appIcon || '📚'} ${guideData.appTitle || id}</h1>
-                        <p>${guideData.appSubtitle || ''}</p>
+                        <h1>${guide.data.appIcon || '📚'} ${guide.data.appTitle || guide.id}</h1>
+                        <p>${guide.data.appSubtitle || ''}</p>
                     </div>
                     <div class="nav-tabs">
-                        ${(guideData.categories || []).map(cat => 
+                        ${(guide.data.categories || []).slice(0, 3).map(cat => 
                             `<button class="nav-tab">${cat.icon} ${cat.name}</button>`
                         ).join('')}
                     </div>
                     <div class="content-area" style="padding: 20px;">
-                        ${guideData.categories && guideData.categories[0] ? `
+                        ${guide.data.categories && guide.data.categories[0] ? `
                             <div class="category-intro">
-                                <h2>${guideData.categories[0].icon} ${guideData.categories[0].name}</h2>
-                                <p>${guideData.categories[0].intro}</p>
+                                <h2>${guide.data.categories[0].icon} ${guide.data.categories[0].name}</h2>
+                                <p>${guide.data.categories[0].intro}</p>
                             </div>
                         ` : ''}
                     </div>
                 </div>
             `;
             
-            switcher.appendChild(card);
-            index++;
+            card.onclick = () => openGuide(guide.id);
+            wrapper.appendChild(card);
+        });
+        
+        setupSwipeGestures();
+    });
+}
+
+function setupSwipeGestures() {
+    const wrapper = document.getElementById('guideCardsWrapper');
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+    
+    wrapper.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    });
+    
+    wrapper.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        currentX = e.touches[0].clientX;
+        const diff = currentX - startX;
+        
+        // Apply transform to current card
+        const cards = wrapper.querySelectorAll('.guide-card');
+        if (cards[0]) {
+            cards[0].style.transform = `translateX(${diff}px) scale(1)`;
+        }
+    });
+    
+    wrapper.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const diff = currentX - startX;
+        const cards = wrapper.querySelectorAll('.guide-card');
+        
+        if (Math.abs(diff) > 100) {
+            // Swipe detected
+            if (diff < 0 && currentCardIndex < allGuides.length - 1) {
+                // Swipe left - next card
+                cycleCards('next');
+            } else if (diff > 0 && currentCardIndex > 0) {
+                // Swipe right - previous card
+                cycleCards('prev');
+            }
+        }
+        
+        // Reset transform
+        if (cards[0]) {
+            cards[0].style.transform = '';
         }
     });
 }
-function switchGuide(id) {
+
+function cycleCards(direction) {
+    const wrapper = document.getElementById('guideCardsWrapper');
+    const cards = Array.from(wrapper.querySelectorAll('.guide-card'));
+    
+    if (direction === 'next') {
+        const firstCard = cards.shift();
+        wrapper.appendChild(firstCard);
+        currentCardIndex = (currentCardIndex + 1) % allGuides.length;
+    } else {
+        const lastCard = cards.pop();
+        wrapper.insertBefore(lastCard, cards[0]);
+        currentCardIndex = (currentCardIndex - 1 + allGuides.length) % allGuides.length;
+    }
+}
+
+function openGuide(id) {
     currentGuideId = id;
-    // Hide the switcher and show the main container
     document.getElementById('guideSwitcher').style.display = 'none';
     document.querySelector('body > .container').style.display = 'block';
     loadFromFirebase();
 }
 
+function switchGuide(id) {
+    openGuide(id);
+}
 function createNewGuide() {
     const id = prompt("Enter a name or ID for this new guide:");
     if (!id) return;
@@ -684,4 +754,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
