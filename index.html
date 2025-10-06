@@ -295,12 +295,19 @@ function renderHeader() {
         <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
 
-    if (editMode) {
-        header.querySelector('h1 span').addEventListener('blur', (e) => {
+if (editMode) {
+    const titleSpan = header.querySelector('h1 span.editable');
+    const subtitleP = header.querySelector('p');
+    
+    if (titleSpan) {
+        titleSpan.addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
             saveHeader();
         });
-        header.querySelector('p').addEventListener('blur', (e) => {
+    }
+    
+    if (subtitleP) {
+        subtitleP.addEventListener('blur', (e) => {
             appSubtitle = e.target.textContent.trim();
             saveHeader();
         });
@@ -649,6 +656,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
