@@ -219,21 +219,41 @@ function createNewGuide() {
     loadGuideList();
     loadFromFirebase();
 }
+function toggleGuideMenu(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('guideDropdown');
+    const isCurrentlyShown = dropdown.classList.contains('show');
+    
+    dropdown.classList.toggle('show');
+    
+    // Close other menus
+    const otherMenu = document.getElementById('dropdownMenu');
+    if (otherMenu) otherMenu.classList.remove('show');
+    
+    // If we just closed it, trigger a re-render to reset button state
+    if (isCurrentlyShown) {
+        // Force button to lose focus
+        e.target.blur();
+    }
+}
+
 function toggleMenu(e) {
     e.stopPropagation();
     const menu = document.getElementById('dropdownMenu');
-    menu.classList.toggle('show');
-}
-
-// Close menu when clicking outside
-// Close menus when clicking outside
-document.addEventListener('click', () => {
-    const menu = document.getElementById('dropdownMenu');
-    if (menu) menu.classList.remove('show');
+    const isCurrentlyShown = menu.classList.contains('show');
     
+    menu.classList.toggle('show');
+    
+    // Close other menus
     const guideMenu = document.getElementById('guideDropdown');
     if (guideMenu) guideMenu.classList.remove('show');
-});
+    
+    // If we just closed it, trigger a re-render to reset button state
+    if (isCurrentlyShown) {
+        // Force button to lose focus
+        e.target.blur();
+    }
+}
 
 function duplicateGuide() {
     const newId = prompt("Enter name for the duplicated guide:");
@@ -306,15 +326,6 @@ ${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</bu
             saveHeader();
         });
     }
-}
-		function toggleGuideMenu(e) {
-    e.stopPropagation();
-    const dropdown = document.getElementById('guideDropdown');
-    dropdown.classList.toggle('show');
-    
-    // Close other menus
-    const otherMenu = document.getElementById('dropdownMenu');
-    if (otherMenu) otherMenu.classList.remove('show');
 }
 
 function populateGuideDropdown() {
@@ -735,6 +746,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
