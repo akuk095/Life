@@ -16,12 +16,16 @@
 		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px;}
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
-		.guide-dropdown { display: none; position: absolute; top: 50px; left: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 250px; max-width: 350px; z-index: 1000; max-height: 400px; overflow-y: auto; }
-		.guide-dropdown.show { display: block; }
-		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 300px; background: white; box-shadow: 2px 0 12px rgba(0,0,0,0.15); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: 60px; }
+		.guide-dropdown.show { transform: translateX(0); }
+		.drawer-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+		.drawer-backdrop.show { opacity: 1; visibility: visible; }
+		.drawer-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 28px; color: #666; cursor: pointer; line-height: 1; padding: 5px; transition: color 0.2s ease; }
+		.drawer-close-btn:hover { color: #333; }
+		.drawer-header { padding: 20px 16px 15px; border-bottom: 2px solid #f0f0f0; margin-bottom: 10px; font-weight: bold; color: #2c3e50; font-size: 16px; }		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.guide-dropdown button:hover { background: #f8f9fa; }
 		.guide-dropdown button:last-child { border-bottom: none; }
-		.guide-dropdown .new-guide-btn { background: #27ae60; color: white; font-weight: bold; border-radius: 0 0 8px 8px; }
+		.guide-dropdown .new-guide-btn { background: #27ae60; color: white; font-weight: bold; border-radius: 8px; margin: 10px 16px 20px 16px; }
 		.guide-dropdown .new-guide-btn:hover { background: #229954; }
 		.guide-dropdown .current-guide { background: rgba(25, 118, 210, 0.2); font-weight: 600; color: #1976d2; }
         .dropdown-menu { display: none; position: absolute; top: 40px;  right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1000;}
@@ -306,19 +310,34 @@ function createNewGuide() {
 function toggleGuideMenu(e) {
     e.stopPropagation();
     const dropdown = document.getElementById('guideDropdown');
-    const isCurrentlyShown = dropdown.classList.contains('show');
+    const backdrop = document.getElementById('drawerBackdrop');
     
-    dropdown.classList.toggle('show');
+    const isShowing = dropdown.classList.contains('show');
+    
+    if (isShowing) {
+        // Close drawer
+        dropdown.classList.remove('show');
+        backdrop.classList.remove('show');
+        document.body.style.overflow = ''; // Restore scrolling
+    } else {
+        // Open drawer
+        dropdown.classList.add('show');
+        backdrop.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
+    }
     
     // Close other menus
     const otherMenu = document.getElementById('dropdownMenu');
     if (otherMenu) otherMenu.classList.remove('show');
+}
+
+function closeDrawer() {
+    const dropdown = document.getElementById('guideDropdown');
+    const backdrop = document.getElementById('drawerBackdrop');
     
-    // If we just closed it, trigger a re-render to reset button state
-    if (isCurrentlyShown) {
-        // Force button to lose focus
-        e.target.blur();
-    }
+    dropdown.classList.remove('show');
+    backdrop.classList.remove('show');
+    document.body.style.overflow = '';
 }
 
 function toggleMenu(e) {
@@ -390,7 +409,11 @@ function renderHeader() {
     
     header.innerHTML = `
 <button class="guide-menu-btn" onclick="toggleGuideMenu(event)">☰</button>
-<div class="guide-dropdown" id="guideDropdown"></div>
+<div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
+<div class="guide-dropdown" id="guideDropdown">
+    <button class="drawer-close-btn" onclick="closeDrawer()">×</button>
+    <div class="drawer-header">📚 My Guides</div>
+</div>
 ${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</button>' : ''}
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
@@ -439,7 +462,13 @@ function populateGuideDropdown() {
     database.ref('guides').once('value', (snapshot) => {
         const guides = snapshot.val() || {};
         const dropdown = document.getElementById('guideDropdown');
+        
+        // Keep the close button and header, clear only the guide list
+        const closeBtn = dropdown.querySelector('.drawer-close-btn');
+        const header = dropdown.querySelector('.drawer-header');
         dropdown.innerHTML = '';
+        if (closeBtn) dropdown.appendChild(closeBtn);
+        if (header) dropdown.appendChild(header);
         
         for (let id in guides) {
             const title = guides[id].appTitle || id;
@@ -448,12 +477,12 @@ function populateGuideDropdown() {
             
             const btn = document.createElement('button');
             btn.textContent = `${icon} ${title}`;
-            btn.style.borderLeft = `4px solid ${guideTheme}`; // Add colored border
-            btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`; // Subtle gradient background
+            btn.style.borderLeft = `4px solid ${guideTheme}`;
+            btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
             
             btn.onclick = () => {
                 switchGuide(id);
-                dropdown.classList.remove('show');
+                closeDrawer(); // Use closeDrawer instead
             };
             
             if (id === currentGuideId) {
@@ -469,7 +498,7 @@ function populateGuideDropdown() {
         newBtn.textContent = '+ New Guide';
         newBtn.onclick = () => {
             createNewGuide();
-            dropdown.classList.remove('show');
+            closeDrawer(); // Use closeDrawer instead
         };
         dropdown.appendChild(newBtn);
     });
@@ -858,12 +887,19 @@ function deleteCategory(catIndex) {
     }
 }
 // Close menus when clicking outside
-document.addEventListener('click', () => {
+document.addEventListener('click', (e) => {
     const menu = document.getElementById('dropdownMenu');
     if (menu) menu.classList.remove('show');
     
     const guideMenu = document.getElementById('guideDropdown');
-    if (guideMenu) guideMenu.classList.remove('show');
+    const backdrop = document.getElementById('drawerBackdrop');
+    
+    // Don't close drawer if clicking inside it or on the hamburger button
+    if (guideMenu && !guideMenu.contains(e.target) && !e.target.classList.contains('guide-menu-btn')) {
+        if (guideMenu.classList.contains('show')) {
+            closeDrawer();
+        }
+    }
     
     const colorMenu = document.getElementById('colorPickerMenu');
     if (colorMenu) colorMenu.classList.remove('show');
@@ -876,6 +912,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
