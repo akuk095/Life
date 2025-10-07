@@ -316,17 +316,12 @@ function toggleGuideMenu(e) {
         // Close drawer
         dropdown.classList.remove('show');
         backdrop.classList.remove('show');
-        document.body.style.overflow = '';
+        document.body.style.overflow = ''; // Restore scrolling
     } else {
         // Open drawer
         dropdown.classList.add('show');
         backdrop.classList.add('show');
-        document.body.style.overflow = 'hidden';
-        
-        // Initialize swipe after drawer is visible
-        setTimeout(() => {
-            initDrawerSwipe();
-        }, 50);
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
     }
     
     // Close other menus
@@ -342,51 +337,7 @@ function closeDrawer() {
     backdrop.classList.remove('show');
     document.body.style.overflow = '';
 }
-// Swipe to close drawer
-function initDrawerSwipe() {
-    const drawer = document.getElementById('guideDropdown');
-    let startX = 0;
-    let currentX = 0;
-    let isDragging = false;
 
-    drawer.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-        isDragging = true;
-        drawer.style.transition = 'none'; // Disable transition during drag
-    });
-
-    drawer.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        
-        currentX = e.touches[0].clientX;
-        const deltaX = currentX - startX;
-        
-        // Only allow swiping left (negative direction)
-        if (deltaX < 0) {
-            drawer.style.transform = `translateX(${deltaX}px)`;
-        }
-    });
-
-    drawer.addEventListener('touchend', (e) => {
-        if (!isDragging) return;
-        
-        isDragging = false;
-        drawer.style.transition = 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)';
-        
-        const deltaX = currentX - startX;
-        
-        // If swiped more than 100px left, close the drawer
-        if (deltaX < -100) {
-            closeDrawer();
-        } else {
-            // Otherwise, snap back to open position
-            drawer.style.transform = 'translateX(0)';
-        }
-        
-        startX = 0;
-        currentX = 0;
-    });
-}
 function toggleMenu(e) {
     e.stopPropagation();
     const menu = document.getElementById('dropdownMenu');
@@ -956,12 +907,3 @@ loadFromFirebase();
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
