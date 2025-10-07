@@ -20,8 +20,6 @@
 		.guide-dropdown.show { transform: translateX(0); }
 		.drawer-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 		.drawer-backdrop.show { opacity: 1; visibility: visible; }
-		.drawer-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 28px; color: #666; cursor: pointer; line-height: 1; padding: 5px; transition: color 0.2s ease; }
-		.drawer-close-btn:hover { color: #333; }
 		.drawer-header { padding: 20px 16px 15px; border-bottom: 2px solid #f0f0f0; margin-bottom: 10px; font-weight: bold; color: #2c3e50; font-size: 16px; }		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.guide-dropdown button:hover { background: #f8f9fa; }
 		.guide-dropdown button:last-child { border-bottom: none; }
@@ -411,7 +409,6 @@ function renderHeader() {
 <button class="guide-menu-btn" onclick="toggleGuideMenu(event)">☰</button>
 <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
 <div class="guide-dropdown" id="guideDropdown">
-    <button class="drawer-close-btn" onclick="closeDrawer()">×</button>
     <div class="drawer-header">📚 My Guides</div>
 </div>
 ${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</button>' : ''}
@@ -463,11 +460,9 @@ function populateGuideDropdown() {
         const guides = snapshot.val() || {};
         const dropdown = document.getElementById('guideDropdown');
         
-        // Keep the close button and header, clear only the guide list
-        const closeBtn = dropdown.querySelector('.drawer-close-btn');
+        // Keep the header, clear only the guide list
         const header = dropdown.querySelector('.drawer-header');
         dropdown.innerHTML = '';
-        if (closeBtn) dropdown.appendChild(closeBtn);
         if (header) dropdown.appendChild(header);
         
         for (let id in guides) {
@@ -482,7 +477,7 @@ function populateGuideDropdown() {
             
             btn.onclick = () => {
                 switchGuide(id);
-                closeDrawer(); // Use closeDrawer instead
+                closeDrawer();
             };
             
             if (id === currentGuideId) {
@@ -498,7 +493,7 @@ function populateGuideDropdown() {
         newBtn.textContent = '+ New Guide';
         newBtn.onclick = () => {
             createNewGuide();
-            closeDrawer(); // Use closeDrawer instead
+            closeDrawer();
         };
         dropdown.appendChild(newBtn);
     });
@@ -912,6 +907,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
