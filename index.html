@@ -85,7 +85,8 @@
         .edit-mode .add-skill-btn { display: block; }
 		.floating-add-btn { position: fixed; bottom: 25px; right: 25px; width: 75px; height: 75px; border-radius: 18px; background-color: var(--primary-color, rgba(52, 152, 219, 0.5)); color: white; font-size: 42px; font-weight: bold; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.2s ease-in-out; z-index: 1000; }
 		.floating-add-btn:hover { transform: scale(1.1); background-color: var(--secondary-color, rgba(41, 128, 185, 0.7)); }
-        @media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
+        .edit-mode-active .floating-add-btn { display: none; }
+		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
 		.floating-add-btn {  animation: fadeIn 0.3s ease-in-out;}
 
@@ -466,10 +467,10 @@ function populateGuideDropdown() {
 }
 function saveAndExitEdit() {
     editMode = false;
+    document.body.classList.remove('edit-mode-active');
     renderHeader();
     renderTabs();
     renderContent();
-    alert('Changes saved!'); 
 }
 function showEmojiPicker(target, callback) {
     // Remove any existing picker
@@ -698,6 +699,14 @@ function toggleEditMode() {
     if (menu) menu.classList.remove('show'); 
     
     editMode = !editMode; 
+    
+    // Toggle class on body to hide/show floating button
+    if (editMode) {
+        document.body.classList.add('edit-mode-active');
+    } else {
+        document.body.classList.remove('edit-mode-active');
+    }
+    
     renderHeader();
     renderTabs();
     renderContent(); 
@@ -858,6 +867,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
