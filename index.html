@@ -53,7 +53,11 @@
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
-        .tab-wrapper { display: flex; align-items: center; gap: 5px; }
+        .nav-tab .tab-icon { margin-right: 5px; cursor: pointer; }
+		.nav-tab .tab-name { cursor: text; }
+		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
+		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }
+		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
         .nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; flex-shrink: 0; }
 		.nav-tab.active { color: var(--primary-color, #3498db); border-bottom-color: var(--primary-color, #3498db); background: white; }
 		.delete-tab-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
@@ -68,7 +72,6 @@
         .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .skill-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
  		.category-intro { background: #e3f2fd; padding: 20px 30px; border-radius: 0; margin: 0 0 25px 0; border-left: 4px solid #2196f3; border-top: none; text-align: center; }
-        .category-intro h2 { color: #1976d2; margin-bottom: 10px; font-size: 20px; }
         .checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: white; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .checklist-item:hover { background: #f0f7ff; }
        	.checkbox { width: 20px; height: 20px; border: 2px solid var(--primary-color, #3498db); border-radius: 4px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.3s ease; }
@@ -567,8 +570,38 @@ function renderTabs() {
         
         const tab = document.createElement('button'); 
         tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
-        tab.textContent = `${cat.icon} ${cat.name}`; 
-        tab.onclick = () => switchTab(i); 
+        
+        // Make tab editable in edit mode
+        if (editMode) {
+            tab.innerHTML = `
+                <span class="tab-icon editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)">${cat.icon || ""}</span>
+                <span class="tab-name editable" contenteditable="true" onclick="event.stopPropagation()">${cat.name}</span>
+            `;
+            
+            // Save name when editing
+            const nameSpan = tab.querySelector('.tab-name');
+            nameSpan.addEventListener('blur', (e) => {
+                categories[i].name = e.target.textContent.trim();
+                saveCategories();
+            });
+            nameSpan.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                }
+            });
+            
+            // Click to switch tabs (but not when editing text)
+            tab.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('editable') && !e.target.classList.contains('editable-icon')) {
+                    switchTab(i);
+                }
+            });
+        } else {
+            tab.textContent = `${cat.icon} ${cat.name}`; 
+            tab.onclick = () => switchTab(i);
+        }
+        
         tabWrapper.appendChild(tab);
         
         if (editMode) {
@@ -603,18 +636,13 @@ function renderContent() {
         const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); 
         
-        const intro = document.createElement('div'); 
-        intro.className = 'category-intro'; 
-        const h2 = document.createElement('h2'); 
-        h2.innerHTML = `
-   		<span class="icon editable-icon" ${editMode ? `onclick="editCategoryIcon(${catIndex}, this)"` : ''}>${cat.icon || ""}</span>
-	   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${cat.name}</span> `;
-        const p = document.createElement('p'); 
-        p.className = editMode ? 'editable' : ''; 
-        p.contentEditable = editMode; 
-        p.textContent = cat.intro; 
-        intro.appendChild(h2); 
-        intro.appendChild(p); 
+	const intro = document.createElement('div'); 
+	intro.className = 'category-intro'; 
+	const p = document.createElement('p'); 
+	p.className = editMode ? 'editable' : ''; 
+	p.contentEditable = editMode; 
+	p.textContent = cat.intro; 
+	intro.appendChild(p); 
         
         if (editMode) { 
             h2.querySelector('.editable').addEventListener('blur', (e) => { 
@@ -907,4 +935,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
