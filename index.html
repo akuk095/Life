@@ -7,8 +7,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .container.loaded { opacity: 1;}
+		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
         .header h1 { font-size: 32px; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 16px; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
@@ -148,46 +149,58 @@ let appSubtitle = "Fundamental knowledge everyone should have to navigate life s
 
 // Load data from Firebase on startup
 function loadFromFirebase() {
-   database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
-  if (!snapshot.exists()) {
-    database.ref(`guides/${currentGuideId}`).set({
-      appTitle, appSubtitle, appIcon, categories, checkedItems
-    });
-  }
-});
-
-	database.ref(`guides/${currentGuideId}/categories`).once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            categories = data;
+    // Hide container initially
+    document.querySelector('.container').classList.remove('loaded');
+    
+    database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
+        if (!snapshot.exists()) {
+            database.ref(`guides/${currentGuideId}`).set({
+                appTitle, appSubtitle, appIcon, categories, checkedItems
+            });
         }
+    });
+
+    // Use Promise.all to wait for all data to load
+    Promise.all([
+        database.ref(`guides/${currentGuideId}/categories`).once('value'),
+        database.ref(`guides/${currentGuideId}/checkedItems`).once('value'),
+        database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
+        database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
+        database.ref(`guides/${currentGuideId}/appIcon`).once('value')
+    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap]) => {
+        // Load categories
+        if (categoriesSnap.val()) {
+            categories = categoriesSnap.val();
+        }
+        
+        // Load checked items
+        if (checkedSnap.val()) {
+            checkedItems = checkedSnap.val();
+        }
+        
+        // Load app title
+        if (titleSnap.val()) {
+            appTitle = titleSnap.val();
+        }
+        
+        // Load app subtitle
+        if (subtitleSnap.val()) {
+            appSubtitle = subtitleSnap.val();
+        }
+        
+        // Load app icon
+        if (iconSnap.val() !== null) {
+            appIcon = iconSnap.val();
+        }
+        
+        // Render everything
+        renderHeader();
         renderTabs();
         renderContent();
+        
+        // Show container with fade-in effect
+        document.querySelector('.container').classList.add('loaded');
     });
-    
-    database.ref(`guides/${currentGuideId}/checkedItems`).once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            checkedItems = data;
-            renderContent();
-        }
-    });
-
-    database.ref(`guides/${currentGuideId}/appTitle`).once('value', (snapshot) => {
-        if (snapshot.val()) appTitle = snapshot.val();
-        renderHeader();
-    });
-
-    database.ref(`guides/${currentGuideId}/appSubtitle`).once('value', (snapshot) => {
-        if (snapshot.val()) appSubtitle = snapshot.val();
-        renderHeader();
-    });
-
-database.ref(`guides/${currentGuideId}/appIcon`).once('value', (snapshot) => {
-    if (snapshot.val() !== null) appIcon = snapshot.val();
-    renderHeader();
-});
-	
 }
 
 function switchGuide(id) {
@@ -746,6 +759,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
