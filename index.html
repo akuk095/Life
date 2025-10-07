@@ -343,7 +343,7 @@ function populateGuideDropdown() {
         // Add "New Guide" button at the bottom
         const newBtn = document.createElement('button');
         newBtn.className = 'new-guide-btn';
-        newBtn.textContent = '+ New Guide';
+        newBtn.textContent = '+ Add';
         newBtn.onclick = () => {
             createNewGuide();
             dropdown.classList.remove('show');
@@ -735,6 +735,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
