@@ -155,7 +155,8 @@ let appIcon = "📚";
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 let themeColor = '#3498db'; // Default blue
-
+let currentGuideId = "defaultGuide";
+		
 const colorThemes = [
     { name: 'Blue', primary: '#3498db', secondary: '#2c3e50' },
     { name: 'Green', primary: '#27ae60', secondary: '#1e8449' },
@@ -236,11 +237,13 @@ function loadFromFirebase() {
         document.querySelector('.container').classList.add('loaded');
     });
 }
-
+function saveCurrentGuide() {
+    localStorage.setItem('currentGuideId', currentGuideId);
+}
 function switchGuide(id) {
     currentGuideId = id;
-    // Reset to default theme before loading
-    themeColor = '#3498db';
+    themeColor = '#3498db'; // Reset to default before loading
+    saveCurrentGuide(); 
     loadFromFirebase();
 }
 function applyTheme() {
@@ -296,7 +299,8 @@ function createNewGuide() {
     };
     database.ref(`guides/${id}`).set(newGuide);
     currentGuideId = id;
-    loadGuideList();
+    saveCurrentGuide(); // Save to localStorage
+    populateGuideDropdown();
     loadFromFirebase();
 }
 function toggleGuideMenu(e) {
@@ -867,6 +871,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
