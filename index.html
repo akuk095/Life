@@ -67,7 +67,10 @@
         .content-area { padding: 0 0 30px 0; }
         .category { display: none; }
         .category.active { display: block; }
-        .skill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; padding: 0 30px; }
+        .skill-grid { display: grid; gap: 20px; margin-top: 20px; padding: 0 30px; }
+		.skill-grid.layout-1 { grid-template-columns: 1fr; }
+		.skill-grid.layout-2 { grid-template-columns: repeat(2, 1fr); }
+		.skill-grid.layout-3 { grid-template-columns: repeat(3, 1fr); }
         .skill-card { background: #f8f9fa; border-radius: 12px; padding: 20px; border-left: 4px solid var(--primary-color, #3498db); transition: all 0.3s ease; }
         .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .skill-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
@@ -93,7 +96,8 @@
 		.floating-add-btn { position: fixed; bottom: 25px; right: 25px; width: 75px; height: 75px; border-radius: 18px; background-color: var(--primary-color, rgba(52, 152, 219, 0.5)); color: white; font-size: 42px; font-weight: bold; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.2s ease-in-out; z-index: 1000; }
 		.floating-add-btn:hover { transform: scale(1.1); background-color: var(--secondary-color, rgba(41, 128, 185, 0.7)); }
         .edit-mode-active .floating-add-btn { display: none; }
-		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
+		@media (max-width: 768px) { .skill-grid.layout-2, .skill-grid.layout-3 { grid-template-columns: 1fr; }}
+		@media (min-width: 769px) and (max-width: 1024px) { .skill-grid.layout-3 { grid-template-columns: repeat(2, 1fr); }}
 		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
 		.floating-add-btn {  animation: fadeIn 0.3s ease-in-out;}
 
@@ -152,7 +156,7 @@ let categories = [
         ]
     }
 ];
-
+let layoutMode = 2;
 let checkedItems = {};
 let editMode = false;
 let activeTabIndex = 0;
@@ -190,13 +194,14 @@ function loadFromFirebase() {
 
     // Use Promise.all to wait for all data to load
     Promise.all([
-        database.ref(`guides/${currentGuideId}/categories`).once('value'),
-        database.ref(`guides/${currentGuideId}/checkedItems`).once('value'),
-        database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
-        database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
-        database.ref(`guides/${currentGuideId}/appIcon`).once('value'),
-        database.ref(`guides/${currentGuideId}/themeColor`).once('value')
-    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap]) => {
+    database.ref(`guides/${currentGuideId}/categories`).once('value'),
+    database.ref(`guides/${currentGuideId}/checkedItems`).once('value'),
+    database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
+    database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
+    database.ref(`guides/${currentGuideId}/appIcon`).once('value'),
+    database.ref(`guides/${currentGuideId}/themeColor`).once('value'),
+    database.ref(`guides/${currentGuideId}/layoutMode`).once('value')
+]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap]) => {
         // Load categories
         if (categoriesSnap.val()) {
             categories = categoriesSnap.val();
@@ -228,7 +233,12 @@ function loadFromFirebase() {
         } else {
     		themeColor = '#3498db'; // Default blue if no theme saved
 		}
-        
+        // Load layout mode
+		if (layoutSnap.val()) {
+    		layoutMode = layoutSnap.val();
+		} else {
+    		layoutMode = 2; // Default to 2 columns
+		}
         // Apply theme
         applyTheme();
         
@@ -556,7 +566,11 @@ function saveCategories() {
 function saveCheckedItems() {
    database.ref(`guides/${currentGuideId}/checkedItems`).set(checkedItems)
 }
-
+function cycleLayout() {
+    layoutMode = layoutMode === 3 ? 1 : layoutMode + 1;
+    database.ref(`guides/${currentGuideId}/layoutMode`).set(layoutMode);
+    renderContent();
+}
 function renderTabs() { 
     const navTabs = document.getElementById('navTabs'); 
     navTabs.innerHTML = ''; 
@@ -633,9 +647,8 @@ function renderContent() {
        const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
         
-        const grid = document.createElement('div');
-		
-        grid.className = 'skill-grid'; 
+        const grid = document.createElement('div'); 
+		grid.className = `skill-grid layout-${layoutMode}`; 
         
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
@@ -906,10 +919,11 @@ document.addEventListener('click', (e) => {
 loadFromFirebase();
 
     </script>
-	<button class="floating-add-btn" onclick="createNewGuide()">+</button>
+	<button class="floating-add-btn" onclick="cycleLayout()">▦</button>
 
 </body>
 </html>
+
 
 
 
