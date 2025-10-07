@@ -13,6 +13,16 @@
         .header p { opacity: 0.9; font-size: 16px; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
 		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px;}
+		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
+		.guide-menu-btn:hover { opacity: 0.7; }
+		.guide-dropdown { display: none; position: absolute; top: 50px; left: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 250px; max-width: 350px; z-index: 1000; max-height: 400px; overflow-y: auto; }
+		.guide-dropdown.show { display: block; }
+		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+		.guide-dropdown button:hover { background: #f8f9fa; }
+		.guide-dropdown button:last-child { border-bottom: none; }
+		.guide-dropdown .new-guide-btn { background: #27ae60; color: white; font-weight: bold; border-radius: 0 0 8px 8px; }
+		.guide-dropdown .new-guide-btn:hover { background: #229954; }
+		.guide-dropdown .current-guide { background: #e3f2fd; font-weight: 600; color: #1976d2; }
         .dropdown-menu { display: none; position: absolute; top: 40px;  right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1000;}
 		.dropdown-menu.show { display: block;}
 		.dropdown-menu button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s;}
@@ -76,11 +86,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-	<div style="text-align:center; margin-bottom:20px;">
-  <select id="guideSelect" onchange="switchGuide(this.value)">
-    <option value="defaultGuide">📚 Essential Life Skills Guide</option>
-  </select>
-</div>
     <div class="container">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
@@ -184,21 +189,6 @@ database.ref(`guides/${currentGuideId}/appIcon`).once('value', (snapshot) => {
 });
 	
 }
-		function loadGuideList() {
-    database.ref('guides').once('value', (snapshot) => {
-        const guides = snapshot.val() || {};
-        const select = document.getElementById('guideSelect');
-        select.innerHTML = '';
-        for (let id in guides) {
-            const title = guides[id].appTitle || id;
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = title;
-            select.appendChild(option);
-        }
-        select.value = currentGuideId;
-    });
-}
 
 function switchGuide(id) {
     currentGuideId = id;
@@ -236,9 +226,13 @@ function toggleMenu(e) {
 }
 
 // Close menu when clicking outside
+// Close menus when clicking outside
 document.addEventListener('click', () => {
     const menu = document.getElementById('dropdownMenu');
     if (menu) menu.classList.remove('show');
+    
+    const guideMenu = document.getElementById('guideDropdown');
+    if (guideMenu) guideMenu.classList.remove('show');
 });
 
 function duplicateGuide() {
@@ -277,6 +271,8 @@ function saveHeader() {
 function renderHeader() {
     const header = document.querySelector('.header');
     header.innerHTML = `
+<button class="guide-menu-btn" onclick="toggleGuideMenu(event)">☰</button>
+<div class="guide-dropdown" id="guideDropdown"></div>
 ${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</button>' : ''}
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
@@ -286,7 +282,7 @@ ${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</bu
         <button onclick="deleteGuide()">Delete</button>
     </div>
 </div>
-       <h1>
+<h1>
     <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
         ${appIcon ? appIcon : "🚫"}
     </span>
@@ -294,8 +290,11 @@ ${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</bu
         ${appTitle}
     </span>
 </h1>
-        <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
+<p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
+
+    // Populate guide dropdown
+    populateGuideDropdown();
 
     if (editMode) {
         header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
@@ -307,6 +306,50 @@ ${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</bu
             saveHeader();
         });
     }
+}
+		function toggleGuideMenu(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('guideDropdown');
+    dropdown.classList.toggle('show');
+    
+    // Close other menus
+    const otherMenu = document.getElementById('dropdownMenu');
+    if (otherMenu) otherMenu.classList.remove('show');
+}
+
+function populateGuideDropdown() {
+    database.ref('guides').once('value', (snapshot) => {
+        const guides = snapshot.val() || {};
+        const dropdown = document.getElementById('guideDropdown');
+        dropdown.innerHTML = '';
+        
+        for (let id in guides) {
+            const title = guides[id].appTitle || id;
+            const icon = guides[id].appIcon || '📄';
+            const btn = document.createElement('button');
+            btn.textContent = `${icon} ${title}`;
+            btn.onclick = () => {
+                switchGuide(id);
+                dropdown.classList.remove('show');
+            };
+            
+            if (id === currentGuideId) {
+                btn.classList.add('current-guide');
+            }
+            
+            dropdown.appendChild(btn);
+        }
+        
+        // Add "New Guide" button at the bottom
+        const newBtn = document.createElement('button');
+        newBtn.className = 'new-guide-btn';
+        newBtn.textContent = '+ New Guide';
+        newBtn.onclick = () => {
+            createNewGuide();
+            dropdown.classList.remove('show');
+        };
+        dropdown.appendChild(newBtn);
+    });
 }
 function saveAndExitEdit() {
     editMode = false;
@@ -686,12 +729,12 @@ function deleteCategory(catIndex) {
 
 // Load data when page loads
 loadFromFirebase();
-		loadGuideList();
 
     </script>
 	<button class="floating-add-btn" onclick="createNewGuide()">+</button>
 
 </body>
 </html>
+
 
 
