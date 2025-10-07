@@ -6,7 +6,7 @@
     <title>Essential Life Skills Guide</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-   		body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); min-height: 100vh; padding: 0; margin: 0; }
+		body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, rgba(44, 62, 80, 0.5) 0%, rgba(52, 152, 219, 0.7) 100%); min-height: 100vh; padding: 0; margin: 0; }
         .container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: transparent; border-radius: 0; box-shadow: none; overflow: hidden; opacity: 0; transition: opacity 0.3s ease-in-out; }
         .container.loaded { opacity: 1;}
 		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
@@ -246,12 +246,13 @@ function switchGuide(id) {
 function applyTheme() {
     const theme = colorThemes.find(t => t.primary === themeColor) || colorThemes[0];
     
-    // Update CSS variables or direct styles
+    // Update CSS variables
     document.documentElement.style.setProperty('--primary-color', theme.primary);
     document.documentElement.style.setProperty('--secondary-color', theme.secondary);
     
-    // Update body background
-    document.body.style.background = `linear-gradient(135deg, ${theme.secondary} 0%, ${theme.primary} 100%)`;
+    // Update body background with transparency
+    document.body.style.background = `linear-gradient(135deg, ${theme.secondary}CC 0%, ${theme.primary}CC 100%)`;
+    // The CC at the end = 80% opacity. Use 99 for 60%, 66 for 40%, etc.
     
     // Update header background
     const header = document.querySelector('.header');
@@ -867,4 +868,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
