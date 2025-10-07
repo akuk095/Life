@@ -71,8 +71,7 @@
         .skill-card { background: #f8f9fa; border-radius: 12px; padding: 20px; border-left: 4px solid var(--primary-color, #3498db); transition: all 0.3s ease; }
         .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .skill-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
- 		.category-intro { background: #e3f2fd; padding: 20px 30px; border-radius: 0; margin: 0 0 25px 0; border-left: 4px solid #2196f3; border-top: none; text-align: center; }
-        .checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: white; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+ 		.checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: white; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .checklist-item:hover { background: #f0f7ff; }
        	.checkbox { width: 20px; height: 20px; border: 2px solid var(--primary-color, #3498db); border-radius: 4px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.3s ease; }
         .checklist-item.checked .checkbox { background: #27ae60; border-color: #27ae60; position: relative; }
@@ -133,7 +132,6 @@ let categories = [
     {
         name: "Health & Body", 
         icon: "💪", 
-        intro: "Understanding your body and maintaining your health.", 
         skills: [
             {
                 title: "Basic Hygiene", 
@@ -145,7 +143,6 @@ let categories = [
     {
         name: "Daily Living", 
         icon: "🏡", 
-        intro: "Practical skills to manage your home and everyday responsibilities.", 
         skills: [
             {
                 title: "Household Basics", 
@@ -633,27 +630,11 @@ function renderContent() {
     contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
     
     categories.forEach((cat, catIndex) => { 
-        const catDiv = document.createElement('div'); 
-        catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); 
+       const catDiv = document.createElement('div'); 
+        catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
         
-const intro = document.createElement('div'); 
-	intro.className = 'category-intro'; 
-	const p = document.createElement('p'); 
-	p.className = editMode ? 'editable' : ''; 
-	p.contentEditable = editMode; 
-	p.textContent = cat.intro; 
-	intro.appendChild(p); 
-        
-        if (editMode) { 
-            p.addEventListener('blur', (e) => { 
-                categories[catIndex].intro = e.target.textContent.trim(); 
-                saveCategories();
-            }); 
-        } 
-        
-        catDiv.appendChild(intro); 
-        
-        const grid = document.createElement('div'); 
+        const grid = document.createElement('div');
+		
         grid.className = 'skill-grid'; 
         
         cat.skills.forEach((skill, skillIndex) => { 
@@ -869,7 +850,6 @@ function addCategory() {
     categories.push({
         name: "New Category",
         icon: "📌",
-        intro: "Click to edit this description",
         skills: [
             {
                 title: "New Skill",
@@ -930,5 +910,6 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
