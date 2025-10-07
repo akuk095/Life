@@ -636,7 +636,7 @@ function renderContent() {
         const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : ''); 
         
-	const intro = document.createElement('div'); 
+const intro = document.createElement('div'); 
 	intro.className = 'category-intro'; 
 	const p = document.createElement('p'); 
 	p.className = editMode ? 'editable' : ''; 
@@ -645,11 +645,6 @@ function renderContent() {
 	intro.appendChild(p); 
         
         if (editMode) { 
-            h2.querySelector('.editable').addEventListener('blur', (e) => { 
-                categories[catIndex].name = e.target.textContent.trim(); 
-                saveCategories();
-                renderTabs();
-            }); 
             p.addEventListener('blur', (e) => { 
                 categories[catIndex].intro = e.target.textContent.trim(); 
                 saveCategories();
@@ -935,4 +930,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
