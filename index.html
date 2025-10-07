@@ -221,7 +221,9 @@ function loadFromFirebase() {
         // Load theme color
         if (themeSnap.val()) {
             themeColor = themeSnap.val();
-        }
+        } else {
+    		themeColor = '#3498db'; // Default blue if no theme saved
+		}
         
         // Apply theme
         applyTheme();
@@ -238,6 +240,8 @@ function loadFromFirebase() {
 
 function switchGuide(id) {
     currentGuideId = id;
+    // Reset to default theme before loading
+    themeColor = '#3498db';
     loadFromFirebase();
 }
 function applyTheme() {
@@ -860,6 +864,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
