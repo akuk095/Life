@@ -434,7 +434,8 @@ function saveHeader() {
   database.ref(`guides/${currentGuideId}/appTitle`).set(appTitle);
   database.ref(`guides/${currentGuideId}/appSubtitle`).set(appSubtitle);
   database.ref(`guides/${currentGuideId}/appIcon`).set(appIcon);
-	loadGuideList();
+  renderHeader(); // Update display immediately
+  populateGuideDropdown(); // Update drawer list
 }
 
 
@@ -1036,6 +1037,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
