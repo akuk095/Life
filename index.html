@@ -331,28 +331,29 @@ function selectColor(color) {
     document.getElementById('dropdownMenu').classList.remove('show');
 }
 function createNewGuide() {
-    const id = prompt("Enter a name or ID for this new guide:");
-    if (!id) return;
+    const name = prompt("Enter a name for this new guide:");
+    if (!name) return;
+    const id = `guide_${Date.now()}`;
     const newGuide = {
-        appTitle: "New Life Skills Guide",
+        appTitle: name,
         appSubtitle: "Click to edit subtitle",
         appIcon: "📘",
         categories: [
             {
                 name: "New Category",
                 icon: "📌",
-                intro: "Click to edit this section",
                 skills: [
                     { title: "New Skill", icon: "✨", items: ["New item - click to edit"] }
                 ]
             }
         ],
-        checkedItems: {}
+        checkedItems: {},
+        themeColor: themeColor
     };
-    database.ref(`guides/${id}`).set(newGuide);
-    currentGuideId = id;
-    loadGuideList();
-    loadFromFirebase();
+    database.ref(`guides/${id}`).set(newGuide).then(() => {
+        currentGuideId = id;
+        loadFromFirebase();
+    });
 }
 function toggleGuideMenu(e) {
     e.stopPropagation();
@@ -1040,6 +1041,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
