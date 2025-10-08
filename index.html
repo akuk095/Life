@@ -535,13 +535,14 @@ function populateGuideDropdown() {
             const createBtn = document.createElement('button');
             createBtn.textContent = '+ Create new guide';
             createBtn.style.borderLeft = '4px solid #3498db';
+            createBtn.style.borderRight = '2px solid #3498db';
+            createBtn.style.borderTop = 'none';
+            createBtn.style.borderBottom = '1px solid #f0f0f0';
             createBtn.style.background = 'transparent';
-            createBtn.style.border = '2px solid #3498db';
             createBtn.style.color = '#3498db';
             createBtn.style.fontWeight = '600';
             createBtn.style.borderRadius = '0';
             createBtn.style.margin = '0';
-            createBtn.style.borderBottom = '1px solid #f0f0f0';
             createBtn.onclick = () => {
                 createNewGuide();
                 closeDrawer();
@@ -980,6 +981,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
