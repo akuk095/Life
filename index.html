@@ -22,8 +22,10 @@
 		.checklist-item.checked .checkbox:after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
 		.checklist-item:hover { background: #f0f7ff; }
 		.checklist-text { flex: 1; font-size: 14px; line-height: 1.5; color: #495057; }
-		.collapse-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #95a5a6; font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: all 0.2s ease; display: none; }
-		.collapse-btn:hover { background: #ecf0f1; color: #2c3e50; }
+		.collapse-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s ease; width: 20px; height: 20px; display: none; }
+		.collapse-btn:hover { background: #ecf0f1; transform: scale(1.1); }
+		.collapse-btn svg { width: 100%; height: 100%; stroke: #95a5a6; transition: stroke 0.2s ease; }
+		.collapse-btn:hover svg { stroke: #2c3e50; }
 		.color-option { width: 40px; height: 40px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
 		.color-option:hover { transform: scale(1.1); border-color: #2c3e50; }
 		.color-option.selected { border-color: #2c3e50; border-width: 3px; }
@@ -758,16 +760,23 @@ function renderContent() {
    				<span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
 			`;
 			// Add collapse button for headings mode
-			if (layoutMode === 'headings' && !editMode) {
-    			const collapseBtn = document.createElement('button');
-    			collapseBtn.className = 'collapse-btn';
-    			collapseBtn.textContent = '-';
-    			collapseBtn.onclick = (e) => {
-        			e.stopPropagation();
-        			card.classList.remove('expanded');
-    			};
-    			titleDiv.appendChild(collapseBtn);
-			}
+				if (layoutMode === 'headings' && !editMode) {
+    				const collapseBtn = document.createElement('button');
+    				collapseBtn.className = 'collapse-btn';
+    				collapseBtn.innerHTML = `
+        				<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            				<polyline points="4 14 10 14 10 20"></polyline>
+            				<polyline points="20 10 14 10 14 4"></polyline>
+            				<line x1="14" y1="10" x2="21" y2="3"></line>
+            				<line x1="3" y1="21" x2="10" y2="14"></line>
+        				</svg>
+    				`;
+    				collapseBtn.onclick = (e) => {
+        				e.stopPropagation();
+        				card.classList.remove('expanded');
+    				};
+    				titleDiv.appendChild(collapseBtn);
+				}
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -1102,6 +1111,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
