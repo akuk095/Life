@@ -894,7 +894,9 @@ function updateLayoutButton() {
     const btn = document.getElementById('layoutBtn');
     if (btn) {
         // Show icon for NEXT layout (what it will change TO)
-        btn.textContent = layoutMode === 'vertical' ? '⇄' : '☰';
+        btn.innerHTML = layoutMode === 'vertical' ? 
+            '<div style="display: flex; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>' : 
+            '<div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
         btn.title = layoutMode === 'vertical' ? 'Switch to horizontal scrolling' : 'Switch to vertical scrolling';
     }
 }
@@ -937,6 +939,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
