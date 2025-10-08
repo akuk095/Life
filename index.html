@@ -172,6 +172,8 @@ let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
+let autoRefreshEnabled = false;
+let autoRefreshTime = "00:00"; // Default midnight
 		
 const colorThemes = [
     // Calm (3 options)
@@ -237,14 +239,18 @@ function loadFromFirebase() {
 
     // Use Promise.all to wait for all data to load
     Promise.all([
-        database.ref(`guides/${currentGuideId}/categories`).once('value'),
-        database.ref(`guides/${currentGuideId}/checkedItems`).once('value'),
-        database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
-        database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
-        database.ref(`guides/${currentGuideId}/appIcon`).once('value'),
-        database.ref(`guides/${currentGuideId}/themeColor`).once('value'),
-        database.ref(`guides/${currentGuideId}/layoutMode`).once('value')
-    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap]) => {
+    database.ref(`guides/${currentGuideId}/categories`).once('value'),
+    database.ref(`guides/${currentGuideId}/checkedItems`).once('value'),
+    database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
+    database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
+    database.ref(`guides/${currentGuideId}/appIcon`).once('value'),
+    database.ref(`guides/${currentGuideId}/themeColor`).once('value'),
+    database.ref(`guides/${currentGuideId}/layoutMode`).once('value'),
+    database.ref(`guides/${currentGuideId}/expandedCards`).once('value'),
+    database.ref(`guides/${currentGuideId}/autoRefreshEnabled`).once('value'),
+    database.ref(`guides/${currentGuideId}/autoRefreshTime`).once('value'),
+    database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value')
+]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, expandedSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap]) => {
 		
         // Load categories
         if (categoriesSnap.val()) {
@@ -282,7 +288,16 @@ function loadFromFirebase() {
         if (layoutSnap.val()) {
             layoutMode = layoutSnap.val();
         }
-        
+        // Load auto-refresh settings
+		if (autoRefreshEnabledSnap.val() !== null) {
+    		autoRefreshEnabled = autoRefreshEnabledSnap.val();
+		}
+		if (autoRefreshTimeSnap.val()) {
+    		autoRefreshTime = autoRefreshTimeSnap.val();
+		}
+
+		// Check if we need to auto-refresh
+		checkAndAutoRefresh(lastRefreshSnap.val());
         // Apply theme
         applyTheme();
         
@@ -479,6 +494,10 @@ function renderHeader() {
     <button onclick="duplicateGuide()">Duplicate</button>
     <button onclick="deleteGuide()">Delete</button>
     <button onclick="toggleColorPicker(event)">Theme</button>
+    <button onclick="clearAllChecks()">Clear all checks</button>
+    <button onclick="toggleAutoRefresh()">
+        ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
+    </button>
     <div class="color-picker-menu" id="colorPickerMenu">
         <h3>Choose Theme Color</h3>
         <div class="color-options">
@@ -665,7 +684,75 @@ function saveCategories() {
 function saveCheckedItems() {
    database.ref(`guides/${currentGuideId}/checkedItems`).set(checkedItems)
 }
+		
+// Save auto-refresh settings to Firebase
+function saveAutoRefreshSettings() {
+    database.ref(`guides/${currentGuideId}/autoRefreshEnabled`).set(autoRefreshEnabled);
+    database.ref(`guides/${currentGuideId}/autoRefreshTime`).set(autoRefreshTime);
+}
 
+		function checkAndAutoRefresh(lastRefreshDate) {
+    if (!autoRefreshEnabled) return;
+    
+    const now = new Date();
+    const today = now.toDateString();
+    
+    // If we already refreshed today, don't do it again
+    if (lastRefreshDate === today) return;
+    
+    // Parse the refresh time (format: "HH:MM")
+    const [hours, minutes] = autoRefreshTime.split(':').map(Number);
+    const refreshTime = new Date();
+    refreshTime.setHours(hours, minutes, 0, 0);
+    
+    // If current time is past the refresh time and we haven't refreshed today
+    if (now >= refreshTime && lastRefreshDate !== today) {
+        // Clear all checked items
+        checkedItems = {};
+        saveCheckedItems();
+        
+        // Mark that we refreshed today
+        database.ref(`guides/${currentGuideId}/lastRefreshDate`).set(today);
+        
+        // Re-render to show unchecked items
+        renderContent();
+    }
+}
+
+function clearAllChecks() {
+    if (confirm('Clear all checkmarks? This cannot be undone.')) {
+        checkedItems = {};
+        saveCheckedItems();
+        const today = new Date().toDateString();
+        database.ref(`guides/${currentGuideId}/lastRefreshDate`).set(today);
+        renderContent();
+    }
+}
+
+function toggleAutoRefresh() {
+    const enabled = confirm(
+        autoRefreshEnabled 
+            ? 'Disable automatic daily refresh?' 
+            : `Enable automatic daily refresh at ${autoRefreshTime}?\n\nThis will clear all checkmarks at the specified time each day.`
+    );
+    
+    if (enabled) {
+        if (!autoRefreshEnabled) {
+            const time = prompt('Enter refresh time (HH:MM format, 24-hour):', autoRefreshTime);
+            if (time && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
+                autoRefreshTime = time;
+                autoRefreshEnabled = true;
+            } else {
+                alert('Invalid time format. Please use HH:MM (e.g., 09:00 or 23:30)');
+                return;
+            }
+        } else {
+            autoRefreshEnabled = false;
+        }
+        saveAutoRefreshSettings();
+        renderHeader(); // Update menu display
+    }
+}
 function renderTabs() { 
     const navTabs = document.getElementById('navTabs'); 
     navTabs.innerHTML = ''; 
@@ -1098,6 +1185,22 @@ document.addEventListener('click', (e) => {
     if (colorMenu) colorMenu.classList.remove('show');
 });
 
+		// Check for auto-refresh when page becomes visible
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value', (snapshot) => {
+            checkAndAutoRefresh(snapshot.val());
+        });
+    }
+});
+
+// Also check every hour while page is open
+setInterval(() => {
+    database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value', (snapshot) => {
+        checkAndAutoRefresh(snapshot.val());
+    });
+}, 60 * 60 * 1000); // Check every hour
+
 		
 // Load data when page loads
 loadFromFirebase();
@@ -1111,6 +1214,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
