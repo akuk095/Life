@@ -846,9 +846,25 @@ function switchTab(index) {
 
 function toggleCheck(itemId) { 
     if (editMode) return; 
+    
+    // Store expanded state before re-render
+    const expandedCards = [];
+    document.querySelectorAll('.skill-card.expanded').forEach(card => {
+        expandedCards.push({
+            catIndex: card.dataset.catIndex,
+            skillIndex: card.dataset.skillIndex
+        });
+    });
+    
     checkedItems[itemId] = !checkedItems[itemId]; 
     saveCheckedItems();
     renderContent(); 
+    
+    // Restore expanded state after re-render
+    expandedCards.forEach(({catIndex, skillIndex}) => {
+        const card = document.querySelector(`.skill-card[data-cat-index="${catIndex}"][data-skill-index="${skillIndex}"]`);
+        if (card) card.classList.add('expanded');
+    });
 }
 
 function toggleEditMode() { 
@@ -1073,4 +1089,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
