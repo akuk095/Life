@@ -788,7 +788,7 @@ function renderContent() {
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
                 checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); 
-                if (!editMode) checkItem.onclick = () => toggleCheck(itemId); 
+                if (!editMode) checkItem.onclick = (e) => { e.stopPropagation(); toggleCheck(itemId);};
                 
                 const checkbox = document.createElement('div');
                 checkbox.className = 'checkbox';
@@ -1091,5 +1091,6 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
