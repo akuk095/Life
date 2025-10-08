@@ -761,7 +761,7 @@ function renderContent() {
 			if (layoutMode === 'headings' && !editMode) {
     			const collapseBtn = document.createElement('button');
     			collapseBtn.className = 'collapse-btn';
-    			collapseBtn.textContent = 'collapse';
+    			collapseBtn.textContent = '-';
     			collapseBtn.onclick = (e) => {
         			e.stopPropagation();
         			card.classList.remove('expanded');
@@ -1102,6 +1102,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
