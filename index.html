@@ -72,18 +72,19 @@
 		.guide-dropdown.show { transform: translateX(0); }
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
-		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: sticky; top: 0; left: 0; right: 0; z-index: 100; }
+		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
 		.header h1 { font-size: 32px; margin-bottom: 10px; }
 		.header p { opacity: 0.9; font-size: 16px; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
 		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px; }
+		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; }
 		.nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; flex-shrink: 0; }
 		.nav-tab.active { color: var(--primary-color, #3498db); border-bottom-color: var(--primary-color, #3498db); background: white; }
 		.nav-tab .tab-icon { margin-right: 5px; cursor: pointer; }
 		.nav-tab .tab-name { cursor: text; }
 		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
 		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }
-		.nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; position: sticky; top: 0; left: 0; right: 0; z-index: 99; }
+		.nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; position: sticky; top: 0; left: 0; right: 0; z-index: 100; }
 		.nav-tabs::-webkit-scrollbar { height: 4px; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
@@ -114,12 +115,14 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            <h1>📚 Essential Life Skills Guide</h1>
+		<div class="header-wrapper">
+        	<div class="header">
+            	<div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
+            	<h1>📚 Essential Life Skills Guide</h1>
             <p>Fundamental knowledge everyone should have to navigate life successfully</p>
         </div>
         <div class="nav-tabs" id="navTabs"></div>
+		</div>
         <div class="content-area" id="contentArea"></div>
     </div>
     <script>
@@ -1214,6 +1217,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
