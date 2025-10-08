@@ -825,22 +825,17 @@ function renderContent() {
             grid.appendChild(card); 
             
             // Add click handler for headings mode
-            if (layoutMode === 'headings' && !editMode) {
-                card.addEventListener('click', function(e) {
-                    // Don't toggle if clicking on checkbox, editable content, collapse button, or checklist items
-                    if (e.target.classList.contains('checkbox') || 
-                        e.target.classList.contains('editable') ||
-                        e.target.classList.contains('delete-btn') ||
-                        e.target.classList.contains('collapse-btn') ||
-                        e.target.closest('.checklist-item')) {
-                        return;
-                    }
-                    // Only expand, never collapse (collapse button handles that)
-                    if (!this.classList.contains('expanded')) {
-                        this.classList.add('expanded');
-                    }
-                });
+if (layoutMode === 'headings' && !editMode) {
+    card.addEventListener('click', function(e) {
+        // Only expand if clicking on the title or card background, not on items
+        if (e.target.closest('.skill-title') && 
+            !e.target.classList.contains('collapse-btn')) {
+            if (!this.classList.contains('expanded')) {
+                this.classList.add('expanded');
             }
+        }
+    });
+}
         }); 
         
         catDiv.appendChild(grid); 
@@ -1091,6 +1086,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
