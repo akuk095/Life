@@ -23,8 +23,6 @@
 		.drawer-header { padding: 20px 16px 15px; border-bottom: 2px solid #f0f0f0; margin-bottom: 10px; font-weight: bold; color: #2c3e50; font-size: 16px; }		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.guide-dropdown button:hover { background: #f8f9fa; }
 		.guide-dropdown button:last-child { border-bottom: none; }
-		.guide-dropdown .new-guide-btn { background: #27ae60; color: white; font-weight: bold; border-radius: 8px; margin: 10px 16px 20px 16px; }
-		.guide-dropdown .new-guide-btn:hover { background: #229954; }
 		.guide-dropdown .current-guide { background: rgba(25, 118, 210, 0.2); font-weight: 600; color: #1976d2; }
         .dropdown-menu { display: none; position: absolute; top: 40px;  right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1000;}
 		.dropdown-menu.show { display: block;}
@@ -427,6 +425,7 @@ ${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</bu
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
 <div class="dropdown-menu" id="dropdownMenu">
+    <button onclick="createNewGuide()">Create new</button>
     <button onclick="toggleEditMode()">Edit</button>
     <button onclick="duplicateGuide()">Duplicate</button>
     <button onclick="deleteGuide()">Delete</button>
@@ -498,17 +497,7 @@ function populateGuideDropdown() {
             
             dropdown.appendChild(btn);
         }
-        
-        // Add "New Guide" button at the bottom
-        const newBtn = document.createElement('button');
-        newBtn.className = 'new-guide-btn';
-        newBtn.textContent = '+ New Guide';
-        newBtn.onclick = () => {
-            createNewGuide();
-            closeDrawer();
-        };
-        dropdown.appendChild(newBtn);
-    });
+        });
 }
 function saveAndExitEdit() {
     editMode = false;
@@ -940,6 +929,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
