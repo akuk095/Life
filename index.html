@@ -7,100 +7,100 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, rgba(44, 62, 80, 0.5) 0%, rgba(52, 152, 219, 0.2) 100%); min-height: 100vh; padding: 0; margin: 0; }
-        .container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: transparent; border-radius: 0; box-shadow: none; overflow: hidden; opacity: 0; transition: opacity 0.3s ease-in-out; }
-        .container.loaded { opacity: 1;}
-		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
-        .header h1 { font-size: 32px; margin-bottom: 10px; }
-        .header p { opacity: 0.9; font-size: 16px; }
-		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
-		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px;}
-		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
-		.guide-menu-btn:hover { opacity: 0.7; }
-		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 300px; background: #f8f9fa; box-shadow: 2px 0 12px rgba(0,0,0,0.15); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: 0; }
-		.guide-dropdown.show { transform: translateX(0); }
-		.drawer-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
-		.drawer-backdrop.show { opacity: 1; visibility: visible; }
-		.drawer-header { padding: 20px 16px 15px; border-bottom: 2px solid #f0f0f0; margin-bottom: 10px; font-weight: bold; color: #2c3e50; font-size: 16px; }		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
-		.guide-dropdown button:hover { background: #f8f9fa; }
-		.guide-dropdown button:last-child { border-bottom: none; }
-		.guide-dropdown .current-guide { background: rgba(25, 118, 210, 0.2); font-weight: 600; color: #1976d2; }
-        .dropdown-menu { display: none; position: absolute; top: 40px;  right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1000; overflow: visible;}
-		.dropdown-menu.show { display: block;}
-		.dropdown-menu button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s;}
-		.dropdown-menu button:hover { background: #f8f9fa;}
-		.dropdown-menu button:first-child { border-radius: 8px 8px 0 0;}
-		.dropdown-menu button:last-child { border-radius: 0 0 8px 8px;}
-		.color-picker-menu { display: none; background: white; border-radius: 8px; padding: 15px 20px 15px 15px; margin-top: 5px; position: fixed; right: 10px; top: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1001; max-height: calc(100vh - 160px); overflow-y: auto; width: 200px; }
-		.color-picker-menu.show { display: block; }
-		.color-picker-menu h3 { margin: 0 0 10px 0; font-size: 14px; color: #2c3e50; }
-		.color-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding-right: 5px; }
+		.add-category-tab { background: #27ae60 !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
+		.add-category-tab:hover { background: #229954 !important; }
+		.add-item-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 14px; font-weight: 600; display: none; width: 100%; }
+		.add-item-btn:hover { background: #229954; }
+		.add-skill-btn { background: var(--primary-color, #3498db); color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: calc(100% - 60px); margin: 20px 30px; transition: all 0.3s ease; display: none; }
+		.add-skill-btn:hover { background: var(--secondary-color, #2980b9); }
+		.category { display: none; }
+		.category.active { display: block; }
+		.checkbox { width: 20px; height: 20px; border: 2px solid var(--primary-color, #3498db); border-radius: 4px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.3s ease; }
+		.checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: white; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+		.checklist-item.checked { opacity: 0.7; }
+		.checklist-item.checked .checkbox { background: #27ae60; border-color: #27ae60; position: relative; }
+		.checklist-item.checked .checkbox:after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
+		.checklist-item:hover { background: #f0f7ff; }
+		.checklist-text { flex: 1; font-size: 14px; line-height: 1.5; color: #495057; }
 		.color-option { width: 40px; height: 40px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
 		.color-option:hover { transform: scale(1.1); border-color: #2c3e50; }
 		.color-option.selected { border-color: #2c3e50; border-width: 3px; }
+		.color-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding-right: 5px; }
+		.color-picker-menu { display: none; background: white; border-radius: 8px; padding: 15px 20px 15px 15px; margin-top: 5px; position: fixed; right: 10px; top: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1001; max-height: calc(100vh - 160px); overflow-y: auto; width: 200px; }
+		.color-picker-menu h3 { margin: 0 0 10px 0; font-size: 14px; color: #2c3e50; }
+		.color-picker-menu.show { display: block; }
+		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: transparent; border-radius: 0; box-shadow: none; overflow: hidden; opacity: 0; transition: opacity 0.3s ease-in-out; }
+		.container.loaded { opacity: 1; }
+		.content-area { padding: 0 0 30px 0; }
+		.delete-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; display: none; margin-left: 8px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
+		.delete-btn:hover { color: #c0392b; transform: scale(1.2); }
+		.delete-tab-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
+		.delete-tab-btn:hover { color: #c0392b; transform: scale(1.2); }
+		.drawer-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+		.drawer-backdrop.show { opacity: 1; visibility: visible; }
+		.drawer-header { padding: 20px 16px 15px; border-bottom: 2px solid #f0f0f0; margin-bottom: 10px; font-weight: bold; color: #2c3e50; font-size: 16px; }
+		.dropdown-menu { display: none; position: absolute; top: 40px; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1000; overflow: visible; }
+		.dropdown-menu button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; }
+		.dropdown-menu button:first-child { border-radius: 8px 8px 0 0; }
+		.dropdown-menu button:last-child { border-radius: 0 0 8px 8px; }
+		.dropdown-menu button:hover { background: #f8f9fa; }
+		.dropdown-menu.show { display: block; }
+		.edit-btn { background: none; color: white; border: none; padding: 4px 8px; cursor: pointer; font-size: 28px; font-weight: 600; transition: all 0.3s ease; line-height: 1; }
+		.edit-btn:hover { opacity: 0.7; }
+		.edit-mode .add-item-btn { display: block; }
+		.edit-mode .add-skill-btn { display: block; }
+		.edit-mode .delete-btn { display: inline-flex; }
+		.edit-mode-active .floating-layout-btn { display: none; }
 		.edit-toggle { position: absolute; top: 10px; right: 10px; }
-        .edit-btn { background: none; color: white; border: none; padding: 4px 8px; cursor: pointer; font-size: 28px; font-weight: 600; transition: all 0.3s ease; line-height: 1;}
-        .edit-btn:hover { opacity: 0.7; }
-		.save-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--primary-color, #607d8b); opacity: 0.7; color: white; border: none; padding: 12px 24px; cursor: pointer; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; display: none; z-index: 1000; }
-		.save-btn:hover { opacity: 1; transform: translateX(-50%) translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
-		.save-btn.show { display: block; animation: fadeIn 0.3s ease-in-out; }
-		.emoji-picker {  position: absolute;  background: white;  border: 1px solid #ccc;  border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(8, 30px);  gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto;}
-		.emoji-picker button { font-size: 20px; background: none;  border: none;  cursor: pointer; transition: transform 0.2s;}
-		.emoji-picker button:hover { transform: scale(1.2);}
+		.editable { cursor: text; padding: 2px 4px; border-radius: 4px; transition: all 0.2s ease; }
+		.editable:hover { background: rgba(52, 152, 219, 0.1); }
+		.editable:focus { outline: 2px solid var(--primary-color, #3498db); background: white; }
+		.emoji-picker { position: absolute; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(8, 30px); gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto; }
+		.emoji-picker button { font-size: 20px; background: none; border: none; cursor: pointer; transition: transform 0.2s; }
+		.emoji-picker button:hover { transform: scale(1.2); }
+		.floating-layout-btn { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; border-radius: 12px; background-color: var(--primary-color, #3498db); opacity: 0.2; color: white; font-size: 28px; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); cursor: pointer; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+		.floating-layout-btn:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); opacity: 0.7; }
+		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 300px; background: #f8f9fa; box-shadow: 2px 0 12px rgba(0,0,0,0.15); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: 0; }
+		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+		.guide-dropdown button:hover { background: #f8f9fa; }
+		.guide-dropdown button:last-child { border-bottom: none; }
+		.guide-dropdown .current-guide { background: rgba(25, 118, 210, 0.2); font-weight: 600; color: #1976d2; }
+		.guide-dropdown.show { transform: translateX(0); }
+		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
+		.guide-menu-btn:hover { opacity: 0.7; }
+		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
+		.header h1 { font-size: 32px; margin-bottom: 10px; }
+		.header p { opacity: 0.9; font-size: 16px; }
+		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
+		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px; }
+		.nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; flex-shrink: 0; }
+		.nav-tab.active { color: var(--primary-color, #3498db); border-bottom-color: var(--primary-color, #3498db); background: white; }
+		.nav-tab .tab-icon { margin-right: 5px; cursor: pointer; }
+		.nav-tab .tab-name { cursor: text; }
+		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
+		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }
 		.nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
 		.nav-tabs::-webkit-scrollbar { height: 4px; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
-        .nav-tab .tab-icon { margin-right: 5px; cursor: pointer; }
-		.nav-tab .tab-name { cursor: text; }
-		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
-		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }
-		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
-        .nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; flex-shrink: 0; }
-		.nav-tab.active { color: var(--primary-color, #3498db); border-bottom-color: var(--primary-color, #3498db); background: white; }
-		.delete-tab-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
-		.delete-tab-btn:hover { color: #c0392b; transform: scale(1.2); }
-        .add-category-tab { background: #27ae60 !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
-        .add-category-tab:hover { background: #229954 !important; }
-        .content-area { padding: 0 0 30px 0; }
-        .category { display: none; }
-        .category.active { display: block; }
-        .skill-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; padding: 0; transition: all 0.3s ease; }
-		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 0 30px 20px 30px; gap: 20px; }
-		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: none; }
+		.save-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--primary-color, #607d8b); opacity: 0.7; color: white; border: none; padding: 12px 24px; cursor: pointer; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; display: none; z-index: 1000; }
+		.save-btn:hover { opacity: 1; transform: translateX(-50%) translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
+		.save-btn.show { display: block; animation: fadeIn 0.3s ease-in-out; }
+		.skill-card { background: #f8f9fa; border-radius: 0; padding: 20px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e0e0e0; transition: all 0.3s ease; }
+		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+		.skill-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; padding: 0; transition: all 0.3s ease; }
 		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 0 30px; }
 		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--primary-color, #3498db); border-radius: 8px; background: #f8f9fa; border-bottom: none; }
 		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 		.skill-grid.headings .checklist-item { display: none; }
 		.skill-grid.headings .add-item-btn { display: none; }
-        .skill-card { background: #f8f9fa; border-radius: 0; padding: 20px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e0e0e0; transition: all 0.3s ease; }
-        .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .skill-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
- 		.checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: white; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
-        .checklist-item:hover { background: #f0f7ff; }
-       	.checkbox { width: 20px; height: 20px; border: 2px solid var(--primary-color, #3498db); border-radius: 4px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.3s ease; }
-        .checklist-item.checked .checkbox { background: #27ae60; border-color: #27ae60; position: relative; }
-        .checklist-item.checked .checkbox:after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
-        .checklist-item.checked { opacity: 0.7; }
-        .checklist-text { flex: 1; font-size: 14px; line-height: 1.5; color: #495057; }
-        .editable { cursor: text; padding: 2px 4px; border-radius: 4px; transition: all 0.2s ease; }
-        .editable:hover { background: rgba(52, 152, 219, 0.1); }
-        .editable:focus { outline: 2px solid var(--primary-color, #3498db); background: white; }
-		.delete-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; display: none; margin-left: 8px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
-		.delete-btn:hover { color: #c0392b; transform: scale(1.2); }
-        .edit-mode .delete-btn { display: inline-flex; }
-        .add-item-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 14px; font-weight: 600; display: none; width: 100%; }
-        .add-item-btn:hover { background: #229954; }
-        .edit-mode .add-item-btn { display: block; }
-   		.add-skill-btn { background: var(--primary-color, #3498db); color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: calc(100% - 60px); margin: 20px 30px; transition: all 0.3s ease; display: none; }
-		.add-skill-btn:hover { background: var(--secondary-color, #2980b9); }
-        .edit-mode .add-skill-btn { display: block; }
-		.floating-layout-btn { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; border-radius: 12px; background-color: var(--primary-color, #3498db); opacity: 0.2; color: white; font-size: 28px; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); cursor: pointer; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; }
-		.floating-layout-btn:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); opacity: 0.7; }
-        .edit-mode-active .floating-layout-btn { display: none; }
+		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 0 30px 20px 30px; gap: 20px; }
+		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: none; }
+		.skill-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
+		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
+		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
-		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
-		.floating-add-btn {  animation: fadeIn 0.3s ease-in-out;}
 
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1057,6 +1057,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
