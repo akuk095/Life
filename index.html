@@ -876,7 +876,6 @@ function editAppIcon(el) {
             event.stopPropagation();
             appIcon = (e === "🚫") ? "" : e;
             saveHeader();
-            renderHeader();
             menu.remove();
             document.removeEventListener('click', outsideClickHandler);
         };
@@ -1037,6 +1036,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
