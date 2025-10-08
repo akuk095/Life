@@ -62,6 +62,9 @@
 		.emoji-picker { position: absolute; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 8px; display: grid; grid-template-columns: repeat(8, 30px); gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto; }
 		.emoji-picker button { font-size: 20px; background: none; border: none; cursor: pointer; transition: transform 0.2s; }
 		.emoji-picker button:hover { transform: scale(1.2); }
+		.emoji-remove-btn { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #e74c3c; color: white; border: 2px solid white; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; }
+		.emoji-remove-btn:hover { background: #c0392b; transform: scale(1.1); }
+		.editable-icon { position: relative; display: inline-block; }
 		.floating-layout-btn { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; border-radius: 12px; background-color: var(--primary-color, #3498db); opacity: 0.2; color: white; font-size: 28px; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); cursor: pointer; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; }
 		.floating-layout-btn:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); opacity: 0.7; }
 		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 300px; background: rgba(237, 239, 240); box-shadow: 2px 0 12px rgba(0,0,0,0.15); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: 0; }
@@ -510,8 +513,9 @@ function renderHeader() {
 </div>
 </div>
 <h1>
-    <span class="icon editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-        ${appIcon ? appIcon : "🚫"}
+    <span class="editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
+        <span class="icon">${appIcon ? appIcon : "​"}</span>
+        ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" onclick="event.stopPropagation(); appIcon = \'​\'; saveHeader();">×</span>' : ''}
     </span>
     <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
         ${appTitle}
@@ -644,14 +648,14 @@ function showEmojiPicker(target, callback) {
     const picker = document.createElement('div');
     picker.className = 'emoji-picker';
 
-    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊","🚫"];
+    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊"];
     
     emojis.forEach(e => {
         const btn = document.createElement('button');
         btn.textContent = e;
         btn.onclick = (event) => {
-            event.stopPropagation(); // Prevent triggering the outside click
-            callback(e === "🚫" ? "" : e);
+            event.stopPropagation();
+            callback(e);
             picker.remove();
             document.removeEventListener('click', outsideClickHandler);
         };
@@ -769,10 +773,18 @@ function renderTabs() {
         
         // Make tab editable in edit mode
         if (editMode) {
-            tab.innerHTML = `
-                <span class="tab-icon editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)">${cat.icon || ""}</span>
-                <span class="tab-name editable" contenteditable="true" onclick="event.stopPropagation()">${cat.name}</span>
-            `;
+            const tabIconDisplay = cat.icon && cat.icon !== "​" ? cat.icon : "​";
+			const tabRemoveBtn = cat.icon && cat.icon !== "​"
+    			? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${i}].icon = '​'; saveCategories(); renderTabs(); renderContent();">×</span>`
+    			: '';
+
+			tab.innerHTML = `
+    			<span class="editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)">
+        			<span class="tab-icon">${tabIconDisplay}</span>
+        			${tabRemoveBtn}
+    			</span>
+    			<span class="tab-name editable" contenteditable="true" onclick="event.stopPropagation()">${cat.name}</span>
+			`;
             
             // Save name when editing
             const nameSpan = tab.querySelector('.tab-name');
@@ -845,9 +857,17 @@ function renderContent() {
             
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
-            titleDiv.innerHTML = `
-   				<span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
-   				<span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+            const iconDisplay = skill.icon && skill.icon !== "​" ? skill.icon : "​";
+			const removeBtn = editMode && skill.icon && skill.icon !== "​" 
+    			? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` 
+    			: '';
+
+			titleDiv.innerHTML = `
+   			<span class="editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>
+       		<span class="icon">${iconDisplay}</span>
+      		 ${removeBtn}
+   		</span>
+  			 <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
 			`;
 			// Add collapse button for headings mode
 				if (layoutMode === 'headings' && !editMode) {
@@ -1011,10 +1031,10 @@ function editAppIcon(el) {
         return; // Toggle off if clicking the same icon
     }
 
-    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊","🚫"];
+    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊"];
     
     let menu = document.createElement("div");
-    menu.className = "temp-emoji-menu"; // Add class for easy selection
+    menu.className = "temp-emoji-menu";
     menu.style.position = "absolute";
     menu.style.background = "white";
     menu.style.border = "1px solid #ccc";
@@ -1035,7 +1055,7 @@ function editAppIcon(el) {
         btn.style.border = "none";
         btn.onclick = (event) => {
             event.stopPropagation();
-            appIcon = (e === "🚫") ? "" : e;
+            appIcon = e;
             saveHeader();
             menu.remove();
             document.removeEventListener('click', outsideClickHandler);
@@ -1217,6 +1237,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
