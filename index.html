@@ -461,7 +461,7 @@ function renderHeader() {
 <div class="guide-dropdown" id="guideDropdown">
     <div class="drawer-header">📚 My Guides</div>
 </div>
-${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Save</button>' : ''}
+${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Done</button>' : ''}
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
 <div class="dropdown-menu" id="dropdownMenu">
@@ -1037,6 +1037,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
