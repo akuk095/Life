@@ -24,13 +24,13 @@
 		.guide-dropdown button:hover { background: #f8f9fa; }
 		.guide-dropdown button:last-child { border-bottom: none; }
 		.guide-dropdown .current-guide { background: rgba(25, 118, 210, 0.2); font-weight: 600; color: #1976d2; }
-        .dropdown-menu { display: none; position: absolute; top: 40px;  right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1000;}
+        .dropdown-menu { display: none; position: absolute; top: 40px;  right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1000; overflow: visible;}
 		.dropdown-menu.show { display: block;}
 		.dropdown-menu button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s;}
 		.dropdown-menu button:hover { background: #f8f9fa;}
 		.dropdown-menu button:first-child { border-radius: 8px 8px 0 0;}
 		.dropdown-menu button:last-child { border-radius: 0 0 8px 8px;}
-		.color-picker-menu { display: none; background: white; border-radius: 8px; padding: 15px; margin-top: 5px; }
+		.color-picker-menu { display: none; background: white; border-radius: 8px; padding: 15px; margin-top: 5px; position: fixed; right: 10px; top: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1001; max-height: 400px; overflow-y: auto; }
 		.color-picker-menu.show { display: block; }
 		.color-picker-menu h3 { margin: 0 0 10px 0; font-size: 14px; color: #2c3e50; }
 		.color-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
@@ -1015,6 +1015,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
