@@ -224,73 +224,84 @@ function loadFromFirebase() {
     // Hide container initially
     document.querySelector('.container').classList.remove('loaded');
     
+    // First check if the current guide exists
     database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
         if (!snapshot.exists()) {
-            database.ref(`guides/${currentGuideId}`).set({
-                appTitle, appSubtitle, appIcon, categories, checkedItems, themeColor
-            });
-        }
-    });
-
-    // Use Promise.all to wait for all data to load
-    Promise.all([
-        database.ref(`guides/${currentGuideId}/categories`).once('value'),
-        database.ref(`guides/${currentGuideId}/checkedItems`).once('value'),
-        database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
-        database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
-        database.ref(`guides/${currentGuideId}/appIcon`).once('value'),
-        database.ref(`guides/${currentGuideId}/themeColor`).once('value'),
-        database.ref(`guides/${currentGuideId}/layoutMode`).once('value')
-    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap]) => {
-		
-        // Load categories
-        if (categoriesSnap.val()) {
-            categories = categoriesSnap.val();
+            // If guide doesn't exist, check if it's the default guide
+            if (currentGuideId === 'defaultGuide') {
+                // Create default guide
+                database.ref(`guides/${currentGuideId}`).set({
+                    appTitle, appSubtitle, appIcon, categories, checkedItems, themeColor
+                });
+            } else {
+                // Guide doesn't exist, fall back to default
+                currentGuideId = 'defaultGuide';
+                localStorage.setItem('lastGuideId', 'defaultGuide');
+                loadFromFirebase(); // Retry with default guide
+                return;
+            }
         }
         
-        // Load checked items
-        if (checkedSnap.val()) {
-            checkedItems = checkedSnap.val();
-        }
-        
-        // Load app title
-        if (titleSnap.val()) {
-            appTitle = titleSnap.val();
-        }
-        
-        // Load app subtitle
-        if (subtitleSnap.val()) {
-            appSubtitle = subtitleSnap.val();
-        }
-        
-        // Load app icon
-        if (iconSnap.val() !== null) {
-            appIcon = iconSnap.val();
-        }
-        
-        // Load theme color
-        if (themeSnap.val()) {
-            themeColor = themeSnap.val();
-        } else {
-    		themeColor = '#607d8b'; // Default grey if no theme saved
-		}
-        
-        // Load layout mode
-        if (layoutSnap.val()) {
-            layoutMode = layoutSnap.val();
-        }
-        
-        // Apply theme
-        applyTheme();
-        
-        // Render everything
-        renderHeader();
-        renderTabs();
-        renderContent();
-        updateLayoutButton();
-        
-        // Show container with fade-in effect
-        document.querySelector('.container').classList.add('loaded');
+        // Use Promise.all to wait for all data to load
+        Promise.all([
+            database.ref(`guides/${currentGuideId}/categories`).once('value'),
+            database.ref(`guides/${currentGuideId}/checkedItems`).once('value'),
+            database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
+            database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
+            database.ref(`guides/${currentGuideId}/appIcon`).once('value'),
+            database.ref(`guides/${currentGuideId}/themeColor`).once('value'),
+            database.ref(`guides/${currentGuideId}/layoutMode`).once('value')
+        ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap]) => {
+            
+            // Load categories
+            if (categoriesSnap.val()) {
+                categories = categoriesSnap.val();
+            }
+            
+            // Load checked items
+            if (checkedSnap.val()) {
+                checkedItems = checkedSnap.val();
+            }
+            
+            // Load app title
+            if (titleSnap.val()) {
+                appTitle = titleSnap.val();
+            }
+            
+            // Load app subtitle
+            if (subtitleSnap.val()) {
+                appSubtitle = subtitleSnap.val();
+            }
+            
+            // Load app icon
+            if (iconSnap.val() !== null) {
+                appIcon = iconSnap.val();
+            }
+            
+            // Load theme color
+            if (themeSnap.val()) {
+                themeColor = themeSnap.val();
+            } else {
+                themeColor = '#607d8b'; // Default grey if no theme saved
+            }
+            
+            // Load layout mode
+            if (layoutSnap.val()) {
+                layoutMode = layoutSnap.val();
+            }
+            
+            // Apply theme
+            applyTheme();
+            
+            // Render everything
+            renderHeader();
+            renderTabs();
+            renderContent();
+            updateLayoutButton();
+            
+            // Show container with fade-in effect
+            document.querySelector('.container').classList.add('loaded');
+        });
     });
 }
 
@@ -1076,4 +1087,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
