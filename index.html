@@ -406,15 +406,18 @@ function toggleMenu(e) {
 }
 
 function duplicateGuide() {
-    const newId = prompt("Enter name for the duplicated guide:");
-    if (!newId) return;
+    const timestamp = Date.now();
+    const newId = `${currentGuideId}_copy_${timestamp}`;
     
     database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
         const data = snapshot.val();
-        database.ref(`guides/${newId}`).set(data);
-        currentGuideId = newId;
-        loadGuideList();
-        loadFromFirebase();
+        if (data.appTitle) {
+            data.appTitle = data.appTitle + ' (Copy)';
+        }
+        database.ref(`guides/${newId}`).set(data).then(() => {
+            currentGuideId = newId;
+            loadFromFirebase();
+        });
     });
 }
 
@@ -1037,6 +1040,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
