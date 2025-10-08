@@ -29,7 +29,8 @@
 		.color-picker-menu { display: none; background: white; border-radius: 8px; padding: 15px 20px 15px 15px; margin-top: 5px; position: fixed; right: 10px; top: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1001; max-height: calc(100vh - 160px); overflow-y: auto; width: 200px; }
 		.color-picker-menu h3 { margin: 0 0 10px 0; font-size: 14px; color: #2c3e50; }
 		.color-picker-menu.show { display: block; }
-		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: transparent; border-radius: 0; box-shadow: none; overflow: hidden; opacity: 0; transition: opacity 0.3s ease-in-out; }
+		.collapse-btn { position: absolute; top: 0; right: 0; font-size: 12px; color: #999; cursor: pointer; padding: 2px 6px; border-radius: 4px; display: none; transition: all 0.2s ease; }
+		.collapse-btn:hover { background: #f0f0f0; color: #666; }
 		.container.loaded { opacity: 1; }
 		.content-area { padding: 0 0 30px 0; }
 		.delete-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; display: none; margin-left: 8px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
@@ -94,6 +95,7 @@
 		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--primary-color, #3498db); border-radius: 8px; background: #f8f9fa; border-bottom: none; cursor: pointer; position: relative; }
 		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 		.skill-grid.headings .skill-card.expanded .checklist-item { display: flex; }
+		.skill-grid.headings .skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid.headings .checklist-item { display: none; }
 		.skill-grid.headings .add-item-btn { display: none !important; }
 		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 0 30px 20px 30px; gap: 20px; }
@@ -750,6 +752,17 @@ function renderContent() {
             
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
+			// Add collapse button for headings mode
+				if (layoutMode === 'headings' && !editMode) {
+    			const collapseBtn = document.createElement('span');
+    			collapseBtn.className = 'collapse-btn';
+    			collapseBtn.textContent = 'collapse';
+    			collapseBtn.onclick = (e) => {
+        			e.stopPropagation();
+        			card.classList.remove('expanded');
+    			};
+    			titleDiv.appendChild(collapseBtn);
+}
             titleDiv.innerHTML = `
    <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
@@ -812,16 +825,20 @@ function renderContent() {
             grid.appendChild(card); 
 			// Add click handler for headings mode
             if (layoutMode === 'headings' && !editMode) {
-                card.addEventListener('click', function(e) {
-                    // Don't toggle if clicking on checkbox or editable content
-                    if (e.target.classList.contains('checkbox') || 
-                        e.target.classList.contains('editable') ||
-                        e.target.classList.contains('delete-btn')) {
-                        return;
-                    }
-                    this.classList.toggle('expanded');
-                });
-            }
+   				 card.addEventListener('click', function(e) {
+       				 // Don't toggle if clicking on checkbox, editable content, or collapse button
+        			if (e.target.classList.contains('checkbox') || 
+           			 e.target.classList.contains('editable') ||
+            		e.target.classList.contains('delete-btn') ||
+            		e.target.classList.contains('collapse-btn')) {
+            return;
+        }
+        // Only expand, never collapse (collapse button handles that)
+        if (!this.classList.contains('expanded')) {
+            this.classList.add('expanded');
+        }
+    });
+}
         }); 
         
         catDiv.appendChild(grid); 
@@ -1072,3 +1089,4 @@ loadFromFirebase();
 
 </body>
 </html>
+
