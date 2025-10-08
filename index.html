@@ -95,7 +95,12 @@
 		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 		.skill-grid.headings .checklist-item { display: none; }
 		.skill-grid.headings .add-item-btn { display: none; }
-		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 0 30px 20px 30px; gap: 20px; }
+		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--primary-color, #3498db); border-radius: 8px; background: #f8f9fa; border-bottom: none; cursor: pointer; position: relative; }
+		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+		.skill-grid.headings .skill-card.expanded .checklist-item { display: flex; }
+		.skill-grid.headings .skill-card.expanded .add-item-btn { display: block; }
+		.skill-grid.headings .skill-card::after { content: '▼'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--primary-color, #3498db); transition: transform 0.3s ease; }
+		.skill-grid.headings .skill-card.expanded::after { transform: translateY(-50%) rotate(180deg); }.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 0 30px 20px 30px; gap: 20px; }
 		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: none; }
 		.skill-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
 		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
@@ -743,7 +748,9 @@ function renderContent() {
         
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
-            card.className = 'skill-card'; 
+            card.className = 'skill-card';
+            card.dataset.catIndex = catIndex;
+            card.dataset.skillIndex = skillIndex; 
             
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
@@ -807,6 +814,18 @@ function renderContent() {
             card.appendChild(addItemBtn); 
             
             grid.appendChild(card); 
+			// Add click handler for headings mode
+            if (layoutMode === 'headings' && !editMode) {
+                card.addEventListener('click', function(e) {
+                    // Don't toggle if clicking on checkbox or editable content
+                    if (e.target.classList.contains('checkbox') || 
+                        e.target.classList.contains('editable') ||
+                        e.target.classList.contains('delete-btn')) {
+                        return;
+                    }
+                    this.classList.toggle('expanded');
+                });
+            }
         }); 
         
         catDiv.appendChild(grid); 
@@ -1057,6 +1076,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
