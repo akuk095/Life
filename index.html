@@ -597,6 +597,13 @@ function populateGuideDropdown() {
 function saveAndExitEdit() {
     editMode = false;
     document.body.classList.remove('edit-mode-active');
+    
+    // Hide save button
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.style.display = 'none';
+    }
+    
     renderHeader();
     renderTabs();
     renderContent();
@@ -1050,6 +1057,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
