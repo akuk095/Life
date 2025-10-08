@@ -163,18 +163,53 @@ let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical' or 'horizontal'
 		
 const colorThemes = [
-    { name: 'Blue', primary: '#3498db', secondary: '#2c3e50' },
-    { name: 'Green', primary: '#27ae60', secondary: '#1e8449' },
-    { name: 'Purple', primary: '#9b59b6', secondary: '#6c3483' },
-    { name: 'Red', primary: '#e74c3c', secondary: '#c0392b' },
-    { name: 'Orange', primary: '#e67e22', secondary: '#d35400' },
-    { name: 'Teal', primary: '#1abc9c', secondary: '#16a085' },
-    { name: 'Pink', primary: '#ff6b9d', secondary: '#c44569' },
-    { name: 'Indigo', primary: '#5f27cd', secondary: '#341f97' },
-    { name: 'Yellow', primary: '#f39c12', secondary: '#d68910' },
-    { name: 'Cyan', primary: '#00bcd4', secondary: '#0097a7' },
-    { name: 'Brown', primary: '#795548', secondary: '#5d4037' },
-    { name: 'Grey', primary: '#607d8b', secondary: '#455a64' }
+    // Calm (3 options)
+    { name: 'Calm Blue', primary: '#5DADE2', secondary: '#85C1E2' },
+    { name: 'Calm Sage', primary: '#A8DADC', secondary: '#88B5B7' },
+    { name: 'Calm Lavender', primary: '#B4A7D6', secondary: '#9A8AC2' },
+    
+    // Warm (3 options)
+    { name: 'Warm Coral', primary: '#FF6B6B', secondary: '#EE5A52' },
+    { name: 'Warm Peach', primary: '#FFAB73', secondary: '#FF8C42' },
+    { name: 'Warm Gold', primary: '#FFD93D', secondary: '#F4C430' },
+    
+    // Earthy (3 options)
+    { name: 'Earthy Terracotta', primary: '#D4A574', secondary: '#B8956A' },
+    { name: 'Earthy Olive', primary: '#8B9556', secondary: '#6B7346' },
+    { name: 'Earthy Clay', primary: '#C97D60', secondary: '#A86B52' },
+    
+    // Energetic (3 options)
+    { name: 'Energetic Orange', primary: '#FF8C42', secondary: '#FF6B35' },
+    { name: 'Energetic Magenta', primary: '#EC4899', secondary: '#DB2777' },
+    { name: 'Energetic Lime', primary: '#84CC16', secondary: '#65A30D' },
+    
+    // Elegant (3 options)
+    { name: 'Elegant Navy', primary: '#1E3A5F', secondary: '#2C5F8D' },
+    { name: 'Elegant Plum', primary: '#8B5A8C', secondary: '#6B4A6C' },
+    { name: 'Elegant Burgundy', primary: '#8B4359', secondary: '#6B3349' },
+    
+    // Minimal (3 options)
+    { name: 'Minimal Grey', primary: '#607D8B', secondary: '#455A64' },
+    { name: 'Minimal Slate', primary: '#64748B', secondary: '#475569' },
+    { name: 'Minimal Stone', primary: '#78716C', secondary: '#57534E' },
+    
+    // Playful (3 options)
+    { name: 'Playful Pink', primary: '#FF6B9D', secondary: '#FF85B3' },
+    { name: 'Playful Teal', primary: '#06B6D4', secondary: '#0891B2' },
+    { name: 'Playful Purple', primary: '#A855F7', secondary: '#9333EA' },
+    
+    // Muted (3 options)
+    { name: 'Muted Rose', primary: '#D4A5A5', secondary: '#B89090' },
+    { name: 'Muted Teal', primary: '#81A8A4', secondary: '#6B8E8A' },
+    { name: 'Muted Mauve', primary: '#B4A5B4', secondary: '#9A8A9A' },
+    
+    // Vintage (3 options)
+    { name: 'Vintage Mustard', primary: '#D4A76A', secondary: '#B8915A' },
+    { name: 'Vintage Teal', primary: '#5F9EA0', secondary: '#4A7E80' },
+    { name: 'Vintage Rust', primary: '#B85C50', secondary: '#9A4C42' },
+    
+    // Dark (1 option)
+    { name: 'Dark', primary: '#0A0A0A', secondary: '#000000' }
 ];
 // Load data from Firebase on startup
 function loadFromFirebase() {
@@ -980,6 +1015,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
