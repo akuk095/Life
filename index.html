@@ -811,19 +811,28 @@ function renderContent() {
             
             grid.appendChild(card); 
 			// Add click handler for headings mode
-		if (layoutMode === 'headings' && !editMode) {
-    		const titleDiv = card.querySelector('.skill-title');
-    		if (titleDiv) {
-       		 titleDiv.addEventListener('click', function(e) {
-           		 // Don't toggle if clicking on icon or editable content in the title
-            		if (e.target.classList.contains('editable-icon') || 
-                	e.target.classList.contains('editable') ||
-                	e.target.classList.contains('delete-btn')) {
-                	return;
-            	}
-            	card.classList.toggle('expanded');
+		// Add click handler for headings mode
+if (layoutMode === 'headings' && !editMode) {
+    const titleDiv = card.querySelector('.skill-title');
+    if (titleDiv) {
+        titleDiv.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Don't toggle if clicking on icon or editable content in the title
+            if (e.target.classList.contains('editable-icon') || 
+                e.target.classList.contains('editable') ||
+                e.target.classList.contains('delete-btn')) {
+                return;
+            }
+            card.classList.toggle('expanded');
         });
     }
+    
+    // Prevent card clicks from bubbling when clicking on items
+    card.addEventListener('click', function(e) {
+        if (e.target.closest('.checklist-item')) {
+            e.stopPropagation();
+        }
+    });
 }
         }); 
         
@@ -1075,6 +1084,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
