@@ -159,7 +159,7 @@ let activeTabIndex = 0;
 let appIcon = "📚"; 
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
-let themeColor = '#3498db'; // Default blue
+let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical' or 'horizontal'
 		
 const colorThemes = [
@@ -226,11 +226,10 @@ function loadFromFirebase() {
         }
         
         // Load theme color
-        // Load theme color
         if (themeSnap.val()) {
             themeColor = themeSnap.val();
         } else {
-    		themeColor = '#3498db'; // Default blue if no theme saved
+    		themeColor = '#607d8b'; // Default grey if no theme saved
 		}
         
         // Load layout mode
@@ -255,7 +254,7 @@ function loadFromFirebase() {
 function switchGuide(id) {
     currentGuideId = id;
     // Reset to default theme before loading
-    themeColor = '#3498db';
+    themeColor = '#607d8b';
     loadFromFirebase();
 }
 function applyTheme() {
@@ -981,6 +980,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
