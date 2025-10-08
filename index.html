@@ -16,7 +16,7 @@
 		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px;}
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
-		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 300px; background: #F7F2EB; box-shadow: 2px 0 12px rgba(0,0,0,0.15); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: 0; }
+		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 300px; background: #f8f9fa; box-shadow: 2px 0 12px rgba(0,0,0,0.15); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: 0; }
 		.guide-dropdown.show { transform: translateX(0); }
 		.drawer-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 		.drawer-backdrop.show { opacity: 1; visibility: visible; }
@@ -97,7 +97,7 @@
         .edit-mode .add-skill-btn { display: block; }
 		.floating-layout-btn { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; border-radius: 12px; background-color: var(--primary-color, #3498db); opacity: 0.2; color: white; font-size: 28px; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); cursor: pointer; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; }
 		.floating-layout-btn:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); opacity: 0.7; }
-        .edit-mode-active .floating-add-btn { display: none; }
+        .edit-mode-active .floating-layout-btn { display: none; }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
 		.floating-add-btn {  animation: fadeIn 0.3s ease-in-out;}
@@ -465,7 +465,6 @@ function renderHeader() {
 <div class="guide-dropdown" id="guideDropdown">
     <div class="drawer-header">📚 My Guides</div>
 </div>
-${editMode ? '<button class="save-btn show" onclick="saveAndExitEdit()">Done</button>' : ''}
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
 <div class="dropdown-menu" id="dropdownMenu">
@@ -842,6 +841,12 @@ function toggleEditMode() {
         document.body.classList.remove('edit-mode-active');
     }
     
+    // Show/hide save button
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.style.display = editMode ? 'block' : 'none';
+    }
+    
     renderHeader();
     renderTabs();
     renderContent(); 
@@ -1038,9 +1043,14 @@ loadFromFirebase();
 
     </script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
+	<button class="save-btn" id="saveBtn" onclick="saveAndExitEdit()" style="display: none;">Save</button>
 
 </body>
 </html>
+
+</body>
+</html>
+
 
 
 
