@@ -67,7 +67,9 @@
         .content-area { padding: 0 0 30px 0; }
         .category { display: none; }
         .category.active { display: block; }
-        .skill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; padding: 0 30px; }
+        .skill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; padding: 0 30px; transition: all 0.3s ease; }
+		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; padding-bottom: 20px; }
+		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; }
         .skill-card { background: #f8f9fa; border-radius: 12px; padding: 20px; border-left: 4px solid var(--primary-color, #3498db); transition: all 0.3s ease; }
         .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .skill-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
@@ -90,8 +92,8 @@
    		.add-skill-btn { background: var(--primary-color, #3498db); color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: calc(100% - 60px); margin: 20px 30px; transition: all 0.3s ease; display: none; }
 		.add-skill-btn:hover { background: var(--secondary-color, #2980b9); }
         .edit-mode .add-skill-btn { display: block; }
-		.floating-add-btn { position: fixed; bottom: 25px; right: 25px; width: 75px; height: 75px; border-radius: 18px; background-color: var(--primary-color, rgba(52, 152, 219, 0.5)); color: white; font-size: 42px; font-weight: bold; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.2s ease-in-out; z-index: 1000; }
-		.floating-add-btn:hover { transform: scale(1.1); background-color: var(--secondary-color, rgba(41, 128, 185, 0.7)); }
+		.floating-layout-btn { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; border-radius: 50%; background-color: var(--primary-color, #3498db); color: white; font-size: 28px; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); cursor: pointer; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+		.floating-layout-btn:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
         .edit-mode-active .floating-add-btn { display: none; }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@keyframes fadeIn {  from { opacity: 0; transform: scale(0.8); }  to { opacity: 1; transform: scale(1); } }
@@ -160,7 +162,8 @@ let appIcon = "📚";
 let appTitle = "Essential Life Skills Guide";
 let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 let themeColor = '#3498db'; // Default blue
-
+let layoutMode = 'vertical'; // 'vertical' or 'horizontal'
+		
 const colorThemes = [
     { name: 'Blue', primary: '#3498db', secondary: '#2c3e50' },
     { name: 'Green', primary: '#27ae60', secondary: '#1e8449' },
@@ -195,8 +198,10 @@ function loadFromFirebase() {
         database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
         database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
         database.ref(`guides/${currentGuideId}/appIcon`).once('value'),
-        database.ref(`guides/${currentGuideId}/themeColor`).once('value')
-    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap]) => {
+        database.ref(`guides/${currentGuideId}/themeColor`).once('value'),
+        database.ref(`guides/${currentGuideId}/layoutMode`).once('value')
+    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap]) => {
+		
         // Load categories
         if (categoriesSnap.val()) {
             categories = categoriesSnap.val();
@@ -223,11 +228,17 @@ function loadFromFirebase() {
         }
         
         // Load theme color
+        // Load theme color
         if (themeSnap.val()) {
             themeColor = themeSnap.val();
         } else {
     		themeColor = '#3498db'; // Default blue if no theme saved
 		}
+        
+        // Load layout mode
+        if (layoutSnap.val()) {
+            layoutMode = layoutSnap.val();
+        }
         
         // Apply theme
         applyTheme();
@@ -236,6 +247,7 @@ function loadFromFirebase() {
         renderHeader();
         renderTabs();
         renderContent();
+        updateLayoutButton();
         
         // Show container with fade-in effect
         document.querySelector('.container').classList.add('loaded');
@@ -633,9 +645,8 @@ function renderContent() {
        const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
         
-        const grid = document.createElement('div');
-		
-        grid.className = 'skill-grid'; 
+        const grid = document.createElement('div'); 
+        grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : ''); 
         
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
@@ -872,7 +883,21 @@ function editCategoryIcon(catIndex, el) {
         renderContent();
     });
 }
+function toggleLayout() {
+    layoutMode = layoutMode === 'vertical' ? 'horizontal' : 'vertical';
+    database.ref(`guides/${currentGuideId}/layoutMode`).set(layoutMode);
+    renderContent();
+    updateLayoutButton();
+}
 
+function updateLayoutButton() {
+    const btn = document.getElementById('layoutBtn');
+    if (btn) {
+        // Show icon for NEXT layout (what it will change TO)
+        btn.textContent = layoutMode === 'vertical' ? '⇄' : '☰';
+        btn.title = layoutMode === 'vertical' ? 'Switch to horizontal scrolling' : 'Switch to vertical scrolling';
+    }
+}
 function deleteCategory(catIndex) {
     if (confirm('Delete this entire category?')) {
         categories.splice(catIndex, 1);
@@ -902,13 +927,16 @@ document.addEventListener('click', (e) => {
     const colorMenu = document.getElementById('colorPickerMenu');
     if (colorMenu) colorMenu.classList.remove('show');
 });
+
+		
 // Load data when page loads
 loadFromFirebase();
 
     </script>
-	<button class="floating-add-btn" onclick="createNewGuide()">+</button>
+	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout">⇄</button>
 
 </body>
 </html>
+
 
 
