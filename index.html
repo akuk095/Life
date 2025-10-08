@@ -22,6 +22,8 @@
 		.checklist-item.checked .checkbox:after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
 		.checklist-item:hover { background: #f0f7ff; }
 		.checklist-text { flex: 1; font-size: 14px; line-height: 1.5; color: #495057; }
+		.collapse-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #95a5a6; font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: all 0.2s ease; display: none; }
+		.collapse-btn:hover { background: #ecf0f1; color: #2c3e50; }
 		.color-option { width: 40px; height: 40px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
 		.color-option:hover { transform: scale(1.1); border-color: #2c3e50; }
 		.color-option.selected { border-color: #2c3e50; border-width: 3px; }
@@ -87,8 +89,9 @@
 		.save-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--primary-color, #607d8b); opacity: 0.7; color: white; border: none; padding: 12px 24px; cursor: pointer; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; display: none; z-index: 1000; }
 		.save-btn:hover { opacity: 1; transform: translateX(-50%) translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
 		.save-btn.show { display: block; animation: fadeIn 0.3s ease-in-out; }
-		.skill-card { background: #f8f9fa; border-radius: 0; padding: 20px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e0e0e0; transition: all 0.3s ease; }
+		.skill-card { background: #f8f9fa; border-radius: 0; padding: 20px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e0e0e0; transition: all 0.3s ease; position: relative; }
 		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+		.skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; padding: 0; transition: all 0.3s ease; }
 		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 0 30px; }
 		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--primary-color, #3498db); border-radius: 8px; background: #f8f9fa; border-bottom: none; cursor: pointer; position: relative; }
@@ -751,10 +754,20 @@ function renderContent() {
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
             titleDiv.innerHTML = `
-   <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-`;
-
+   				<span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
+   				<span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+			`;
+			// Add collapse button for headings mode
+			if (layoutMode === 'headings' && !editMode) {
+    			const collapseBtn = document.createElement('button');
+    			collapseBtn.className = 'collapse-btn';
+    			collapseBtn.textContent = 'collapse';
+    			collapseBtn.onclick = (e) => {
+        			e.stopPropagation();
+        			card.classList.remove('expanded');
+    			};
+    			titleDiv.appendChild(collapseBtn);
+			}
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -1089,5 +1102,6 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
