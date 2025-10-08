@@ -752,22 +752,22 @@ function renderContent() {
             
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title'; 
-			// Add collapse button for headings mode
-				if (layoutMode === 'headings' && !editMode) {
-    			const collapseBtn = document.createElement('span');
-    			collapseBtn.className = 'collapse-btn';
-    			collapseBtn.textContent = 'collapse';
-    			collapseBtn.onclick = (e) => {
-        			e.stopPropagation();
-        			card.classList.remove('expanded');
-    			};
-    			titleDiv.appendChild(collapseBtn);
-}
             titleDiv.innerHTML = `
    <span class="icon editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>${skill.icon || ""}</span>
    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
 `;
 
+            // Add collapse button for headings mode
+            if (layoutMode === 'headings' && !editMode) {
+                const collapseBtn = document.createElement('span');
+                collapseBtn.className = 'collapse-btn';
+                collapseBtn.textContent = 'collapse';
+                collapseBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    card.classList.remove('expanded');
+                };
+                titleDiv.appendChild(collapseBtn);
+            }
             
             if (editMode) { 
                 const deleteSkillBtn = document.createElement('button');
@@ -823,22 +823,24 @@ function renderContent() {
             card.appendChild(addItemBtn); 
             
             grid.appendChild(card); 
-			// Add click handler for headings mode
+            
+            // Add click handler for headings mode
             if (layoutMode === 'headings' && !editMode) {
-   				 card.addEventListener('click', function(e) {
-       				 // Don't toggle if clicking on checkbox, editable content, or collapse button
-        			if (e.target.classList.contains('checkbox') || 
-           			 e.target.classList.contains('editable') ||
-            		e.target.classList.contains('delete-btn') ||
-            		e.target.classList.contains('collapse-btn')) {
-            return;
-        }
-        // Only expand, never collapse (collapse button handles that)
-        if (!this.classList.contains('expanded')) {
-            this.classList.add('expanded');
-        }
-    });
-}
+                card.addEventListener('click', function(e) {
+                    // Don't toggle if clicking on checkbox, editable content, collapse button, or checklist items
+                    if (e.target.classList.contains('checkbox') || 
+                        e.target.classList.contains('editable') ||
+                        e.target.classList.contains('delete-btn') ||
+                        e.target.classList.contains('collapse-btn') ||
+                        e.target.closest('.checklist-item')) {
+                        return;
+                    }
+                    // Only expand, never collapse (collapse button handles that)
+                    if (!this.classList.contains('expanded')) {
+                        this.classList.add('expanded');
+                    }
+                });
+            }
         }); 
         
         catDiv.appendChild(grid); 
@@ -1089,4 +1091,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
