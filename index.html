@@ -810,33 +810,35 @@ function renderContent() {
             card.appendChild(addItemBtn); 
             
             grid.appendChild(card); 
-			// Add click handler for headings mode
-		// Add click handler for headings mode
-if (layoutMode === 'headings' && !editMode) {
-    const titleDiv = card.querySelector('.skill-title');
-    if (titleDiv) {
-        titleDiv.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // Don't toggle if clicking on icon or editable content in the title
-            if (e.target.classList.contains('editable-icon') || 
-                e.target.classList.contains('editable') ||
-                e.target.classList.contains('delete-btn')) {
-                return;
+			
+// Add click handler for headings mode
+            if (layoutMode === 'headings' && !editMode) {
+                const titleDiv = card.querySelector('.skill-title');
+                if (titleDiv) {
+                    titleDiv.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // Don't toggle if clicking on icon or editable content in the title
+                        if (e.target.classList.contains('editable-icon') || 
+                            e.target.classList.contains('editable') ||
+                            e.target.classList.contains('delete-btn')) {
+                            return;
+                        }
+                        card.classList.toggle('expanded');
+                    });
+                }
+                
+                // Prevent checklist item clicks from triggering card collapse
+                const checklistItems = card.querySelectorAll('.checklist-item');
+                checklistItems.forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // Let the normal toggle check function handle it
+                    });
+                });
             }
-            card.classList.toggle('expanded');
-        });
-    }
-    
-    // Prevent card clicks from bubbling when clicking on items
-    card.addEventListener('click', function(e) {
-        if (e.target.closest('.checklist-item')) {
-            e.stopPropagation();
-        }
-    });
-}
         }); 
         
-        catDiv.appendChild(grid); 
+        catDiv.appendChild(grid);
         
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
@@ -1084,6 +1086,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
