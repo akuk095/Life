@@ -819,7 +819,8 @@ function renderContent() {
                         e.target.classList.contains('delete-btn')) {
                         return;
                     }
-                    this.classList.toggle('expanded');
+                    // Only expand, never collapse
+                    this.classList.add('expanded');
                 });
             }
         }); 
@@ -1072,3 +1073,4 @@ loadFromFirebase();
 
 </body>
 </html>
+
