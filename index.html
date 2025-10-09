@@ -333,11 +333,26 @@ function applyTheme() {
     // Determine if the theme is light
     const isLight = isLightColor(primaryColor);
     
+    // For light themes, make secondary much darker for better contrast
+    if (isLight) {
+        const hex = primaryColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        const darkerR = Math.max(0, Math.floor(r * 0.4));
+        const darkerG = Math.max(0, Math.floor(g * 0.4));
+        const darkerB = Math.max(0, Math.floor(b * 0.4));
+        
+        secondaryColor = '#' + [darkerR, darkerG, darkerB]
+            .map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+    
     // Set CSS variables
     document.documentElement.style.setProperty('--primary-color', primaryColor);
     document.documentElement.style.setProperty('--secondary-color', secondaryColor);
     
-    // Set tab active color based on theme lightness
+    // Set tab active color - use secondary for light themes
     document.documentElement.style.setProperty('--tab-active-color', isLight ? secondaryColor : primaryColor);
     
     // Apply background gradient
@@ -361,12 +376,6 @@ function applyTheme() {
             btn.style.color = isLight ? '#2c3e50' : 'white';
         });
     }
-    
-    // Adjust active tab text color
-    const activeTabs = document.querySelectorAll('.nav-tab.active');
-    activeTabs.forEach(tab => {
-        tab.style.color = isLight ? secondaryColor : primaryColor;
-    });
     
     // Adjust floating button
     const floatingBtn = document.getElementById('layoutBtn');
@@ -1739,6 +1748,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
