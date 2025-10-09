@@ -33,6 +33,10 @@
 		.color-picker-menu { display: none; background: white; border-radius: 8px; padding: 15px 20px 15px 15px; margin-top: 5px; position: fixed; right: 10px; top: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1001; max-height: calc(100vh - 160px); overflow-y: auto; width: 200px; }
 		.color-picker-menu h3 { margin: 0 0 10px 0; font-size: 14px; color: #2c3e50; }
 		.color-picker-menu.show { display: block; }
+		.color-picker-canvas { position: relative; width: 100%; height: 200px; border-radius: 8px; cursor: crosshair; margin-bottom: 10px; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%), linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%); }
+		.hue-slider { width: 100%; height: 20px; border-radius: 10px; background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%); cursor: pointer; position: relative; margin-bottom: 15px; }
+		.picker-indicator { position: absolute; width: 16px; height: 16px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.5); pointer-events: none; transform: translate(-50%, -50%); }
+		.hue-indicator { position: absolute; width: 8px; height: 24px; background: white; border: 2px solid #2c3e50; border-radius: 4px; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
 		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: transparent; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; }
 		.container.loaded { opacity: 1; }
 		.content-area { padding: 0 0 30px 0; }
@@ -373,7 +377,13 @@ function applyTheme() {
 function toggleColorPicker(e) {
     e.stopPropagation();
     const picker = document.getElementById('colorPickerMenu');
+    const isShowing = picker.classList.contains('show');
     picker.classList.toggle('show');
+    
+    if (!isShowing) {
+        // Initialize picker when opening
+        setTimeout(() => initColorPicker(), 10);
+    }
 }
 
 function selectColor(color) {
@@ -386,13 +396,180 @@ function selectColor(color) {
     document.getElementById('colorPickerMenu').classList.remove('show');
     document.getElementById('dropdownMenu').classList.remove('show');
 }
+function initColorPicker() {
+    const canvas = document.getElementById('colorCanvas');
+    const hueSlider = document.getElementById('hueSlider');
+    const canvasIndicator = document.getElementById('canvasIndicator');
+    const hueIndicator = document.getElementById('hueIndicator');
+    const hexInput = document.getElementById('hexInput');
+    const colorPreview = document.getElementById('colorPreview');
+    
+    if (!canvas || !hueSlider) return;
+    
+    let currentHue = 0;
+    let currentSaturation = 100;
+    let currentLightness = 50;
+    
+    // Convert current themeColor to HSL
+    const rgb = hexToRgb(themeColor);
+    if (rgb) {
+        const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+        currentHue = hsl.h;
+        currentSaturation = hsl.s;
+        currentLightness = hsl.l;
+        
+        // Set initial positions
+        hueIndicator.style.left = (currentHue / 360 * 100) + '%';
+        canvasIndicator.style.left = currentSaturation + '%';
+        canvasIndicator.style.top = (100 - currentLightness * 2) + '%';
+        canvas.style.backgroundColor = `hsl(${currentHue}, 100%, 50%)`;
+    }
+    
+    // Hue slider interaction
+    function updateHue(e) {
+        const rect = hueSlider.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const huePercent = (x / rect.width) * 100;
+        currentHue = (huePercent / 100) * 360;
+        
+        hueIndicator.style.left = huePercent + '%';
+        canvas.style.backgroundColor = `hsl(${currentHue}, 100%, 50%)`;
+        updateColor();
+    }
+    
+    let hueMouseDown = false;
+    hueSlider.addEventListener('mousedown', (e) => {
+        hueMouseDown = true;
+        updateHue(e);
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (hueMouseDown) updateHue(e);
+        if (canvasMouseDown) updateCanvas(e);
+    });
+    
+    document.addEventListener('mouseup', () => {
+        hueMouseDown = false;
+        canvasMouseDown = false;
+    });
+    
+    // Canvas interaction
+    let canvasMouseDown = false;
+    
+    function updateCanvas(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+        
+        const xPercent = (x / rect.width) * 100;
+        const yPercent = (y / rect.height) * 100;
+        
+        currentSaturation = xPercent;
+        currentLightness = 50 - (yPercent - 50) * (50 / 50);
+        
+        canvasIndicator.style.left = xPercent + '%';
+        canvasIndicator.style.top = yPercent + '%';
+        updateColor();
+    }
+    
+    canvas.addEventListener('mousedown', (e) => {
+        canvasMouseDown = true;
+        updateCanvas(e);
+    });
+    
+    function updateColor() {
+        const color = hslToHex(currentHue, currentSaturation, currentLightness);
+        hexInput.value = color;
+        colorPreview.style.backgroundColor = color;
+    }
+    
+    // Hex input
+    hexInput.addEventListener('input', (e) => {
+        let value = e.target.value;
+        if (!value.startsWith('#')) value = '#' + value;
+        
+        if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+            colorPreview.style.backgroundColor = value;
+            const rgb = hexToRgb(value);
+            if (rgb) {
+                const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+                currentHue = hsl.h;
+                currentSaturation = hsl.s;
+                currentLightness = hsl.l;
+                
+                hueIndicator.style.left = (currentHue / 360 * 100) + '%';
+                canvasIndicator.style.left = currentSaturation + '%';
+                canvasIndicator.style.top = (100 - currentLightness * 2) + '%';
+                canvas.style.backgroundColor = `hsl(${currentHue}, 100%, 50%)`;
+            }
+        }
+    });
+    
+    hexInput.addEventListener('blur', () => {
+        if (/^#[0-9A-Fa-f]{6}$/.test(hexInput.value)) {
+            selectCustomColor(hexInput.value);
+        }
+    });
+}
 
+// Helper functions
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    
+    if (max === min) {
+        h = s = 0;
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+            case g: h = ((b - r) / d + 2) / 6; break;
+            case b: h = ((r - g) / d + 4) / 6; break;
+        }
+    }
+    
+    return { h: h * 360, s: s * 100, l: l * 100 };
+}
+
+function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+    
+    if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+    else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+    else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+    else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+    else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+    else if (h >= 300 && h < 360) { r = c; g = 0; b = x; }
+    
+    const toHex = (n) => {
+        const hex = Math.round((n + m) * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+    
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
 function selectCustomColor(color) {
     // Find the closest matching theme or create a gradient
     const selectedTheme = colorThemes.find(t => t.primary === color);
     
     if (selectedTheme) {
         themeColor = selectedTheme.primary;
+        applyTheme();
     } else {
         // Create a custom theme with a slightly darker shade for secondary
         themeColor = color;
@@ -410,9 +587,6 @@ function selectCustomColor(color) {
         const secondaryColor = '#' + [darkerR, darkerG, darkerB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
         
-        // Temporarily add custom theme
-        const customTheme = { name: 'Custom', primary: color, secondary: secondaryColor };
-        
         // Update CSS variables directly for custom color
         document.documentElement.style.setProperty('--primary-color', color);
         document.documentElement.style.setProperty('--secondary-color', secondaryColor);
@@ -426,15 +600,6 @@ function selectCustomColor(color) {
     }
     
     database.ref(`guides/${currentGuideId}/themeColor`).set(themeColor);
-    
-    if (selectedTheme) {
-        applyTheme();
-        renderHeader();
-    }
-    
-    // Close menus
-    document.getElementById('colorPickerMenu').classList.remove('show');
-    document.getElementById('dropdownMenu').classList.remove('show');
 }
 function createNewGuide() {
     const name = prompt("Enter a name for this new guide:");
@@ -583,21 +748,29 @@ function renderHeader() {
     <button onclick="toggleAutoRefresh()">
         ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
     </button>
-    <div class="color-picker-menu" id="colorPickerMenu">
-        <h3>Choose Theme Color</h3>
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; font-size: 12px; color: #7f8c8d; margin-bottom: 5px;">Custom Color:</label>
-            <input type="color" id="customColorPicker" value="${themeColor}" 
-                   style="width: 100%; height: 40px; border: 2px solid #dee2e6; border-radius: 6px; cursor: pointer;"
-                   onchange="selectCustomColor(this.value)">
+<div class="color-picker-menu" id="colorPickerMenu">
+    <h3>Choose Theme Color</h3>
+    <div style="margin-bottom: 15px;">
+        <div id="colorCanvas" class="color-picker-canvas" style="background-color: hsl(0, 100%, 50%);">
+            <div class="picker-indicator" id="canvasIndicator" style="left: 100%; top: 0%;"></div>
         </div>
-        <div style="border-top: 1px solid #dee2e6; padding-top: 10px; margin-top: 10px;">
-            <label style="display: block; font-size: 12px; color: #7f8c8d; margin-bottom: 8px;">Preset Themes:</label>
-            <div class="color-options">
-                ${colorOptionsHTML}
-            </div>
+        <div class="hue-slider" id="hueSlider">
+            <div class="hue-indicator" id="hueIndicator" style="left: 0%;"></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 40px; height: 40px; border-radius: 8px; border: 2px solid #dee2e6; background-color: ${themeColor};" id="colorPreview"></div>
+            <input type="text" id="hexInput" value="${themeColor}" 
+                   style="flex: 1; padding: 8px; border: 2px solid #dee2e6; border-radius: 6px; font-family: monospace; text-transform: uppercase;"
+                   maxlength="7" placeholder="#FF0000">
         </div>
     </div>
+    <div style="border-top: 1px solid #dee2e6; padding-top: 10px; margin-top: 10px;">
+        <label style="display: block; font-size: 12px; color: #7f8c8d; margin-bottom: 8px;">Preset Themes:</label>
+        <div class="color-options">
+            ${colorOptionsHTML}
+        </div>
+    </div>
+</div>
 </div>
 </div>
 <h1>
@@ -852,7 +1025,7 @@ function saveCategories() {
 function saveCheckedItems() {
    database.ref(`guides/${currentGuideId}/checkedItems`).set(checkedItems)
 }
-		
+
 // Save auto-refresh settings to Firebase
 function saveAutoRefreshSettings() {
     database.ref(`guides/${currentGuideId}/autoRefreshEnabled`).set(autoRefreshEnabled);
@@ -1474,6 +1647,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
