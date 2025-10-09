@@ -514,7 +514,7 @@ function renderHeader() {
 </div>
 <h1>
     <span class="editable-icon" style="display: inline-block; position: relative;">
-        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'};">${appIcon && appIcon !== "​" ? appIcon : "​"}</span>
+        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${appIcon && appIcon !== "​" ? appIcon : (editMode ? "➕" : "​")}</span>
         ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" onclick="event.stopPropagation(); appIcon = \'​\'; saveHeader();">×</span>' : ''}
     </span>
     <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
@@ -862,13 +862,16 @@ function renderContent() {
     			? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` 
     			: '';
 
-			titleDiv.innerHTML = `
-   			<span class="editable-icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''}>
-       		<span class="icon">${iconDisplay}</span>
-      		 ${removeBtn}
-   		</span>
-  			 <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-			`;
+			const hasIcon = skill.icon && skill.icon !== "​";
+const iconToShow = hasIcon ? skill.icon : (editMode ? "➕" : "​");
+
+titleDiv.innerHTML = `
+   <span class="editable-icon" style="display: inline-block; position: relative;">
+       <span class="icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
+       ${editMode && hasIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` : ''}
+   </span>
+   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+`;
 			// Add collapse button for headings mode
 				if (layoutMode === 'headings' && !editMode) {
     				const collapseBtn = document.createElement('button');
@@ -1237,6 +1240,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
