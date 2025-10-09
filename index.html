@@ -1957,7 +1957,7 @@ function renderContent() {
 			    };
 			    const toggleBtn = document.createElement('button');
 			    toggleBtn.className = 'bullet-toggle-btn';
-			    toggleBtn.style.right = '78px'; // Now on the left (where duplicate was)
+			    toggleBtn.style.right = '78px'; // on the left
 			    toggleBtn.textContent = bulletIcons[bulletStyle];
 			    toggleBtn.title = 'Change bullet style';
 			    toggleBtn.onclick = (e) => {
@@ -1970,7 +1970,7 @@ function renderContent() {
 			if (editMode) {
 			    const duplicateBtn = document.createElement('button');
 			    duplicateBtn.className = 'bullet-toggle-btn';
-			    duplicateBtn.style.right = '42px'; // Now on the right (where toggle was)
+			    duplicateBtn.style.right = '38px'; // on the right 
 			    duplicateBtn.innerHTML = '⧉';
 			    duplicateBtn.title = 'Duplicate card';
 			    duplicateBtn.onclick = (e) => {
@@ -2330,6 +2330,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
