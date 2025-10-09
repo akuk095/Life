@@ -302,6 +302,81 @@ document.addEventListener('drop', (e) => {
         renderContent();
     }
 });
+
+// Drag and drop for category tabs
+let draggedTab = null;
+let draggedTabIndex = null;
+
+document.addEventListener('dragstart', (e) => {
+    if (e.target.classList.contains('nav-tab') && editMode && e.target.draggable) {
+        draggedTab = e.target;
+        draggedTabIndex = parseInt(e.target.dataset.catIndex);
+        e.target.style.opacity = '0.5';
+        e.dataTransfer.effectAllowed = 'move';
+    }
+});
+
+document.addEventListener('dragend', (e) => {
+    if (e.target.classList.contains('nav-tab')) {
+        e.target.style.opacity = '';
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.style.borderLeft = '';
+        });
+        draggedTab = null;
+    }
+});
+
+document.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!draggedTab) return;
+    
+    const target = e.target.closest('.nav-tab');
+    if (target && target !== draggedTab && target.draggable) {
+        e.dataTransfer.dropEffect = 'move';
+    }
+});
+
+document.addEventListener('dragenter', (e) => {
+    const target = e.target.closest('.nav-tab');
+    if (target && target !== draggedTab && target.draggable) {
+        target.style.borderLeft = '3px solid var(--primary-color)';
+    }
+});
+
+document.addEventListener('dragleave', (e) => {
+    const target = e.target.closest('.nav-tab');
+    if (target) {
+        target.style.borderLeft = '';
+    }
+});
+
+document.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const target = e.target.closest('.nav-tab');
+    
+    if (target && target !== draggedTab && target.draggable) {
+        const targetIndex = parseInt(target.dataset.catIndex);
+        
+        // Reorder categories array
+        const [movedCategory] = categories.splice(draggedTabIndex, 1);
+        categories.splice(targetIndex, 0, movedCategory);
+        
+        // Update active tab index if needed
+        if (activeTabIndex === draggedTabIndex) {
+            activeTabIndex = targetIndex;
+        } else if (draggedTabIndex < activeTabIndex && targetIndex >= activeTabIndex) {
+            activeTabIndex--;
+        } else if (draggedTabIndex > activeTabIndex && targetIndex <= activeTabIndex) {
+            activeTabIndex++;
+        }
+        
+        saveCategories();
+        renderTabs();
+        renderContent();
+    }
+});
+
+		
 // Load data from Firebase on startup
 function loadFromFirebase() {
     // Hide container initially
@@ -1107,11 +1182,12 @@ function populateGuideDropdown() {
             };
             
             if (id === currentGuideId) {
-                btn.classList.add('current-guide');
-                btn.style.color = themeColor;
-                btn.style.fontWeight = '700';
-                btn.style.fontSize = '15px';
-            }
+			    btn.classList.add('current-guide');
+			    const isLight = isLightColor(guideTheme);
+			    btn.style.color = isLight ? 'var(--secondary-color)' : guideTheme;
+			    btn.style.fontWeight = '700';
+			    btn.style.fontSize = '15px';
+			}
 
             // Enable drag-and-drop in edit mode
             if (editMode) {
@@ -1546,7 +1622,14 @@ function renderTabs() {
         
         const tab = document.createElement('button'); 
         tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
-        
+
+		// Make tabs draggable in edit mode
+		if (editMode) {
+		    tab.draggable = true;
+		    tab.dataset.catIndex = i;
+		    tab.style.cursor = 'grab';
+		}
+		
         // Make tab editable in edit mode
         if (editMode) {
             const hasTabIcon = cat.icon && cat.icon !== "​";
@@ -2063,6 +2146,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
