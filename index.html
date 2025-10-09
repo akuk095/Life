@@ -22,7 +22,6 @@
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
 		.checklist-item:hover { background: #e8f4f8; border-color: var(--primary-color, #3498db); }
-		
 		.checklist-text { flex: 1; font-size: 14px; line-height: 1.5; color: #495057; }
 		.collapse-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s ease; width: 20px; height: 20px; display: none; }
 		.collapse-btn:hover { background: #ecf0f1; transform: scale(1.1); }
@@ -121,8 +120,6 @@
 		.checklist-item:has(.delete-btn:hover) { background: #fee2e2 !important; border-color: #fca5a5 !important; }
 		.skill-card:has(> .skill-title .delete-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
 		.tab-wrapper:has(.delete-tab-btn:hover) .nav-tab { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fca5a5 !important; }
-		.skill-title:has(.emoji-remove-btn:hover) { background: #fee2e2; border-radius: 4px; padding: 2px 4px; margin: -2px -4px 12px -4px; }
-		.nav-tab:has(.emoji-remove-btn:hover) { background: #fee2e2 !important; color: #dc2626 !important; }
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@supports (-webkit-touch-callout: none) { /* iOS specific - use native emoji keyboard */ input[type="text"].emoji-input {  font-size: 32px; } }
@@ -877,7 +874,7 @@ function renderHeader() {
 </div>
 <h1>
     <span class="editable-icon" style="display: inline-block; position: relative;">
-        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${appIcon && appIcon !== "​" ? appIcon : (editMode ? "➕" : "​")}</span>
+        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${appIcon && appIcon !== "​" ? appIcon : (editMode ? "+" : "​")}</span>
         ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" onclick="event.stopPropagation(); appIcon = \'​\'; saveHeader();">×</span>' : ''}
     </span>
     <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
@@ -1050,7 +1047,7 @@ function populateGuideDropdown() {
     });
 }
 
-let draggedElement = null;
+
 
 function handleDragStart(e) {
     draggedElement = this;
@@ -1334,7 +1331,7 @@ function renderTabs() {
         // Make tab editable in edit mode
         if (editMode) {
             const hasTabIcon = cat.icon && cat.icon !== "​";
-const tabIconToShow = hasTabIcon ? cat.icon : "➕";
+const tabIconToShow = hasTabIcon ? cat.icon : "+";
 
 tab.innerHTML = `
     <span class="editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)" style="display: inline-block; position: relative;">
@@ -1424,7 +1421,7 @@ function renderContent() {
     			: '';
 
 			const hasIcon = skill.icon && skill.icon !== "​";
-const iconToShow = hasIcon ? skill.icon : (editMode ? "➕" : "​");
+const iconToShow = hasIcon ? skill.icon : (editMode ? "+" : "​");
 
 titleDiv.innerHTML = `
    <span class="editable-icon" style="display: inline-block; position: relative;">
@@ -1903,6 +1900,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
