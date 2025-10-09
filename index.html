@@ -41,7 +41,7 @@
 		.hue-indicator { position: absolute; width: 8px; height: 24px; background: white; border: 2px solid #2c3e50; border-radius: 4px; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
 		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: white; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; }
 		.container.loaded { opacity: 1; }
-		.content-area { padding: 30px; background: #f8f9fa; min-height: calc(100vh - 200px); }
+		.content-area { padding: 0; background: #f8f9fa; min-height: calc(100vh - 200px); }
 		.delete-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; display: none; margin-left: 8px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
 		.delete-btn:hover { color: #c0392b; transform: scale(1.2); }
 		.delete-tab-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
@@ -106,13 +106,13 @@
 		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #d0d4d9; }
 		.skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 0; padding: 0; transition: all 0.3s ease; }
-		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 0 12px; }
+		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 20px 8px; }
 		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--secondary-color, #3498db); border-radius: 8px; background: white; border-bottom: 1px solid #e8eaed; cursor: pointer; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 		.skill-grid.headings .skill-card.expanded .checklist-item { display: flex; }
 		.skill-grid.headings .checklist-item { display: none; }
 		.skill-grid.headings .add-item-btn { display: none !important; }
-		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 30px; gap: 24px; }
+		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 30px; gap: 32px; }
 		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: 1px solid #e8eaed; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 		.skill-title { font-size: 17px; font-weight: 600; color: #1f2937; margin-bottom: 16px; letter-spacing: -0.2px; line-height: 1.4; }
 		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
@@ -1297,7 +1297,10 @@ function renderContent() {
         
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
-            card.className = 'skill-card';
+			card.className = 'skill-card';
+			// Set border color based on theme
+			const isLight = isLightColor(themeColor);
+			card.style.borderLeftColor = isLight ? 'var(--secondary-color)' : 'var(--primary-color)';
             card.dataset.catIndex = catIndex;
             card.dataset.skillIndex = skillIndex; 
             
@@ -1778,6 +1781,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
