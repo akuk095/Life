@@ -126,7 +126,7 @@
     	.guide-item { cursor: move; }
 		.guide-item.dragging { opacity: 0.5; }
 		.guide-item.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
-		.drag-handle { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); cursor: grab; padding: 6px 4px; color: rgba(0, 0, 0, 0.15); font-size: 16px; line-height: 1; user-select: none; transition: all 0.2s; font-weight: normal; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8); letter-spacing: -2px; }
+		.drag-handle { position: absolute; left: 8px; top: 0; bottom: 0; display: flex; align-items: center; cursor: grab; padding: 0 4px; color: rgba(0, 0, 0, 0.15); font-size: 16px; line-height: 1; user-select: none; transition: all 0.2s; font-weight: normal; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8); letter-spacing: -2px; }
 		.drag-handle:hover { color: rgba(0, 0, 0, 0.25); text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.9); }
 		.drag-handle:active { cursor: grabbing; }
 		.skill-card.dragging { opacity: 0.5; background: #f3f4f6; }
@@ -249,6 +249,12 @@ document.addEventListener('dragstart', (e) => {
         draggedSkillIndex = parseInt(e.target.dataset.skillIndex);
         e.target.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
+        
+        // Set drag image offset to cursor position
+        const rect = e.target.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        e.dataTransfer.setDragImage(e.target, offsetX, offsetY);
     }
 });
 
@@ -1134,7 +1140,7 @@ function populateGuideDropdown() {
             btn.className = 'guide-item';
             btn.dataset.guideId = id;
             btn.style.borderLeft = `4px solid ${guideTheme}`;
-            btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
+            btn.style.background = `linear-gradient(90deg, ${guideTheme}25 0%, transparent 100%)`;
             btn.style.display = 'flex';
             btn.style.alignItems = 'center';
             btn.style.justifyContent = 'space-between';
@@ -2147,6 +2153,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
