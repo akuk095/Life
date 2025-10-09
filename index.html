@@ -18,7 +18,7 @@
 		.checkbox { width: 20px; height: 20px; border: 2px solid var(--primary-color, #3498db); border-radius: 4px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.3s ease; }
 		.checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: white; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
 		.checklist-item.checked { opacity: 0.7; }
-		.checklist-item.checked .checkbox { background: #27ae60; border-color: #27ae60; position: relative; }
+		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
 		.checklist-item.checked .checkbox:after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
 		.checklist-item:hover { background: #f0f7ff; }
 		.checklist-text { flex: 1; font-size: 14px; line-height: 1.5; color: #495057; }
@@ -340,9 +340,9 @@ function applyTheme() {
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
         
-        const darkerR = Math.max(0, Math.floor(r * 0.4));
-        const darkerG = Math.max(0, Math.floor(g * 0.4));
-        const darkerB = Math.max(0, Math.floor(b * 0.4));
+        const darkerR = Math.max(0, Math.floor(r * 0.2));
+        const darkerG = Math.max(0, Math.floor(g * 0.2));
+        const darkerB = Math.max(0, Math.floor(b * 0.2));
         
         secondaryColor = '#' + [darkerR, darkerG, darkerB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
@@ -1748,6 +1748,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
