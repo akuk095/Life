@@ -1750,6 +1750,17 @@ function toggleBulletStyle(catIndex, skillIndex) {
     saveCategories();
     renderContent();
 }
+
+function duplicateSkill(catIndex, skillIndex) {
+    const originalSkill = categories[catIndex].skills[skillIndex];
+    const duplicatedSkill = JSON.parse(JSON.stringify(originalSkill)); // Deep copy
+    duplicatedSkill.title = duplicatedSkill.title + ' (Copy)';
+    
+    categories[catIndex].skills.splice(skillIndex + 1, 0, duplicatedSkill);
+    saveCategories();
+    renderContent();
+}
+		
 function renderContent() { 
 	    const contentArea = document.getElementById('contentArea'); 
 	    contentArea.innerHTML = ''; 
@@ -1849,8 +1860,10 @@ function renderContent() {
             
             card.appendChild(titleDiv);
 
-			// Add bullet toggle button (not in edit mode)
-			if (!editMode) {
+			card.appendChild(titleDiv);
+
+			// Add bullet toggle button (only in edit mode)
+			if (editMode) {
 			    const bulletStyle = skill.bulletStyle || 'checkbox';
 			    const bulletIcons = {
 			        'checkbox': '☑',
@@ -1869,7 +1882,19 @@ function renderContent() {
 			    };
 			    card.appendChild(toggleBtn);
 			}
-            
+            // Add duplicate button (only in edit mode)
+			if (editMode) {
+			    const duplicateBtn = document.createElement('button');
+			    duplicateBtn.className = 'bullet-toggle-btn';
+			    duplicateBtn.style.right = '78px'; // Position to the left of bullet toggle
+			    duplicateBtn.textContent = '⎘';
+			    duplicateBtn.title = 'Duplicate card';
+			    duplicateBtn.onclick = (e) => {
+			        e.stopPropagation();
+			        duplicateSkill(catIndex, skillIndex);
+			    };
+			    card.appendChild(duplicateBtn);
+			}
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
@@ -2221,6 +2246,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
