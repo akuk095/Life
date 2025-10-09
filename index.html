@@ -84,7 +84,7 @@
 		.header h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px; }
 		.header p { opacity: 0.95; font-size: 13px; font-weight: 400; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
-		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px; }
+		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 24px; }
 		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; }
 		.nav-tab { padding: 16px 28px; cursor: pointer; border: none; background: none; font-size: 14px; font-weight: 500; color: #5f6368; transition: all 0.2s ease; white-space: nowrap; border-bottom: 3px solid transparent; flex-shrink: 0; position: relative; }
 		.nav-tab:hover { color: var(--primary-color, #3498db); background: rgba(52, 152, 219, 0.05); }
@@ -101,7 +101,7 @@
 		.save-btn { position: absolute; top: 5px; right: 5px; background: transparent; color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 16px; cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(255, 255, 255, 0.1); transition: all 0.2s ease; display: none; z-index: 10; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
 		.save-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.2); }
 		.save-btn:active { box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4); transform: translateY(1px); }
-		.skill-card { background: white; border-radius: 0; padding: 24px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e8eaed; box-shadow: none; transition: all 0.3s ease; position: relative; }
+		.skill-card { background: white; border-radius: 0; padding: 24px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e8eaed; box-shadow: 0 2px 4px var(--shadow-color); transition: all 0.3s ease; position: relative; }
 		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #d0d4d9; }
 		.skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid { display: flex; flex-direction: column; gap: 24px; margin-top: 0; padding: 16px 0 0 0; transition: all 0.3s ease; }
@@ -433,6 +433,12 @@ function applyTheme() {
     // Set CSS variables
     document.documentElement.style.setProperty('--primary-color', primaryColor);
     document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+	// Set shadow with secondary color at 30% opacity
+const hex = secondaryColor.replace('#', '');
+const r = parseInt(hex.substr(0, 2), 16);
+const g = parseInt(hex.substr(2, 2), 16);
+const b = parseInt(hex.substr(4, 2), 16);
+document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, ${b}, 0.3)`);
     
     // Set tab active color - use secondary for light themes
     document.documentElement.style.setProperty('--tab-active-color', isLight ? secondaryColor : primaryColor);
@@ -2043,6 +2049,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
