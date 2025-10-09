@@ -966,7 +966,7 @@ function renderHeader() {
 </div>
 </div>
 <h1>
-    <span class="editable-icon" style="display: inline-block; position: relative;">
+    <span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
         <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
             (() => {
                 const hasIconContent = appIcon && appIcon !== "​";
@@ -1682,7 +1682,7 @@ function renderContent() {
 			}
 			
 			titleDiv.innerHTML += `
-			   <span class="editable-icon" style="display: inline-block; position: relative;">
+			   <span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
 			       <span class="icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
 			       ${editMode && hasIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` : ''}
 			   </span>
@@ -1882,124 +1882,10 @@ function toggleEditMode() {
 }
 
 function editAppIcon(el) {
-    const existingInput = document.querySelector('.emoji-input-field');
-    if (existingInput) {
-        existingInput.remove();
-        return;
-    }
-    
-    const inputWrapper = document.createElement('div');
-    inputWrapper.style.position = 'fixed';
-    inputWrapper.style.top = '50%';
-    inputWrapper.style.left = '50%';
-    inputWrapper.style.transform = 'translate(-50%, -50%)';
-    inputWrapper.style.background = 'white';
-    inputWrapper.style.padding = '20px';
-    inputWrapper.style.borderRadius = '12px';
-    inputWrapper.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-    inputWrapper.style.zIndex = '10000';
-    inputWrapper.className = 'emoji-input-field';
-    inputWrapper.addEventListener('click', (e) => e.stopPropagation());
-	
-    const label = document.createElement('div');
-    label.textContent = 'Paste or type emoji:';
-    label.style.marginBottom = '10px';
-    label.style.fontSize = '14px';
-    label.style.color = '#2c3e50';
-    inputWrapper.appendChild(label);
-    
-	const input = document.createElement('input');
-	input.type = 'text';
-	input.maxLength = 20;
-	input.style.fontSize = '32px';
-	input.style.width = '80px';
-	input.style.textAlign = 'center';
-	input.style.border = '2px solid #3498db';
-	input.style.borderRadius = '8px';
-	input.style.padding = '10px';
-	input.style.outline = 'none';
-	input.placeholder = '✅';
-	
-	// Restrict to single emoji only
-	input.addEventListener('input', (e) => {
-	    const value = e.target.value;
-	    // Match emoji including skin tones and combinations
-	    const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(\u200D(\p{Emoji_Presentation}|\p{Emoji}\uFE0F))*(\p{Emoji_Modifier})?/gu;
-	    const matches = value.match(emojiRegex);
-	    
-	    if (matches && matches.length > 0) {
-	        e.target.value = matches[0]; // Keep only first emoji
-	    } else if (value.length > 0) {
-	        e.target.value = ''; // Clear if not emoji
-	    }
-	});
-	
-	inputWrapper.appendChild(input);
-    
-    const buttonContainer = document.createElement('div');
-    buttonContainer.style.marginTop = '15px';
-    buttonContainer.style.display = 'flex';
-    buttonContainer.style.gap = '10px';
-    
-    const confirmBtn = document.createElement('button');
-    confirmBtn.textContent = 'Confirm';
-    confirmBtn.style.flex = '1';
-    confirmBtn.style.padding = '8px';
-    confirmBtn.style.background = '#27ae60';
-    confirmBtn.style.color = 'white';
-    confirmBtn.style.border = 'none';
-    confirmBtn.style.borderRadius = '6px';
-    confirmBtn.style.cursor = 'pointer';
-    confirmBtn.onclick = () => {
-        if (input.value) {
-            appIcon = input.value;
-            saveHeader();
-        }
-        inputWrapper.remove();
-    };
-    buttonContainer.appendChild(confirmBtn);
-    
-    const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = 'Cancel';
-    cancelBtn.style.flex = '1';
-    cancelBtn.style.padding = '8px';
-    cancelBtn.style.background = '#95a5a6';
-    cancelBtn.style.color = 'white';
-    cancelBtn.style.border = 'none';
-    cancelBtn.style.borderRadius = '6px';
-    cancelBtn.style.cursor = 'pointer';
-    cancelBtn.onclick = () => inputWrapper.remove();
-    buttonContainer.appendChild(cancelBtn);
-    
-    inputWrapper.appendChild(buttonContainer);
-    
-    const hint = document.createElement('div');
-    hint.style.marginTop = '10px';
-    hint.style.fontSize = '11px';
-    hint.style.color = '#7f8c8d';
-    hint.style.textAlign = 'center';
-    
-    if (navigator.userAgent.includes('Windows')) {
-        hint.textContent = 'Win + . to open emoji picker';
-    } else if (navigator.userAgent.includes('Mac')) {
-        hint.textContent = '⌘ + ^ + Space for emoji picker';
-    } else {
-        hint.textContent = 'Use your keyboard\'s emoji button';
-    }
-    inputWrapper.appendChild(hint);
-    
-    document.body.appendChild(inputWrapper);
-    input.focus();
-    
-    // Close on outside click
-    setTimeout(() => {
-        document.addEventListener('click', function closeInput(e) {
-            if (!inputWrapper.contains(e.target)) {
-                inputWrapper.remove();
-                document.removeEventListener('click', closeInput);
-            }
-        });
-    }, 100);
+    showEmojiPicker(el, (emoji) => {
+        appIcon = emoji;
+        saveHeader();
+    });
 }
 		// Save expanded cards to Firebase
 function saveExpandedCards() {
@@ -2171,6 +2057,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
