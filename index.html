@@ -1602,7 +1602,18 @@ function deleteCategory(catIndex) {
 // Close menus when clicking outside
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('dropdownMenu');
-    if (menu) menu.classList.remove('show');
+    const colorMenu = document.getElementById('colorPickerMenu');
+    
+    // Don't close dropdown if clicking inside color picker
+    if (colorMenu && colorMenu.contains(e.target)) {
+        return; // Keep everything open when interacting with color picker
+    }
+    
+    // Close dropdown menu if clicking outside
+    if (menu && !menu.contains(e.target)) {
+        menu.classList.remove('show');
+        if (colorMenu) colorMenu.classList.remove('show');
+    }
     
     const guideMenu = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
@@ -1613,9 +1624,6 @@ document.addEventListener('click', (e) => {
             closeDrawer();
         }
     }
-    
-    const colorMenu = document.getElementById('colorPickerMenu');
-    if (colorMenu) colorMenu.classList.remove('show');
 });
 
 		// Check for auto-refresh when page becomes visible
@@ -1647,6 +1655,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
