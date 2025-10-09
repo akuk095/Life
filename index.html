@@ -773,18 +773,16 @@ function renderTabs() {
         
         // Make tab editable in edit mode
         if (editMode) {
-            const tabIconDisplay = cat.icon && cat.icon !== "​" ? cat.icon : "​";
-			const tabRemoveBtn = cat.icon && cat.icon !== "​"
-    			? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${i}].icon = '​'; saveCategories(); renderTabs(); renderContent();">×</span>`
-    			: '';
+            const hasTabIcon = cat.icon && cat.icon !== "​";
+const tabIconToShow = hasTabIcon ? cat.icon : "➕";
 
-			tab.innerHTML = `
-    			<span class="editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)">
-        			<span class="tab-icon">${tabIconDisplay}</span>
-        			${tabRemoveBtn}
-    			</span>
-    			<span class="tab-name editable" contenteditable="true" onclick="event.stopPropagation()">${cat.name}</span>
-			`;
+tab.innerHTML = `
+    <span class="editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)" style="display: inline-block; position: relative;">
+        <span class="tab-icon" style="opacity: ${hasTabIcon ? '1' : '0.3'};">${tabIconToShow}</span>
+        ${hasTabIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${i}].icon = '​'; saveCategories(); renderTabs(); renderContent();">×</span>` : ''}
+    </span>
+    <span class="tab-name editable" contenteditable="true" onclick="event.stopPropagation()">${cat.name}</span>
+`;
             
             // Save name when editing
             const nameSpan = tab.querySelector('.tab-name');
@@ -1240,6 +1238,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
