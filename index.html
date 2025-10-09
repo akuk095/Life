@@ -1479,12 +1479,6 @@ function toggleEditMode() {
         document.body.classList.remove('edit-mode-active');
     }
     
-    // Show/hide save button
-    const saveBtn = document.getElementById('saveBtn');
-    if (saveBtn) {
-        saveBtn.style.display = editMode ? 'block' : 'none';
-    }
-    
     // Hide/show floating layout button
     const floatingBtn = document.getElementById('layoutBtn');
     if (floatingBtn) {
@@ -1493,7 +1487,13 @@ function toggleEditMode() {
     
     renderHeader();
     renderTabs();
-    renderContent(); 
+    renderContent();
+    
+    // Show/hide save button AFTER rendering header
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.style.display = editMode ? 'block' : 'none';
+    }
 }
 
 function editAppIcon(el) {
@@ -1782,3 +1782,4 @@ loadFromFirebase();
 
 </body>
 </html>
+
