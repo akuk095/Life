@@ -121,14 +121,14 @@
 		.checklist-item:has(.delete-btn:hover) { background: #fee2e2 !important; border-color: #fca5a5 !important; }
 		.skill-card:has(> .skill-title .delete-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
 		.tab-wrapper:has(.delete-tab-btn:hover) .nav-tab { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fca5a5 !important; }
-		.checklist-item:has(.emoji-remove-btn:hover) { background: #fee2e2 !important; border-color: #fca5a5 !important; }
-		.skill-card:has(> .skill-title .emoji-remove-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
-		.tab-wrapper:has(.emoji-remove-btn:hover) .nav-tab { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fca5a5 !important; }
-		.header:has(.emoji-remove-btn:hover) { opacity: 0.9; }
+		.skill-title:has(.emoji-remove-btn:hover) { background: #fee2e2; border-radius: 4px; padding: 2px 4px; margin: -2px -4px 12px -4px; }
+		.nav-tab:has(.emoji-remove-btn:hover) { background: #fee2e2 !important; color: #dc2626 !important; }
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@supports (-webkit-touch-callout: none) { /* iOS specific - use native emoji keyboard */ input[type="text"].emoji-input {  font-size: 32px; } }
-    
+    	.guide-item { cursor: move; }
+		.guide-item.dragging { opacity: 0.5; }
+		.guide-item.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
 	</style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -929,91 +929,190 @@ function renderHeader() {
 function populateGuideDropdown() {
     database.ref('guides').once('value', (snapshot) => {
         const guides = snapshot.val() || {};
-        const dropdown = document.getElementById('guideDropdown');
         
-        // Keep the header, clear only the guide list
-        const header = dropdown.querySelector('.drawer-header');
-        dropdown.innerHTML = '';
-        if (header) dropdown.appendChild(header);
-        
-        for (let id in guides) {
-            const title = guides[id].appTitle || id;
-            const icon = guides[id].appIcon || '📄';
-            const guideTheme = guides[id].themeColor || '#3498db';
+        // Get or initialize guide order
+        database.ref('guideOrder').once('value', (orderSnapshot) => {
+            let guideOrder = orderSnapshot.val() || [];
             
-            const btn = document.createElement('button');
-            btn.style.borderLeft = `4px solid ${guideTheme}`;
-            btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
-            btn.style.display = 'flex';
-            btn.style.alignItems = 'center';
-            btn.style.justifyContent = 'space-between';
+            // Add any new guides that aren't in the order yet
+            const guideIds = Object.keys(guides);
+            guideIds.forEach(id => {
+                if (!guideOrder.includes(id)) {
+                    guideOrder.push(id);
+                }
+            });
             
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = `${icon} ${title}`;
-            btn.appendChild(nameSpan);
+            // Remove any guides from order that no longer exist
+            guideOrder = guideOrder.filter(id => guides[id]);
             
-            if (editMode && id !== 'defaultGuide') {
-                const delBtn = document.createElement('span');
-                delBtn.textContent = 'del';
-                delBtn.style.background = '#e74c3c';
-                delBtn.style.color = '#f8f9fa';
-                delBtn.style.padding = '4px 10px';
-                delBtn.style.borderRadius = '6px';
-                delBtn.style.fontSize = '12px';
-                delBtn.style.fontWeight = 'bold';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
-                        database.ref(`guides/${id}`).remove();
-                        if (currentGuideId === id) {
-                            currentGuideId = 'defaultGuide';
-                            loadFromFirebase();
-                        } else {
-                            populateGuideDropdown();
+            const dropdown = document.getElementById('guideDropdown');
+            
+            // Keep the header, clear only the guide list
+            const header = dropdown.querySelector('.drawer-header');
+            dropdown.innerHTML = '';
+            if (header) dropdown.appendChild(header);
+            
+            // Render guides in order
+            guideOrder.forEach(id => {
+                const guide = guides[id];
+                const title = guide.appTitle || id;
+                const icon = guide.appIcon || '📄';
+                const guideTheme = guide.themeColor || '#3498db';
+                
+                const btn = document.createElement('button');
+                btn.className = 'guide-item';
+                btn.draggable = editMode;
+                btn.dataset.guideId = id;
+                btn.style.borderLeft = `4px solid ${guideTheme}`;
+                btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'space-between';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = `${icon} ${title}`;
+                btn.appendChild(nameSpan);
+                
+                if (editMode && id !== 'defaultGuide') {
+                    const delBtn = document.createElement('span');
+                    delBtn.textContent = 'del';
+                    delBtn.style.background = '#e74c3c';
+                    delBtn.style.color = '#f8f9fa';
+                    delBtn.style.padding = '4px 10px';
+                    delBtn.style.borderRadius = '6px';
+                    delBtn.style.fontSize = '12px';
+                    delBtn.style.fontWeight = 'bold';
+                    delBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
+                            database.ref(`guides/${id}`).remove();
+                            // Remove from order
+                            guideOrder = guideOrder.filter(orderId => orderId !== id);
+                            database.ref('guideOrder').set(guideOrder);
+                            
+                            if (currentGuideId === id) {
+                                currentGuideId = 'defaultGuide';
+                                loadFromFirebase();
+                            } else {
+                                populateGuideDropdown();
+                            }
                         }
+                    };
+                    btn.appendChild(delBtn);
+                }
+                
+                btn.onclick = (e) => {
+                    if (!e.target.textContent.includes('del')) {
+                        switchGuide(id);
+                        closeDrawer();
                     }
                 };
-                btn.appendChild(delBtn);
-            }
-            
-            btn.onclick = (e) => {
-                if (!e.target.textContent.includes('del')) {
-                    switchGuide(id);
-                    closeDrawer();
+                
+                if (id === currentGuideId) {
+                    btn.classList.add('current-guide');
+                    btn.style.color = themeColor;
+                    btn.style.fontWeight = '700';
+                    btn.style.fontSize = '15px';
                 }
-            };
+                
+                // Drag and drop events (only in edit mode)
+                if (editMode) {
+                    btn.addEventListener('dragstart', handleDragStart);
+                    btn.addEventListener('dragend', handleDragEnd);
+                    btn.addEventListener('dragover', handleDragOver);
+                    btn.addEventListener('drop', handleDrop);
+                    btn.addEventListener('dragleave', handleDragLeave);
+                }
+                
+                dropdown.appendChild(btn);
+            });
             
-            if (id === currentGuideId) {
-			    btn.classList.add('current-guide');
-			    btn.style.color = themeColor;
-			    btn.style.fontWeight = '700';
-			    btn.style.fontSize = '15px';
-			}
-            
-            dropdown.appendChild(btn);
-        }
-        
-        // Add create new guide button (only when not in edit mode)
-        if (!editMode) {
-            const createBtn = document.createElement('button');
-            createBtn.textContent = '+ Create new guide';
-            createBtn.style.borderLeft = '4px solid #3498db';
-            createBtn.style.borderRight = '2px solid #3498db';
-            createBtn.style.borderTop = 'none';
-            createBtn.style.borderBottom = '1px solid #f0f0f0';
-            createBtn.style.background = 'transparent';
-            createBtn.style.color = '#3498db';
-            createBtn.style.fontWeight = '600';
-            createBtn.style.borderRadius = '0';
-            createBtn.style.margin = '0';
-            createBtn.onclick = () => {
-                createNewGuide();
-                closeDrawer();
-            };
-            dropdown.appendChild(createBtn);
-        }
+            // Add create new guide button (only when not in edit mode)
+            if (!editMode) {
+                const createBtn = document.createElement('button');
+                createBtn.textContent = '+ Create new guide';
+                createBtn.style.borderLeft = '4px solid #3498db';
+                createBtn.style.borderRight = '2px solid #3498db';
+                createBtn.style.borderTop = 'none';
+                createBtn.style.borderBottom = '1px solid #f0f0f0';
+                createBtn.style.background = 'transparent';
+                createBtn.style.color = '#3498db';
+                createBtn.style.fontWeight = '600';
+                createBtn.style.borderRadius = '0';
+                createBtn.style.margin = '0';
+                createBtn.onclick = () => {
+                    createNewGuide();
+                    closeDrawer();
+                };
+                dropdown.appendChild(createBtn);
+            }
+        });
     });
 }
+
+let draggedElement = null;
+
+function handleDragStart(e) {
+    draggedElement = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    
+    // Remove drag-over class from all items
+    document.querySelectorAll('.guide-item').forEach(item => {
+        item.classList.remove('drag-over');
+    });
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    
+    const afterElement = this;
+    if (afterElement !== draggedElement) {
+        afterElement.classList.add('drag-over');
+    }
+    
+    return false;
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    
+    if (draggedElement !== this) {
+        // Get all guide items
+        const allItems = Array.from(document.querySelectorAll('.guide-item'));
+        const draggedIndex = allItems.indexOf(draggedElement);
+        const targetIndex = allItems.indexOf(this);
+        
+        // Reorder in DOM
+        if (draggedIndex < targetIndex) {
+            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(draggedElement, this);
+        }
+        
+        // Save new order to Firebase
+        const newOrder = Array.from(document.querySelectorAll('.guide-item')).map(item => item.dataset.guideId);
+        database.ref('guideOrder').set(newOrder);
+    }
+    
+    this.classList.remove('drag-over');
+    return false;
+}
+		
 function saveAndExitEdit() {
     editMode = false;
     document.body.classList.remove('edit-mode-active');
@@ -1804,6 +1903,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
