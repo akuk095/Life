@@ -513,8 +513,8 @@ function renderHeader() {
 </div>
 </div>
 <h1>
-    <span class="editable-icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''}>
-        <span class="icon">${appIcon ? appIcon : "​"}</span>
+    <span class="editable-icon" style="display: inline-block; position: relative;">
+        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'};">${appIcon && appIcon !== "​" ? appIcon : "​"}</span>
         ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" onclick="event.stopPropagation(); appIcon = \'​\'; saveHeader();">×</span>' : ''}
     </span>
     <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
@@ -1237,6 +1237,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
