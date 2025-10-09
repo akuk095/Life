@@ -26,12 +26,12 @@
 		.collapse-btn:hover { background: #ecf0f1; transform: scale(1.1); }
 		.collapse-btn svg { width: 100%; height: 100%; stroke: #95a5a6; transition: stroke 0.2s ease; }
 		.collapse-btn:hover svg { stroke: #2c3e50; }
-		.color-option { width: 40px; height: 40px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
+		.color-option { width: 32px; height: 32px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
 		.color-option:hover { transform: scale(1.1); border-color: #2c3e50; }
 		.color-option.selected { border-color: #2c3e50; border-width: 3px; }
-		.color-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding-right: 5px; }
-		.color-picker-menu { display: none; background: white; border-radius: 8px; padding: 15px 20px 15px 15px; margin-top: 5px; position: fixed; right: 10px; top: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1001; max-height: calc(100vh - 160px); overflow-y: auto; width: 200px; }
-		.color-picker-menu h3 { margin: 0 0 10px 0; font-size: 14px; color: #2c3e50; }
+		.color-options { display: flex; flex-wrap: wrap; gap: 8px; }
+		.color-picker-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
+		.color-picker-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
 		.color-picker-menu.show { display: block; }
 		.color-picker-canvas { position: relative; width: 100%; height: 200px; border-radius: 8px; cursor: crosshair; margin-bottom: 10px; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%), linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%); }
 		.hue-slider { width: 100%; height: 20px; border-radius: 10px; background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%); cursor: pointer; position: relative; margin-bottom: 15px; }
@@ -350,11 +350,9 @@ function applyTheme() {
 function toggleColorPicker(e) {
     e.stopPropagation();
     const picker = document.getElementById('colorPickerMenu');
-    const isShowing = picker.classList.contains('show');
     picker.classList.toggle('show');
     
-    if (!isShowing) {
-        // Initialize picker when opening
+    if (picker.classList.contains('show')) {
         setTimeout(() => initColorPicker(), 10);
     }
 }
@@ -716,13 +714,9 @@ function renderHeader() {
     <button onclick="toggleEditMode()">Edit</button>
     <button onclick="duplicateGuide()">Duplicate</button>
     <button onclick="deleteGuide()">Delete</button>
-    <button onclick="toggleColorPicker(event)">Theme</button>
-    <button onclick="clearAllChecks()">Clear all checks</button>
-    <button onclick="toggleAutoRefresh()">
-        ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
-    </button>
+<button onclick="toggleColorPicker(event)">Theme</button>
 <div class="color-picker-menu" id="colorPickerMenu">
-    <h3>Choose Theme Color</h3>
+    <h3>Custom Color</h3>
     <div style="margin-bottom: 15px;">
         <div id="colorCanvas" class="color-picker-canvas" style="background-color: hsl(0, 100%, 50%);">
             <div class="picker-indicator" id="canvasIndicator" style="left: 100%; top: 0%;"></div>
@@ -731,18 +725,21 @@ function renderHeader() {
             <div class="hue-indicator" id="hueIndicator" style="left: 0%;"></div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 40px; height: 40px; border-radius: 8px; border: 2px solid #dee2e6; background-color: ${themeColor};" id="colorPreview"></div>
+            <div style="width: 32px; height: 32px; border-radius: 6px; border: 2px solid #dee2e6; background-color: ${themeColor}; flex-shrink: 0;" id="colorPreview"></div>
             <input type="text" id="hexInput" value="${themeColor}" 
-                   style="flex: 1; padding: 8px; border: 2px solid #dee2e6; border-radius: 6px; font-family: monospace; text-transform: uppercase;"
+                   style="flex: 1; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;"
                    maxlength="7" placeholder="#FF0000">
         </div>
     </div>
-    <div style="border-top: 1px solid #dee2e6; padding-top: 10px; margin-top: 10px;">
-        <label style="display: block; font-size: 12px; color: #7f8c8d; margin-bottom: 8px;">Preset Themes:</label>
-        <div class="color-options">
-            ${colorOptionsHTML}
-        </div>
+    <h3>Preset Themes</h3>
+    <div class="color-options">
+        ${colorOptionsHTML}
     </div>
+</div>
+    <button onclick="clearAllChecks()">Clear all checks</button>
+    <button onclick="toggleAutoRefresh()">
+        ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
+    </button>
 </div>
 </div>
 </div>
@@ -1628,6 +1625,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
