@@ -189,24 +189,21 @@ let expandedCards = {};
 
 		
 const colorThemes = [
-    // Soft & Sophisticated
-    { name: 'Slate Blue', primary: '#6B7C93', secondary: '#4A5F7F' },
-    { name: 'Dusty Rose', primary: '#C9A0A0', secondary: '#A88080' },
+    { name: 'Soft Cream', primary: '#F5F7D9', secondary: '#E1E3C1' },
+	{ name: 'Warm Sand', primary: '#E5D4B0', secondary: '#DAC898' },
+	{ name: 'Dusty Rose', primary: '#C9A0A0', secondary: '#A88080' },
     { name: 'Rose Clay', primary: '#D98C8C', secondary: '#A96565' },
-	
-    // Modern & Professional
-    { name: 'Charcoal', primary: '#5C6B73', secondary: '#3D4A52' },
-    { name: 'Deep Teal', primary: '#4A7C7E', secondary: '#355E60' },
+	{ name: 'Elegant Burgundy', primary: '#8B4359', secondary: '#6B3349' },
+    { name: 'Elegant Plum', primary: '#8B5A8C', secondary: '#6B4A6C' },
+	{ name: 'Deep Teal', primary: '#4A7C7E', secondary: '#355E60' },
 	{ name: 'Forest Deep', primary: '#3A5A4A', secondary: '#22342D' },
-	
-    // Calm & Refined
+	{ name: 'Elegant Navy', primary: '#1E3A5F', secondary: '#2C5F8D' },
     { name: 'Ocean Blue', primary: '#5B8FA3', secondary: '#407084' },
-    { name: 'Warm Sand', primary: '#E5D4B0', secondary: '#DAC898' },
-	 { name: 'Stormy Blue', primary: '#6A8CA5', secondary: '#456274' },
-	
-    // Elegant & Timeless
+    { name: 'Stormy Blue', primary: '#6A8CA5', secondary: '#456274' },
+	{ name: 'Slate Blue', primary: '#6B7C93', secondary: '#4A5F7F' },
     { name: 'Steel Blue', primary: '#607D8B', secondary: '#455A64' },
-	{ name: 'Soft Cream', primary: '#F5F7D9', secondary: '#E1E3C1' }
+	{ name: 'Charcoal', primary: '#5C6B73', secondary: '#3D4A52' },
+	{ name: 'Dark', primary: '#0A0A0A', secondary: '#000000' }
 ];
     
 
@@ -397,9 +394,9 @@ function initColorPicker() {
     }
     
     // Hue slider interaction
-    function updateHue(e) {
+    function updateHue(clientX) {
         const rect = hueSlider.getBoundingClientRect();
-        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
         const huePercent = (x / rect.width) * 100;
         currentHue = (huePercent / 100) * 360;
         
@@ -408,29 +405,28 @@ function initColorPicker() {
         updateColor();
     }
     
-    let hueMouseDown = false;
+    let hueActive = false;
+    
+    // Mouse events for hue slider
     hueSlider.addEventListener('mousedown', (e) => {
-        hueMouseDown = true;
-        updateHue(e);
+        hueActive = true;
+        updateHue(e.clientX);
     });
     
-    document.addEventListener('mousemove', (e) => {
-        if (hueMouseDown) updateHue(e);
-        if (canvasMouseDown) updateCanvas(e);
-    });
-    
-    document.addEventListener('mouseup', () => {
-        hueMouseDown = false;
-        canvasMouseDown = false;
+    // Touch events for hue slider
+    hueSlider.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        hueActive = true;
+        updateHue(e.touches[0].clientX);
     });
     
     // Canvas interaction
-    let canvasMouseDown = false;
+    let canvasActive = false;
     
-    function updateCanvas(e) {
+    function updateCanvas(clientX, clientY) {
         const rect = canvas.getBoundingClientRect();
-        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-        const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+        const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
         
         const xPercent = (x / rect.width) * 100;
         const yPercent = (y / rect.height) * 100;
@@ -443,9 +439,45 @@ function initColorPicker() {
         updateColor();
     }
     
+    // Mouse events for canvas
     canvas.addEventListener('mousedown', (e) => {
-        canvasMouseDown = true;
-        updateCanvas(e);
+        canvasActive = true;
+        updateCanvas(e.clientX, e.clientY);
+    });
+    
+    // Touch events for canvas
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        canvasActive = true;
+        updateCanvas(e.touches[0].clientX, e.touches[0].clientY);
+    });
+    
+    // Global mouse move and up
+    document.addEventListener('mousemove', (e) => {
+        if (hueActive) updateHue(e.clientX);
+        if (canvasActive) updateCanvas(e.clientX, e.clientY);
+    });
+    
+    document.addEventListener('mouseup', () => {
+        hueActive = false;
+        canvasActive = false;
+    });
+    
+    // Global touch move and end
+    document.addEventListener('touchmove', (e) => {
+        if (hueActive) {
+            e.preventDefault();
+            updateHue(e.touches[0].clientX);
+        }
+        if (canvasActive) {
+            e.preventDefault();
+            updateCanvas(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchend', () => {
+        hueActive = false;
+        canvasActive = false;
     });
     
     function updateColor() {
@@ -1643,6 +1675,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
