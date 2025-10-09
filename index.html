@@ -370,6 +370,14 @@ function applyTheme() {
     if (floatingBtn) {
         floatingBtn.style.backgroundColor = primaryColor;
     }
+	// Adjust nav tab colors
+    const navTabs = document.querySelectorAll('.nav-tab');
+    navTabs.forEach(tab => {
+        if (tab.classList.contains('active')) {
+            tab.style.color = isLight ? secondaryColor : primaryColor;
+            tab.style.borderBottomColor = isLight ? secondaryColor : primaryColor;
+        }
+    });
 }
 function toggleColorPicker(e) {
     e.stopPropagation();
@@ -1736,6 +1744,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
