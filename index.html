@@ -945,22 +945,26 @@ titleDiv.innerHTML = `
    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
 `;
 			// Add collapse button for headings mode
+				// Add collapse button for headings mode
 				if (layoutMode === 'headings' && !editMode) {
-    				const collapseBtn = document.createElement('button');
-    				collapseBtn.className = 'collapse-btn';
-    				collapseBtn.innerHTML = `
-        				<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            				<polyline points="4 14 10 14 10 20"></polyline>
-            				<polyline points="20 10 14 10 14 4"></polyline>
-            				<line x1="14" y1="10" x2="21" y2="3"></line>
-            				<line x1="3" y1="21" x2="10" y2="14"></line>
-        				</svg>
-    				`;
-    				collapseBtn.onclick = (e) => {
-        				e.stopPropagation();
-        				card.classList.remove('expanded');
-    				};
-    				titleDiv.appendChild(collapseBtn);
+				    const collapseBtn = document.createElement('button');
+				    collapseBtn.className = 'collapse-btn';
+				    collapseBtn.innerHTML = `
+				        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				            <polyline points="4 14 10 14 10 20"></polyline>
+				            <polyline points="20 10 14 10 14 4"></polyline>
+				            <line x1="14" y1="10" x2="21" y2="3"></line>
+				            <line x1="3" y1="21" x2="10" y2="14"></line>
+				        </svg>
+				    `;
+				    collapseBtn.onclick = (e) => {
+				        e.stopPropagation();
+				        card.classList.remove('expanded');
+				        const cardId = `${catIndex}-${skillIndex}`;
+				        delete expandedCards[cardId];
+				        saveExpandedCards();
+				    };
+				    titleDiv.appendChild(collapseBtn);
 				}
             
             if (editMode) { 
@@ -1018,18 +1022,28 @@ titleDiv.innerHTML = `
             
             grid.appendChild(card); 
 			// Add click handler for headings mode
-            if (layoutMode === 'headings' && !editMode) {
-                card.addEventListener('click', function(e) {
-                    // Don't toggle if clicking on checkbox or editable content
-                    if (e.target.classList.contains('checkbox') || 
-                        e.target.classList.contains('editable') ||
-                        e.target.classList.contains('delete-btn')) {
-                        return;
-                    }
-                    // Only expand, never collapse
-                    this.classList.add('expanded');
-                });
-            }
+            // Add click handler for headings mode
+			if (layoutMode === 'headings' && !editMode) {
+			    const cardId = `${catIndex}-${skillIndex}`;
+			    
+			    // Restore expanded state if it was expanded before
+			    if (expandedCards[cardId]) {
+			        card.classList.add('expanded');
+			    }
+			    
+			    card.addEventListener('click', function(e) {
+			        // Don't toggle if clicking on checkbox or editable content
+			        if (e.target.classList.contains('checkbox') || 
+			            e.target.classList.contains('editable') ||
+			            e.target.classList.contains('delete-btn')) {
+			            return;
+			        }
+			        // Only expand, never collapse
+			        this.classList.add('expanded');
+			        expandedCards[cardId] = true;
+			        saveExpandedCards();
+			    });
+			}
         }); 
         
         catDiv.appendChild(grid); 
@@ -1369,6 +1383,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
