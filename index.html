@@ -308,20 +308,15 @@ function switchGuide(id) {
 }
 function applyTheme() {
     const theme = colorThemes.find(t => t.primary === themeColor);
+    let primaryColor, secondaryColor;
     
     if (theme) {
         // Use preset theme
-        document.documentElement.style.setProperty('--primary-color', theme.primary);
-        document.documentElement.style.setProperty('--secondary-color', theme.secondary);
-        
-        document.body.style.background = `linear-gradient(135deg, ${theme.secondary}CC 0%, ${theme.primary}CC 100%)`;
-        
-        const header = document.querySelector('.header');
-        if (header) {
-            header.style.background = `linear-gradient(135deg, ${theme.secondary} 0%, ${theme.primary} 100%)`;
-        }
+        primaryColor = theme.primary;
+        secondaryColor = theme.secondary;
     } else {
         // Custom color - calculate darker shade
+        primaryColor = themeColor;
         const hex = themeColor.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
@@ -331,18 +326,49 @@ function applyTheme() {
         const darkerG = Math.max(0, g - 30);
         const darkerB = Math.max(0, b - 30);
         
-        const secondaryColor = '#' + [darkerR, darkerG, darkerB]
+        secondaryColor = '#' + [darkerR, darkerG, darkerB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+    
+    // Determine if the theme is light
+    const isLight = isLightColor(primaryColor);
+    
+    // Set CSS variables
+    document.documentElement.style.setProperty('--primary-color', primaryColor);
+    document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+    
+    // Apply background gradient
+    document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${primaryColor}CC 100%)`;
+    
+    // Apply header styling with adjusted text color
+    const header = document.querySelector('.header');
+    if (header) {
+        header.style.background = `linear-gradient(135deg, ${secondaryColor} 0%, ${primaryColor} 100%)`;
+        header.style.color = isLight ? '#2c3e50' : 'white';
         
-        document.documentElement.style.setProperty('--primary-color', themeColor);
-        document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+        // Adjust all text elements in header
+        const headerTexts = header.querySelectorAll('h1, p, .editable');
+        headerTexts.forEach(el => {
+            el.style.color = isLight ? '#2c3e50' : 'white';
+        });
         
-        document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${themeColor}CC 100%)`;
-        
-        const header = document.querySelector('.header');
-        if (header) {
-            header.style.background = `linear-gradient(135deg, ${secondaryColor} 0%, ${themeColor} 100%)`;
-        }
+        // Adjust button colors in header
+        const headerButtons = header.querySelectorAll('.edit-btn, .guide-menu-btn');
+        headerButtons.forEach(btn => {
+            btn.style.color = isLight ? '#2c3e50' : 'white';
+        });
+    }
+    
+    // Adjust active tab text color
+    const activeTabs = document.querySelectorAll('.nav-tab.active');
+    activeTabs.forEach(tab => {
+        tab.style.color = isLight ? secondaryColor : primaryColor;
+    });
+    
+    // Adjust floating button
+    const floatingBtn = document.getElementById('layoutBtn');
+    if (floatingBtn) {
+        floatingBtn.style.backgroundColor = primaryColor;
     }
 }
 function toggleColorPicker(e) {
@@ -568,6 +594,17 @@ function hslToHex(h, s, l) {
     
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+function isLightColor(hex) {
+    const rgb = hexToRgb(hex);
+    if (!rgb) return false;
+    
+    // Calculate relative luminance
+    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+    return luminance > 0.6; // Returns true if color is light
+}
+
+
 function selectCustomColor(color) {
     // Find the closest matching theme or create a gradient
     const selectedTheme = colorThemes.find(t => t.primary === color);
@@ -806,7 +843,29 @@ function renderHeader() {
 </h1>
 <p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
     `;
-
+	// Add dynamic styles for light/dark theme
+	    const isLight = isLightColor(themeColor);
+	    if (isLight) {
+	        const style = document.createElement('style');
+	        style.id = 'dynamic-header-style';
+	        const existingStyle = document.getElementById('dynamic-header-style');
+	        if (existingStyle) existingStyle.remove();
+	        
+	        style.textContent = `
+	            .header .editable:focus { 
+	                outline: 2px solid #2c3e50 !important; 
+	                background: rgba(255, 255, 255, 0.5) !important; 
+	                color: #2c3e50 !important; 
+	            }
+	            .header .editable:hover { 
+	                background: rgba(0, 0, 0, 0.1) !important; 
+	            }
+	        `;
+	        document.head.appendChild(style);
+	    } else {
+	        const existingStyle = document.getElementById('dynamic-header-style');
+	        if (existingStyle) existingStyle.remove();
+	    }
     // Apply current theme
     applyTheme();
 
@@ -1677,6 +1736,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
