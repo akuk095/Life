@@ -42,10 +42,10 @@
 		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: white; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; }
 		.container.loaded { opacity: 1; }
 		.content-area { padding: 0; background: #f8f9fa; min-height: calc(100vh - 200px); }
-		.delete-btn { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; background: #e74c3c; color: white; border: 2px solid white; border-radius: 50%; font-size: 14px; font-weight: bold; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; padding: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-		.delete-btn:hover { background: #c0392b; transform: scale(1.1); }
-		.delete-tab-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
-		.delete-tab-btn:hover { color: #c0392b; transform: scale(1.2); }
+		.delete-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: transparent; color: #6b7280; border: none; border-radius: 6px; font-size: 18px; font-weight: normal; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; padding: 0; }
+		.delete-btn:hover { background: #fee2e2; color: #dc2626; transform: scale(1.05); }
+		.delete-tab-btn { width: 22px; height: 22px; background: transparent; color: #9ca3af; border: none; border-radius: 50%; font-size: 18px; font-weight: 600; margin-left: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; padding: 0; }
+		.delete-tab-btn:hover { background: #fee2e2; color: #dc2626; transform: scale(1.05); }
 		.drawer-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 		.drawer-backdrop.show { opacity: 1; visibility: visible; }
 		.drawer-header { padding: 20px 16px 15px; border-bottom: 2px solid #2c3e50; margin-bottom: 10px; font-weight: bold; color: #2c3e50; font-size: 16px; }
@@ -106,7 +106,7 @@
 		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #d0d4d9; }
 		.skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 0; padding: 16px 0 0 0; transition: all 0.3s ease; }
-		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 20px 10px; }
+		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 20px 16px; }
 		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--secondary-color, #3498db); border-radius: 8px; background: white; border-bottom: 1px solid #e8eaed; cursor: pointer; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 		.skill-grid.headings .skill-card.expanded .checklist-item { display: flex; }
@@ -115,6 +115,8 @@
 		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 30px; gap: 32px; }
 		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: 1px solid #e8eaed; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 		.skill-title { font-size: 17px; font-weight: 600; color: #1f2937; margin-bottom: 16px; letter-spacing: -0.2px; line-height: 1.4; }
+		.skill-title .delete-btn { position: static; width: auto; height: auto; background: transparent; color: #9ca3af; border: none; border-radius: 4px; font-size: 20px; padding: 4px 6px; margin-left: 8px; }
+		.skill-title .delete-btn:hover { background: #fee2e2; color: #dc2626; }
 		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
@@ -827,7 +829,7 @@ function renderHeader() {
 <button class="guide-menu-btn" onclick="toggleGuideMenu(event)">☰</button>
 <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
 <div class="guide-dropdown" id="guideDropdown">
-    <div class="drawer-header">My Notebook🪶</div>
+    <div class="drawer-header">🪶My Notebook</div>
 </div>
 <div class="edit-toggle">
     <button class="save-btn" id="saveBtn" onclick="saveAndExitEdit()" style="display: none;">Done</button>
@@ -1795,6 +1797,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
