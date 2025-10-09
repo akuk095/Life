@@ -86,7 +86,7 @@
 		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px; }
 		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; }
 		.nav-tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #6c757d; transition: all 0.3s ease; white-space: nowrap; border-bottom: 3px solid transparent; flex-shrink: 0; }
-		.nav-tab.active { color: var(--primary-color, #3498db); border-bottom-color: var(--primary-color, #3498db); background: white; }
+		.nav-tab.active { color: var(--tab-active-color, var(--primary-color, #3498db)); border-bottom-color: var(--tab-active-color, var(--primary-color, #3498db)); background: white; }
 		.nav-tab .tab-icon { margin-right: 5px; cursor: pointer; }
 		.nav-tab .tab-name { cursor: text; }
 		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
@@ -337,6 +337,9 @@ function applyTheme() {
     document.documentElement.style.setProperty('--primary-color', primaryColor);
     document.documentElement.style.setProperty('--secondary-color', secondaryColor);
     
+    // Set tab active color based on theme lightness
+    document.documentElement.style.setProperty('--tab-active-color', isLight ? secondaryColor : primaryColor);
+    
     // Apply background gradient
     document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${primaryColor}CC 100%)`;
     
@@ -370,14 +373,6 @@ function applyTheme() {
     if (floatingBtn) {
         floatingBtn.style.backgroundColor = primaryColor;
     }
-	// Adjust nav tab colors
-    const navTabs = document.querySelectorAll('.nav-tab');
-    navTabs.forEach(tab => {
-        if (tab.classList.contains('active')) {
-            tab.style.color = isLight ? secondaryColor : primaryColor;
-            tab.style.borderBottomColor = isLight ? secondaryColor : primaryColor;
-        }
-    });
 }
 function toggleColorPicker(e) {
     e.stopPropagation();
@@ -1744,6 +1739,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
