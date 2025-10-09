@@ -148,7 +148,7 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-let currentGuideId = "defaultGuide"; 
+let currentGuideId = localStorage.getItem('currentGuideId') || "defaultGuide";
 // Default data structure
 let categories = [
     {
@@ -301,6 +301,7 @@ function loadFromFirebase() {
 
 function switchGuide(id) {
     currentGuideId = id;
+    localStorage.setItem('currentGuideId', id);
     // Reset to default theme before loading
     themeColor = '#607d8b';
     loadFromFirebase();
@@ -721,6 +722,7 @@ function deleteGuide() {
     if (confirm("Delete this entire guide? This cannot be undone.")) {
         database.ref(`guides/${currentGuideId}`).remove();
         currentGuideId = 'defaultGuide';
+        localStorage.setItem('currentGuideId', 'defaultGuide');
         loadGuideList();
         loadFromFirebase();
     }
@@ -754,7 +756,7 @@ function renderHeader() {
 <button class="guide-menu-btn" onclick="toggleGuideMenu(event)">☰</button>
 <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
 <div class="guide-dropdown" id="guideDropdown">
-    <div class="drawer-header">📚 My Guides</div>
+    <div class="drawer-header">My Notebook</div>
 </div>
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
@@ -1675,6 +1677,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
