@@ -18,7 +18,7 @@
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
 		.checkbox:hover { border-color: var(--primary-color, #3498db); }
-		.checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: white; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; position: relative; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
 		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
@@ -42,8 +42,8 @@
 		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: white; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; }
 		.container.loaded { opacity: 1; }
 		.content-area { padding: 0; background: #f8f9fa; min-height: calc(100vh - 200px); }
-		.delete-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; display: none; margin-left: 8px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
-		.delete-btn:hover { color: #c0392b; transform: scale(1.2); }
+		.delete-btn { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; background: #e74c3c; color: white; border: 2px solid white; border-radius: 50%; font-size: 14px; font-weight: bold; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; padding: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+		.delete-btn:hover { background: #c0392b; transform: scale(1.1); }
 		.delete-tab-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 18px; font-weight: bold; margin-right: 10px; flex-shrink: 0; transition: all 0.2s ease; line-height: 1; padding: 0; width: auto; height: auto; }
 		.delete-tab-btn:hover { color: #c0392b; transform: scale(1.2); }
 		.drawer-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
@@ -77,7 +77,7 @@
 		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.guide-dropdown button:hover { background: #f8f9fa; }
 		.guide-dropdown button:last-child { border-bottom: none; }
-		.guide-dropdown .current-guide { background: rgba(25, 118, 210, 0.2); font-weight: 600; color: #1976d2; }
+		.guide-dropdown .current-guide { background: rgba(25, 118, 210, 0.1); font-weight: 700; color: var(--primary-color, #1976d2); font-size: 15px; }
 		.guide-dropdown.show { transform: translateX(0); }
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
@@ -975,8 +975,11 @@ function populateGuideDropdown() {
             };
             
             if (id === currentGuideId) {
-                btn.classList.add('current-guide');
-            }
+			    btn.classList.add('current-guide');
+			    btn.style.color = themeColor;
+			    btn.style.fontWeight = '700';
+			    btn.style.fontSize = '15px';
+			}
             
             dropdown.appendChild(btn);
         }
@@ -1377,11 +1380,14 @@ titleDiv.innerHTML = `
                 checkItem.appendChild(textDiv);
                 
                 if (editMode) {
-                    const deleteItemBtn = document.createElement('button');
-                    deleteItemBtn.className = 'delete-btn';
-                    deleteItemBtn.textContent = '×';
-                    deleteItemBtn.onclick = () => deleteItem(catIndex, skillIndex, itemIndex);
-                    checkItem.appendChild(deleteItemBtn);
+				    const deleteItemBtn = document.createElement('button');
+				    deleteItemBtn.className = 'delete-btn';
+				    deleteItemBtn.textContent = '×';
+				    deleteItemBtn.onclick = (e) => {
+				        e.stopPropagation();
+				        deleteItem(catIndex, skillIndex, itemIndex);
+				    };
+				    checkItem.appendChild(deleteItemBtn);
                     
                     textDiv.addEventListener('blur', (e) => { 
                         categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
@@ -1789,6 +1795,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
