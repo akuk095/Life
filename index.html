@@ -126,6 +126,10 @@
     	.guide-item { cursor: move; }
 		.guide-item.dragging { opacity: 0.5; }
 		.guide-item.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
+		.drag-handle { display: none; color: #9ca3af; font-size: 16px; margin-right: 8px; cursor: grab; user-select: none; }
+		.edit-mode .drag-handle { display: inline-block; }
+		.guide-item.dragging .drag-handle { cursor: grabbing; }
+		
 	</style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -928,186 +932,207 @@ function populateGuideDropdown() {
         const guides = snapshot.val() || {};
         const dropdown = document.getElementById('guideDropdown');
         
-        // Keep header, clear only list
+        // Keep the header, clear only the guide list
         const header = dropdown.querySelector('.drawer-header');
         dropdown.innerHTML = '';
         if (header) dropdown.appendChild(header);
         
-        for (let id in guides) {
-            const guide = guides[id];
-            const title = guide.appTitle || id;
-            const icon = guide.appIcon || '📄';
-            const guideTheme = guide.themeColor || '#3498db';
+        // Get guide order
+        database.ref('guideOrder').once('value', (orderSnapshot) => {
+            let guideOrder = orderSnapshot.val() || [];
             
-            const btn = document.createElement('button');
-            btn.className = 'guide-item';
-            btn.dataset.guideId = id;
-            btn.style.borderLeft = `4px solid ${guideTheme}`;
-            btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
-            btn.style.display = 'flex';
-            btn.style.alignItems = 'center';
-            btn.style.justifyContent = 'space-between';
-            btn.style.margin = '4px 0';
-            btn.style.padding = '8px 12px';
+            // Add any new guides that aren't in the order yet
+            const guideIds = Object.keys(guides);
+            guideIds.forEach(id => {
+                if (!guideOrder.includes(id)) {
+                    guideOrder.push(id);
+                }
+            });
             
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = `${icon} ${title}`;
-            btn.appendChild(nameSpan);
+            // Remove any guides from order that no longer exist
+            guideOrder = guideOrder.filter(id => guides[id]);
             
-            if (editMode && id !== 'defaultGuide') {
-                const delBtn = document.createElement('span');
-                delBtn.textContent = 'del';
-                delBtn.style.background = '#e74c3c';
-                delBtn.style.color = '#f8f9fa';
-                delBtn.style.padding = '4px 10px';
-                delBtn.style.borderRadius = '6px';
-                delBtn.style.fontSize = '12px';
-                delBtn.style.fontWeight = 'bold';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
-                        database.ref(`guides/${id}`).remove();
-                        if (currentGuideId === id) {
-                            currentGuideId = 'defaultGuide';
-                            loadFromFirebase();
-                        } else {
-                            populateGuideDropdown();
+            // Save cleaned order
+            if (guideOrder.length > 0) {
+                database.ref('guideOrder').set(guideOrder);
+            }
+            
+            // Render guides in order
+            guideOrder.forEach(id => {
+                const guide = guides[id];
+                if (!guide) return;
+                
+                const title = guide.appTitle || id;
+                const icon = guide.appIcon || '📄';
+                const guideTheme = guide.themeColor || '#3498db';
+                
+                const btn = document.createElement('button');
+                btn.className = 'guide-item';
+                btn.draggable = editMode;
+                btn.dataset.guideId = id;
+                btn.style.borderLeft = `4px solid ${guideTheme}`;
+                btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'space-between';
+                
+                const leftContent = document.createElement('div');
+                leftContent.style.display = 'flex';
+                leftContent.style.alignItems = 'center';
+                
+                // Add drag handle (6 dots)
+                const dragHandle = document.createElement('span');
+                dragHandle.className = 'drag-handle';
+                dragHandle.innerHTML = '⋮⋮';
+                leftContent.appendChild(dragHandle);
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = `${icon} ${title}`;
+                leftContent.appendChild(nameSpan);
+                
+                btn.appendChild(leftContent);
+                
+                if (editMode && id !== 'defaultGuide') {
+                    const delBtn = document.createElement('span');
+                    delBtn.textContent = 'del';
+                    delBtn.style.background = '#e74c3c';
+                    delBtn.style.color = '#f8f9fa';
+                    delBtn.style.padding = '4px 10px';
+                    delBtn.style.borderRadius = '6px';
+                    delBtn.style.fontSize = '12px';
+                    delBtn.style.fontWeight = 'bold';
+                    delBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
+                            database.ref(`guides/${id}`).remove();
+                            // Remove from order
+                            const newOrder = guideOrder.filter(orderId => orderId !== id);
+                            database.ref('guideOrder').set(newOrder);
+                            
+                            if (currentGuideId === id) {
+                                currentGuideId = 'defaultGuide';
+                                localStorage.setItem('currentGuideId', 'defaultGuide');
+                                loadFromFirebase();
+                            } else {
+                                populateGuideDropdown();
+                            }
                         }
+                    };
+                    btn.appendChild(delBtn);
+                }
+                
+                btn.onclick = (e) => {
+                    if (!e.target.textContent.includes('del') && !e.target.classList.contains('drag-handle')) {
+                        switchGuide(id);
+                        closeDrawer();
                     }
                 };
-                btn.appendChild(delBtn);
-            }
-            
-            btn.onclick = (e) => {
-                if (!e.target.textContent.includes('del')) {
-                    switchGuide(id);
-                    closeDrawer();
+                
+                if (id === currentGuideId) {
+                    btn.classList.add('current-guide');
+                    btn.style.color = themeColor;
+                    btn.style.fontWeight = '700';
+                    btn.style.fontSize = '15px';
                 }
-            };
+                
+                // Drag and drop events (only in edit mode)
+                if (editMode) {
+                    btn.addEventListener('dragstart', handleDragStart);
+                    btn.addEventListener('dragend', handleDragEnd);
+                    btn.addEventListener('dragover', handleDragOver);
+                    btn.addEventListener('drop', handleDrop);
+                    btn.addEventListener('dragleave', handleDragLeave);
+                }
+                
+                dropdown.appendChild(btn);
+            });
             
-            if (id === currentGuideId) {
-                btn.classList.add('current-guide');
-                btn.style.color = themeColor;
-                btn.style.fontWeight = '700';
-                btn.style.fontSize = '15px';
+            // Add create new guide button (only when not in edit mode)
+            if (!editMode) {
+                const createBtn = document.createElement('button');
+                createBtn.textContent = '+ Create new guide';
+                createBtn.style.borderLeft = '4px solid #3498db';
+                createBtn.style.borderRight = '2px solid #3498db';
+                createBtn.style.borderTop = 'none';
+                createBtn.style.borderBottom = '1px solid #f0f0f0';
+                createBtn.style.background = 'transparent';
+                createBtn.style.color = '#3498db';
+                createBtn.style.fontWeight = '600';
+                createBtn.style.borderRadius = '0';
+                createBtn.style.margin = '0';
+                createBtn.onclick = () => {
+                    createNewGuide();
+                    closeDrawer();
+                };
+                dropdown.appendChild(createBtn);
             }
-
-            // Enable drag-and-drop in edit mode
-            if (editMode) {
-                btn.draggable = true;
-                btn.style.cursor = 'grab';
-                btn.addEventListener('dragstart', handleDragStart);
-                btn.addEventListener('dragend', handleDragEnd);
-                btn.addEventListener('dragenter', handleDragEnter);
-                btn.addEventListener('dragover', handleDragOver);
-                btn.addEventListener('drop', handleDrop);
-                btn.addEventListener('dragleave', handleDragLeave);
-            }
-
-            dropdown.appendChild(btn);
-        }
-        
-        // Add create button (only when not editing)
-        if (!editMode) {
-            const createBtn = document.createElement('button');
-            createBtn.textContent = '+ Create new guide';
-            createBtn.style.borderLeft = '4px solid #3498db';
-            createBtn.style.borderRight = '2px solid #3498db';
-            createBtn.style.borderTop = 'none';
-            createBtn.style.borderBottom = '1px solid #f0f0f0';
-            createBtn.style.background = 'transparent';
-            createBtn.style.color = '#3498db';
-            createBtn.style.fontWeight = '600';
-            createBtn.style.borderRadius = '0';
-            createBtn.style.margin = '0';
-            createBtn.onclick = () => {
-                createNewGuide();
-                closeDrawer();
-            };
-            dropdown.appendChild(createBtn);
-        }
+        });
     });
 }
 
 
-
 let draggedElement = null;
-let placeholder = null;
 
 function handleDragStart(e) {
     draggedElement = this;
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', this.dataset.guideId);
-
-    // Create and insert a placeholder element
-    placeholder = document.createElement('div');
-    placeholder.className = 'guide-placeholder';
-    placeholder.style.height = `${this.offsetHeight}px`;
-    placeholder.style.border = '2px dashed #aaa';
-    placeholder.style.borderRadius = '6px';
-    placeholder.style.margin = '4px 0';
-    this.parentNode.insertBefore(placeholder, this.nextSibling);
+    e.dataTransfer.setData('text/html', this.innerHTML);
 }
 
 function handleDragEnd(e) {
     this.classList.remove('dragging');
-    document.querySelectorAll('.guide-item').forEach(item => item.classList.remove('drag-over'));
     
-    // Remove placeholder
-    if (placeholder && placeholder.parentNode) {
-        placeholder.parentNode.removeChild(placeholder);
-    }
-    placeholder = null;
-    draggedElement = null;
-}
-
-function handleDragEnter(e) {
-    e.preventDefault();
-    if (!draggedElement || this === draggedElement) return;
-
-    const parent = this.parentNode;
-    const items = Array.from(parent.querySelectorAll('.guide-item'));
-    const draggedIndex = items.indexOf(draggedElement);
-    const targetIndex = items.indexOf(this);
-
-    // Move placeholder visually
-    if (draggedIndex < targetIndex) {
-        parent.insertBefore(placeholder, this.nextSibling);
-    } else {
-        parent.insertBefore(placeholder, this);
-    }
+    // Remove drag-over class from all items
+    document.querySelectorAll('.guide-item').forEach(item => {
+        item.classList.remove('drag-over');
+    });
 }
 
 function handleDragOver(e) {
-    e.preventDefault(); // Needed to allow drop
-}
-
-function handleDrop(e) {
-    e.stopPropagation();
-    if (!placeholder || !draggedElement) return false;
-
-    const parent = placeholder.parentNode;
-    parent.insertBefore(draggedElement, placeholder);
-    placeholder.remove();
-
-    // Save new order to Firebase
-    const newOrder = Array.from(parent.querySelectorAll('.guide-item'))
-        .map(item => item.dataset.guideId);
-    database.ref('guideOrder').set(newOrder);
-
-    draggedElement.classList.remove('dragging');
-    draggedElement = null;
-    placeholder = null;
-
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    
+    const afterElement = this;
+    if (afterElement !== draggedElement) {
+        afterElement.classList.add('drag-over');
+    }
+    
     return false;
 }
-
 
 function handleDragLeave(e) {
     this.classList.remove('drag-over');
 }
 
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    
+    if (draggedElement !== this) {
+        // Get all guide items
+        const allItems = Array.from(document.querySelectorAll('.guide-item'));
+        const draggedIndex = allItems.indexOf(draggedElement);
+        const targetIndex = allItems.indexOf(this);
+        
+        // Reorder in DOM
+        if (draggedIndex < targetIndex) {
+            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(draggedElement, this);
+        }
+        
+        // Save new order to Firebase
+        const newOrder = Array.from(document.querySelectorAll('.guide-item')).map(item => item.dataset.guideId);
+        database.ref('guideOrder').set(newOrder);
+    }
+    
+    this.classList.remove('drag-over');
+    return false;
+}
 
 function saveAndExitEdit() {
     editMode = false;
@@ -1900,6 +1925,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
