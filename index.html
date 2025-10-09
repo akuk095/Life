@@ -126,8 +126,8 @@
     	.guide-item { cursor: move; }
 		.guide-item.dragging { opacity: 0.5; }
 		.guide-item.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
-		.drag-handle { cursor: grab; padding: 4px; margin-right: 8px; color: #9ca3af; font-size: 18px; line-height: 1; user-select: none; opacity: 0.6; transition: opacity 0.2s; }
-		.drag-handle:hover { opacity: 1; }
+		.drag-handle { cursor: grab; padding: 4px; margin-right: 8px; color: #4b5563; font-size: 20px; line-height: 1; user-select: none; opacity: 1; transition: opacity 0.2s; font-weight: bold; }
+		.drag-handle:hover { opacity: 1; color: var(--primary-color, #3498db); }
 		.drag-handle:active { cursor: grabbing; }
 		.skill-card.dragging { opacity: 0.5; background: #f3f4f6; }
 		.skill-card.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
@@ -1193,7 +1193,10 @@ function handleDrop(e) {
     // Save new order to Firebase
     const newOrder = Array.from(parent.querySelectorAll('.guide-item'))
         .map(item => item.dataset.guideId);
-    database.ref('guideOrder').set(newOrder);
+    database.ref('guideOrder').set(newOrder).then(() => {
+        // Don't re-render, order is already visually correct
+        console.log('Guide order saved');
+    });
 
     draggedElement.classList.remove('dragging');
     draggedElement = null;
@@ -2040,6 +2043,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
