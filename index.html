@@ -111,8 +111,9 @@
 		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
-
-    </style>
+		@supports (-webkit-touch-callout: none) { /* iOS specific - use native emoji keyboard */ input[type="text"].emoji-input {  font-size: 32px; } }
+    
+	</style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
@@ -641,46 +642,59 @@ function saveAndExitEdit() {
     renderContent();
 }
 function showEmojiPicker(target, callback) {
-    // Remove any existing picker
-    const oldPicker = document.querySelector('.emoji-picker');
-    if (oldPicker) oldPicker.remove();
-
-    const picker = document.createElement('div');
-    picker.className = 'emoji-picker';
-
-    const emojis = ["📚","💪","🏡","🧼","🧹","✨","⚡","🔥","💡","📌","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊"];
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 2;
+    input.style.position = 'absolute';
+    input.style.opacity = '0';
+    input.style.pointerEvents = 'none';
+    document.body.appendChild(input);
     
-    emojis.forEach(e => {
-        const btn = document.createElement('button');
-        btn.textContent = e;
-        btn.onclick = (event) => {
-            event.stopPropagation();
-            callback(e);
-            picker.remove();
-            document.removeEventListener('click', outsideClickHandler);
-        };
-        picker.appendChild(btn);
-    });
-
-    document.body.appendChild(picker);
-
-    // Position near target
+    input.focus();
+    
+    // Show instruction based on platform
     const rect = target.getBoundingClientRect();
-    picker.style.top = `${rect.bottom + window.scrollY + 5}px`;
-    picker.style.left = `${rect.left + window.scrollX}px`;
-
-    // Close picker when clicking outside
-    const outsideClickHandler = (event) => {
-        if (!picker.contains(event.target) && event.target !== target) {
-            picker.remove();
-            document.removeEventListener('click', outsideClickHandler);
+    const tooltip = document.createElement('div');
+    tooltip.style.position = 'absolute';
+    tooltip.style.left = rect.left + 'px';
+    tooltip.style.top = (rect.bottom + 5) + 'px';
+    tooltip.style.background = '#2c3e50';
+    tooltip.style.color = 'white';
+    tooltip.style.padding = '8px 12px';
+    tooltip.style.borderRadius = '6px';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.zIndex = '10000';
+    tooltip.style.whiteSpace = 'nowrap';
+    
+    if (navigator.userAgent.includes('Mac')) {
+        tooltip.textContent = 'Press ⌘ + ^ + Space for emoji picker';
+    } else if (navigator.userAgent.includes('Windows')) {
+        tooltip.textContent = 'Press Win + . for emoji picker';
+    } else {
+        tooltip.textContent = 'Type or paste emoji';
+    }
+    
+    document.body.appendChild(tooltip);
+    
+    input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value) {
+            callback(value);
+            document.body.removeChild(input);
+            document.body.removeChild(tooltip);
         }
-    };
-
-    // Add listener after a small delay to prevent immediate closing
-    setTimeout(() => {
-        document.addEventListener('click', outsideClickHandler);
-    }, 10);
+    });
+    
+    input.addEventListener('blur', () => {
+        setTimeout(() => {
+            if (document.body.contains(input)) {
+                document.body.removeChild(input);
+            }
+            if (document.body.contains(tooltip)) {
+                document.body.removeChild(tooltip);
+            }
+        }, 100);
+    });
 }
 // Save categories to Firebase
 function saveCategories() {
@@ -1025,63 +1039,44 @@ function toggleEditMode() {
 }
 
 function editAppIcon(el) {
-    // Check if picker already exists and remove it
-    const existingMenu = document.querySelector('.temp-emoji-menu');
-    if (existingMenu) {
-        existingMenu.remove();
-        return; // Toggle off if clicking the same icon
-    }
-
-    const emojis = ["📚","💡","🌍","⚙️","❤️","🚀","🎯","💪","🏡","✨","😀","😂","😍","🤔","😎","🥳","😢","😡","😱","💀","👻","🤖","👋","👍","🙏","👩‍⚕️","👨‍🚀","💑","🐶","🐱","🐵","🦋","🐢","🐬","🦁","🌹","🌍","🌞","🌈","🌊","🔥","❄️","🍎","🍌","🍕","🍣","🍦","🍫","☕","🍺","⚽","🏀","🎨","🎤","🚗","🚲","✈️","🚀","🏠","🏥","🗽","📱","💻","📚","💡","📌","🔑","💉","💊"];
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 2; // Allow emoji (some are 2 characters)
+    input.style.position = 'absolute';
+    input.style.opacity = '0';
+    input.style.pointerEvents = 'none';
+    document.body.appendChild(input);
     
-    let menu = document.createElement("div");
-    menu.className = "temp-emoji-menu";
-    menu.style.position = "absolute";
-    menu.style.background = "white";
-    menu.style.border = "1px solid #ccc";
-    menu.style.padding = "5px";
-    menu.style.borderRadius = "8px";
-    menu.style.display = "grid";
-    menu.style.gridTemplateColumns = "repeat(6, 1fr)";
-    menu.style.gap = "5px";
-    menu.style.zIndex = 1000;
-    menu.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
-
-    emojis.forEach(e => {
-        let btn = document.createElement("button");
-        btn.textContent = e;
-        btn.style.fontSize = "20px";
-        btn.style.cursor = "pointer";
-        btn.style.background = "none";
-        btn.style.border = "none";
-        btn.onclick = (event) => {
-            event.stopPropagation();
-            appIcon = e;
+    input.focus();
+    
+    // Try to open emoji picker
+    if (navigator.userAgent.includes('Mac')) {
+        // Mac: Cmd + Ctrl + Space
+        alert('Press Command + Control + Space to open emoji picker');
+    } else if (navigator.userAgent.includes('Windows')) {
+        // Windows: Win + . or Win + ;
+        alert('Press Windows key + . (period) to open emoji picker');
+    } else {
+        // Mobile or other
+        input.setAttribute('inputmode', 'none');
+    }
+    
+    input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value) {
+            appIcon = value;
             saveHeader();
-            menu.remove();
-            document.removeEventListener('click', outsideClickHandler);
-        };
-        menu.appendChild(btn);
-    });
-
-    // Place menu below icon
-    const rect = el.getBoundingClientRect();
-    menu.style.left = rect.left + "px";
-    menu.style.top = rect.bottom + window.scrollY + "px";
-    document.body.appendChild(menu);
-
-    // Close menu when clicking outside
-    const outsideClickHandler = (event) => {
-        if (!menu.contains(event.target) && event.target !== el) {
-            menu.remove();
-            document.removeEventListener('click', outsideClickHandler);
+            document.body.removeChild(input);
         }
-    };
-
-    // Add listener after a small delay
-    setTimeout(() => {
-        document.addEventListener('click', outsideClickHandler);
-    }, 10);
+    });
+    
+    input.addEventListener('blur', () => {
+        setTimeout(() => {
+            if (document.body.contains(input)) {
+                document.body.removeChild(input);
+            }
+        }, 100);
+    });
 }
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
@@ -1238,6 +1233,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
