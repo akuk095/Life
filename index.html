@@ -912,6 +912,15 @@ function renderHeader() {
     // Populate guide dropdown
     populateGuideDropdown();
 
+	// Preserve Done button state if in edit mode
+	if (editMode) {
+	    setTimeout(() => {
+	        const saveBtn = document.getElementById('saveBtn');
+	        const menuBtn = document.getElementById('menuBtn');
+	        if (saveBtn) saveBtn.style.display = 'block';
+	        if (menuBtn) menuBtn.style.display = 'none';
+	    }, 0);
+	}
     if (editMode) {
         header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
             appTitle = e.target.textContent.trim();
@@ -1142,7 +1151,8 @@ function showEmojiPicker(target, callback) {
     inputWrapper.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
     inputWrapper.style.zIndex = '10000';
     inputWrapper.className = 'emoji-input-field';
-    
+    inputWrapper.addEventListener('click', (e) => e.stopPropagation());
+	
     const label = document.createElement('div');
     label.textContent = 'Paste or type emoji:';
     label.style.marginBottom = '10px';
@@ -1388,6 +1398,15 @@ tab.innerHTML = `
         addCategoryBtn.onclick = addCategory;
         navTabs.appendChild(addCategoryBtn);
     }
+	// Preserve Done button state if in edit mode
+	if (editMode) {
+	    setTimeout(() => {
+	        const saveBtn = document.getElementById('saveBtn');
+	        const menuBtn = document.getElementById('menuBtn');
+	        if (saveBtn) saveBtn.style.display = 'block';
+	        if (menuBtn) menuBtn.style.display = 'none';
+	    }, 0);
+	}
 }
 
 function renderContent() { 
@@ -1545,6 +1564,15 @@ titleDiv.innerHTML = `
         
         contentArea.appendChild(catDiv); 
     }); 
+	// Preserve Done button state if in edit mode
+if (editMode) {
+    setTimeout(() => {
+        const saveBtn = document.getElementById('saveBtn');
+        const menuBtn = document.getElementById('menuBtn');
+        if (saveBtn) saveBtn.style.display = 'block';
+        if (menuBtn) menuBtn.style.display = 'none';
+    }, 0);
+}
 }
 
 function switchTab(index) { 
@@ -1632,7 +1660,8 @@ function editAppIcon(el) {
     inputWrapper.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
     inputWrapper.style.zIndex = '10000';
     inputWrapper.className = 'emoji-input-field';
-    
+    inputWrapper.addEventListener('click', (e) => e.stopPropagation());
+	
     const label = document.createElement('div');
     label.textContent = 'Paste or type emoji:';
     label.style.marginBottom = '10px';
@@ -1900,3 +1929,4 @@ loadFromFirebase();
 
 </body>
 </html>
+
