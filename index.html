@@ -332,20 +332,42 @@ function switchGuide(id) {
     loadFromFirebase();
 }
 function applyTheme() {
-    const theme = colorThemes.find(t => t.primary === themeColor) || colorThemes[0];
+    const theme = colorThemes.find(t => t.primary === themeColor);
     
-    // Update CSS variables
-    document.documentElement.style.setProperty('--primary-color', theme.primary);
-    document.documentElement.style.setProperty('--secondary-color', theme.secondary);
-    
-    // Update body background with transparency
-    document.body.style.background = `linear-gradient(135deg, ${theme.secondary}CC 0%, ${theme.primary}CC 100%)`;
-    // The CC at the end = 80% opacity. Use 99 for 60%, 66 for 40%, etc.
-    
-    // Update header background
-    const header = document.querySelector('.header');
-    if (header) {
-        header.style.background = `linear-gradient(135deg, ${theme.secondary} 0%, ${theme.primary} 100%)`;
+    if (theme) {
+        // Use preset theme
+        document.documentElement.style.setProperty('--primary-color', theme.primary);
+        document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+        
+        document.body.style.background = `linear-gradient(135deg, ${theme.secondary}CC 0%, ${theme.primary}CC 100%)`;
+        
+        const header = document.querySelector('.header');
+        if (header) {
+            header.style.background = `linear-gradient(135deg, ${theme.secondary} 0%, ${theme.primary} 100%)`;
+        }
+    } else {
+        // Custom color - calculate darker shade
+        const hex = themeColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        const darkerR = Math.max(0, r - 30);
+        const darkerG = Math.max(0, g - 30);
+        const darkerB = Math.max(0, b - 30);
+        
+        const secondaryColor = '#' + [darkerR, darkerG, darkerB]
+            .map(x => x.toString(16).padStart(2, '0')).join('');
+        
+        document.documentElement.style.setProperty('--primary-color', themeColor);
+        document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+        
+        document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${themeColor}CC 100%)`;
+        
+        const header = document.querySelector('.header');
+        if (header) {
+            header.style.background = `linear-gradient(135deg, ${secondaryColor} 0%, ${themeColor} 100%)`;
+        }
     }
 }
 function toggleColorPicker(e) {
@@ -361,6 +383,56 @@ function selectColor(color) {
     renderHeader(); // Re-render to update selected color
     
     // Close both color picker and dropdown menu
+    document.getElementById('colorPickerMenu').classList.remove('show');
+    document.getElementById('dropdownMenu').classList.remove('show');
+}
+
+function selectCustomColor(color) {
+    // Find the closest matching theme or create a gradient
+    const selectedTheme = colorThemes.find(t => t.primary === color);
+    
+    if (selectedTheme) {
+        themeColor = selectedTheme.primary;
+    } else {
+        // Create a custom theme with a slightly darker shade for secondary
+        themeColor = color;
+        
+        // Calculate a darker secondary color
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        const darkerR = Math.max(0, r - 30);
+        const darkerG = Math.max(0, g - 30);
+        const darkerB = Math.max(0, b - 30);
+        
+        const secondaryColor = '#' + [darkerR, darkerG, darkerB]
+            .map(x => x.toString(16).padStart(2, '0')).join('');
+        
+        // Temporarily add custom theme
+        const customTheme = { name: 'Custom', primary: color, secondary: secondaryColor };
+        
+        // Update CSS variables directly for custom color
+        document.documentElement.style.setProperty('--primary-color', color);
+        document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+        
+        // Update backgrounds
+        document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${color}CC 100%)`;
+        const header = document.querySelector('.header');
+        if (header) {
+            header.style.background = `linear-gradient(135deg, ${secondaryColor} 0%, ${color} 100%)`;
+        }
+    }
+    
+    database.ref(`guides/${currentGuideId}/themeColor`).set(themeColor);
+    
+    if (selectedTheme) {
+        applyTheme();
+        renderHeader();
+    }
+    
+    // Close menus
     document.getElementById('colorPickerMenu').classList.remove('show');
     document.getElementById('dropdownMenu').classList.remove('show');
 }
@@ -513,8 +585,17 @@ function renderHeader() {
     </button>
     <div class="color-picker-menu" id="colorPickerMenu">
         <h3>Choose Theme Color</h3>
-        <div class="color-options">
-            ${colorOptionsHTML}
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 12px; color: #7f8c8d; margin-bottom: 5px;">Custom Color:</label>
+            <input type="color" id="customColorPicker" value="${themeColor}" 
+                   style="width: 100%; height: 40px; border: 2px solid #dee2e6; border-radius: 6px; cursor: pointer;"
+                   onchange="selectCustomColor(this.value)">
+        </div>
+        <div style="border-top: 1px solid #dee2e6; padding-top: 10px; margin-top: 10px;">
+            <label style="display: block; font-size: 12px; color: #7f8c8d; margin-bottom: 8px;">Preset Themes:</label>
+            <div class="color-options">
+                ${colorOptionsHTML}
+            </div>
         </div>
     </div>
 </div>
@@ -1393,6 +1474,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
