@@ -131,7 +131,7 @@
 		.drag-handle:active { cursor: grabbing; }
 		.skill-card.dragging { opacity: 0.5; background: #f3f4f6; }
 		.skill-card.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
-		.bullet-toggle-btn { position: absolute; top: 12px; right: 42px; background: rgba(0, 0, 0, 0.05); color: #6b7280; border: none; border-radius: 6px; cursor: pointer; padding: 6px 10px; font-size: 12px; font-weight: 600; transition: all 0.2s ease; z-index: 5; }
+		.bullet-toggle-btn { position: absolute; top: 12px; right: 42px; background: rgba(0, 0, 0, 0.05); color: #6b7280; border: none; border-radius: 6px; cursor: pointer; padding: 6px 10px; font-size: 18px; font-weight: 600; transition: all 0.2s ease; z-index: 5; }
 		.bullet-toggle-btn:hover { background: rgba(0, 0, 0, 0.1); color: #374151; }
 		.checklist-item .bullet-number { width: 20px; height: 20px; border-radius: 50%; background: #d1d5db; color: white; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
 		.checklist-item .bullet-square { width: 20px; height: 20px; border-radius: 5px; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
@@ -1957,6 +1957,7 @@ function renderContent() {
 			    };
 			    const toggleBtn = document.createElement('button');
 			    toggleBtn.className = 'bullet-toggle-btn';
+			    toggleBtn.style.right = '78px'; // Now on the left (where duplicate was)
 			    toggleBtn.textContent = bulletIcons[bulletStyle];
 			    toggleBtn.title = 'Change bullet style';
 			    toggleBtn.onclick = (e) => {
@@ -1969,8 +1970,8 @@ function renderContent() {
 			if (editMode) {
 			    const duplicateBtn = document.createElement('button');
 			    duplicateBtn.className = 'bullet-toggle-btn';
-			    duplicateBtn.style.right = '78px'; // Position to the left of bullet toggle
-			    duplicateBtn.textContent = '⧉';
+			    duplicateBtn.style.right = '42px'; // Now on the right (where toggle was)
+			    duplicateBtn.innerHTML = '⧉';
 			    duplicateBtn.title = 'Duplicate card';
 			    duplicateBtn.onclick = (e) => {
 			        e.stopPropagation();
@@ -2329,6 +2330,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
