@@ -1048,6 +1048,15 @@ async function populateGuideDropdown() {
         dropdown.appendChild(createBtn);
     }
 }
+console.log("populateGuideDropdown() started");
+
+const [guidesSnap, orderSnap] = await Promise.all([
+    database.ref('guides').once('value'),
+    database.ref('guideOrder').once('value')
+]);
+
+console.log("guidesSnap:", guidesSnap.val());
+console.log("orderSnap:", orderSnap.val());
 
 
 function handleDragStart(e) {
@@ -1914,6 +1923,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
