@@ -642,59 +642,107 @@ function saveAndExitEdit() {
     renderContent();
 }
 function showEmojiPicker(target, callback) {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.maxLength = 2;
-    input.style.position = 'absolute';
-    input.style.opacity = '0';
-    input.style.pointerEvents = 'none';
-    document.body.appendChild(input);
-    
-    input.focus();
-    
-    // Show instruction based on platform
-    const rect = target.getBoundingClientRect();
-    const tooltip = document.createElement('div');
-    tooltip.style.position = 'absolute';
-    tooltip.style.left = rect.left + 'px';
-    tooltip.style.top = (rect.bottom + 5) + 'px';
-    tooltip.style.background = '#2c3e50';
-    tooltip.style.color = 'white';
-    tooltip.style.padding = '8px 12px';
-    tooltip.style.borderRadius = '6px';
-    tooltip.style.fontSize = '12px';
-    tooltip.style.zIndex = '10000';
-    tooltip.style.whiteSpace = 'nowrap';
-    
-    if (navigator.userAgent.includes('Mac')) {
-        tooltip.textContent = 'Press ⌘ + ^ + Space for emoji picker';
-    } else if (navigator.userAgent.includes('Windows')) {
-        tooltip.textContent = 'Press Win + . for emoji picker';
-    } else {
-        tooltip.textContent = 'Type or paste emoji';
+    const existingInput = document.querySelector('.emoji-input-field');
+    if (existingInput) {
+        existingInput.remove();
+        return;
     }
     
-    document.body.appendChild(tooltip);
+    const inputWrapper = document.createElement('div');
+    inputWrapper.style.position = 'fixed';
+    inputWrapper.style.top = '50%';
+    inputWrapper.style.left = '50%';
+    inputWrapper.style.transform = 'translate(-50%, -50%)';
+    inputWrapper.style.background = 'white';
+    inputWrapper.style.padding = '20px';
+    inputWrapper.style.borderRadius = '12px';
+    inputWrapper.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+    inputWrapper.style.zIndex = '10000';
+    inputWrapper.className = 'emoji-input-field';
     
-    input.addEventListener('input', (e) => {
-        const value = e.target.value;
-        if (value) {
-            callback(value);
-            document.body.removeChild(input);
-            document.body.removeChild(tooltip);
+    const label = document.createElement('div');
+    label.textContent = 'Paste or type emoji:';
+    label.style.marginBottom = '10px';
+    label.style.fontSize = '14px';
+    label.style.color = '#2c3e50';
+    inputWrapper.appendChild(label);
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 4;
+    input.style.fontSize = '32px';
+    input.style.width = '80px';
+    input.style.textAlign = 'center';
+    input.style.border = '2px solid #3498db';
+    input.style.borderRadius = '8px';
+    input.style.padding = '10px';
+    input.style.outline = 'none';
+    input.placeholder = '😀';
+    inputWrapper.appendChild(input);
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.marginTop = '15px';
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '10px';
+    
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'Confirm';
+    confirmBtn.style.flex = '1';
+    confirmBtn.style.padding = '8px';
+    confirmBtn.style.background = '#27ae60';
+    confirmBtn.style.color = 'white';
+    confirmBtn.style.border = 'none';
+    confirmBtn.style.borderRadius = '6px';
+    confirmBtn.style.cursor = 'pointer';
+    confirmBtn.onclick = () => {
+        if (input.value) {
+            callback(input.value);
         }
-    });
+        inputWrapper.remove();
+    };
+    buttonContainer.appendChild(confirmBtn);
     
-    input.addEventListener('blur', () => {
-        setTimeout(() => {
-            if (document.body.contains(input)) {
-                document.body.removeChild(input);
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.flex = '1';
+    cancelBtn.style.padding = '8px';
+    cancelBtn.style.background = '#95a5a6';
+    cancelBtn.style.color = 'white';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.borderRadius = '6px';
+    cancelBtn.style.cursor = 'pointer';
+    cancelBtn.onclick = () => inputWrapper.remove();
+    buttonContainer.appendChild(cancelBtn);
+    
+    inputWrapper.appendChild(buttonContainer);
+    
+    const hint = document.createElement('div');
+    hint.style.marginTop = '10px';
+    hint.style.fontSize = '11px';
+    hint.style.color = '#7f8c8d';
+    hint.style.textAlign = 'center';
+    
+    if (navigator.userAgent.includes('Windows')) {
+        hint.textContent = 'Win + . to open emoji picker';
+    } else if (navigator.userAgent.includes('Mac')) {
+        hint.textContent = '⌘ + ^ + Space for emoji picker';
+    } else {
+        hint.textContent = 'Use your keyboard\'s emoji button';
+    }
+    inputWrapper.appendChild(hint);
+    
+    document.body.appendChild(inputWrapper);
+    input.focus();
+    
+    // Close on outside click
+    setTimeout(() => {
+        document.addEventListener('click', function closeInput(e) {
+            if (!inputWrapper.contains(e.target)) {
+                inputWrapper.remove();
+                document.removeEventListener('click', closeInput);
             }
-            if (document.body.contains(tooltip)) {
-                document.body.removeChild(tooltip);
-            }
-        }, 100);
-    });
+        });
+    }, 100);
 }
 // Save categories to Firebase
 function saveCategories() {
@@ -1039,44 +1087,108 @@ function toggleEditMode() {
 }
 
 function editAppIcon(el) {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.maxLength = 2; // Allow emoji (some are 2 characters)
-    input.style.position = 'absolute';
-    input.style.opacity = '0';
-    input.style.pointerEvents = 'none';
-    document.body.appendChild(input);
-    
-    input.focus();
-    
-    // Try to open emoji picker
-    if (navigator.userAgent.includes('Mac')) {
-        // Mac: Cmd + Ctrl + Space
-        alert('Press Command + Control + Space to open emoji picker');
-    } else if (navigator.userAgent.includes('Windows')) {
-        // Windows: Win + . or Win + ;
-        alert('Press Windows key + . (period) to open emoji picker');
-    } else {
-        // Mobile or other
-        input.setAttribute('inputmode', 'none');
+    const existingInput = document.querySelector('.emoji-input-field');
+    if (existingInput) {
+        existingInput.remove();
+        return;
     }
     
-    input.addEventListener('input', (e) => {
-        const value = e.target.value;
-        if (value) {
-            appIcon = value;
-            saveHeader();
-            document.body.removeChild(input);
-        }
-    });
+    const inputWrapper = document.createElement('div');
+    inputWrapper.style.position = 'fixed';
+    inputWrapper.style.top = '50%';
+    inputWrapper.style.left = '50%';
+    inputWrapper.style.transform = 'translate(-50%, -50%)';
+    inputWrapper.style.background = 'white';
+    inputWrapper.style.padding = '20px';
+    inputWrapper.style.borderRadius = '12px';
+    inputWrapper.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+    inputWrapper.style.zIndex = '10000';
+    inputWrapper.className = 'emoji-input-field';
     
-    input.addEventListener('blur', () => {
-        setTimeout(() => {
-            if (document.body.contains(input)) {
-                document.body.removeChild(input);
+    const label = document.createElement('div');
+    label.textContent = 'Paste or type emoji:';
+    label.style.marginBottom = '10px';
+    label.style.fontSize = '14px';
+    label.style.color = '#2c3e50';
+    inputWrapper.appendChild(label);
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 4;
+    input.style.fontSize = '32px';
+    input.style.width = '80px';
+    input.style.textAlign = 'center';
+    input.style.border = '2px solid #3498db';
+    input.style.borderRadius = '8px';
+    input.style.padding = '10px';
+    input.style.outline = 'none';
+    input.placeholder = '😀';
+    inputWrapper.appendChild(input);
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.marginTop = '15px';
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '10px';
+    
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'Confirm';
+    confirmBtn.style.flex = '1';
+    confirmBtn.style.padding = '8px';
+    confirmBtn.style.background = '#27ae60';
+    confirmBtn.style.color = 'white';
+    confirmBtn.style.border = 'none';
+    confirmBtn.style.borderRadius = '6px';
+    confirmBtn.style.cursor = 'pointer';
+    confirmBtn.onclick = () => {
+        if (input.value) {
+            appIcon = input.value;
+            saveHeader();
+        }
+        inputWrapper.remove();
+    };
+    buttonContainer.appendChild(confirmBtn);
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.flex = '1';
+    cancelBtn.style.padding = '8px';
+    cancelBtn.style.background = '#95a5a6';
+    cancelBtn.style.color = 'white';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.borderRadius = '6px';
+    cancelBtn.style.cursor = 'pointer';
+    cancelBtn.onclick = () => inputWrapper.remove();
+    buttonContainer.appendChild(cancelBtn);
+    
+    inputWrapper.appendChild(buttonContainer);
+    
+    const hint = document.createElement('div');
+    hint.style.marginTop = '10px';
+    hint.style.fontSize = '11px';
+    hint.style.color = '#7f8c8d';
+    hint.style.textAlign = 'center';
+    
+    if (navigator.userAgent.includes('Windows')) {
+        hint.textContent = 'Win + . to open emoji picker';
+    } else if (navigator.userAgent.includes('Mac')) {
+        hint.textContent = '⌘ + ^ + Space for emoji picker';
+    } else {
+        hint.textContent = 'Use your keyboard\'s emoji button';
+    }
+    inputWrapper.appendChild(hint);
+    
+    document.body.appendChild(inputWrapper);
+    input.focus();
+    
+    // Close on outside click
+    setTimeout(() => {
+        document.addEventListener('click', function closeInput(e) {
+            if (!inputWrapper.contains(e.target)) {
+                inputWrapper.remove();
+                document.removeEventListener('click', closeInput);
             }
-        }, 100);
-    });
+        });
+    }, 100);
 }
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
@@ -1233,6 +1345,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
