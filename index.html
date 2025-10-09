@@ -181,6 +181,8 @@ let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
+let expandedCards = {};
+
 		
 const colorThemes = [
     // Calm (3 options)
@@ -295,6 +297,10 @@ function loadFromFirebase() {
         if (layoutSnap.val()) {
             layoutMode = layoutSnap.val();
         }
+		// Load expanded cards
+		if (expandedSnap.val()) {
+		    expandedCards = expandedSnap.val();
+		}
         // Load auto-refresh settings
 		if (autoRefreshEnabledSnap.val() !== null) {
     		autoRefreshEnabled = autoRefreshEnabledSnap.val();
@@ -1228,6 +1234,10 @@ function editAppIcon(el) {
         });
     }, 100);
 }
+		// Save expanded cards to Firebase
+function saveExpandedCards() {
+    database.ref(`guides/${currentGuideId}/expandedCards`).set(expandedCards);
+}
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
         title: "New Skill", 
@@ -1383,6 +1393,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
