@@ -126,8 +126,8 @@
     	.guide-item { cursor: move; }
 		.guide-item.dragging { opacity: 0.5; }
 		.guide-item.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
-		.drag-handle { cursor: grab; padding: 4px; margin-right: 8px; color: #4b5563; font-size: 20px; line-height: 1; user-select: none; opacity: 1; transition: opacity 0.2s; font-weight: bold; }
-		.drag-handle:hover { opacity: 1; color: var(--primary-color, #3498db); }
+		.drag-handle { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); cursor: grab; padding: 6px 4px; color: rgba(0, 0, 0, 0.15); font-size: 16px; line-height: 1; user-select: none; transition: all 0.2s; font-weight: normal; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8); letter-spacing: -2px; }
+		.drag-handle:hover { color: rgba(0, 0, 0, 0.25); text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.9); }
 		.drag-handle:active { cursor: grabbing; }
 		.skill-card.dragging { opacity: 0.5; background: #f3f4f6; }
 		.skill-card.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
@@ -1001,7 +1001,7 @@ function renderHeader() {
 <button class="guide-menu-btn" onclick="toggleGuideMenu(event)">☰</button>
 <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
 <div class="guide-dropdown" id="guideDropdown">
-    <div class="drawer-header">🪶My Notebook</div>
+    <div class="drawer-header">My Notebook</div>
 </div>
 <div class="edit-toggle">
     <button class="save-btn" id="saveBtn" onclick="saveAndExitEdit()" style="display: none;">Done</button>
@@ -1748,10 +1748,11 @@ function renderContent() {
 			// Add drag handle in edit mode and headings view
 			if (editMode && layoutMode === 'headings') {
 			    const dragHandle = document.createElement('span');
-			    dragHandle.className = 'drag-handle';
-			    dragHandle.innerHTML = '⋮⋮';
-			    dragHandle.draggable = false;
-			    titleDiv.appendChild(dragHandle);
+				dragHandle.className = 'drag-handle';
+				dragHandle.innerHTML = '⋮⋮⋮';
+				dragHandle.draggable = false;
+				card.classList.add('draggable');
+				titleDiv.appendChild(dragHandle);
 			    
 			    card.draggable = true;
 			    card.style.cursor = 'grab';
@@ -2146,6 +2147,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
