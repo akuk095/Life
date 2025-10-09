@@ -94,7 +94,7 @@
 		.nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; position: sticky; top: 0; left: 0; right: 0; z-index: 100; }
 		.nav-tabs::-webkit-scrollbar { height: 4px; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
-		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 30px; max-width: 50px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
 		.save-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--primary-color, #607d8b); opacity: 0.7; color: white; border: none; padding: 12px 24px; cursor: pointer; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; display: none; z-index: 1000; }
 		.save-btn:hover { opacity: 1; transform: translateX(-50%) translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
@@ -194,8 +194,7 @@ const colorThemes = [
 	{ name: 'Dusty Rose', primary: '#C9A0A0', secondary: '#A88080' },
     { name: 'Rose Clay', primary: '#D98C8C', secondary: '#A96565' },
 	{ name: 'Elegant Burgundy', primary: '#8B4359', secondary: '#6B3349' },
-    { name: 'Elegant Plum', primary: '#8B5A8C', secondary: '#6B4A6C' },
-	{ name: 'Deep Teal', primary: '#4A7C7E', secondary: '#355E60' },
+    { name: 'Deep Teal', primary: '#4A7C7E', secondary: '#355E60' },
 	{ name: 'Forest Deep', primary: '#3A5A4A', secondary: '#22342D' },
 	{ name: 'Elegant Navy', primary: '#1E3A5F', secondary: '#2C5F8D' },
     { name: 'Ocean Blue', primary: '#5B8FA3', secondary: '#407084' },
@@ -827,7 +826,6 @@ function renderHeader() {
 <div class="edit-toggle">
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
 <div class="dropdown-menu" id="dropdownMenu">
-    <button onclick="createNewGuide()">Create new</button>
     <button onclick="toggleEditMode()">Edit</button>
     <button onclick="duplicateGuide()">Duplicate</button>
     <button onclick="deleteGuide()">Delete</button>
@@ -1768,6 +1766,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
