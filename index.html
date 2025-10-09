@@ -946,8 +946,9 @@ function populateGuideDropdown() {
             
             // Keep the header, clear only the guide list
             const header = dropdown.querySelector('.drawer-header');
-            dropdown.innerHTML = '';
-            if (header) dropdown.appendChild(header);
+			Array.from(dropdown.children).forEach(child => {
+			  if (!child.classList.contains('drawer-header')) child.remove();
+			});
             
             // Render guides in order
             guideOrder.forEach(id => {
@@ -1049,67 +1050,84 @@ function populateGuideDropdown() {
 
 
 
+let draggedElement = null;
+let placeholder = null;
+
 function handleDragStart(e) {
     draggedElement = this;
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
+    e.dataTransfer.setData('text/plain', this.dataset.guideId);
+
+    // Create and insert a placeholder element
+    placeholder = document.createElement('div');
+    placeholder.className = 'guide-placeholder';
+    placeholder.style.height = `${this.offsetHeight}px`;
+    placeholder.style.border = '2px dashed #aaa';
+    placeholder.style.borderRadius = '6px';
+    placeholder.style.margin = '4px 0';
+    this.parentNode.insertBefore(placeholder, this.nextSibling);
 }
 
 function handleDragEnd(e) {
     this.classList.remove('dragging');
+    document.querySelectorAll('.guide-item').forEach(item => item.classList.remove('drag-over'));
     
-    // Remove drag-over class from all items
-    document.querySelectorAll('.guide-item').forEach(item => {
-        item.classList.remove('drag-over');
-    });
+    // Remove placeholder
+    if (placeholder && placeholder.parentNode) {
+        placeholder.parentNode.removeChild(placeholder);
+    }
+    placeholder = null;
+    draggedElement = null;
+}
+
+function handleDragEnter(e) {
+    e.preventDefault();
+    if (!draggedElement || this === draggedElement) return;
+
+    const parent = this.parentNode;
+    const items = Array.from(parent.querySelectorAll('.guide-item'));
+    const draggedIndex = items.indexOf(draggedElement);
+    const targetIndex = items.indexOf(this);
+
+    // Move placeholder visually
+    if (draggedIndex < targetIndex) {
+        parent.insertBefore(placeholder, this.nextSibling);
+    } else {
+        parent.insertBefore(placeholder, this);
+    }
 }
 
 function handleDragOver(e) {
-    if (e.preventDefault) {
-        e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'move';
-    
-    const afterElement = this;
-    if (afterElement !== draggedElement) {
-        afterElement.classList.add('drag-over');
-    }
-    
+    e.preventDefault(); // Needed to allow drop
+}
+
+function handleDrop(e) {
+    e.stopPropagation();
+    if (!placeholder || !draggedElement) return false;
+
+    const parent = placeholder.parentNode;
+    parent.insertBefore(draggedElement, placeholder);
+    placeholder.remove();
+
+    // Save new order to Firebase
+    const newOrder = Array.from(parent.querySelectorAll('.guide-item'))
+        .map(item => item.dataset.guideId);
+    database.ref('guideOrder').set(newOrder);
+
+    draggedElement.classList.remove('dragging');
+    draggedElement = null;
+    placeholder = null;
+
     return false;
 }
+
 
 function handleDragLeave(e) {
     this.classList.remove('drag-over');
 }
 
-function handleDrop(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation();
-    }
-    
-    if (draggedElement !== this) {
-        // Get all guide items
-        const allItems = Array.from(document.querySelectorAll('.guide-item'));
-        const draggedIndex = allItems.indexOf(draggedElement);
-        const targetIndex = allItems.indexOf(this);
-        
-        // Reorder in DOM
-        if (draggedIndex < targetIndex) {
-            this.parentNode.insertBefore(draggedElement, this.nextSibling);
-        } else {
-            this.parentNode.insertBefore(draggedElement, this);
-        }
-        
-        // Save new order to Firebase
-        const newOrder = Array.from(document.querySelectorAll('.guide-item')).map(item => item.dataset.guideId);
-        database.ref('guideOrder').set(newOrder);
-    }
-    
-    this.classList.remove('drag-over');
-    return false;
-}
-		
+
 function saveAndExitEdit() {
     editMode = false;
     document.body.classList.remove('edit-mode-active');
@@ -1124,6 +1142,7 @@ function saveAndExitEdit() {
     renderTabs();
     renderContent();
 }
+		
 function showEmojiPicker(target, callback) {
     const existingInput = document.querySelector('.emoji-input-field');
     if (existingInput) {
@@ -1900,6 +1919,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
