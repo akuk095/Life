@@ -119,8 +119,12 @@
 		.skill-title .delete-btn:hover { background: #fee2e2; color: #dc2626; }
 		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
 		.checklist-item:has(.delete-btn:hover) { background: #fee2e2 !important; border-color: #fca5a5 !important; }
-		.skill-card:has(.delete-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
+		.skill-card:has(> .skill-title .delete-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
 		.tab-wrapper:has(.delete-tab-btn:hover) .nav-tab { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fca5a5 !important; }
+		.checklist-item:has(.emoji-remove-btn:hover) { background: #fee2e2 !important; border-color: #fca5a5 !important; }
+		.skill-card:has(> .skill-title .emoji-remove-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
+		.tab-wrapper:has(.emoji-remove-btn:hover) .nav-tab { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fca5a5 !important; }
+		.header:has(.emoji-remove-btn:hover) { opacity: 0.9; }
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@supports (-webkit-touch-callout: none) { /* iOS specific - use native emoji keyboard */ input[type="text"].emoji-input {  font-size: 32px; } }
@@ -1800,6 +1804,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
