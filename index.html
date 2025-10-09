@@ -131,6 +131,12 @@
 		.drag-handle:active { cursor: grabbing; }
 		.skill-card.dragging { opacity: 0.5; background: #f3f4f6; }
 		.skill-card.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
+		.bullet-toggle-btn { position: absolute; top: 12px; right: 42px; background: rgba(0, 0, 0, 0.05); color: #6b7280; border: none; border-radius: 6px; cursor: pointer; padding: 6px 10px; font-size: 12px; font-weight: 600; transition: all 0.2s ease; z-index: 5; }
+		.bullet-toggle-btn:hover { background: rgba(0, 0, 0, 0.1); color: #374151; }
+		.checklist-item .bullet-number { width: 20px; height: 20px; border-radius: 50%; background: #d1d5db; color: white; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+		.checklist-item .bullet-square { width: 20px; height: 20px; border-radius: 5px; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
+		.checklist-item .bullet-circle { width: 20px; height: 20px; border-radius: 50%; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
+		.checklist-item .bullet-none { width: 0px; height: 20px; flex-shrink: 0; margin-top: 2px; }
 
 		
 	</style>
@@ -174,6 +180,7 @@ let categories = [
             {
                 title: "Basic Hygiene", 
                 icon: "🧼", 
+				bulletStyle: "checkbox",
                 items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
             }
         ]
@@ -1193,6 +1200,16 @@ function populateGuideDropdown() {
 			    btn.style.color = isLight ? 'var(--secondary-color)' : guideTheme;
 			    btn.style.fontWeight = '700';
 			    btn.style.fontSize = '15px';
+				btn.style.background = `linear-gradient(90deg, ${guideTheme}35 0%, transparent 100%)`;
+			    // Make icon larger
+			    const iconElement = nameSpan.querySelector('span') || nameSpan.childNodes[0];
+			    if (iconElement) {
+			        if (icon.startsWith('svg:')) {
+			            iconElement.style.transform = 'scale(1.15)';
+			        } else {
+			            nameSpan.style.fontSize = '16px';
+			        }
+			    }
 			}
 
             // Enable drag-and-drop in edit mode
@@ -1722,7 +1739,17 @@ tab.innerHTML = `
 	    }, 0);
 	}
 }
-
+		
+function toggleBulletStyle(catIndex, skillIndex) {
+    const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
+    const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
+    const currentIndex = styles.indexOf(currentStyle);
+    const nextIndex = (currentIndex + 1) % styles.length;
+    
+    categories[catIndex].skills[skillIndex].bulletStyle = styles[nextIndex];
+    saveCategories();
+    renderContent();
+}
 function renderContent() { 
 	    const contentArea = document.getElementById('contentArea'); 
 	    contentArea.innerHTML = ''; 
@@ -1820,7 +1847,28 @@ function renderContent() {
                 }); 
             } 
             
-            card.appendChild(titleDiv); 
+            card.appendChild(titleDiv);
+
+			// Add bullet toggle button (not in edit mode)
+			if (!editMode) {
+			    const bulletStyle = skill.bulletStyle || 'checkbox';
+			    const bulletIcons = {
+			        'checkbox': '☑',
+			        'number': '123',
+			        'square': '■',
+			        'circle': '●',
+			        'none': '—'
+			    };
+			    const toggleBtn = document.createElement('button');
+			    toggleBtn.className = 'bullet-toggle-btn';
+			    toggleBtn.textContent = bulletIcons[bulletStyle];
+			    toggleBtn.title = 'Change bullet style';
+			    toggleBtn.onclick = (e) => {
+			        e.stopPropagation();
+			        toggleBulletStyle(catIndex, skillIndex);
+			    };
+			    card.appendChild(toggleBtn);
+			}
             
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
@@ -1828,9 +1876,29 @@ function renderContent() {
                 checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); 
                 if (!editMode) checkItem.onclick = () => toggleCheck(itemId); 
                 
-                const checkbox = document.createElement('div');
-                checkbox.className = 'checkbox';
-                checkItem.appendChild(checkbox);
+                // Render appropriate bullet based on style
+				const bulletStyle = skill.bulletStyle || 'checkbox';
+				let bulletElement;
+				
+				if (bulletStyle === 'checkbox') {
+				    bulletElement = document.createElement('div');
+				    bulletElement.className = 'checkbox';
+				} else if (bulletStyle === 'number') {
+				    bulletElement = document.createElement('div');
+				    bulletElement.className = 'bullet-number';
+				    bulletElement.textContent = itemIndex + 1;
+				} else if (bulletStyle === 'square') {
+				    bulletElement = document.createElement('div');
+				    bulletElement.className = 'bullet-square';
+				} else if (bulletStyle === 'circle') {
+				    bulletElement = document.createElement('div');
+				    bulletElement.className = 'bullet-circle';
+				} else if (bulletStyle === 'none') {
+				    bulletElement = document.createElement('div');
+				    bulletElement.className = 'bullet-none';
+				}
+				
+				checkItem.appendChild(bulletElement);
                 
                 const textDiv = document.createElement('div');
                 textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
@@ -2153,6 +2221,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
