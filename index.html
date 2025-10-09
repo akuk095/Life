@@ -427,8 +427,15 @@ function initColorPicker() {
         
         // Set initial positions
         hueIndicator.style.left = (currentHue / 360 * 100) + '%';
-        canvasIndicator.style.left = currentSaturation + '%';
-        canvasIndicator.style.top = (100 - currentLightness * 2) + '%';
+        
+        // Calculate correct canvas position based on HSL
+        // X-axis is saturation (0-100)
+        // Y-axis is lightness, but inverted: 0% lightness at bottom, 100% at top
+        const xPos = currentSaturation;
+        const yPos = 100 - (currentLightness * 2); // Convert 0-100 lightness to 0-100 canvas position
+        
+        canvasIndicator.style.left = xPos + '%';
+        canvasIndicator.style.top = yPos + '%';
         canvas.style.backgroundColor = `hsl(${currentHue}, 100%, 50%)`;
     }
     
@@ -1761,6 +1768,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
