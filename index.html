@@ -80,9 +80,9 @@
 		.guide-dropdown.show { transform: translateX(0); }
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
-		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 48px 30px; text-align: center; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-		.header h1 { font-size: 32px; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; }
-		.header p { opacity: 0.95; font-size: 15px; font-weight: 400; }
+		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 24px 30px; text-align: center; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+		.header h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px; }
+		.header p { opacity: 0.95; font-size: 13px; font-weight: 400; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
 		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 32px; }
 		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; }
@@ -1162,7 +1162,7 @@ function showEmojiPicker(target, callback) {
     
 	const input = document.createElement('input');
 	input.type = 'text';
-	input.maxLength = 4;
+	input.maxLength = 20;
 	input.style.fontSize = '32px';
 	input.style.width = '80px';
 	input.style.textAlign = 'center';
@@ -1674,7 +1674,7 @@ function editAppIcon(el) {
     
 	const input = document.createElement('input');
 	input.type = 'text';
-	input.maxLength = 4;
+	input.maxLength = 20;
 	input.style.fontSize = '32px';
 	input.style.width = '80px';
 	input.style.textAlign = 'center';
@@ -1935,5 +1935,6 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
