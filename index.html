@@ -8,12 +8,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; }
-		.add-category-tab { background: #27ae60 !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
-		.add-category-tab:hover { background: #229954 !important; }
-		.add-item-btn { background: var(--primary-color, #3498db); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 13px; font-weight: 500; display: none; width: 100%; transition: all 0.2s ease; }
-		.add-item-btn:hover { background: var(--secondary-color, #2980b9); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-		.add-skill-btn { background: var(--primary-color, #3498db); color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; width: auto; margin: 20px auto; transition: all 0.2s ease; display: none; }
-		.add-skill-btn:hover { background: var(--secondary-color, #2980b9); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+		.add-category-tab { background: #f59e0b !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
+		.add-category-tab:hover { background: #d97706 !important; }
+		.add-item-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 13px; font-weight: 500; display: none; width: 100%; transition: all 0.2s ease; }
+		.add-item-btn:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+		.add-skill-btn { background: #8b5cf6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; width: auto; margin: 20px auto; transition: all 0.2s ease; display: none; }
+		.add-skill-btn:hover { background: #7c3aed; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3); }
 		.category { display: none; }
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
@@ -99,21 +99,21 @@
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
-		.save-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--primary-color, #607d8b); opacity: 0.7; color: white; border: none; padding: 12px 24px; cursor: pointer; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; display: none; z-index: 1000; }
+		.save-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--save-btn-color, var(--primary-color, #607d8b)); opacity: 0.9; color: white; border: none; padding: 12px 24px; cursor: pointer; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; display: none; z-index: 1000; }
 		.save-btn:hover { opacity: 1; transform: translateX(-50%) translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
 		.save-btn.show { display: block; animation: fadeIn 0.3s ease-in-out; }
-		.skill-card { background: white; border-radius: 12px; padding: 24px; border-left: 4px solid var(--primary-color, #3498db); border: 1px solid #e8eaed; box-shadow: 0 1px 3px rgba(0,0,0,0.06); transition: all 0.3s ease; position: relative; }
+		.skill-card { background: white; border-radius: 0; padding: 24px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e8eaed; box-shadow: none; transition: all 0.3s ease; position: relative; }
 		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #d0d4d9; }
 		.skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 0; padding: 0; transition: all 0.3s ease; }
-		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 0 30px; }
-		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--primary-color, #3498db); border-radius: 8px; background: #f8f9fa; border-bottom: none; cursor: pointer; position: relative; }
+		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 0 12px; }
+		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--secondary-color, #3498db); border-radius: 8px; background: white; border-bottom: 1px solid #e8eaed; cursor: pointer; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 		.skill-grid.headings .skill-card.expanded .checklist-item { display: flex; }
 		.skill-grid.headings .checklist-item { display: none; }
 		.skill-grid.headings .add-item-btn { display: none !important; }
-		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 0 30px 20px 30px; gap: 20px; }
-		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: none; }
+		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 30px; gap: 24px; }
+		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: 1px solid #e8eaed; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 		.skill-title { font-size: 17px; font-weight: 600; color: #1f2937; margin-bottom: 16px; letter-spacing: -0.2px; line-height: 1.4; }
 		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
@@ -356,7 +356,10 @@ function applyTheme() {
     
     // Set tab active color - use secondary for light themes
     document.documentElement.style.setProperty('--tab-active-color', isLight ? secondaryColor : primaryColor);
-    
+
+	// Set save button color - use secondary for light themes
+    document.documentElement.style.setProperty('--save-btn-color', isLight ? secondaryColor : primaryColor);
+	
     // Apply background gradient
     document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${primaryColor}CC 100%)`;
     
@@ -441,8 +444,8 @@ function initColorPicker() {
         canvas.style.backgroundColor = `hsl(${currentHue}, 100%, 50%)`;
     }
     
-    // Hue slider interaction
-    function updateHue(clientX) {
+// Hue slider interaction
+function updateHue(clientX) {
         const rect = hueSlider.getBoundingClientRect();
         const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
         const huePercent = (x / rect.width) * 100;
@@ -1478,6 +1481,12 @@ function toggleEditMode() {
         saveBtn.style.display = editMode ? 'block' : 'none';
     }
     
+    // Hide/show floating layout button
+    const floatingBtn = document.getElementById('layoutBtn');
+    if (floatingBtn) {
+        floatingBtn.style.display = editMode ? 'none' : 'flex';
+    }
+    
     renderHeader();
     renderTabs();
     renderContent(); 
@@ -1769,6 +1778,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
