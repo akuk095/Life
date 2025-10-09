@@ -1172,14 +1172,17 @@ function showEmojiPicker(target, callback) {
 	input.style.outline = 'none';
 	input.placeholder = '✅';
 	
-	// Restrict to emoji only (more permissive)
+	// Restrict to single emoji only
 	input.addEventListener('input', (e) => {
-	    const emojiRegex = /[\p{Emoji}\u200d\ufe0f]/gu;
 	    const value = e.target.value;
+	    // Match emoji including skin tones and combinations
+	    const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(\u200D(\p{Emoji_Presentation}|\p{Emoji}\uFE0F))*(\p{Emoji_Modifier})?/gu;
+	    const matches = value.match(emojiRegex);
 	    
-	    // Allow any unicode emoji characters
-	    if (value.length > 4) {
-	        e.target.value = value.substring(0, 4);
+	    if (matches && matches.length > 0) {
+	        e.target.value = matches[0]; // Keep only first emoji
+	    } else if (value.length > 0) {
+	        e.target.value = ''; // Clear if not emoji
 	    }
 	});
 	
@@ -1681,13 +1684,16 @@ function editAppIcon(el) {
 	input.style.outline = 'none';
 	input.placeholder = '✅';
 	
-	// Restrict to emoji only
+	// Restrict to single emoji only
 	input.addEventListener('input', (e) => {
-	    const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
-	    const matches = e.target.value.match(emojiRegex);
-	    if (matches) {
+	    const value = e.target.value;
+	    // Match emoji including skin tones and combinations
+	    const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(\u200D(\p{Emoji_Presentation}|\p{Emoji}\uFE0F))*(\p{Emoji_Modifier})?/gu;
+	    const matches = value.match(emojiRegex);
+	    
+	    if (matches && matches.length > 0) {
 	        e.target.value = matches[0]; // Keep only first emoji
-	    } else {
+	    } else if (value.length > 0) {
 	        e.target.value = ''; // Clear if not emoji
 	    }
 	});
@@ -1929,4 +1935,5 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
