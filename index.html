@@ -228,6 +228,19 @@ const colorThemes = [
 	{ name: 'Dark', primary: '#0A0A0A', secondary: '#000000' }
 ];
 
+		const svgIcons = [
+    { name: 'Night', bg: '#6B7C9E', path: 'M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z' },
+    { name: 'Water', bg: '#5B8FA3', path: 'M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8z' },
+    { name: 'Reading', bg: '#9B7C6E', path: 'M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z' },
+    { name: 'Planning', bg: '#7B8B9E', path: 'M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z' },
+    { name: 'Focus', bg: '#9E7B7C', path: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-12c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z' },
+    { name: 'Study', bg: '#6E7C9B', path: 'M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z' },
+    { name: 'Work', bg: '#6B7C8B', path: 'M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z' },
+    { name: 'Music', bg: '#9E7B9B', path: 'M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z' },
+    { name: 'Coffee', bg: '#8B7C8B', path: 'M2 21h18v-2H2v2zm2-8h14v-2H4v2zm18.5-5H20V4h1.5c.83 0 1.5.67 1.5 1.5v1c0 .83-.67 1.5-1.5 1.5zM4 4h14v4c0 2.21-1.79 4-4 4H8c-2.21 0-4-1.79-4-4V4z' },
+    { name: 'Heart', bg: '#9E7B7C', path: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' }
+    // Add more icons from the document as needed
+];
 
 document.addEventListener('dragstart', (e) => {
     if (e.target.classList.contains('skill-card') && editMode && layoutMode === 'headings') {
@@ -954,7 +967,21 @@ function renderHeader() {
 </div>
 <h1>
     <span class="editable-icon" style="display: inline-block; position: relative;">
-        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${appIcon && appIcon !== "​" ? appIcon : (editMode ? "+" : "​")}</span>
+        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
+            (() => {
+                const hasIconContent = appIcon && appIcon !== "​";
+                if (hasIconContent) {
+                    if (appIcon.startsWith('svg:')) {
+                        const iconData = JSON.parse(appIcon.substring(4));
+                        return `<span style="display: inline-flex; width: 28px; height: 28px; background: ${iconData.bg}; border-radius: 6px; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+                    } else {
+                        return appIcon;
+                    }
+                } else {
+                    return editMode ? "+" : "​";
+                }
+            })()
+        }</span>
         ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" onclick="event.stopPropagation(); appIcon = \'​\'; saveHeader();">×</span>' : ''}
     </span>
     <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
@@ -1040,7 +1067,12 @@ function populateGuideDropdown() {
             btn.style.padding = '8px 12px';
             
             const nameSpan = document.createElement('span');
-            nameSpan.textContent = `${icon} ${title}`;
+            if (icon.startsWith('svg:')) {
+			    const iconData = JSON.parse(icon.substring(4));
+			    nameSpan.innerHTML = `<span style="display: inline-flex; width: 18px; height: 18px; background: ${iconData.bg}; border-radius: 3px; align-items: center; justify-content: center; margin-right: 8px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span> ${title}`;
+			} else {
+			    nameSpan.textContent = `${icon} ${title}`;
+			}
             btn.appendChild(nameSpan);
             
             if (editMode && id !== 'defaultGuide') {
@@ -1229,44 +1261,155 @@ function showEmojiPicker(target, callback) {
     inputWrapper.style.borderRadius = '12px';
     inputWrapper.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
     inputWrapper.style.zIndex = '10000';
+    inputWrapper.style.maxWidth = '500px';
+    inputWrapper.style.maxHeight = '80vh';
+    inputWrapper.style.overflowY = 'auto';
     inputWrapper.className = 'emoji-input-field';
+    
+    // Prevent clicks inside from bubbling
     inputWrapper.addEventListener('click', (e) => e.stopPropagation());
-	
+    
+    // Tabs
+    const tabContainer = document.createElement('div');
+    tabContainer.style.display = 'flex';
+    tabContainer.style.gap = '10px';
+    tabContainer.style.marginBottom = '15px';
+    tabContainer.style.borderBottom = '2px solid #e0e0e0';
+    
+    const emojiTab = document.createElement('button');
+    emojiTab.textContent = '😀 Emoji';
+    emojiTab.style.flex = '1';
+    emojiTab.style.padding = '10px';
+    emojiTab.style.border = 'none';
+    emojiTab.style.background = 'none';
+    emojiTab.style.cursor = 'pointer';
+    emojiTab.style.borderBottom = '3px solid #3498db';
+    emojiTab.style.fontWeight = 'bold';
+    emojiTab.style.color = '#3498db';
+    
+    const iconTab = document.createElement('button');
+    iconTab.textContent = '🎨 Icons';
+    iconTab.style.flex = '1';
+    iconTab.style.padding = '10px';
+    iconTab.style.border = 'none';
+    iconTab.style.background = 'none';
+    iconTab.style.cursor = 'pointer';
+    iconTab.style.color = '#666';
+    
+    tabContainer.appendChild(emojiTab);
+    tabContainer.appendChild(iconTab);
+    inputWrapper.appendChild(tabContainer);
+    
+    // Content containers
+    const emojiContent = document.createElement('div');
+    const iconContent = document.createElement('div');
+    iconContent.style.display = 'none';
+    
+    // Emoji input section
     const label = document.createElement('div');
     label.textContent = 'Paste or type emoji:';
     label.style.marginBottom = '10px';
     label.style.fontSize = '14px';
     label.style.color = '#2c3e50';
-    inputWrapper.appendChild(label);
+    emojiContent.appendChild(label);
     
-	const input = document.createElement('input');
-	input.type = 'text';
-	input.maxLength = 20;
-	input.style.fontSize = '32px';
-	input.style.width = '80px';
-	input.style.textAlign = 'center';
-	input.style.border = '2px solid #3498db';
-	input.style.borderRadius = '8px';
-	input.style.padding = '10px';
-	input.style.outline = 'none';
-	input.placeholder = '✅';
-	
-	// Restrict to single emoji only
-	input.addEventListener('input', (e) => {
-	    const value = e.target.value;
-	    // Match emoji including skin tones and combinations
-	    const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(\u200D(\p{Emoji_Presentation}|\p{Emoji}\uFE0F))*(\p{Emoji_Modifier})?/gu;
-	    const matches = value.match(emojiRegex);
-	    
-	    if (matches && matches.length > 0) {
-	        e.target.value = matches[0]; // Keep only first emoji
-	    } else if (value.length > 0) {
-	        e.target.value = ''; // Clear if not emoji
-	    }
-	});
-	
-	inputWrapper.appendChild(input);
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 20;
+    input.style.fontSize = '32px';
+    input.style.width = '100%';
+    input.style.textAlign = 'center';
+    input.style.border = '2px solid #3498db';
+    input.style.borderRadius = '8px';
+    input.style.padding = '10px';
+    input.style.outline = 'none';
+    input.placeholder = '✅';
     
+    input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(\u200D(\p{Emoji_Presentation}|\p{Emoji}\uFE0F))*(\p{Emoji_Modifier})?/gu;
+        const matches = value.match(emojiRegex);
+        
+        if (matches && matches.length > 0) {
+            e.target.value = matches[0];
+        } else if (value.length > 0) {
+            e.target.value = '';
+        }
+    });
+    
+    emojiContent.appendChild(input);
+    
+    // Icon grid
+    const iconGrid = document.createElement('div');
+    iconGrid.style.display = 'grid';
+    iconGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(60px, 1fr))';
+    iconGrid.style.gap = '10px';
+    iconGrid.style.maxHeight = '300px';
+    iconGrid.style.overflowY = 'auto';
+    
+    svgIcons.forEach(icon => {
+        const iconBtn = document.createElement('button');
+        iconBtn.style.width = '60px';
+        iconBtn.style.height = '60px';
+        iconBtn.style.borderRadius = '8px';
+        iconBtn.style.border = '2px solid transparent';
+        iconBtn.style.cursor = 'pointer';
+        iconBtn.style.backgroundColor = icon.bg;
+        iconBtn.style.display = 'flex';
+        iconBtn.style.alignItems = 'center';
+        iconBtn.style.justifyContent = 'center';
+        iconBtn.style.transition = 'all 0.2s';
+        iconBtn.title = icon.name;
+        
+        iconBtn.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="${icon.path}"/></svg>`;
+        
+        iconBtn.onmouseover = () => {
+            iconBtn.style.transform = 'scale(1.1)';
+            iconBtn.style.borderColor = '#3498db';
+        };
+        iconBtn.onmouseout = () => {
+            iconBtn.style.transform = 'scale(1)';
+            iconBtn.style.borderColor = 'transparent';
+        };
+        
+        iconBtn.onclick = () => {
+            // Store as SVG data
+            callback(`svg:${JSON.stringify({name: icon.name, bg: icon.bg, path: icon.path})}`);
+            inputWrapper.remove();
+        };
+        
+        iconGrid.appendChild(iconBtn);
+    });
+    
+    iconContent.appendChild(iconGrid);
+    
+    inputWrapper.appendChild(emojiContent);
+    inputWrapper.appendChild(iconContent);
+    
+    // Tab switching
+    emojiTab.onclick = () => {
+        emojiTab.style.borderBottom = '3px solid #3498db';
+        emojiTab.style.fontWeight = 'bold';
+        emojiTab.style.color = '#3498db';
+        iconTab.style.borderBottom = 'none';
+        iconTab.style.fontWeight = 'normal';
+        iconTab.style.color = '#666';
+        emojiContent.style.display = 'block';
+        iconContent.style.display = 'none';
+    };
+    
+    iconTab.onclick = () => {
+        iconTab.style.borderBottom = '3px solid #3498db';
+        iconTab.style.fontWeight = 'bold';
+        iconTab.style.color = '#3498db';
+        emojiTab.style.borderBottom = 'none';
+        emojiTab.style.fontWeight = 'normal';
+        emojiTab.style.color = '#666';
+        iconContent.style.display = 'block';
+        emojiContent.style.display = 'none';
+    };
+    
+    // Buttons
     const buttonContainer = document.createElement('div');
     buttonContainer.style.marginTop = '15px';
     buttonContainer.style.display = 'flex';
@@ -1301,27 +1444,11 @@ function showEmojiPicker(target, callback) {
     cancelBtn.onclick = () => inputWrapper.remove();
     buttonContainer.appendChild(cancelBtn);
     
-    inputWrapper.appendChild(buttonContainer);
-    
-    const hint = document.createElement('div');
-    hint.style.marginTop = '10px';
-    hint.style.fontSize = '11px';
-    hint.style.color = '#7f8c8d';
-    hint.style.textAlign = 'center';
-    
-    if (navigator.userAgent.includes('Windows')) {
-        hint.textContent = 'Win + . to open emoji picker';
-    } else if (navigator.userAgent.includes('Mac')) {
-        hint.textContent = '⌘ + ^ + Space for emoji picker';
-    } else {
-        hint.textContent = 'Use your keyboard\'s emoji button';
-    }
-    inputWrapper.appendChild(hint);
+    emojiContent.appendChild(buttonContainer);
     
     document.body.appendChild(inputWrapper);
     input.focus();
     
-    // Close on outside click
     setTimeout(() => {
         document.addEventListener('click', function closeInput(e) {
             if (!inputWrapper.contains(e.target)) {
@@ -1423,7 +1550,17 @@ function renderTabs() {
         // Make tab editable in edit mode
         if (editMode) {
             const hasTabIcon = cat.icon && cat.icon !== "​";
-const tabIconToShow = hasTabIcon ? cat.icon : "+";
+			let tabIconToShow;
+			if (hasTabIcon) {
+			    if (cat.icon.startsWith('svg:')) {
+			        const iconData = JSON.parse(cat.icon.substring(4));
+			        tabIconToShow = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+			    } else {
+			        tabIconToShow = cat.icon;
+			    }
+			} else {
+			    tabIconToShow = "+";
+			}
 
 tab.innerHTML = `
     <span class="editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)" style="display: inline-block; position: relative;">
@@ -1523,29 +1660,34 @@ function renderContent() {
 			if (editMode && layoutMode === 'headings') {
 			    const dragHandle = document.createElement('span');
 			    dragHandle.className = 'drag-handle';
-			    dragHandle.innerHTML = '⋮⋮'; // Six dots icon
-			    dragHandle.draggable = false; // Handle itself isn't draggable
+			    dragHandle.innerHTML = '⋮⋮';
+			    dragHandle.draggable = false;
 			    titleDiv.appendChild(dragHandle);
 			    
-			    // Make the entire card draggable
 			    card.draggable = true;
 			    card.style.cursor = 'grab';
 			}
-            const iconDisplay = skill.icon && skill.icon !== "​" ? skill.icon : "​";
-			const removeBtn = editMode && skill.icon && skill.icon !== "​" 
-    			? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` 
-    			: '';
-
+			
 			const hasIcon = skill.icon && skill.icon !== "​";
-const iconToShow = hasIcon ? skill.icon : (editMode ? "+" : "​");
-
-titleDiv.innerHTML = `
-   <span class="editable-icon" style="display: inline-block; position: relative;">
-       <span class="icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
-       ${editMode && hasIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` : ''}
-   </span>
-   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-`;
+			let iconToShow;
+			if (hasIcon) {
+			    if (skill.icon.startsWith('svg:')) {
+			        const iconData = JSON.parse(skill.icon.substring(4));
+			        iconToShow = `<span style="display: inline-flex; width: 24px; height: 24px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+			    } else {
+			        iconToShow = skill.icon;
+			    }
+			} else {
+			    iconToShow = editMode ? "+" : "​";
+			}
+			
+			titleDiv.innerHTML += `
+			   <span class="editable-icon" style="display: inline-block; position: relative;">
+			       <span class="icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
+			       ${editMode && hasIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` : ''}
+			   </span>
+			   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+			`;
 			// Add collapse button for headings mode
 				// Add collapse button for headings mode
 				if (layoutMode === 'headings' && !editMode) {
@@ -2029,6 +2171,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
