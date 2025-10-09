@@ -340,9 +340,9 @@ function applyTheme() {
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
         
-        const darkerR = Math.max(0, Math.floor(r * 0.2));
-        const darkerG = Math.max(0, Math.floor(g * 0.2));
-        const darkerB = Math.max(0, Math.floor(b * 0.2));
+        const darkerR = Math.max(0, Math.floor(r * 0.6));
+        const darkerG = Math.max(0, Math.floor(g * 0.6));
+        const darkerB = Math.max(0, Math.floor(b * 0.6));
         
         secondaryColor = '#' + [darkerR, darkerG, darkerB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
@@ -1748,6 +1748,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
