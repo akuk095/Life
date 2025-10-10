@@ -21,7 +21,7 @@
 		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; position: relative; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
-		.checklist-item.checked .checkbox::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+		.checklist-item.checked .checkbox::after { content: "✓" ; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
 		.checklist-item:hover { background: #e8f4f8; border-color: var(--primary-color, #3498db); }
 		.checklist-text { flex: 1; font-size: 14px; line-height: 1.5; color: #495057; }
 		.collapse-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s ease; width: 20px; height: 20px; display: none; }
@@ -2331,6 +2331,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
