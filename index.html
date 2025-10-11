@@ -2112,15 +2112,22 @@ function renderContent() {
 				    titleDiv.appendChild(collapseBtn);
 				}
                                       
-                titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
-                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
-                    saveCategories();
-                }); 
-            } 
+                titleDiv.appendChild(collapseBtn);
+				}
+            
+            if (editMode) {
+                const editableSpan = titleDiv.querySelector('.editable');
+                if (editableSpan) {
+                    editableSpan.addEventListener('blur', (e) => { 
+                        categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
+                        saveCategories();
+                    }); 
+                }
+            }
             
             card.appendChild(titleDiv);
-
-			// Add control buttons (only in edit mode)
+            
+           			// Add control buttons (only in edit mode)
 			if (editMode) {
 			    const controlsContainer = document.createElement('div');
 			    controlsContainer.className = 'skill-card-controls';
@@ -2620,6 +2627,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
