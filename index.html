@@ -1575,7 +1575,15 @@ function renderHeader() {
 <button class="guide-menu-btn" id="guideMenuBtn">☰</button>
 <div id="drawerBackdrop" class="drawer-backdrop"></div>
 <div class="guide-dropdown" id="guideDropdown">
-    <div class="drawer-header">My Notebook ⊞</div>
+    <div class="drawer-header">
+    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; margin-right: 8px; display: inline-block; vertical-align: middle;">
+        <rect x="2" y="2" width="10.5" height="10.5" rx="1"></rect>
+        <rect x="16" y="5" width="7" height="7" rx="1"></rect>
+        <rect x="3.6" y="16" width="8.4" height="8.4" rx="1"></rect>
+        <rect x="16" y="16" width="7" height="7" rx="1"></rect>
+    </svg>
+    My Notebook
+</div>
 </div>
 <div class="drawer-footer" id="drawerFooter">
     <button id="logoutMenuBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-right: auto; opacity: 0.5; transition: opacity 0.2s;">
@@ -3501,4 +3509,5 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
