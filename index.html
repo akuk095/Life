@@ -1630,7 +1630,7 @@ function renderHeader() {
     <button id="editModeMenuBtn">Edit</button>
     <button id="duplicateGuideBtn">Duplicate</button>
     <button id="deleteGuideBtn">Delete</button>
-	<button id="changeCategoryBtn">Change Category</button>
+	<button id="moveCategoryBtn">Move</button>
 	<button id="toggleColorBtn">Theme</button>
 	<button id="toggleDarkModeBtn">${darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}</button>
 	<div class="color-picker-menu" id="colorPickerMenu">
@@ -1662,6 +1662,16 @@ function renderHeader() {
 	</div>
 </div>
 </div>
+		<div class="dropdown-menu" id="categoryMenu" style="display: none;">
+		    <button data-category="Habits">Habits</button>
+		    <button data-category="Notes">Notes</button>
+		    <button data-category="To-Do">To-Do</button>
+		    <button data-category="Tracking">Tracking</button>
+		    <button data-category="Recipes">Recipes</button>
+		    <button data-category="Goals">Goals</button>
+		    <button data-category="Journaling">Journaling</button>
+		    <button data-category="Other">Other</button>
+		</div>
 <h1>
     <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
         <span class="icon" id="appIconSpan" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
@@ -1710,47 +1720,47 @@ function renderHeader() {
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
 
-	if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        logoutMenu.classList.toggle('show');
-    });
-}
-
-if (logoutConfirmBtn) {
-    logoutConfirmBtn.addEventListener('click', () => {
-        logout();
-        logoutMenu.classList.remove('show');
-        closeDrawer();
-    });
-}
-
-if (deleteAccountBtn) {
-    deleteAccountBtn.addEventListener('click', () => {
-        logoutMenu.classList.remove('show');
-        deleteAccount();
-    });
-}
+	if (logoutBtn) { logoutBtn.addEventListener('click', (e) => { e.stopPropagation(); logoutMenu.classList.toggle('show'); });}
+	if (logoutConfirmBtn) {logoutConfirmBtn.addEventListener('click', () => { logout(); logoutMenu.classList.remove('show'); closeDrawer(); });}
+	if (deleteAccountBtn) { deleteAccountBtn.addEventListener('click', () => {logoutMenu.classList.remove('show'); deleteAccount(); });}
     if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
-    if (createGuideBtn) {
-        createGuideBtn.addEventListener('click', () => {
-            createNewGuide();
-            closeDrawer();
-        });
-    }
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            logout();
-            closeDrawer();
-        });
-    }
+    if (createGuideBtn) { createGuideBtn.addEventListener('click', () => { createNewGuide(); closeDrawer();}); }
+    if (logoutBtn) { logoutBtn.addEventListener('click', () => { logout();  closeDrawer(); });}
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
     if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
     if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
     if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
     if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
-    if (changeCategoryBtn) changeCategoryBtn.addEventListener('click', changeGuideCategory);
+    if (document.getElementById('moveCategoryBtn')) {
+	    document.getElementById('moveCategoryBtn').addEventListener('click', (e) => {
+	        e.stopPropagation();
+	        const mainMenu = document.getElementById('dropdownMenu');
+	        const categoryMenu = document.getElementById('categoryMenu');
+	        
+	        // Position category menu at same location as main menu
+	        const rect = mainMenu.getBoundingClientRect();
+	        categoryMenu.style.top = rect.top + 'px';
+	        categoryMenu.style.right = (window.innerWidth - rect.right) + 'px';
+	        
+	        mainMenu.classList.remove('show');
+	        categoryMenu.classList.add('show');
+	    });
+	}
+	
+	// Add click handlers for category buttons
+	document.querySelectorAll('#categoryMenu button').forEach(btn => {
+	    btn.addEventListener('click', (e) => {
+	        e.stopPropagation();
+	        const newCategory = btn.dataset.category;
+	        if (currentUser) {
+	            set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/category`), newCategory);
+	            document.getElementById('categoryMenu').classList.remove('show');
+	            populateGuideDropdown();
+	            alert(`Moved to: ${newCategory}`);
+	        }
+	    });
+	});
     if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
     if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
     if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
@@ -1878,11 +1888,11 @@ function populateGuideDropdown() {
         // Group guides by category
 		const groupedGuides = {};
 		guideCategories.forEach(cat => groupedGuides[cat.name] = []);
-		groupedGuides['Uncategorized'] = [];
+		groupedGuides['Other'] = [];
 		
 		for (let id in guides) {
 		    const guide = guides[id];
-		    const category = guide.category || 'Uncategorized';
+		    const category = guide.category || 'Other';
 		    if (!groupedGuides[category]) {
 		        groupedGuides['Uncategorized'].push({id, guide});
 		    } else {
@@ -1891,15 +1901,15 @@ function populateGuideDropdown() {
 		}
         
         // Render each category group
-		const categoryNames = guideCategories.map(cat => cat.name).concat(['Uncategorized']);
+		const categoryNames = guideCategories.map(cat => cat.name).concat(['Other']);
 		categoryNames.forEach(categoryName => {
 		    const guidesInCategory = groupedGuides[categoryName];
 		    if (guidesInCategory.length === 0) return;
 		    
 		    // Add category header with icon
 		    const categoryHeader = document.createElement('div');
-		    categoryHeader.style.padding = '12px 16px 6px';
-		    categoryHeader.style.fontSize = '11px';
+		    categoryHeader.style.padding = '16px 16px 8px';
+		    categoryHeader.style.fontSize = '22px';
 		    categoryHeader.style.fontWeight = 'bold';
 		    categoryHeader.style.color = '#9ca3af';
 		    categoryHeader.style.textTransform = 'uppercase';
@@ -1911,7 +1921,7 @@ function populateGuideDropdown() {
 		    // Find the category icon
 		    const categoryData = guideCategories.find(cat => cat.name === categoryName);
 		    if (categoryData) {
-		        const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${categoryData.icon}"/></svg>`;
+		        const iconSvg = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${categoryData.icon}"/></svg>`;
 		        categoryHeader.innerHTML = iconSvg + `<span>${categoryName}</span>`;
 		    } else {
 		        categoryHeader.textContent = categoryName;
@@ -3381,6 +3391,7 @@ function deleteCategory(catIndex) {
 // Close menus when clicking outside
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('dropdownMenu');
+    const categoryMenu = document.getElementById('categoryMenu');
     const colorMenu = document.getElementById('colorPickerMenu');
     const floatingBtn = document.getElementById('layoutBtn');
     const logoutMenu = document.getElementById('logoutMenu');
@@ -3392,16 +3403,14 @@ document.addEventListener('click', (e) => {
     
     // Don't close dropdown if clicking inside color picker
     if (colorMenu && colorMenu.contains(e.target)) {
-        return; // Keep everything open when interacting with color picker
+        return;
     }
     
     // Close dropdown menu if clicking outside
     if (menu && !menu.contains(e.target)) {
         menu.classList.remove('show');
+        if (categoryMenu) categoryMenu.classList.remove('show');
         if (colorMenu) colorMenu.classList.remove('show');
-        // Show floating button when menu closes
-        if (floatingBtn && guideMenu && !guideMenu.classList.contains('show')) {
-    		floatingBtn.style.display = 'flex';
 		}
     }
     
@@ -3509,5 +3518,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
