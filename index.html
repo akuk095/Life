@@ -191,18 +191,16 @@
 </div>
     
     <div class="container" id="app" style="display: none;">
-        
-    <div class="container">
-		<div class="header-wrapper">
-        	<div class="header">
-            	<div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            	<h1>📚 Personal Notebook</h1>
+    <div class="header-wrapper">
+        <div class="header">
+            <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
+            <h1>📚 Personal Notebook</h1>
             <p>note description</p>
         </div>
         <div class="nav-tabs" id="navTabs"></div>
-		</div>
-        <div class="content-area" id="contentArea"></div>
     </div>
+    <div class="content-area" id="contentArea"></div>
+</div>
 <script type="module">
 	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 	import { getDatabase, ref, set, get, update, remove, onValue, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -3104,6 +3102,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
