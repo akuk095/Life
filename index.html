@@ -78,7 +78,7 @@
 		.floating-layout-btn { position: fixed; bottom: max(env(safe-area-inset-bottom), 24px); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 999; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
 		.floating-layout-btn:active { transform: scale(0.9); }
 		.floating-layout-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 1; }
-		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 85%; max-width: 320px; background: rgba(237, 239, 240, 1); box-shadow: 2px 0 20px rgba(0,0,0,0.2); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: 80px; scrollbar-width: none; -ms-overflow-style: none; will-change: transform; }
+		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 85%; max-width: 320px; background: rgba(237, 239, 240, 1); box-shadow: 2px 0 20px rgba(0,0,0,0.2); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: 140px; scrollbar-width: none; -ms-overflow-style: none; will-change: transform; }
 		.guide-dropdown::-webkit-scrollbar { display: none; }
 		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.guide-dropdown button:hover { background: #f8f9fa; }
@@ -151,7 +151,7 @@
 		.skill-control-btn:hover { color: #6b7280; transform: scale(1.1); }
 		.skill-control-btn.delete-control { color: #9ca3af;}
 		.skill-control-btn.delete-control:hover { color: #dc2626; opacity: 1; }
-		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
+		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
 		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
 		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
 		.drawer-create-icon:hover { opacity: 0.8; transform: scale(1.05); }
@@ -1073,6 +1073,9 @@ let touchStartX = 0;
 let touchCurrentX = 0;
 let isDragging = false;
 
+// Define handlers outside so they can be referenced
+let handleDrawerTouchStart, handleDrawerTouchMove, handleDrawerTouchEnd;
+
 function initDrawerSwipe() {
     const drawer = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
@@ -1080,69 +1083,69 @@ function initDrawerSwipe() {
     if (!drawer || !backdrop) return;
     
     // Remove old listeners if they exist
-    drawer.removeEventListener('touchstart', handleDrawerTouchStart);
-    drawer.removeEventListener('touchmove', handleDrawerTouchMove);
-    drawer.removeEventListener('touchend', handleDrawerTouchEnd);
-    
-    // Touch start
-    function handleDrawerTouchStart(e) {
-        // Only start drag if touching near the edge (left 50px of drawer)
-        const rect = drawer.getBoundingClientRect();
-        const touchX = e.touches[0].clientX;
-        
-        if (touchX - rect.left < 50 || touchX - rect.left > rect.width - 50) {
-            touchStartX = e.touches[0].clientX;
-            touchCurrentX = touchStartX;
-            isDragging = true;
-            drawer.style.transition = 'none';
-        }
+    if (handleDrawerTouchStart) {
+        drawer.removeEventListener('touchstart', handleDrawerTouchStart);
+        drawer.removeEventListener('touchmove', handleDrawerTouchMove);
+        drawer.removeEventListener('touchend', handleDrawerTouchEnd);
     }
     
+    // Touch start
+    handleDrawerTouchStart = function(e) {
+        // Allow swiping from anywhere on the drawer
+        const footer = document.getElementById('drawerFooter');
+        
+        touchStartX = e.touches[0].clientX;
+        touchCurrentX = touchStartX;
+        isDragging = true;
+        drawer.style.transition = 'none';
+        if (footer) footer.style.transition = 'none';
+    };
+    
     // Touch move
-    function handleDrawerTouchMove(e) {
+    handleDrawerTouchMove = function(e) {
         if (!isDragging) return;
         
         touchCurrentX = e.touches[0].clientX;
         const deltaX = touchCurrentX - touchStartX;
+        const footer = document.getElementById('drawerFooter');
         
-        // Only allow dragging left (closing)
         if (deltaX < 0) {
             drawer.style.transform = `translateX(${deltaX}px)`;
+            if (footer) footer.style.transform = `translateX(${deltaX}px)`;
             
-            // Fade out backdrop based on drag distance
             const maxDrag = drawer.offsetWidth;
             const opacity = 1 - (Math.abs(deltaX) / maxDrag);
             backdrop.style.opacity = opacity;
         }
-    }
+    };
     
     // Touch end
-    function handleDrawerTouchEnd(e) {
+    handleDrawerTouchEnd = function(e) {
         if (!isDragging) return;
         
         const deltaX = touchCurrentX - touchStartX;
-        const threshold = drawer.offsetWidth * 0.3; // 30% of drawer width
+        const threshold = drawer.offsetWidth * 0.3;
+        const footer = document.getElementById('drawerFooter');
         
         drawer.style.transition = 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)';
+        if (footer) footer.style.transition = 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)';
         backdrop.style.transition = 'opacity 0.3s ease';
         
         if (Math.abs(deltaX) > threshold) {
-            // Close drawer
             closeDrawer();
         } else {
-            // Snap back to open
             drawer.style.transform = 'translateX(0)';
+            if (footer) footer.style.transform = 'translateX(0)';
             backdrop.style.opacity = '1';
         }
         
         isDragging = false;
-    }
+    };
     
     drawer.addEventListener('touchstart', handleDrawerTouchStart, { passive: true });
     drawer.addEventListener('touchmove', handleDrawerTouchMove, { passive: true });
     drawer.addEventListener('touchend', handleDrawerTouchEnd);
     
-    // Also handle backdrop touch to close
     backdrop.addEventListener('touchstart', (e) => {
         closeDrawer();
     });
@@ -2885,6 +2888,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
