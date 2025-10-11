@@ -10,7 +10,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-select: none; }
 		.add-category-tab { background: #f59e0b !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
 		.add-category-tab:hover { background: #d97706 !important; }
 		.add-item-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 13px; font-weight: 500; display: none; width: 100%; transition: all 0.2s ease; }
@@ -1944,13 +1944,26 @@ tab.innerHTML = `
 		        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
 		    }
 		    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
-		    tab.onclick = () => switchTab(i);
 		    
-		    // Add double-click to edit category name
-		    tab.addEventListener('dblclick', (e) => {
-		        const nameSpan = tab.querySelector('.tab-name-display');
-		        if (nameSpan) enableQuickEdit(nameSpan, i, null, null);
+		    const nameSpan = tab.querySelector('.tab-name-display');
+		    
+		    // Single click switches tab
+		    tab.addEventListener('click', function(e) {
+		        if (e.target === nameSpan || nameSpan.contains(e.target)) {
+		            // If clicking on name span, do nothing (let dblclick handle it)
+		        } else {
+		            switchTab(i);
+		        }
 		    });
+		    
+		    // Double-click on name to edit
+		    if (nameSpan) {
+		        nameSpan.addEventListener('dblclick', function(e) {
+		            e.stopPropagation();
+		            e.preventDefault();
+		            enableQuickEdit(this, i, null, null);
+		        });
+		    }
 		}
         
         tabWrapper.appendChild(tab);
@@ -2206,10 +2219,14 @@ function renderContent() {
                 
                 // Add double-click to edit (only when not in edit mode)
                 if (!editMode) {
-                    checkItem.addEventListener('dblclick', (e) => {
+                    textDiv.addEventListener('dblclick', function(e) {
                         e.stopPropagation();
                         e.preventDefault();
-                        enableQuickEdit(textDiv, catIndex, skillIndex, itemIndex);
+                        const parent = this.closest('.checklist-item');
+                        if (parent && parent.onclick) {
+                            parent.onclick = null; // Temporarily disable click
+                        }
+                        enableQuickEdit(this, catIndex, skillIndex, itemIndex);
                     });
                 }
                 
@@ -2352,12 +2369,15 @@ function toggleEditMode() {
     }
 }
 function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
-    if (editMode) return; // Don't allow if already in edit mode
+    if (editMode) return;
     
     const originalText = element.textContent.trim();
+    const parentItem = element.closest('.checklist-item');
     
-    // Prevent the checkbox toggle during editing
-    element.onclick = (e) => e.stopPropagation();
+    // Prevent checkbox toggle during editing
+    if (parentItem) {
+        parentItem.style.pointerEvents = 'none';
+    }
     
     element.contentEditable = true;
     element.style.background = 'white';
@@ -2385,29 +2405,32 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
         element.style.padding = '';
         element.style.userSelect = '';
         element.style.webkitUserSelect = '';
-        element.onclick = null;
+        
+        if (parentItem) {
+            parentItem.style.pointerEvents = '';
+        }
         
         if (newText && newText !== originalText) {
             if (itemIndex !== null) {
-                // Editing a checklist item
                 categories[catIndex].skills[skillIndex].items[itemIndex] = newText;
             } else if (skillIndex !== null) {
-                // Editing a skill title
                 categories[catIndex].skills[skillIndex].title = newText;
             } else {
-                // Editing a category name
                 categories[catIndex].name = newText;
             }
             saveCategories();
-            renderTabs();
-            renderContent();
+            setTimeout(() => {
+                renderTabs();
+                renderContent();
+            }, 0);
         } else if (!newText) {
-            // Restore original if empty
             element.textContent = originalText;
         }
+        
+        element.removeEventListener('blur', saveEdit);
+        element.removeEventListener('keydown', keyHandler);
     }
     
-    const blurHandler = () => saveEdit();
     const keyHandler = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -2418,7 +2441,7 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
         }
     };
     
-    element.addEventListener('blur', blurHandler, { once: true });
+    element.addEventListener('blur', saveEdit);
     element.addEventListener('keydown', keyHandler);
 }
 function editAppIcon(el) {
@@ -2597,6 +2620,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
