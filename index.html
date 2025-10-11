@@ -500,8 +500,8 @@ function loadFromFirebase() {
     database.ref(`guides/${currentGuideId}/autoRefreshEnabled`).once('value'),
     database.ref(`guides/${currentGuideId}/autoRefreshTime`).once('value'),
     database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value'),
-	database.ref(`guides/${currentGuideId}/darkMode`).once('value'),
-]).then([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, expandedSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, darkModeSnap]) => {
+	database.ref(`guides/${currentGuideId}/darkMode`).once('value')
+]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, expandedSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, darkModeSnap]) => {
 		
         // Load categories
         if (categoriesSnap.val()) {
@@ -2473,6 +2473,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
