@@ -397,6 +397,7 @@ const colorThemes = [
   ];
 
 
+// Skill card drag start
 document.addEventListener('dragstart', (e) => {
     if (e.target.classList.contains('skill-card') && !editMode && layoutMode === 'headings') {
         draggedCard = e.target;
@@ -405,66 +406,13 @@ document.addEventListener('dragstart', (e) => {
         e.target.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
         
-        // Set drag image offset to cursor position
         const rect = e.target.getBoundingClientRect();
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
         e.dataTransfer.setDragImage(e.target, offsetX, offsetY);
     }
-});
-
-document.addEventListener('dragend', (e) => {
-    if (e.target.classList.contains('skill-card')) {
-        e.target.classList.remove('dragging');
-        document.querySelectorAll('.skill-card').forEach(card => {
-            card.classList.remove('drag-over');
-        });
-        draggedCard = null;
-    }
-});
-
-document.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    if (!draggedCard) return;
     
-    const target = e.target.closest('.skill-card');
-    if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
-        e.dataTransfer.dropEffect = 'move';
-    }
-});
-
-document.addEventListener('dragenter', (e) => {
-    const target = e.target.closest('.skill-card');
-    if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
-        target.classList.add('drag-over');
-    }
-});
-
-document.addEventListener('dragleave', (e) => {
-    const target = e.target.closest('.skill-card');
-    if (target) {
-        target.classList.remove('drag-over');
-    }
-});
-
-document.addEventListener('drop', (e) => {
-    e.preventDefault();
-    const target = e.target.closest('.skill-card');
-    
-    if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
-        const targetCatIndex = parseInt(target.dataset.catIndex);
-        const targetSkillIndex = parseInt(target.dataset.skillIndex);
-        
-        // Reorder skills array
-        const [movedSkill] = categories[draggedCatIndex].skills.splice(draggedSkillIndex, 1);
-        categories[targetCatIndex].skills.splice(targetSkillIndex, 0, movedSkill);
-        
-        saveCategories();
-        renderContent();
-    }
-});
-
-document.addEventListener('dragstart', (e) => {
+    // Tab drag start
     if (e.target.classList.contains('nav-tab') && !editMode && e.target.draggable) {
         draggedTab = e.target;
         draggedTabIndex = parseInt(e.target.dataset.catIndex);
@@ -473,7 +421,16 @@ document.addEventListener('dragstart', (e) => {
     }
 });
 
+// Combined drag end
 document.addEventListener('dragend', (e) => {
+    if (e.target.classList.contains('skill-card')) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.skill-card').forEach(card => {
+            card.classList.remove('drag-over');
+        });
+        draggedCard = null;
+    }
+    
     if (e.target.classList.contains('nav-tab')) {
         e.target.style.opacity = '';
         document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -483,53 +440,105 @@ document.addEventListener('dragend', (e) => {
     }
 });
 
+// Combined drag over
 document.addEventListener('dragover', (e) => {
     e.preventDefault();
-    if (!draggedTab) return;
     
-    const target = e.target.closest('.nav-tab');
-    if (target && target !== draggedTab && target.draggable) {
-        e.dataTransfer.dropEffect = 'move';
+    // Skill cards
+    if (draggedCard) {
+        const target = e.target.closest('.skill-card');
+        if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
+            e.dataTransfer.dropEffect = 'move';
+        }
+    }
+    
+    // Tabs
+    if (draggedTab) {
+        const target = e.target.closest('.nav-tab');
+        if (target && target !== draggedTab && target.draggable) {
+            e.dataTransfer.dropEffect = 'move';
+        }
     }
 });
 
+// Combined drag enter
 document.addEventListener('dragenter', (e) => {
-    const target = e.target.closest('.nav-tab');
-    if (target && target !== draggedTab && target.draggable) {
-        target.style.borderLeft = '3px solid var(--primary-color)';
+    // Skill cards
+    if (draggedCard) {
+        const target = e.target.closest('.skill-card');
+        if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
+            target.classList.add('drag-over');
+        }
+    }
+    
+    // Tabs
+    if (draggedTab) {
+        const target = e.target.closest('.nav-tab');
+        if (target && target !== draggedTab && target.draggable) {
+            target.style.borderLeft = '3px solid var(--primary-color)';
+        }
     }
 });
 
+// Combined drag leave
 document.addEventListener('dragleave', (e) => {
-    const target = e.target.closest('.nav-tab');
-    if (target) {
-        target.style.borderLeft = '';
+    // Skill cards
+    if (draggedCard) {
+        const target = e.target.closest('.skill-card');
+        if (target) {
+            target.classList.remove('drag-over');
+        }
+    }
+    
+    // Tabs
+    if (draggedTab) {
+        const target = e.target.closest('.nav-tab');
+        if (target) {
+            target.style.borderLeft = '';
+        }
     }
 });
 
+// Combined drop
 document.addEventListener('drop', (e) => {
     e.preventDefault();
-    const target = e.target.closest('.nav-tab');
     
-    if (target && target !== draggedTab && target.draggable) {
-        const targetIndex = parseInt(target.dataset.catIndex);
-        
-        // Reorder categories array
-        const [movedCategory] = categories.splice(draggedTabIndex, 1);
-        categories.splice(targetIndex, 0, movedCategory);
-        
-        // Update active tab index if needed
-        if (activeTabIndex === draggedTabIndex) {
-            activeTabIndex = targetIndex;
-        } else if (draggedTabIndex < activeTabIndex && targetIndex >= activeTabIndex) {
-            activeTabIndex--;
-        } else if (draggedTabIndex > activeTabIndex && targetIndex <= activeTabIndex) {
-            activeTabIndex++;
+    // Skill cards drop
+    if (draggedCard) {
+        const target = e.target.closest('.skill-card');
+        if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
+            const targetCatIndex = parseInt(target.dataset.catIndex);
+            const targetSkillIndex = parseInt(target.dataset.skillIndex);
+            
+            const [movedSkill] = categories[draggedCatIndex].skills.splice(draggedSkillIndex, 1);
+            categories[targetCatIndex].skills.splice(targetSkillIndex, 0, movedSkill);
+            
+            saveCategories();
+            renderContent();
         }
-        
-        saveCategories();
-        renderTabs();
-        renderContent();
+    }
+    
+    // Tabs drop
+    if (draggedTab) {
+        const target = e.target.closest('.nav-tab');
+        if (target && target !== draggedTab && target.draggable) {
+            const targetIndex = parseInt(target.dataset.catIndex);
+            
+            const [movedCategory] = categories.splice(draggedTabIndex, 1);
+            categories.splice(targetIndex, 0, movedCategory);
+            
+            if (activeTabIndex === draggedTabIndex) {
+                activeTabIndex = targetIndex;
+            } else if (draggedTabIndex < activeTabIndex && targetIndex >= activeTabIndex) {
+                activeTabIndex--;
+            } else if (draggedTabIndex > activeTabIndex && targetIndex <= activeTabIndex) {
+                activeTabIndex++;
+            }
+            
+            saveCategories();
+            renderTabs();
+            renderContent();
+        }
     }
 });
 
@@ -3102,6 +3111,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
