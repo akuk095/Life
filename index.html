@@ -21,7 +21,7 @@
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
 		.checkbox:hover { border-color: var(--primary-color, #3498db); }
-		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; }
+		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; }
 		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
@@ -164,8 +164,8 @@
 		<div class="header-wrapper">
         	<div class="header">
             	<div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            	<h1>📚 Essential Life Skills Guide</h1>
-            <p>Fundamental knowledge everyone should have to navigate life successfully</p>
+            	<h1>📚 Notebook</h1>
+            <p>notebook description</p>
         </div>
         <div class="nav-tabs" id="navTabs"></div>
 		</div>
@@ -1242,6 +1242,28 @@ function renderHeader() {
     // Populate guide dropdown
     populateGuideDropdown();
 
+    // Add double-click edit for header (only when not in edit mode)
+    if (!editMode) {
+        const headerTitle = header.querySelector('h1 span:not(.editable-icon):not(.icon)');
+        const headerSubtitle = header.querySelector('p');
+        
+        if (headerTitle) {
+            headerTitle.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                enableQuickEditHeader(headerTitle, 'title');
+            });
+        }
+        
+        if (headerSubtitle) {
+            headerSubtitle.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                enableQuickEditHeader(headerSubtitle, 'subtitle');
+            });
+        }
+    }
+
 	// Preserve Done button state if in edit mode
 	if (editMode) {
 	    setTimeout(() => {
@@ -2168,8 +2190,7 @@ function renderContent() {
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
-                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); 
-                if (!editMode) checkItem.onclick = () => toggleCheck(itemId);
+                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : '');
                 
                 // Make draggable in edit mode
                 if (!editMode) {
@@ -2205,6 +2226,15 @@ function renderContent() {
 				}
 				
 				checkItem.appendChild(bulletElement);
+                
+                // Only checkbox/bullet triggers the check, not the whole item
+                if (!editMode) {
+                    bulletElement.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleCheck(itemId);
+                    };
+                    bulletElement.style.cursor = 'pointer';
+                }
                 
                 const textDiv = document.createElement('div');
                 textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
@@ -2439,6 +2469,62 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
     element.addEventListener('blur', saveEdit);
     element.addEventListener('keydown', keyHandler);
 }
+
+		function enableQuickEditHeader(element, type) {
+    if (editMode) return;
+    
+    const originalText = element.textContent.trim();
+    
+    element.contentEditable = true;
+    element.style.outline = '2px solid white';
+    element.style.borderRadius = '4px';
+    element.style.padding = '4px 8px';
+    element.style.background = 'rgba(255, 255, 255, 0.2)';
+    
+    setTimeout(() => {
+        element.focus();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }, 10);
+    
+    function saveEdit() {
+        const newText = element.textContent.trim();
+        element.contentEditable = false;
+        element.style.outline = '';
+        element.style.padding = '';
+        element.style.background = '';
+        
+        if (newText && newText !== originalText) {
+            if (type === 'title') {
+                appTitle = newText;
+            } else {
+                appSubtitle = newText;
+            }
+            saveHeader();
+        } else if (!newText) {
+            element.textContent = originalText;
+        }
+        
+        element.removeEventListener('blur', saveEdit);
+        element.removeEventListener('keydown', keyHandler);
+    }
+    
+    const keyHandler = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        } else if (e.key === 'Escape') {
+            element.textContent = originalText;
+            element.blur();
+        }
+    };
+    
+    element.addEventListener('blur', saveEdit);
+    element.addEventListener('keydown', keyHandler);
+}
 function editAppIcon(el) {
     showEmojiPicker(el, (emoji) => {
         appIcon = emoji;
@@ -2615,6 +2701,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
