@@ -335,7 +335,7 @@ const colorThemes = [
 
 
 document.addEventListener('dragstart', (e) => {
-    if (e.target.classList.contains('skill-card') && editMode && layoutMode === 'headings') {
+    if (e.target.classList.contains('skill-card') && !editMode && layoutMode === 'headings') {
         draggedCard = e.target;
         draggedCatIndex = parseInt(e.target.dataset.catIndex);
         draggedSkillIndex = parseInt(e.target.dataset.skillIndex);
@@ -406,7 +406,7 @@ let draggedTab = null;
 let draggedTabIndex = null;
 
 document.addEventListener('dragstart', (e) => {
-    if (e.target.classList.contains('nav-tab') && editMode && e.target.draggable) {
+    if (e.target.classList.contains('nav-tab') && !editMode && e.target.draggable) {
         draggedTab = e.target;
         draggedTabIndex = parseInt(e.target.dataset.catIndex);
         e.target.style.opacity = '0.5';
@@ -1356,7 +1356,8 @@ function populateGuideDropdown() {
                     }
                 }
 
-                if (editMode) {
+                // Enable drag-and-drop when NOT in edit mode
+                if (!editMode) {
                     btn.draggable = true;
                     btn.style.cursor = 'grab';
                     btn.addEventListener('dragstart', handleDragStart);
@@ -1473,7 +1474,7 @@ let draggedItemSkillIndex = null;
 let draggedItemIndex = null;
 
 document.addEventListener('dragstart', (e) => {
-    if (e.target.classList.contains('checklist-item') && editMode) {
+    if (e.target.classList.contains('checklist-item') && !editMode) {
         draggedItem = e.target;
         draggedItemCatIndex = parseInt(e.target.dataset.catIndex);
         draggedItemSkillIndex = parseInt(e.target.dataset.skillIndex);
@@ -1953,7 +1954,7 @@ function renderTabs() {
         tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
 
 		// Make tabs draggable in edit mode
-		if (editMode) {
+		if (!editMode) {
 		    tab.draggable = true;
 		    tab.dataset.catIndex = i;
 		    tab.style.cursor = 'grab';
@@ -2096,7 +2097,7 @@ function renderContent() {
 			titleDiv.style.alignItems = 'center';
 			
 			// Add drag handle in edit mode and headings view
-			if (editMode && layoutMode === 'headings') {
+			if (!editMode && layoutMode === 'headings') {
 			    const dragHandle = document.createElement('span');
 				dragHandle.className = 'drag-handle';
 				dragHandle.innerHTML = '⋮⋮⋮';
@@ -2104,7 +2105,15 @@ function renderContent() {
 				card.classList.add('draggable');
 				titleDiv.appendChild(dragHandle);
 			    
+			 	card.draggable = true;
+			    card.style.cursor = 'grab';
+			}
+			
+			// Make draggable in headings mode (not just edit mode)
+			if (layoutMode === 'headings' && !editMode) {
 			    card.draggable = true;
+			    card.dataset.catIndex = catIndex;
+			    card.dataset.skillIndex = skillIndex;
 			    card.style.cursor = 'grab';
 			}
 			
@@ -2209,7 +2218,7 @@ function renderContent() {
                 if (!editMode) checkItem.onclick = () => toggleCheck(itemId);
                 
                 // Make draggable in edit mode
-                if (editMode) {
+                if (!editMode) {
                     checkItem.draggable = true;
                     checkItem.dataset.catIndex = catIndex;
                     checkItem.dataset.skillIndex = skillIndex;
@@ -2562,6 +2571,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
