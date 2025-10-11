@@ -1883,34 +1883,35 @@ function populateGuideDropdown() {
         }
         
         // Render each category group
-        [...guideCategories, 'Uncategorized'].forEach(categoryName => {
-            const guidesInCategory = groupedGuides[categoryName];
-            if (guidesInCategory.length === 0) return;
-            
-            /// Add category header with icon
-			const categoryHeader = document.createElement('div');
-			categoryHeader.style.padding = '12px 16px 6px';
-			categoryHeader.style.fontSize = '11px';
-			categoryHeader.style.fontWeight = 'bold';
-			categoryHeader.style.color = '#9ca3af';
-			categoryHeader.style.textTransform = 'uppercase';
-			categoryHeader.style.letterSpacing = '0.5px';
-			categoryHeader.style.display = 'flex';
-			categoryHeader.style.alignItems = 'center';
-			categoryHeader.style.gap = '8px';
-			
-			// Find the category icon
-			const categoryData = guideCategories.find(cat => cat.name === categoryName);
-			if (categoryData) {
-			    const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${categoryData.icon}"/></svg>`;
-			    categoryHeader.innerHTML = iconSvg + `<span>${categoryName}</span>`;
-			} else {
-			    categoryHeader.textContent = categoryName;
-			}
-			dropdown.appendChild(categoryHeader);
-            
-            // Add guides in this category
-            guidesInCategory.forEach(({id, guide}) => {
+		const categoryNames = guideCategories.map(cat => cat.name).concat(['Uncategorized']);
+		categoryNames.forEach(categoryName => {
+		    const guidesInCategory = groupedGuides[categoryName];
+		    if (guidesInCategory.length === 0) return;
+		    
+		    // Add category header with icon
+		    const categoryHeader = document.createElement('div');
+		    categoryHeader.style.padding = '12px 16px 6px';
+		    categoryHeader.style.fontSize = '11px';
+		    categoryHeader.style.fontWeight = 'bold';
+		    categoryHeader.style.color = '#9ca3af';
+		    categoryHeader.style.textTransform = 'uppercase';
+		    categoryHeader.style.letterSpacing = '0.5px';
+		    categoryHeader.style.display = 'flex';
+		    categoryHeader.style.alignItems = 'center';
+		    categoryHeader.style.gap = '8px';
+		    
+		    // Find the category icon
+		    const categoryData = guideCategories.find(cat => cat.name === categoryName);
+		    if (categoryData) {
+		        const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${categoryData.icon}"/></svg>`;
+		        categoryHeader.innerHTML = iconSvg + `<span>${categoryName}</span>`;
+		    } else {
+		        categoryHeader.textContent = categoryName;
+		    }
+		    dropdown.appendChild(categoryHeader);
+		    
+		    // Add guides in this category
+		    guidesInCategory.forEach(({id, guide}) => {
                 const title = guide.appTitle || id;
                 const icon = guide.appIcon || '📄';
                 const guideTheme = guide.themeColor || '#3498db';
@@ -3500,6 +3501,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
