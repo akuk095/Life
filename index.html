@@ -149,6 +149,10 @@
 		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0.4; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; font-weight: normal; }
 		.skill-control-btn:hover { color: rgba(0, 0, 0, 0.6); transform: scale(1.1); }
 		.skill-control-btn.delete-control:hover { color: #dc2626; }
+		.drawer-create-btn { position: fixed; bottom: max(env(safe-area-inset-bottom), 24px); left: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: #3498db; color: white; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.3); cursor: pointer; transition: all 0.3s ease; z-index: 2001; display: none; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+		.drawer-create-btn:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+		.drawer-create-btn:active { transform: scale(0.95); }
+		.guide-dropdown.show ~ .drawer-create-btn { display: flex; }
 
 		
 	</style>
@@ -1139,6 +1143,12 @@ function renderHeader() {
 <div class="guide-dropdown" id="guideDropdown">
     <div class="drawer-header">My Notebook ⊞</div>
 </div>
+<button class="drawer-create-btn" onclick="createNewGuide(); closeDrawer();">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+</button>
 <div class="edit-toggle">
     <button class="save-btn" id="saveBtn" onclick="saveAndExitEdit()" style="display: none;">Done</button>
     <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)" style="display: block;">⋮</button>
@@ -1383,27 +1393,7 @@ function populateGuideDropdown() {
             });
         });
         
-        // Add create button
-        if (!editMode) {
-            const createBtn = document.createElement('button');
-            createBtn.textContent = '+ Create new guide';
-            createBtn.style.borderLeft = '4px solid #3498db';
-            createBtn.style.borderRight = '2px solid #3498db';
-            createBtn.style.borderTop = 'none';
-            createBtn.style.borderBottom = '1px solid #f0f0f0';
-            createBtn.style.background = 'transparent';
-            createBtn.style.color = '#3498db';
-            createBtn.style.fontWeight = '600';
-            createBtn.style.borderRadius = '0';
-            createBtn.style.margin = '8px 0 0 0';
-            createBtn.onclick = () => {
-                createNewGuide();
-                closeDrawer();
-            };
-            dropdown.appendChild(createBtn);
-        }
-    });
-}
+       }
 
 // Drag and drop for category tabs
 let draggedTab = null;
