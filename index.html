@@ -1158,6 +1158,7 @@ function initDrawerSwipe() {
 
 		
 // Swipe to delete checklist items
+// Swipe to delete checklist items
 let itemTouchStartX = 0;
 let itemTouchCurrentX = 0;
 let isItemDragging = false;
@@ -1188,7 +1189,6 @@ document.addEventListener('touchmove', (e) => {
     
     // Only allow swiping left (negative delta)
     if (deltaX < 0) {
-        e.preventDefault(); // Prevent scrolling while swiping
         currentSwipedItem.style.transform = `translateX(${deltaX}px)`;
         
         // Show delete button background as user swipes
@@ -1196,13 +1196,13 @@ document.addEventListener('touchmove', (e) => {
         const swipeProgress = Math.min(Math.abs(deltaX) / maxSwipe, 1);
         currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #fee2e2 100%)`;
     }
-}, { passive: false }); // passive: false to allow preventDefault
+});
 
 document.addEventListener('touchend', (e) => {
     if (!isItemDragging || !currentSwipedItem) return;
     
     const deltaX = itemTouchCurrentX - itemTouchStartX;
-    const threshold = 100; // Swipe 100px to delete
+    const threshold = 80; // Swipe 80px to delete
     
     currentSwipedItem.style.transition = 'all 0.3s ease';
     
@@ -1211,12 +1211,12 @@ document.addEventListener('touchend', (e) => {
         currentSwipedItem.style.transform = 'translateX(-100%)';
         currentSwipedItem.style.opacity = '0';
         
+        // Get the data immediately before animation
+        const catIndex = parseInt(currentSwipedItem.dataset.catIndex);
+        const skillIndex = parseInt(currentSwipedItem.dataset.skillIndex);
+        const itemIndex = parseInt(currentSwipedItem.dataset.itemIndex);
+        
         setTimeout(() => {
-            // Extract indices from the item
-            const catIndex = parseInt(currentSwipedItem.dataset.catIndex);
-            const skillIndex = parseInt(currentSwipedItem.dataset.skillIndex);
-            const itemIndex = parseInt(currentSwipedItem.dataset.itemIndex);
-            
             // Delete the item
             if (!isNaN(catIndex) && !isNaN(skillIndex) && !isNaN(itemIndex)) {
                 categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
@@ -2902,6 +2902,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
