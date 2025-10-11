@@ -3395,35 +3395,34 @@ document.addEventListener('click', (e) => {
     const colorMenu = document.getElementById('colorPickerMenu');
     const floatingBtn = document.getElementById('layoutBtn');
     const logoutMenu = document.getElementById('logoutMenu');
-    
+    const guideMenu = document.getElementById('guideDropdown');
+    const backdrop = document.getElementById('drawerBackdrop');
+
     // Close logout menu when clicking outside
     if (logoutMenu && !logoutMenu.contains(e.target) && !e.target.closest('#logoutMenuBtn')) {
         logoutMenu.classList.remove('show');
     }
-    
+
     // Don't close dropdown if clicking inside color picker
     if (colorMenu && colorMenu.contains(e.target)) {
         return;
     }
-    
+
     // Close dropdown menu if clicking outside
     if (menu && !menu.contains(e.target)) {
         menu.classList.remove('show');
         if (categoryMenu) categoryMenu.classList.remove('show');
         if (colorMenu) colorMenu.classList.remove('show');
-		}
     }
-}
-    const guideMenu = document.getElementById('guideDropdown');
-    const backdrop = document.getElementById('drawerBackdrop');
-    
+
     // Don't close drawer if clicking inside it or on the hamburger button
-    if (guideMenu && !guideMenu.contains(e.target) && !e.target.classList.contains('guide-menu-btn')) {
+    if (guideMenu && !guideMenu.contains(e.target) && !e.target.closest('.guide-menu-btn')) {
         if (guideMenu.classList.contains('show')) {
             closeDrawer();
         }
     }
 });
+
 
 // Check for auto-refresh when page becomes visible
 document.addEventListener('visibilitychange', () => {
@@ -3518,6 +3517,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
