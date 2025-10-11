@@ -2047,21 +2047,8 @@ function renderContent() {
 			titleDiv.style.display = 'flex';
 			titleDiv.style.alignItems = 'center';
 			
-			// Add drag handle in edit mode and headings view
+			// Make draggable in headings mode without the handle
 			if (!editMode && layoutMode === 'headings') {
-			    const dragHandle = document.createElement('span');
-				dragHandle.className = 'drag-handle';
-				dragHandle.innerHTML = '⋮⋮⋮';
-				dragHandle.draggable = false;
-				card.classList.add('draggable');
-				titleDiv.appendChild(dragHandle);
-			    
-			 	card.draggable = true;
-			    card.style.cursor = 'grab';
-			}
-			
-			// Make draggable in headings mode (not just edit mode)
-			if (layoutMode === 'headings' && !editMode) {
 			    card.draggable = true;
 			    card.dataset.catIndex = catIndex;
 			    card.dataset.skillIndex = skillIndex;
@@ -2600,6 +2587,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
