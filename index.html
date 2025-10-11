@@ -1868,19 +1868,19 @@ function populateGuideDropdown() {
         if (header) dropdown.appendChild(header);
         
         // Group guides by category
-        const groupedGuides = {};
-        guideCategories.forEach(cat => groupedGuides[cat] = []);
-        groupedGuides['Uncategorized'] = [];
-        
-        for (let id in guides) {
-            const guide = guides[id];
-            const category = guide.category || 'Uncategorized';
-            if (!groupedGuides[category]) {
-                groupedGuides['Uncategorized'].push({id, guide});
-            } else {
-                groupedGuides[category].push({id, guide});
-            }
-        }
+		const groupedGuides = {};
+		guideCategories.forEach(cat => groupedGuides[cat.name] = []);
+		groupedGuides['Uncategorized'] = [];
+		
+		for (let id in guides) {
+		    const guide = guides[id];
+		    const category = guide.category || 'Uncategorized';
+		    if (!groupedGuides[category]) {
+		        groupedGuides['Uncategorized'].push({id, guide});
+		    } else {
+		        groupedGuides[category].push({id, guide});
+		    }
+		}
         
         // Render each category group
 		const categoryNames = guideCategories.map(cat => cat.name).concat(['Uncategorized']);
@@ -3501,6 +3501,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
