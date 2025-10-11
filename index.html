@@ -6,7 +6,7 @@
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<meta name="mobile-web-app-capable" content="yes">
-    <title>Essential Life Skills Guide</title>
+    <title>Personal Notebook</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -218,7 +218,7 @@
     <div class="header-wrapper">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            <h1>📚 Personal Notebook</h1>
+            <h1>📓 Personal Notebook</h1>
             <p>note description</p>
         </div>
         <div class="nav-tabs" id="navTabs"></div>
@@ -249,25 +249,25 @@
 	// Default data structure
 	let categories = [
 	    {
-	        name: "Health & Body", 
-	        icon: "💪", 
+	        name: "Helping you started", 
+	        icon: "❄️", 
 	        skills: [
 	            {
-	                title: "Basic Hygiene", 
-	                icon: "🧼", 
+	                title: "First steps", 
+	                icon: "🍵", 
 					bulletStyle: "checkbox",
-	                items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
+	                items: ["Create your first note", "Click on the 3 dots on top right for more actions", "Edit, duplicate or delete note"]
 	            }
 	        ]
 	    },
 	    {
-        name: "Daily Living", 
-        icon: "🏡", 
+        name: "Do more", 
+        icon: "🍉", 
         skills: [
             {
-                title: "Household Basics", 
-                icon: "🧹", 
-                items: ["Do laundry", "Clean regularly", "Take out trash"]
+                title: "Keep it Simple Stupid (KISS)", 
+                icon: "🍜", 
+                items: ["Write a note, journal or recipe", "Choose a theme", "Click on the hamburger menu to see all your notes"]
             }
         ]
     }
@@ -308,9 +308,9 @@ onAuthStateChanged(auth, (user) => {
 let checkedItems = {};
 let editMode = false;
 let activeTabIndex = 0;
-let appIcon = "📚"; 
-let appTitle = "Essential Life Skills Guide";
-let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
+let appIcon = "📓"; 
+let appTitle = "Welcome to your own Personal Notebook";
+let appSubtitle = "Jot down thoughts, capture ideas, and organise your mind — all in one place.";
 let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
@@ -3337,6 +3337,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
