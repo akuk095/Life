@@ -146,6 +146,9 @@
 		.checklist-item .bullet-none { width: 0px; height: 20px; flex-shrink: 0; margin-top: 2px; }
 		.checklist-item.dragging { opacity: 0.5; background: #f3f4f6; }
 		.checklist-item.drag-over { border-top: 3px solid var(--primary-color); }
+		.checklist-text[contenteditable="true"],
+		.skill-title span[contenteditable="true"],
+		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
 		
 	</style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -2109,9 +2112,11 @@ function renderContent() {
 			// Add double-click to edit (only when not in edit mode)
 			if (!editMode) {
 			    titleDiv.addEventListener('dblclick', (e) => {
-			        if (e.target.classList.contains('editable') || e.target.closest('.skill-title')) {
-			            const titleSpan = titleDiv.querySelector('span:last-child');
-			            if (titleSpan) enableQuickEdit(titleSpan, catIndex, skillIndex);
+			        e.stopPropagation();
+			        e.preventDefault();
+			        const titleSpan = titleDiv.querySelector('span:not(.editable-icon):not(.icon)');
+			        if (titleSpan) {
+			            enableQuickEdit(titleSpan, catIndex, skillIndex);
 			        }
 			    });
 			}
@@ -2276,16 +2281,16 @@ function renderContent() {
                 textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
                 textDiv.contentEditable = editMode;
                 textDiv.textContent = item;
+                checkItem.appendChild(textDiv);
                 
                 // Add double-click to edit (only when not in edit mode)
                 if (!editMode) {
-                    textDiv.addEventListener('dblclick', (e) => {
+                    checkItem.addEventListener('dblclick', (e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         enableQuickEdit(textDiv, catIndex, skillIndex, itemIndex);
                     });
                 }
-                
-                checkItem.appendChild(textDiv);
                 
                 if (editMode) {
 				    const deleteItemBtn = document.createElement('button');
@@ -2429,19 +2434,27 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
     if (editMode) return; // Don't allow if already in edit mode
     
     const originalText = element.textContent.trim();
+    
+    // Prevent the checkbox toggle during editing
+    element.onclick = (e) => e.stopPropagation();
+    
     element.contentEditable = true;
-    element.focus();
     element.style.background = 'white';
     element.style.outline = '2px solid var(--primary-color)';
     element.style.borderRadius = '4px';
     element.style.padding = '4px 8px';
+    element.style.userSelect = 'text';
+    element.style.webkitUserSelect = 'text';
     
-    // Select all text
-    const range = document.createRange();
-    range.selectNodeContents(element);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
+    // Focus and select all text
+    setTimeout(() => {
+        element.focus();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }, 10);
     
     function saveEdit() {
         const newText = element.textContent.trim();
@@ -2449,6 +2462,9 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
         element.style.background = '';
         element.style.outline = '';
         element.style.padding = '';
+        element.style.userSelect = '';
+        element.style.webkitUserSelect = '';
+        element.onclick = null;
         
         if (newText && newText !== originalText) {
             if (itemIndex !== null) {
@@ -2470,8 +2486,8 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
         }
     }
     
-    element.addEventListener('blur', saveEdit, { once: true });
-    element.addEventListener('keydown', (e) => {
+    const blurHandler = () => saveEdit();
+    const keyHandler = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             element.blur();
@@ -2479,7 +2495,10 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
             element.textContent = originalText;
             element.blur();
         }
-    }, { once: true });
+    };
+    
+    element.addEventListener('blur', blurHandler, { once: true });
+    element.addEventListener('keydown', keyHandler);
 }
 function editAppIcon(el) {
     showEmojiPicker(el, (emoji) => {
@@ -2657,6 +2676,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
