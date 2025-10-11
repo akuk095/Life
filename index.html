@@ -21,7 +21,7 @@
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
 		.checkbox:hover { border-color: var(--primary-color, #3498db); }
-		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; }
+		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
 		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
@@ -1042,10 +1042,13 @@ function toggleGuideMenu(e) {
         // Open drawer
         dropdown.classList.add('show');
         backdrop.classList.add('show');
-        dropdown.style.transform = 'translateX(0)'; // Reset transform
-        backdrop.style.opacity = '1'; // Reset opacity
+        dropdown.style.transform = 'translateX(0)';
+        backdrop.style.opacity = '1';
         document.body.style.overflow = 'hidden';
         if (floatingBtn) floatingBtn.style.display = 'none';
+        
+        // Initialize swipe after drawer is open
+        setTimeout(() => initDrawerSwipe(), 100);
     }
     
     // Close other menus
@@ -1069,22 +1072,34 @@ function closeDrawer() {
 let touchStartX = 0;
 let touchCurrentX = 0;
 let isDragging = false;
-let drawer = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    drawer = document.getElementById('guideDropdown');
+function initDrawerSwipe() {
+    const drawer = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
     
+    if (!drawer || !backdrop) return;
+    
+    // Remove old listeners if they exist
+    drawer.removeEventListener('touchstart', handleDrawerTouchStart);
+    drawer.removeEventListener('touchmove', handleDrawerTouchMove);
+    drawer.removeEventListener('touchend', handleDrawerTouchEnd);
+    
     // Touch start
-    drawer.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        touchCurrentX = touchStartX;
-        isDragging = true;
-        drawer.style.transition = 'none'; // Remove transition during drag
-    }, { passive: true });
+    function handleDrawerTouchStart(e) {
+        // Only start drag if touching near the edge (left 50px of drawer)
+        const rect = drawer.getBoundingClientRect();
+        const touchX = e.touches[0].clientX;
+        
+        if (touchX - rect.left < 50 || touchX - rect.left > rect.width - 50) {
+            touchStartX = e.touches[0].clientX;
+            touchCurrentX = touchStartX;
+            isDragging = true;
+            drawer.style.transition = 'none';
+        }
+    }
     
     // Touch move
-    drawer.addEventListener('touchmove', (e) => {
+    function handleDrawerTouchMove(e) {
         if (!isDragging) return;
         
         touchCurrentX = e.touches[0].clientX;
@@ -1099,10 +1114,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const opacity = 1 - (Math.abs(deltaX) / maxDrag);
             backdrop.style.opacity = opacity;
         }
-    }, { passive: true });
+    }
     
     // Touch end
-    drawer.addEventListener('touchend', (e) => {
+    function handleDrawerTouchEnd(e) {
         if (!isDragging) return;
         
         const deltaX = touchCurrentX - touchStartX;
@@ -1121,16 +1136,85 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         isDragging = false;
-    });
+    }
+    
+    drawer.addEventListener('touchstart', handleDrawerTouchStart, { passive: true });
+    drawer.addEventListener('touchmove', handleDrawerTouchMove, { passive: true });
+    drawer.addEventListener('touchend', handleDrawerTouchEnd);
     
     // Also handle backdrop touch to close
     backdrop.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-    }, { passive: true });
-    
-    backdrop.addEventListener('touchend', (e) => {
         closeDrawer();
     });
+}
+
+// Call this after rendering header
+
+		
+		// Swipe to delete checklist items
+let itemTouchStartX = 0;
+let itemTouchCurrentX = 0;
+let isItemDragging = false;
+let currentSwipedItem = null;
+
+document.addEventListener('touchstart', (e) => {
+    const item = e.target.closest('.checklist-item');
+    if (!item || editMode) return;
+    
+    itemTouchStartX = e.touches[0].clientX;
+    itemTouchCurrentX = itemTouchStartX;
+    isItemDragging = true;
+    currentSwipedItem = item;
+    item.style.transition = 'none';
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+    if (!isItemDragging || !currentSwipedItem) return;
+    
+    itemTouchCurrentX = e.touches[0].clientX;
+    const deltaX = itemTouchCurrentX - itemTouchStartX;
+    
+    // Only allow swiping left (negative delta)
+    if (deltaX < 0) {
+        currentSwipedItem.style.transform = `translateX(${deltaX}px)`;
+        
+        // Show delete button background as user swipes
+        const maxSwipe = 80;
+        const swipeProgress = Math.min(Math.abs(deltaX) / maxSwipe, 1);
+        currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #fee2e2 100%)`;
+    }
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+    if (!isItemDragging || !currentSwipedItem) return;
+    
+    const deltaX = itemTouchCurrentX - itemTouchStartX;
+    const threshold = 80; // Swipe 80px to delete
+    
+    currentSwipedItem.style.transition = 'all 0.3s ease';
+    
+    if (Math.abs(deltaX) > threshold) {
+        // Delete the item with animation
+        currentSwipedItem.style.transform = 'translateX(-100%)';
+        currentSwipedItem.style.opacity = '0';
+        
+        setTimeout(() => {
+            // Extract indices from the item
+            const catIndex = parseInt(currentSwipedItem.dataset.catIndex);
+            const skillIndex = parseInt(currentSwipedItem.dataset.skillIndex);
+            const itemIndex = parseInt(currentSwipedItem.dataset.itemIndex);
+            
+            // Delete the item
+            deleteItem(catIndex, skillIndex, itemIndex);
+        }, 300);
+    } else {
+        // Snap back
+        currentSwipedItem.style.transform = 'translateX(0)';
+        currentSwipedItem.style.background = '#f8f9fa';
+    }
+    
+    isItemDragging = false;
+    currentSwipedItem = null;
 });
 function toggleMenu(e) {
     e.stopPropagation();
@@ -1345,7 +1429,7 @@ function renderHeader() {
         }
     }
 
-	// Preserve Done button state if in edit mode
+// Preserve Done button state if in edit mode
 	if (editMode) {
 	    setTimeout(() => {
 	        const saveBtn = document.getElementById('saveBtn');
@@ -1354,15 +1438,28 @@ function renderHeader() {
 	        if (menuBtn) menuBtn.style.display = 'none';
 	    }, 0);
 	}
+	
     if (editMode) {
-        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
-            appTitle = e.target.textContent.trim();
-            saveHeader();
-        });
-        header.querySelector('p').addEventListener('blur', (e) => {
-            appSubtitle = e.target.textContent.trim();
-            saveHeader();
-        });
+        const editableTitle = header.querySelector('h1 span.editable');
+        const editableSubtitle = header.querySelector('p');
+        
+        if (editableTitle) {
+            editableTitle.addEventListener('blur', (e) => {
+                appTitle = e.target.textContent.trim();
+                saveHeader();
+            });
+        }
+        if (editableSubtitle) {
+            editableSubtitle.addEventListener('blur', (e) => {
+                appSubtitle = e.target.textContent.trim();
+                saveHeader();
+            });
+        }
+    }
+    
+    // Initialize drawer swipe if drawer is open
+    if (!editMode) {
+        setTimeout(() => initDrawerSwipe(), 100);
     }
 }
 function populateGuideDropdown() {
@@ -2247,7 +2344,7 @@ function renderContent() {
 			    const duplicateBtn = document.createElement('button');
 			    duplicateBtn.className = 'skill-control-btn';
 			    duplicateBtn.innerHTML = '⧉';
-				duplicateBtn.style.fontSize = '15px';
+				duplicateBtn.style.fontSize = '13px';
 			    duplicateBtn.title = 'Duplicate card';
 			    duplicateBtn.onclick = (e) => {
 			        e.stopPropagation();
@@ -2275,7 +2372,10 @@ function renderContent() {
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
                 checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : '');
-                
+                checkItem.dataset.catIndex = catIndex;
+                checkItem.dataset.skillIndex = skillIndex;
+                checkItem.dataset.itemIndex = itemIndex;
+				
                 // Make draggable in edit mode
                 if (!editMode) {
                     checkItem.draggable = true;
@@ -2785,6 +2885,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
