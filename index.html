@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select-none, viewport-fit=cover">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
     <title>Essential Life Skills Guide</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; }
+		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 		.add-category-tab { background: #f59e0b !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
 		.add-category-tab:hover { background: #d97706 !important; }
 		.add-item-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 13px; font-weight: 500; display: none; width: 100%; transition: all 0.2s ease; }
@@ -18,7 +21,8 @@
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
 		.checkbox:hover { border-color: var(--primary-color, #3498db); }
-		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; position: relative; }
+		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; }
+		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
 		.checklist-item.checked .checkbox:after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
@@ -39,9 +43,9 @@
 		.hue-slider { width: 100%; height: 20px; border-radius: 10px; background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%); cursor: pointer; position: relative; margin-bottom: 15px; }
 		.picker-indicator { position: absolute; width: 16px; height: 16px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.5); pointer-events: none; transform: translate(-50%, -50%); }
 		.hue-indicator { position: absolute; width: 8px; height: 24px; background: white; border: 2px solid #2c3e50; border-radius: 4px; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: white; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; }
+		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: #f0f2f5; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; min-height: 100vh; }
 		.container.loaded { opacity: 1; }
-		.content-area { padding: 0; background: #f8f9fa; min-height: calc(100vh - 200px); }
+		.content-area { padding: 0 12px 80px; background: transparent; min-height: calc(100vh - 250px); }
 		.delete-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: transparent; color: #6b7280; border: none; border-radius: 6px; font-size: 18px; font-weight: normal; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; padding: 0; }
 		.delete-btn:hover { background: rgba(220, 38, 38, 0.1); color: #dc2626; transform: scale(1.1); }
 		.delete-tab-btn { width: 22px; height: 22px; background: transparent; color: #9ca3af; border: none; border-radius: 50%; font-size: 18px; font-weight: 600; margin-left: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; padding: 0; }
@@ -71,9 +75,10 @@
 		.emoji-remove-btn { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #e74c3c; color: white; border: 2px solid white; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; }
 		.emoji-remove-btn:hover { background: #c0392b; transform: scale(1.1); }
 		.editable-icon { position: relative; display: inline-block; }
-		.floating-layout-btn { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color, #3498db); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+		.floating-layout-btn { position: fixed; bottom: max(env(safe-area-inset-bottom), 24px); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+		.floating-layout-btn:active { transform: scale(0.9); }
 		.floating-layout-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 1; }
-		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 300px; background: rgba(237, 239, 240); box-shadow: 2px 0 12px rgba(0,0,0,0.15); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: 0; }
+		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 85%; max-width: 320px; background: rgba(237, 239, 240); box-shadow: 2px 0 20px rgba(0,0,0,0.2); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: max(env(safe-area-inset-bottom), 0); }
 		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.guide-dropdown button:hover { background: #f8f9fa; }
 		.guide-dropdown button:last-child { border-bottom: none; }
@@ -81,31 +86,31 @@
 		.guide-dropdown.show { transform: translateX(0); }
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
-		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 24px 30px; text-align: center; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: max(env(safe-area-inset-top), 20px) 20px 20px; text-align: center; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.15); border-radius: 0 0 20px 20px; }
 		.header h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px; }
 		.header p { opacity: 0.95; font-size: 13px; font-weight: 400; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
 		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 24px; }
-		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; }
-		.nav-tab { padding: 16px 28px; cursor: pointer; border: none; background: none; font-size: 14px; font-weight: 500; color: #5f6368; transition: all 0.2s ease; white-space: nowrap; border-bottom: 3px solid transparent; flex-shrink: 0; position: relative; }
-		.nav-tab:hover { color: var(--primary-color, #3498db); background: rgba(52, 152, 219, 0.05); }
-		.nav-tab.active { color: var(--tab-active-color, var(--primary-color, #3498db)); border-bottom-color: var(--tab-active-color, var(--primary-color, #3498db)); background: white; font-weight: 600; }
+		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; padding-bottom: 8px; }
+		.nav-tab { padding: 12px 20px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #5f6368; transition: all 0.3s ease; white-space: nowrap; border-radius: 12px 12px 0 0; flex-shrink: 0; position: relative; margin: 0 4px; }
+		.nav-tab:hover { color: var(--primary-color); background: rgba(52, 152, 219, 0.1); }
+		.nav-tab.active { color: var(--tab-active-color, var(--primary-color)); background: white; font-weight: 600; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
 		.nav-tab .tab-icon { margin-right: 5px; cursor: pointer; }
 		.nav-tab .tab-name { cursor: text; }
 		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
 		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }
-		.nav-tabs { display: flex; background: white; border-bottom: 1px solid #e8eaed; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; position: sticky; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-		.nav-tabs::-webkit-scrollbar { height: 4px; }
+		.nav-tabs { display: flex; background: white; border-bottom: none; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: sticky; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 0 0 16px 16px; padding: 8px 8px 0; margin-bottom: 12px; }
+		.nav-tabs::-webkit-scrollbar { display: none; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
 		.save-btn { position: absolute; top: 5px; right: 5px; background: transparent; color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 16px; cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(255, 255, 255, 0.1); transition: all 0.2s ease; display: none; z-index: 10; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
 		.save-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.2); }
 		.save-btn:active { box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4); transform: translateY(1px); }
-		.skill-card { background: white; border-radius: 0; padding: 24px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e8eaed; box-shadow: 0 4px 8px var(--shadow-color); transition: all 0.3s ease; position: relative; }
-		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #d0d4d9; }
+		.skill-card { background: white; border-radius: 16px; padding: 20px; border-left: 4px solid var(--primary-color); border-bottom: none; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s ease; position: relative; margin-bottom: 16px; }
+		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
 		.skill-card.expanded .collapse-btn { display: block; }
-		.skill-grid { display: flex; flex-direction: column; gap: 32px; margin-top: 0; padding: 16px 0 0 0; transition: all 0.3s ease; }
+		.skill-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 0; padding: 12px 0 0 0; transition: all 0.3s ease; }
 		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 20px 16px; }
 		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--secondary-color, #3498db); border-radius: 8px; background: white; border-bottom: 1px solid #e8eaed; cursor: pointer; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -124,7 +129,8 @@
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@supports (-webkit-touch-callout: none) { /* iOS specific - use native emoji keyboard */ input[type="text"].emoji-input {  font-size: 32px; } }
-    	.guide-item { cursor: move; }
+    	@supports (-webkit-overflow-scrolling: touch) { body { overscroll-behavior-y: contain; } }
+		.guide-item { cursor: move; }
 		.guide-item.dragging { opacity: 0.5; }
 		.guide-item.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
 		.drag-handle { position: absolute; left: 8px; top: 0; bottom: 0; display: flex; align-items: center; cursor: grab; padding: 0 4px; color: rgba(0, 0, 0, 0.15); font-size: 16px; line-height: 1; user-select: none; transition: all 0.2s; font-weight: normal; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8); letter-spacing: -2px; }
@@ -2571,6 +2577,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
