@@ -138,7 +138,8 @@
 		.checklist-item .bullet-square { width: 20px; height: 20px; border-radius: 5px; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
 		.checklist-item .bullet-circle { width: 20px; height: 20px; border-radius: 50%; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
 		.checklist-item .bullet-none { width: 0px; height: 20px; flex-shrink: 0; margin-top: 2px; }
-
+		.checklist-item.dragging { opacity: 0.5; background: #f3f4f6; }
+		.checklist-item.drag-over { border-top: 3px solid var(--primary-color); }
 		
 	</style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1465,7 +1466,86 @@ function handleDrop(e) {
     return false;
 }
 
+// Drag and drop for checklist items
+let draggedItem = null;
+let draggedItemCatIndex = null;
+let draggedItemSkillIndex = null;
+let draggedItemIndex = null;
 
+document.addEventListener('dragstart', (e) => {
+    if (e.target.classList.contains('checklist-item') && editMode) {
+        draggedItem = e.target;
+        draggedItemCatIndex = parseInt(e.target.dataset.catIndex);
+        draggedItemSkillIndex = parseInt(e.target.dataset.skillIndex);
+        draggedItemIndex = parseInt(e.target.dataset.itemIndex);
+        e.target.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        
+        const rect = e.target.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        e.dataTransfer.setDragImage(e.target, offsetX, offsetY);
+    }
+});
+
+document.addEventListener('dragend', (e) => {
+    if (e.target.classList.contains('checklist-item')) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.checklist-item').forEach(item => {
+            item.classList.remove('drag-over');
+        });
+        draggedItem = null;
+    }
+});
+
+document.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!draggedItem) return;
+    
+    const target = e.target.closest('.checklist-item');
+    if (target && target !== draggedItem && 
+        target.dataset.catIndex === draggedItem.dataset.catIndex &&
+        target.dataset.skillIndex === draggedItem.dataset.skillIndex) {
+        e.dataTransfer.dropEffect = 'move';
+    }
+});
+
+document.addEventListener('dragenter', (e) => {
+    const target = e.target.closest('.checklist-item');
+    if (target && target !== draggedItem && 
+        target.dataset.catIndex === draggedItem.dataset.catIndex &&
+        target.dataset.skillIndex === draggedItem.dataset.skillIndex) {
+        target.classList.add('drag-over');
+    }
+});
+
+document.addEventListener('dragleave', (e) => {
+    const target = e.target.closest('.checklist-item');
+    if (target) {
+        target.classList.remove('drag-over');
+    }
+});
+
+document.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const target = e.target.closest('.checklist-item');
+    
+    if (target && target !== draggedItem && 
+        target.dataset.catIndex === draggedItem.dataset.catIndex &&
+        target.dataset.skillIndex === draggedItem.dataset.skillIndex) {
+        
+        const targetCatIndex = parseInt(target.dataset.catIndex);
+        const targetSkillIndex = parseInt(target.dataset.skillIndex);
+        const targetItemIndex = parseInt(target.dataset.itemIndex);
+        
+        // Reorder items array
+        const [movedItem] = categories[draggedItemCatIndex].skills[draggedItemSkillIndex].items.splice(draggedItemIndex, 1);
+        categories[targetCatIndex].skills[targetSkillIndex].items.splice(targetItemIndex, 0, movedItem);
+        
+        saveCategories();
+        renderContent();
+    }
+});
 function handleDragLeave(e) {
     this.classList.remove('drag-over');
 }
@@ -2126,7 +2206,16 @@ function renderContent() {
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
                 checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); 
-                if (!editMode) checkItem.onclick = () => toggleCheck(itemId); 
+                if (!editMode) checkItem.onclick = () => toggleCheck(itemId);
+                
+                // Make draggable in edit mode
+                if (editMode) {
+                    checkItem.draggable = true;
+                    checkItem.dataset.catIndex = catIndex;
+                    checkItem.dataset.skillIndex = skillIndex;
+                    checkItem.dataset.itemIndex = itemIndex;
+                    checkItem.style.cursor = 'grab';
+                }
                 
                 // Render appropriate bullet based on style
 				const bulletStyle = skill.bulletStyle || 'checkbox';
@@ -2473,6 +2562,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
