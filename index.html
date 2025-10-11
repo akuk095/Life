@@ -980,6 +980,25 @@ function createNewGuide() {
         loadFromFirebase();
     });
 }
+
+function changeGuideCategory() {
+    const currentCategory = categories[0]?.category || 'Notes'; // Get current category from guide data
+    
+    // Create a selection dialog
+    const categoryList = guideCategories.map((cat, i) => `${i + 1}. ${cat}`).join('\n');
+    const selection = prompt(`Select a category:\n\n${categoryList}\n\nEnter the number (1-${guideCategories.length}):`, '2');
+    
+    if (selection && !isNaN(selection)) {
+        const index = parseInt(selection) - 1;
+        if (index >= 0 && index < guideCategories.length) {
+            const newCategory = guideCategories[index];
+            database.ref(`guides/${currentGuideId}/category`).set(newCategory);
+            populateGuideDropdown(); // Refresh the drawer
+            alert(`Category changed to: ${newCategory}`);
+        }
+    }
+}
+		
 function toggleGuideMenu(e) {
     e.stopPropagation();
     const dropdown = document.getElementById('guideDropdown');
@@ -1108,6 +1127,7 @@ function renderHeader() {
     <button onclick="toggleEditMode()">Edit</button>
     <button onclick="duplicateGuide()">Duplicate</button>
     <button onclick="deleteGuide()">Delete</button>
+	<button onclick="changeGuideCategory()">Change Category</button>
 	<button onclick="toggleColorPicker(event)">Theme</button>
 	<div class="color-picker-menu" id="colorPickerMenu">
 	    <h3>Preset Themes</h3>
@@ -2362,5 +2382,6 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
