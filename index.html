@@ -1082,40 +1082,6 @@ function changeGuideCategory() {
     }
 }
 		
-function toggleGuideMenu(e) {
-    e.stopPropagation();
-    const dropdown = document.getElementById('guideDropdown');
-    const backdrop = document.getElementById('drawerBackdrop');
-    const floatingBtn = document.getElementById('layoutBtn');
-    
-    const isShowing = dropdown.classList.contains('show');
-    
-    if (isShowing) {
-        // Close drawer
-        dropdown.classList.remove('show');
-        backdrop.classList.remove('show');
-        document.body.style.overflow = '';
-        if (floatingBtn) floatingBtn.style.display = 'flex';
-    } else {
-        // Open drawer
-        dropdown.classList.add('show');
-        backdrop.classList.add('show');
-        dropdown.style.transform = 'translateX(0)';
-        backdrop.style.opacity = '1';
-        const footer = document.getElementById('drawerFooter');
-        if (footer) footer.style.transform = 'translateX(0)';
-        document.body.style.overflow = 'hidden';
-        if (floatingBtn) floatingBtn.style.display = 'none';
-        
-        // Initialize swipe after drawer is open
-        setTimeout(() => initDrawerSwipe(), 100);
-    }
-    
-    // Close other menus
-    const otherMenu = document.getElementById('dropdownMenu');
-    if (otherMenu) otherMenu.classList.remove('show');
-}
-
 function closeDrawer() {
     const dropdown = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
@@ -1292,7 +1258,67 @@ document.addEventListener('touchend', (e) => {
     isItemDragging = false;
     currentSwipedItem = null;
 });
+function toggleGuideMenu(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('guideDropdown');
+    const backdrop = document.getElementById('drawerBackdrop');
+    const floatingBtn = document.getElementById('layoutBtn');
+    
+    const isShowing = dropdown.classList.contains('show');
+    
+    if (isShowing) {
+        // Close drawer
+        dropdown.classList.remove('show');
+        backdrop.classList.remove('show');
+        document.body.style.overflow = '';
+        if (floatingBtn) floatingBtn.style.display = 'flex';
+    } else {
+        // Open drawer
+        dropdown.classList.add('show');
+        backdrop.classList.add('show');
+        dropdown.style.transform = 'translateX(0)';
+        backdrop.style.opacity = '1';
+        const footer = document.getElementById('drawerFooter');
+        if (footer) footer.style.transform = 'translateX(0)';
+        document.body.style.overflow = 'hidden';
+        if (floatingBtn) floatingBtn.style.display = 'none';
+        
+        // Initialize swipe after drawer is open
+        setTimeout(() => initDrawerSwipe(), 100);
+    }
+    
+    // Close other menus
+    const otherMenu = document.getElementById('dropdownMenu');
+    if (otherMenu) otherMenu.classList.remove('show');
+}
 
+function toggleMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('dropdownMenu');
+    const floatingBtn = document.getElementById('layoutBtn');
+    const isCurrentlyShown = menu.classList.contains('show');
+    
+    menu.classList.toggle('show');
+    
+    // Hide/show floating button based on menu state
+    if (floatingBtn) {
+        if (menu.classList.contains('show')) {
+            floatingBtn.style.display = 'none';
+        } else {
+            floatingBtn.style.display = 'flex';
+        }
+    }
+    
+    // Close other menus
+    const guideMenu = document.getElementById('guideDropdown');
+    if (guideMenu) guideMenu.classList.remove('show');
+    
+    // If we just closed it, trigger a re-render to reset button state
+    if (isCurrentlyShown) {
+        // Force button to lose focus
+        e.target.blur();
+    }
+}
 // Authentication functions
 function login(email, password) {
     signInWithEmailAndPassword(auth, email, password)
@@ -1347,35 +1373,6 @@ function showSignup() {
     signup(email, password);
 }
 
-
-
-function toggleMenu(e) {
-    e.stopPropagation();
-    const menu = document.getElementById('dropdownMenu');
-    const floatingBtn = document.getElementById('layoutBtn');
-    const isCurrentlyShown = menu.classList.contains('show');
-    
-    menu.classList.toggle('show');
-    
-    // Hide/show floating button based on menu state
-    if (floatingBtn) {
-        if (menu.classList.contains('show')) {
-            floatingBtn.style.display = 'none';
-        } else {
-            floatingBtn.style.display = 'flex';
-        }
-    }
-    
-    // Close other menus
-    const guideMenu = document.getElementById('guideDropdown');
-    if (guideMenu) guideMenu.classList.remove('show');
-    
-    // If we just closed it, trigger a re-render to reset button state
-    if (isCurrentlyShown) {
-        // Force button to lose focus
-        e.target.blur();
-    }
-}
 
 function duplicateGuide() {
     if (!currentUser) return;
@@ -3111,6 +3108,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
