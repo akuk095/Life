@@ -1097,12 +1097,25 @@ function createNewGuide() {
     if (!currentUser) return;
     const name = prompt("Enter a name for this new guide:");
     if (!name) return;
+    
+    // Show category selection
+    const categoryList = guideCategories.map((cat, i) => `${i + 1}. ${cat.name}`).join('\n');
+    const selection = prompt(`Select a category:\n\n${categoryList}\n\nEnter the number (1-${guideCategories.length}):`, '2');
+    
+    let selectedCategory = 'Notes'; // Default
+    if (selection && !isNaN(selection)) {
+        const index = parseInt(selection) - 1;
+        if (index >= 0 && index < guideCategories.length) {
+            selectedCategory = guideCategories[index].name;
+        }
+    }
+    
     const id = `guide_${Date.now()}`;
     const newGuide = {
         appTitle: name,
         appSubtitle: "Click to edit subtitle",
         appIcon: "📘",
-        category: "Notes",
+        category: selectedCategory,
         categories: [
             {
                 name: "New Category",
@@ -1475,6 +1488,10 @@ function duplicateGuide() {
         const data = snapshot.val();
         if (data.appTitle) {
             data.appTitle = data.appTitle + ' (Copy)';
+        }
+        // Make sure category is preserved
+        if (!data.category) {
+            data.category = 'Notes';
         }
         set(ref(database, `users/${currentUser.uid}/guides/${newId}`), data).then(() => {
             currentGuideId = newId;
@@ -2542,7 +2559,7 @@ function renderTabs() {
                     switchTab(i);
                 }
             });
-        } else {
+	        } else {
 		    // Need to render SVG icons properly
 		    let displayIcon = cat.icon;
 		    if (cat.icon && cat.icon.startsWith('svg:')) {
@@ -2551,15 +2568,21 @@ function renderTabs() {
 		    }
 		    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
 		    
-		    const nameSpan = tab.querySelector('.tab-name-display');
+		    // Make tabs draggable
+		    tab.draggable = true;
+		    tab.dataset.catIndex = i;
 		    
-		    // Single click switches tab
+		    const nameSpan = tab.querySelector('.tab-name-display');
+		    const iconSpan = tab.querySelector('.tab-icon-display');
+		    
+		    // Single click switches tab (but not on name/icon spans)
 		    tab.addEventListener('click', function(e) {
-		        if (e.target === nameSpan || nameSpan.contains(e.target)) {
-		            // If clicking on name span, do nothing (let dblclick handle it)
-		        } else {
-		            switchTab(i);
+		        // Don't switch if clicking directly on name or icon for editing
+		        if (e.target === nameSpan || nameSpan.contains(e.target) ||
+		            e.target === iconSpan || iconSpan.contains(e.target)) {
+		            return;
 		        }
+		        switchTab(i);
 		    });
 		    
 		    // Double-click on name to edit
@@ -2567,7 +2590,26 @@ function renderTabs() {
 		        nameSpan.addEventListener('dblclick', function(e) {
 		            e.stopPropagation();
 		            e.preventDefault();
+		            // Temporarily disable dragging
+		            tab.draggable = false;
 		            enableQuickEdit(this, i, null, null);
+		            // Re-enable dragging after edit
+		            setTimeout(() => {
+		                tab.draggable = true;
+		            }, 100);
+		        });
+		    }
+		    
+		    // Double-click on icon to edit
+		    if (iconSpan) {
+		        iconSpan.addEventListener('dblclick', function(e) {
+		            e.stopPropagation();
+		            e.preventDefault();
+		            tab.draggable = false;
+		            editCategoryIcon(i, this);
+		            setTimeout(() => {
+		                tab.draggable = true;
+		            }, 100);
 		        });
 		    }
 		}
@@ -3063,10 +3105,16 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
     
     const originalText = element.textContent.trim();
     const parentItem = element.closest('.checklist-item');
+    const parentTab = element.closest('.nav-tab');
     
     // Prevent checkbox toggle during editing
     if (parentItem) {
         parentItem.style.pointerEvents = 'none';
+    }
+    
+    // Disable tab dragging during editing
+    if (parentTab) {
+        parentTab.draggable = false;
     }
     
     element.contentEditable = true;
@@ -3098,6 +3146,11 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
         
         if (parentItem) {
             parentItem.style.pointerEvents = '';
+        }
+        
+        // Re-enable tab dragging
+        if (parentTab) {
+            parentTab.draggable = true;
         }
         
         if (newText && newText !== originalText) {
@@ -3447,6 +3500,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
