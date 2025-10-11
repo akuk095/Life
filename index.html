@@ -322,7 +322,15 @@ let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
 let expandedCards = {};
-const guideCategories = ['Habits', 'Notes', 'To-Do', 'Tracking', 'Recipes', 'Goals', 'Journaling'];
+const guideCategories = [
+    { name: 'Habits', icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z' },
+    { name: 'Notes', icon: 'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z' },
+    { name: 'To-Do', icon: 'M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z' },
+    { name: 'Tracking', icon: 'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z' },
+    { name: 'Recipes', icon: 'M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z' },
+    { name: 'Goals', icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' },
+    { name: 'Journaling', icon: 'M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z' }
+];
 // Drag and drop state
 let draggedCard = null;
 let draggedCatIndex = null;
@@ -1116,15 +1124,14 @@ function createNewGuide() {
 
 function changeGuideCategory() {
     if (!currentUser) return;
-    const currentCategory = categories[0]?.category || 'Notes';
     
-    const categoryList = guideCategories.map((cat, i) => `${i + 1}. ${cat}`).join('\n');
+    const categoryList = guideCategories.map((cat, i) => `${i + 1}. ${cat.name}`).join('\n');
     const selection = prompt(`Select a category:\n\n${categoryList}\n\nEnter the number (1-${guideCategories.length}):`, '2');
     
     if (selection && !isNaN(selection)) {
         const index = parseInt(selection) - 1;
         if (index >= 0 && index < guideCategories.length) {
-            const newCategory = guideCategories[index];
+            const newCategory = guideCategories[index].name;
             set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/category`), newCategory);
             populateGuideDropdown();
             alert(`Category changed to: ${newCategory}`);
@@ -1863,16 +1870,27 @@ function populateGuideDropdown() {
             const guidesInCategory = groupedGuides[categoryName];
             if (guidesInCategory.length === 0) return;
             
-            // Add category header
-            const categoryHeader = document.createElement('div');
-            categoryHeader.style.padding = '12px 16px 6px';
-            categoryHeader.style.fontSize = '11px';
-            categoryHeader.style.fontWeight = 'bold';
-            categoryHeader.style.color = '#9ca3af';
-            categoryHeader.style.textTransform = 'uppercase';
-            categoryHeader.style.letterSpacing = '0.5px';
-            categoryHeader.textContent = categoryName;
-            dropdown.appendChild(categoryHeader);
+            /// Add category header with icon
+			const categoryHeader = document.createElement('div');
+			categoryHeader.style.padding = '12px 16px 6px';
+			categoryHeader.style.fontSize = '11px';
+			categoryHeader.style.fontWeight = 'bold';
+			categoryHeader.style.color = '#9ca3af';
+			categoryHeader.style.textTransform = 'uppercase';
+			categoryHeader.style.letterSpacing = '0.5px';
+			categoryHeader.style.display = 'flex';
+			categoryHeader.style.alignItems = 'center';
+			categoryHeader.style.gap = '8px';
+			
+			// Find the category icon
+			const categoryData = guideCategories.find(cat => cat.name === categoryName);
+			if (categoryData) {
+			    const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${categoryData.icon}"/></svg>`;
+			    categoryHeader.innerHTML = iconSvg + `<span>${categoryName}</span>`;
+			} else {
+			    categoryHeader.textContent = categoryName;
+			}
+			dropdown.appendChild(categoryHeader);
             
             // Add guides in this category
             guidesInCategory.forEach(({id, guide}) => {
@@ -3429,6 +3447,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
