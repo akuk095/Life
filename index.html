@@ -160,7 +160,13 @@
 		.drawer-create-icon:hover { opacity: 0.8; transform: scale(1.05); }
 		.drawer-create-icon:active { opacity: 1; transform: scale(0.98); }
 		.drawer-create-icon svg { stroke: #2c3e50; width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
-		/* Hide all scrollbars but keep scroll functionality */
+		.logout-menu { position: fixed; bottom: 80px; left: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); display: none; z-index: 2002; overflow: hidden; min-width: 180px; }
+		.logout-menu.show { display: block; }
+		.logout-menu button { width: 100%; padding: 14px 20px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; display: flex; align-items: center; gap: 10px; }
+		.logout-menu button:hover { background: #f3f4f6; }
+		.logout-menu button:first-child { color: #1f2937; border-bottom: 1px solid #e5e7eb; }
+		.logout-menu button:last-child { color: #dc2626; }
+/* Hide all scrollbars but keep scroll functionality */
 		* { scrollbar-width: none; -ms-overflow-style: none; }
 		*::-webkit-scrollbar { display: none; }
 		#loginScreen { opacity: 0; transition: opacity 0.3s ease-in-out; }
@@ -1484,6 +1490,37 @@ function deleteGuide() {
         loadUserData(currentUser.uid);
     }
 }
+
+function deleteAccount() {
+    if (!currentUser) return;
+    
+    const confirmation = prompt('⚠️ WARNING: This will permanently delete your account and ALL your data.\n\nType "DELETE" to confirm:');
+    
+    if (confirmation === 'DELETE') {
+        const finalConfirm = confirm('Are you absolutely sure? This cannot be undone!');
+        
+        if (finalConfirm) {
+            // Delete all user data from database
+            remove(ref(database, `users/${currentUser.uid}`))
+                .then(() => {
+                    // Delete the user account
+                    return currentUser.delete();
+                })
+                .then(() => {
+                    alert('Your account has been deleted.');
+                    closeDrawer();
+                })
+                .catch((error) => {
+                    if (error.code === 'auth/requires-recent-login') {
+                        alert('For security, please log out and log back in, then try deleting your account again.');
+                    } else {
+                        alert('Error deleting account: ' + error.message);
+                    }
+                });
+        }
+    }
+}
+
 	
 function saveHeader() {
   if (!currentUser) return;
@@ -1517,13 +1554,36 @@ function renderHeader() {
     <div class="drawer-header">My Notebook ⊞</div>
 </div>
 <div class="drawer-footer" id="drawerFooter">
-    <button id="logoutBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-right: auto; opacity: 0.5; transition: opacity 0.2s;">
+    <button id="logoutMenuBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-right: auto; opacity: 0.5; transition: opacity 0.2s;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
         </svg>
     </button>
+    
+    <!-- Logout popup menu -->
+    <div class="logout-menu" id="logoutMenu">
+        <button id="logoutBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Logout
+        </button>
+        <button id="deleteAccountBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+            Delete Account
+        </button>
+    </div>
+    
     <button class="drawer-create-icon" id="createGuideBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -1600,7 +1660,10 @@ function renderHeader() {
     const guideMenuBtn = document.getElementById('guideMenuBtn');
     const drawerBackdrop = document.getElementById('drawerBackdrop');
     const createGuideBtn = document.getElementById('createGuideBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutBtn = document.getElementById('logoutMenuBtn');  // Changed from 'logoutBtn' to match new ID
+	const logoutMenu = document.getElementById('logoutMenu');
+	const logoutConfirmBtn = document.getElementById('logoutBtn');  // The actual logout button inside menu
+	const deleteAccountBtn = document.getElementById('deleteAccountBtn');
     const saveBtn = document.getElementById('saveBtn');
     const menuBtn = document.getElementById('menuBtn');
     const editModeMenuBtn = document.getElementById('editModeMenuBtn');
@@ -1614,7 +1677,28 @@ function renderHeader() {
     const applyColorBtn = document.getElementById('applyColorBtn');
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
-    
+
+	if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        logoutMenu.classList.toggle('show');
+    });
+}
+
+if (logoutConfirmBtn) {
+    logoutConfirmBtn.addEventListener('click', () => {
+        logout();
+        logoutMenu.classList.remove('show');
+        closeDrawer();
+    });
+}
+
+if (deleteAccountBtn) {
+    deleteAccountBtn.addEventListener('click', () => {
+        logoutMenu.classList.remove('show');
+        deleteAccount();
+    });
+}
     if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
     if (createGuideBtn) {
@@ -3219,6 +3303,12 @@ document.addEventListener('click', (e) => {
     const menu = document.getElementById('dropdownMenu');
     const colorMenu = document.getElementById('colorPickerMenu');
     const floatingBtn = document.getElementById('layoutBtn');
+    const logoutMenu = document.getElementById('logoutMenu');
+    
+    // Close logout menu when clicking outside
+    if (logoutMenu && !logoutMenu.contains(e.target) && !e.target.closest('#logoutMenuBtn')) {
+        logoutMenu.classList.remove('show');
+    }
     
     // Don't close dropdown if clicking inside color picker
     if (colorMenu && colorMenu.contains(e.target)) {
@@ -3230,7 +3320,9 @@ document.addEventListener('click', (e) => {
         menu.classList.remove('show');
         if (colorMenu) colorMenu.classList.remove('show');
         // Show floating button when menu closes
-        if (floatingBtn) floatingBtn.style.display = 'flex';
+        if (floatingBtn && guideMenu && !guideMenu.classList.contains('show')) {
+    		floatingBtn.style.display = 'flex';
+		}
     }
     
     const guideMenu = document.getElementById('guideDropdown');
@@ -3337,6 +3429,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
