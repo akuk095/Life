@@ -210,7 +210,9 @@ let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
 let expandedCards = {};
-
+let guideClassifications = {}; // Stores guide ID -> classification mapping
+const classifications = ['Habits', 'Notes', 'Trackers', 'Journals', 'Other'];
+		
 // Drag and drop state
 let draggedCard = null;
 let draggedCatIndex = null;
@@ -499,7 +501,8 @@ function loadFromFirebase() {
     database.ref(`guides/${currentGuideId}/expandedCards`).once('value'),
     database.ref(`guides/${currentGuideId}/autoRefreshEnabled`).once('value'),
     database.ref(`guides/${currentGuideId}/autoRefreshTime`).once('value'),
-    database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value')
+    database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value'),
+	database.ref(`guideClassifications`).once('value')
 ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, expandedSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap]) => {
 		
         // Load categories
@@ -549,7 +552,10 @@ function loadFromFirebase() {
 		if (autoRefreshTimeSnap.val()) {
     		autoRefreshTime = autoRefreshTimeSnap.val();
 		}
-
+		// Load guide classifications
+		if (guideClassificationsSnap.val()) {
+		    guideClassifications = guideClassificationsSnap.val();
+		}
 		// Check if we need to auto-refresh
 		checkAndAutoRefresh(lastRefreshSnap.val());
         // Apply theme
@@ -1106,7 +1112,8 @@ function renderHeader() {
 <div class="dropdown-menu" id="dropdownMenu">
     <button onclick="toggleEditMode()">Edit</button>
     <button onclick="duplicateGuide()">Duplicate</button>
-    <button onclick="deleteGuide()">Delete</button>
+    <button onclick="changeClassification()">Change Classification</button>
+	<button onclick="deleteGuide()">Delete</button>
 	<button onclick="toggleColorPicker(event)">Theme</button>
 	<div class="color-picker-menu" id="colorPickerMenu">
 	    <h3>Preset Themes</h3>
@@ -1221,94 +1228,121 @@ function populateGuideDropdown() {
         dropdown.innerHTML = '';
         if (header) dropdown.appendChild(header);
         
+        // Group guides by classification
+        const groupedGuides = {};
+        classifications.forEach(cat => groupedGuides[cat] = []);
+        
         for (let id in guides) {
-            const guide = guides[id];
-            const title = guide.appTitle || id;
-            const icon = guide.appIcon || '📄';
-            const guideTheme = guide.themeColor || '#3498db';
+            const classification = guideClassifications[id] || 'Other';
+            if (!groupedGuides[classification]) groupedGuides[classification] = [];
+            groupedGuides[classification].push({ id, guide: guides[id] });
+        }
+        
+        // Render each classification group
+        classifications.forEach(classification => {
+            const guidesInCategory = groupedGuides[classification];
+            if (guidesInCategory.length === 0) return;
             
-            const btn = document.createElement('button');
-            btn.className = 'guide-item';
-            btn.dataset.guideId = id;
-            btn.style.borderLeft = `4px solid ${guideTheme}`;
-            btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
-            btn.style.display = 'flex';
-            btn.style.alignItems = 'center';
-            btn.style.justifyContent = 'space-between';
-            btn.style.margin = '4px 0';
-            btn.style.padding = '8px 12px';
+            // Category header
+            const categoryHeader = document.createElement('div');
+            categoryHeader.style.padding = '12px 16px 6px';
+            categoryHeader.style.fontSize = '11px';
+            categoryHeader.style.fontWeight = '700';
+            categoryHeader.style.color = '#6b7280';
+            categoryHeader.style.textTransform = 'uppercase';
+            categoryHeader.style.letterSpacing = '0.5px';
+            categoryHeader.textContent = classification;
+            dropdown.appendChild(categoryHeader);
             
-            const nameSpan = document.createElement('span');
-            if (icon.startsWith('svg:')) {
-			    const iconData = JSON.parse(icon.substring(4));
-			    nameSpan.innerHTML = `<span style="display: inline-flex; width: 18px; height: 18px; background: ${iconData.bg}; border-radius: 3px; align-items: center; justify-content: center; margin-right: 8px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span> ${title}`;
-			} else {
-			    nameSpan.textContent = `${icon} ${title}`;
-			}
-            btn.appendChild(nameSpan);
-            
-            if (editMode && id !== 'defaultGuide') {
-                const delBtn = document.createElement('span');
-                delBtn.textContent = 'del';
-                delBtn.style.background = '#e74c3c';
-                delBtn.style.color = '#f8f9fa';
-                delBtn.style.padding = '4px 10px';
-                delBtn.style.borderRadius = '6px';
-                delBtn.style.fontSize = '12px';
-                delBtn.style.fontWeight = 'bold';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
-                        database.ref(`guides/${id}`).remove();
-                        if (currentGuideId === id) {
-                            currentGuideId = 'defaultGuide';
-                            loadFromFirebase();
-                        } else {
-                            populateGuideDropdown();
+            // Guides in this category
+            guidesInCategory.forEach(({ id, guide }) => {
+                const title = guide.appTitle || id;
+                const icon = guide.appIcon || '📄';
+                const guideTheme = guide.themeColor || '#3498db';
+                
+                const btn = document.createElement('button');
+                btn.className = 'guide-item';
+                btn.dataset.guideId = id;
+                btn.style.borderLeft = `4px solid ${guideTheme}`;
+                btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'space-between';
+                btn.style.margin = '4px 0';
+                btn.style.padding = '8px 12px';
+                
+                const nameSpan = document.createElement('span');
+                if (icon.startsWith('svg:')) {
+                    const iconData = JSON.parse(icon.substring(4));
+                    nameSpan.innerHTML = `<span style="display: inline-flex; width: 18px; height: 18px; background: ${iconData.bg}; border-radius: 3px; align-items: center; justify-content: center; margin-right: 8px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span> ${title}`;
+                } else {
+                    nameSpan.textContent = `${icon} ${title}`;
+                }
+                btn.appendChild(nameSpan);
+                
+                if (editMode && id !== 'defaultGuide') {
+                    const delBtn = document.createElement('span');
+                    delBtn.textContent = 'del';
+                    delBtn.style.background = '#e74c3c';
+                    delBtn.style.color = '#f8f9fa';
+                    delBtn.style.padding = '4px 10px';
+                    delBtn.style.borderRadius = '6px';
+                    delBtn.style.fontSize = '12px';
+                    delBtn.style.fontWeight = 'bold';
+                    delBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
+                            database.ref(`guides/${id}`).remove();
+                            delete guideClassifications[id];
+                            database.ref('guideClassifications').set(guideClassifications);
+                            if (currentGuideId === id) {
+                                currentGuideId = 'defaultGuide';
+                                loadFromFirebase();
+                            } else {
+                                populateGuideDropdown();
+                            }
                         }
+                    };
+                    btn.appendChild(delBtn);
+                }
+                
+                btn.onclick = (e) => {
+                    if (!e.target.textContent.includes('del')) {
+                        switchGuide(id);
+                        closeDrawer();
                     }
                 };
-                btn.appendChild(delBtn);
-            }
-            
-            btn.onclick = (e) => {
-                if (!e.target.textContent.includes('del')) {
-                    switchGuide(id);
-                    closeDrawer();
+                
+                if (id === currentGuideId) {
+                    btn.classList.add('current-guide');
+                    const isLight = isLightColor(guideTheme);
+                    btn.style.color = isLight ? 'var(--secondary-color)' : guideTheme;
+                    btn.style.fontWeight = '700';
+                    btn.style.fontSize = '15px';
+                    btn.style.background = `linear-gradient(90deg, ${guideTheme}35 0%, transparent 100%)`;
+                    const iconElement = nameSpan.querySelector('span') || nameSpan.childNodes[0];
+                    if (iconElement) {
+                        if (icon.startsWith('svg:')) {
+                            iconElement.style.transform = 'scale(1.15)';
+                        } else {
+                            nameSpan.style.fontSize = '16px';
+                        }
+                    }
                 }
-            };
-            
-            if (id === currentGuideId) {
-			    btn.classList.add('current-guide');
-			    const isLight = isLightColor(guideTheme);
-			    btn.style.color = isLight ? 'var(--secondary-color)' : guideTheme;
-			    btn.style.fontWeight = '700';
-			    btn.style.fontSize = '15px';
-				btn.style.background = `linear-gradient(90deg, ${guideTheme}35 0%, transparent 100%)`;
-			    // Make icon larger
-			    const iconElement = nameSpan.querySelector('span') || nameSpan.childNodes[0];
-			    if (iconElement) {
-			        if (icon.startsWith('svg:')) {
-			            iconElement.style.transform = 'scale(1.15)';
-			        } else {
-			            nameSpan.style.fontSize = '16px';
-			        }
-			    }
-			}
-
-            // Enable drag-and-drop in edit mode
-            if (editMode) {
-                btn.draggable = true;
-                btn.style.cursor = 'grab';
-                btn.addEventListener('dragstart', handleDragStart);
-                btn.addEventListener('dragend', handleDragEnd);
-                btn.addEventListener('dragenter', handleDragEnter);
-                btn.addEventListener('dragover', handleDragOver);
-                btn.addEventListener('drop', handleDrop);
-                btn.addEventListener('dragleave', handleDragLeave);
-            }
-
-            dropdown.appendChild(btn);
+                
+                if (editMode) {
+                    btn.draggable = true;
+                    btn.style.cursor = 'grab';
+                    btn.addEventListener('dragstart', handleDragStart);
+                    btn.addEventListener('dragend', handleDragEnd);
+                    btn.addEventListener('dragenter', handleDragEnter);
+                    btn.addEventListener('dragover', handleDragOver);
+                    btn.addEventListener('drop', handleDrop);
+                    btn.addEventListener('dragleave', handleDragLeave);
+                }
+                
+                dropdown.appendChild(btn);
+            });
         }
         
         // Add create button (only when not editing)
@@ -1324,15 +1358,15 @@ function populateGuideDropdown() {
             createBtn.style.fontWeight = '600';
             createBtn.style.borderRadius = '0';
             createBtn.style.margin = '0';
+            createBtn.style.marginTop = '8px';
             createBtn.onclick = () => {
-                createNewGuide();
+                createNewGuideWithClassification();
                 closeDrawer();
             };
             dropdown.appendChild(createBtn);
         }
     });
 }
-
 
 function handleDragStart(e) {
     draggedElement = this;
@@ -1694,7 +1728,54 @@ function clearAllChecks() {
         renderContent();
     }
 }
+function createNewGuideWithClassification() {
+    const name = prompt("Enter a name for this new guide:");
+    if (!name) return;
+    
+    const classification = prompt(`Choose a classification:\n${classifications.join(', ')}`, 'Other');
+    if (!classification || !classifications.includes(classification)) {
+        alert('Invalid classification. Using "Other".');
+    }
+    
+    const id = `guide_${Date.now()}`;
+    const newGuide = {
+        appTitle: name,
+        appSubtitle: "Click to edit subtitle",
+        appIcon: "📘",
+        categories: [
+            {
+                name: "New Category",
+                icon: "📌",
+                skills: [
+                    { title: "New Skill", icon: "✨", items: ["New item - click to edit"] }
+                ]
+            }
+        ],
+        checkedItems: {},
+        themeColor: themeColor
+    };
+    
+    guideClassifications[id] = classification || 'Other';
+    
+    database.ref(`guides/${id}`).set(newGuide).then(() => {
+        database.ref('guideClassifications').set(guideClassifications).then(() => {
+            currentGuideId = id;
+            loadFromFirebase();
+        });
+    });
+}
 
+function changeClassification() {
+    const current = guideClassifications[currentGuideId] || 'Other';
+    const newClass = prompt(`Current: ${current}\n\nChoose new classification:\n${classifications.join(', ')}`, current);
+    
+    if (newClass && classifications.includes(newClass)) {
+        guideClassifications[currentGuideId] = newClass;
+        database.ref('guideClassifications').set(guideClassifications).then(() => {
+            populateGuideDropdown();
+        });
+    }
+}
 function toggleAutoRefresh() {
     const enabled = confirm(
         autoRefreshEnabled 
@@ -2331,6 +2412,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
