@@ -3103,11 +3103,43 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
+// Expose functions to global scope for onclick handlers
+window.toggleMenu = toggleMenu;
+window.toggleGuideMenu = toggleGuideMenu;
+window.toggleEditMode = toggleEditMode;
+window.saveAndExitEdit = saveAndExitEdit;
+window.saveHeader = saveHeader;
+window.closeDrawer = closeDrawer;
+window.createNewGuide = createNewGuide;
+window.logout = logout;
+window.duplicateGuide = duplicateGuide;
+window.deleteGuide = deleteGuide;
+window.changeGuideCategory = changeGuideCategory;
+window.toggleColorPicker = toggleColorPicker;
+window.toggleDarkMode = toggleDarkMode;
+window.clearAllChecks = clearAllChecks;
+window.toggleAutoRefresh = toggleAutoRefresh;
+window.selectColor = selectColor;
+window.applyCustomColor = applyCustomColor;
+window.toggleLayout = toggleLayout;
+window.switchTab = switchTab;
+window.addSkill = addSkill;
+window.addItem = addItem;
+window.addCategory = addCategory;
+window.deleteSkill = deleteSkill;
+window.deleteItem = deleteItem;
+window.deleteCategory = deleteCategory;
+window.editAppIcon = editAppIcon;
+window.editSkillIcon = editSkillIcon;
+window.editCategoryIcon = editCategoryIcon;
+window.toggleBulletStyle = toggleBulletStyle;
+window.duplicateSkill = duplicateSkill;
+window.showSignup = showSignup;
     </script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
