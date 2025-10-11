@@ -149,8 +149,7 @@
 		.skill-card-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; align-items: center; padding: 4px 4px 4px 8px; background: transparent; }
 		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0.4; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; font-weight: normal; }
 		.skill-control-btn:hover { color: #6b7280; transform: scale(1.1); }
-		.skill-control-btn.delete-control { color: #9ca3af;}
-		.skill-control-btn.delete-control:hover { color: #dc2626; opacity: 1; }
+		.skill-control-btn.delete-control:hover {color: #dc2626;}
 		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
 		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
 		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
@@ -1044,6 +1043,8 @@ function toggleGuideMenu(e) {
         backdrop.classList.add('show');
         dropdown.style.transform = 'translateX(0)';
         backdrop.style.opacity = '1';
+        const footer = document.getElementById('drawerFooter');
+        if (footer) footer.style.transform = 'translateX(0)';
         document.body.style.overflow = 'hidden';
         if (floatingBtn) floatingBtn.style.display = 'none';
         
@@ -1059,12 +1060,14 @@ function toggleGuideMenu(e) {
 function closeDrawer() {
     const dropdown = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
+    const footer = document.getElementById('drawerFooter');
     const floatingBtn = document.getElementById('layoutBtn');
     
     dropdown.classList.remove('show');
     backdrop.classList.remove('show');
-    dropdown.style.transform = ''; // Reset transform
-    backdrop.style.opacity = ''; // Reset opacity
+    dropdown.style.transform = '';
+    backdrop.style.opacity = '';
+    if (footer) footer.style.transform = ''; // Reset footer transform
     document.body.style.overflow = '';
     if (floatingBtn) floatingBtn.style.display = 'flex';
 }
@@ -1154,7 +1157,7 @@ function initDrawerSwipe() {
 // Call this after rendering header
 
 		
-		// Swipe to delete checklist items
+// Swipe to delete checklist items
 let itemTouchStartX = 0;
 let itemTouchCurrentX = 0;
 let isItemDragging = false;
@@ -1163,6 +1166,12 @@ let currentSwipedItem = null;
 document.addEventListener('touchstart', (e) => {
     const item = e.target.closest('.checklist-item');
     if (!item || editMode) return;
+    
+    // Don't interfere with checkbox clicks
+    if (e.target.closest('.checkbox') || e.target.closest('.bullet-number') || 
+        e.target.closest('.bullet-square') || e.target.closest('.bullet-circle')) {
+        return;
+    }
     
     itemTouchStartX = e.touches[0].clientX;
     itemTouchCurrentX = itemTouchStartX;
@@ -1179,24 +1188,25 @@ document.addEventListener('touchmove', (e) => {
     
     // Only allow swiping left (negative delta)
     if (deltaX < 0) {
+        e.preventDefault(); // Prevent scrolling while swiping
         currentSwipedItem.style.transform = `translateX(${deltaX}px)`;
         
         // Show delete button background as user swipes
-        const maxSwipe = 80;
+        const maxSwipe = 100;
         const swipeProgress = Math.min(Math.abs(deltaX) / maxSwipe, 1);
         currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #fee2e2 100%)`;
     }
-}, { passive: true });
+}, { passive: false }); // passive: false to allow preventDefault
 
 document.addEventListener('touchend', (e) => {
     if (!isItemDragging || !currentSwipedItem) return;
     
     const deltaX = itemTouchCurrentX - itemTouchStartX;
-    const threshold = 80; // Swipe 80px to delete
+    const threshold = 100; // Swipe 100px to delete
     
     currentSwipedItem.style.transition = 'all 0.3s ease';
     
-    if (Math.abs(deltaX) > threshold) {
+    if (deltaX < 0 && Math.abs(deltaX) > threshold) {
         // Delete the item with animation
         currentSwipedItem.style.transform = 'translateX(-100%)';
         currentSwipedItem.style.opacity = '0';
@@ -1208,7 +1218,11 @@ document.addEventListener('touchend', (e) => {
             const itemIndex = parseInt(currentSwipedItem.dataset.itemIndex);
             
             // Delete the item
-            deleteItem(catIndex, skillIndex, itemIndex);
+            if (!isNaN(catIndex) && !isNaN(skillIndex) && !isNaN(itemIndex)) {
+                categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
+                saveCategories();
+                renderContent();
+            }
         }, 300);
     } else {
         // Snap back
@@ -2888,6 +2902,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
