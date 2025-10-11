@@ -959,9 +959,10 @@ function createNewGuide() {
     if (!name) return;
     const id = `guide_${Date.now()}`;
     const newGuide = {
-        appTitle: name,
-        appSubtitle: "Click to edit subtitle",
-        appIcon: "📘",
+	    appTitle: name,
+	    appSubtitle: "Click to edit subtitle",
+	    appIcon: "📘",
+	    category: "Notes",
         categories: [
             {
                 name: "New Category",
@@ -2331,3 +2332,4 @@ loadFromFirebase();
 
 </body>
 </html>
+
