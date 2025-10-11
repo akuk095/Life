@@ -120,8 +120,6 @@
 		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 30px; gap: 32px; }
 		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: 1px solid #e8eaed; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 		.skill-title { font-size: 17px; font-weight: 600; color: #1f2937; margin-bottom: 16px; letter-spacing: -0.2px; line-height: 1.4; }
-		.skill-title .delete-btn { position: static; width: auto; height: auto; background: transparent; color: #9ca3af; border: none; border-radius: 4px; font-size: 20px; padding: 4px 6px; margin-left: 8px; }
-		.skill-title .delete-btn:hover { background: #fee2e2; color: #dc2626; }
 		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
 		.checklist-item:has(.delete-btn:hover) { background: #fee2e2 !important; border-color: #fca5a5 !important; }
 		.skill-card:has(> .skill-title .delete-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
@@ -138,17 +136,20 @@
 		.drag-handle:active { cursor: grabbing; }
 		.skill-card.dragging { opacity: 0.5; background: #f3f4f6; }
 		.skill-card.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
-		.bullet-toggle-btn { position: absolute; top: 12px; right: 42px; background: rgba(0, 0, 0, 0.05); color: #6b7280; border: none; border-radius: 6px; cursor: pointer; padding: 6px 10px; font-size: 18px; font-weight: 600; transition: all 0.2s ease; z-index: 5; }
-		.bullet-toggle-btn:hover { background: rgba(0, 0, 0, 0.1); color: #374151; }
 		.checklist-item .bullet-number { width: 20px; height: 20px; border-radius: 50%; background: #d1d5db; color: white; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-		.checklist-item .bullet-square { width: 20px; height: 20px; border-radius: 5px; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
-		.checklist-item .bullet-circle { width: 20px; height: 20px; border-radius: 50%; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
+		.checklist-item .bullet-square { flex-shrink: 0; margin-top: 2px; font-size: 20px; line-height: 1; color: var(--primary-color, #3498db); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+		.checklist-item .bullet-circle { flex-shrink: 0; margin-top: 2px; font-size: 20px; line-height: 1; color: var(--primary-color, #3498db); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
 		.checklist-item .bullet-none { width: 0px; height: 20px; flex-shrink: 0; margin-top: 2px; }
 		.checklist-item.dragging { opacity: 0.5; background: #f3f4f6; }
 		.checklist-item.drag-over { border-top: 3px solid var(--primary-color); }
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
+		.skill-card-controls { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; align-items: center; }
+		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0.4; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; font-weight: normal; }
+		.skill-control-btn:hover { color: rgba(0, 0, 0, 0.6); transform: scale(1.1); }
+		.skill-control-btn.delete-control:hover { color: #dc2626; }
+
 		
 	</style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -2097,14 +2098,7 @@ function renderContent() {
 				    };
 				    titleDiv.appendChild(collapseBtn);
 				}
-            
-            if (editMode) { 
-                const deleteSkillBtn = document.createElement('button');
-                deleteSkillBtn.className = 'delete-btn';
-                deleteSkillBtn.textContent = '×';
-                deleteSkillBtn.onclick = () => deleteSkill(catIndex, skillIndex);
-                titleDiv.appendChild(deleteSkillBtn);
-                
+                                      
                 titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
                     categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
                     saveCategories();
@@ -2113,41 +2107,55 @@ function renderContent() {
             
             card.appendChild(titleDiv);
 
-			card.appendChild(titleDiv);
-
-			// Add bullet toggle button (only in edit mode)
+			// Add control buttons (only in edit mode)
 			if (editMode) {
+			    const controlsContainer = document.createElement('div');
+			    controlsContainer.className = 'skill-card-controls';
+			    
+			    // Bullet toggle button
 			    const bulletStyle = skill.bulletStyle || 'checkbox';
 			    const bulletIcons = {
 			        'checkbox': '☑',
-			        'number': '123',
+			        'number': '#',
 			        'square': '■',
 			        'circle': '●',
 			        'none': '—'
 			    };
 			    const toggleBtn = document.createElement('button');
-			    toggleBtn.className = 'bullet-toggle-btn';
-			    toggleBtn.style.right = '86px'; // on the left
+			    toggleBtn.className = 'skill-control-btn';
 			    toggleBtn.textContent = bulletIcons[bulletStyle];
 			    toggleBtn.title = 'Change bullet style';
 			    toggleBtn.onclick = (e) => {
 			        e.stopPropagation();
 			        toggleBulletStyle(catIndex, skillIndex);
 			    };
-			    card.appendChild(toggleBtn);
-			}
-            // Add duplicate button (only in edit mode)
-			if (editMode) {
+			    
+			    // Duplicate button
 			    const duplicateBtn = document.createElement('button');
-			    duplicateBtn.className = 'bullet-toggle-btn';
-			    duplicateBtn.style.right = '42x'; // on the right 
+			    duplicateBtn.className = 'skill-control-btn';
 			    duplicateBtn.innerHTML = '⧉';
 			    duplicateBtn.title = 'Duplicate card';
 			    duplicateBtn.onclick = (e) => {
 			        e.stopPropagation();
 			        duplicateSkill(catIndex, skillIndex);
 			    };
-			    card.appendChild(duplicateBtn);
+			    
+			    // Delete button
+			    const deleteBtn = document.createElement('button');
+			    deleteBtn.className = 'skill-control-btn delete-control';
+			    deleteBtn.innerHTML = '×';
+			    deleteBtn.title = 'Delete card';
+			    deleteBtn.onclick = (e) => {
+			        e.stopPropagation();
+			        deleteSkill(catIndex, skillIndex);
+			    };
+			    
+			    // Add in order: bullet, duplicate, delete (left to right)
+			    controlsContainer.appendChild(toggleBtn);
+			    controlsContainer.appendChild(duplicateBtn);
+			    controlsContainer.appendChild(deleteBtn);
+			    
+			    card.appendChild(controlsContainer);
 			}
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
@@ -2178,9 +2186,11 @@ function renderContent() {
 				} else if (bulletStyle === 'square') {
 				    bulletElement = document.createElement('div');
 				    bulletElement.className = 'bullet-square';
+				    bulletElement.textContent = '■';
 				} else if (bulletStyle === 'circle') {
 				    bulletElement = document.createElement('div');
 				    bulletElement.className = 'bullet-circle';
+				    bulletElement.textContent = '●';
 				} else if (bulletStyle === 'none') {
 				    bulletElement = document.createElement('div');
 				    bulletElement.className = 'bullet-none';
@@ -2587,6 +2597,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
