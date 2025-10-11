@@ -2015,8 +2015,14 @@ tab.innerHTML = `
 		        const iconData = JSON.parse(cat.icon.substring(4));
 		        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
 		    }
-		    tab.innerHTML = `${displayIcon} ${cat.name}`;
+		    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
 		    tab.onclick = () => switchTab(i);
+		    
+		    // Add double-click to edit category name
+		    tab.addEventListener('dblclick', (e) => {
+		        const nameSpan = tab.querySelector('.tab-name-display');
+		        if (nameSpan) enableQuickEdit(nameSpan, i, null, null);
+		    });
 		}
         
         tabWrapper.appendChild(tab);
@@ -2099,6 +2105,16 @@ function renderContent() {
             
             const titleDiv = document.createElement('div'); 
 			titleDiv.className = 'skill-title';
+			
+			// Add double-click to edit (only when not in edit mode)
+			if (!editMode) {
+			    titleDiv.addEventListener('dblclick', (e) => {
+			        if (e.target.classList.contains('editable') || e.target.closest('.skill-title')) {
+			            const titleSpan = titleDiv.querySelector('span:last-child');
+			            if (titleSpan) enableQuickEdit(titleSpan, catIndex, skillIndex);
+			        }
+			    });
+			}
 			titleDiv.style.display = 'flex';
 			titleDiv.style.alignItems = 'center';
 			
@@ -2260,6 +2276,15 @@ function renderContent() {
                 textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
                 textDiv.contentEditable = editMode;
                 textDiv.textContent = item;
+                
+                // Add double-click to edit (only when not in edit mode)
+                if (!editMode) {
+                    textDiv.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        enableQuickEdit(textDiv, catIndex, skillIndex, itemIndex);
+                    });
+                }
+                
                 checkItem.appendChild(textDiv);
                 
                 if (editMode) {
@@ -2400,7 +2425,62 @@ function toggleEditMode() {
         }
     }
 }
-
+function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
+    if (editMode) return; // Don't allow if already in edit mode
+    
+    const originalText = element.textContent.trim();
+    element.contentEditable = true;
+    element.focus();
+    element.style.background = 'white';
+    element.style.outline = '2px solid var(--primary-color)';
+    element.style.borderRadius = '4px';
+    element.style.padding = '4px 8px';
+    
+    // Select all text
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    function saveEdit() {
+        const newText = element.textContent.trim();
+        element.contentEditable = false;
+        element.style.background = '';
+        element.style.outline = '';
+        element.style.padding = '';
+        
+        if (newText && newText !== originalText) {
+            if (itemIndex !== null) {
+                // Editing a checklist item
+                categories[catIndex].skills[skillIndex].items[itemIndex] = newText;
+            } else if (skillIndex !== null) {
+                // Editing a skill title
+                categories[catIndex].skills[skillIndex].title = newText;
+            } else {
+                // Editing a category name
+                categories[catIndex].name = newText;
+            }
+            saveCategories();
+            renderTabs();
+            renderContent();
+        } else if (!newText) {
+            // Restore original if empty
+            element.textContent = originalText;
+        }
+    }
+    
+    element.addEventListener('blur', saveEdit, { once: true });
+    element.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        } else if (e.key === 'Escape') {
+            element.textContent = originalText;
+            element.blur();
+        }
+    }, { once: true });
+}
 function editAppIcon(el) {
     showEmojiPicker(el, (emoji) => {
         appIcon = emoji;
@@ -2577,6 +2657,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
