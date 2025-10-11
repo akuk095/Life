@@ -739,6 +739,7 @@ document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, $
         floatingBtn.style.backgroundColor = secondaryColor;
     }
 }
+
 function toggleColorPicker(e) {
     e.stopPropagation();
     const picker = document.getElementById('colorPickerMenu');
@@ -760,6 +761,7 @@ function selectColor(color) {
     document.getElementById('colorPickerMenu').classList.remove('show');
     document.getElementById('dropdownMenu').classList.remove('show');
 }
+
 function initColorPicker() {
     const canvas = document.getElementById('colorCanvas');
     const hueSlider = document.getElementById('hueSlider');
@@ -911,7 +913,6 @@ function updateHue(clientX) {
         }
     });
     
-    // Remove auto-apply on blur since we now have a Done button
     hexInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             applyCustomColor();
@@ -1017,7 +1018,8 @@ function selectCustomColor(color) {
         }
     }
     
-    database.ref(`guides/${currentGuideId}/themeColor`).set(themeColor);
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/themeColor`), themeColor);
 }
 
 
@@ -1096,6 +1098,7 @@ function closeDrawer() {
     document.body.style.overflow = '';
     if (floatingBtn) floatingBtn.style.display = 'flex';
 }
+
 // Touch swipe to close drawer
 let touchStartX = 0;
 let touchCurrentX = 0;
@@ -1179,10 +1182,6 @@ function initDrawerSwipe() {
     });
 }
 
-// Call this after rendering header
-
-		
-// Swipe to delete checklist items
 // Swipe to delete checklist items
 let itemTouchStartX = 0;
 let itemTouchCurrentX = 0;
@@ -1258,6 +1257,7 @@ document.addEventListener('touchend', (e) => {
     isItemDragging = false;
     currentSwipedItem = null;
 });
+
 function toggleGuideMenu(e) {
     e.stopPropagation();
     const dropdown = document.getElementById('guideDropdown');
@@ -1319,6 +1319,7 @@ function toggleMenu(e) {
         e.target.blur();
     }
 }
+
 // Authentication functions
 function login(email, password) {
     signInWithEmailAndPassword(auth, email, password)
@@ -1407,13 +1408,13 @@ function deleteGuide() {
 }
 	
 function saveHeader() {
+  if (!currentUser) return;
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appTitle`), appTitle);
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appSubtitle`), appSubtitle);
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appIcon`), appIcon);
   renderHeader();
   populateGuideDropdown();
 }
-
 
 function renderHeader() {
     const header = document.querySelector('.header');
@@ -1425,26 +1426,26 @@ function renderHeader() {
         colorOptionsHTML += `
             <div class="color-option ${isSelected}" 
                  style="background: linear-gradient(135deg, ${theme.secondary} 0%, ${theme.primary} 100%);"
-                 onclick="selectColor('${theme.primary}')"
+                 data-color="${theme.primary}"
                  title="${theme.name}">
             </div>
         `;
     });
     
     header.innerHTML = `
-<button class="guide-menu-btn" onclick="toggleGuideMenu(event)">☰</button>
-<div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
+<button class="guide-menu-btn" id="guideMenuBtn">☰</button>
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
 <div class="guide-dropdown" id="guideDropdown">
     <div class="drawer-header">My Notebook ⊞</div>
 </div>
 <div class="drawer-footer" id="drawerFooter">
-    <button class="drawer-create-icon" onclick="createNewGuide(); closeDrawer();">
+    <button class="drawer-create-icon" id="createGuideBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
         </svg>
     </button>
-    <button onclick="logout(); closeDrawer();" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: auto; opacity: 0.5; transition: opacity 0.2s;">
+    <button id="logoutBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: auto; opacity: 0.5; transition: opacity 0.2s;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
@@ -1453,18 +1454,18 @@ function renderHeader() {
     </button>
 </div>
 <div class="edit-toggle">
-    <button class="save-btn" id="saveBtn" onclick="saveAndExitEdit()" style="display: none;">Done</button>
-    <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)" style="display: block;">⋮</button>
+    <button class="save-btn" id="saveBtn" style="display: none;">Done</button>
+    <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
 <div class="dropdown-menu" id="dropdownMenu">
-    <button onclick="toggleEditMode()">Edit</button>
-    <button onclick="duplicateGuide()">Duplicate</button>
-    <button onclick="deleteGuide()">Delete</button>
-	<button onclick="changeGuideCategory()">Change Category</button>
-	<button onclick="toggleColorPicker(event)">Theme</button>
-	<button onclick="toggleDarkMode()">${darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}</button>
+    <button id="editModeMenuBtn">Edit</button>
+    <button id="duplicateGuideBtn">Duplicate</button>
+    <button id="deleteGuideBtn">Delete</button>
+	<button id="changeCategoryBtn">Change Category</button>
+	<button id="toggleColorBtn">Theme</button>
+	<button id="toggleDarkModeBtn">${darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}</button>
 	<div class="color-picker-menu" id="colorPickerMenu">
 	    <h3>Preset Themes</h3>
-	    <div class="color-options" style="margin-bottom: 15px;">
+	    <div class="color-options" id="colorOptionsContainer" style="margin-bottom: 15px;">
 	        ${colorOptionsHTML}
 	    </div>
 	    <h3>Custom Color</h3>
@@ -1480,20 +1481,20 @@ function renderHeader() {
 	            <input type="text" id="hexInput" value="${themeColor}" 
 	                   style="flex: 1; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;"
 	                   maxlength="7" placeholder="#FF0000">
-	            <button onclick="applyCustomColor()" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">Done</button>
+	            <button id="applyColorBtn" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">Done</button>
 	        </div>
 	    </div>
 	</div>
-	    <button onclick="clearAllChecks()">Clear all checks</button>
-	    <button onclick="toggleAutoRefresh()">
+	    <button id="clearChecksBtn">Clear all checks</button>
+	    <button id="autoRefreshBtn">
 	        ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
 	    </button>
 	</div>
 </div>
 </div>
 <h1>
-    <span class="editable-icon" onclick="event.stopPropagation();" ondblclick="event.stopPropagation();" style="display: inline-block; position: relative; margin-right: 8px;">
-        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
+    <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
+        <span class="icon" id="appIconSpan" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
             (() => {
                 const hasIconContent = appIcon && appIcon !== "​";
                 if (hasIconContent) {
@@ -1508,15 +1509,84 @@ function renderHeader() {
                 }
             })()
         }</span>
-        ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" onclick="event.stopPropagation(); appIcon = \'​\'; saveHeader();">×</span>' : ''}
+        ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" id="removeAppIconBtn">×</span>' : ''}
     </span>
-    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
+    <span class="${editMode ? 'editable' : ''}" id="appTitleSpan" contenteditable="${editMode}">
         ${appTitle}
     </span>
 </h1>
-<p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
+<p class="${editMode ? 'editable' : ''}" id="appSubtitleSpan" contenteditable="${editMode}">${appSubtitle}</p>
     `;
-	// Add dynamic styles for light/dark theme
+
+    // Add event listeners after HTML is rendered
+    const guideMenuBtn = document.getElementById('guideMenuBtn');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const createGuideBtn = document.getElementById('createGuideBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const menuBtn = document.getElementById('menuBtn');
+    const editModeMenuBtn = document.getElementById('editModeMenuBtn');
+    const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
+    const deleteGuideBtn = document.getElementById('deleteGuideBtn');
+    const changeCategoryBtn = document.getElementById('changeCategoryBtn');
+    const toggleColorBtn = document.getElementById('toggleColorBtn');
+    const toggleDarkModeBtn = document.getElementById('toggleDarkModeBtn');
+    const clearChecksBtn = document.getElementById('clearChecksBtn');
+    const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+    const applyColorBtn = document.getElementById('applyColorBtn');
+    const appIconSpan = document.getElementById('appIconSpan');
+    const removeAppIconBtn = document.getElementById('removeAppIconBtn');
+    
+    if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
+    if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
+    if (createGuideBtn) {
+        createGuideBtn.addEventListener('click', () => {
+            createNewGuide();
+            closeDrawer();
+        });
+    }
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            logout();
+            closeDrawer();
+        });
+    }
+    if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
+    if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+    if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
+    if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
+    if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
+    if (changeCategoryBtn) changeCategoryBtn.addEventListener('click', changeGuideCategory);
+    if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
+    if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
+    if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
+    if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
+    if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
+    
+    // App icon editing
+    if (editMode && appIconSpan) {
+        appIconSpan.addEventListener('click', (e) => {
+            e.stopPropagation();
+            editAppIcon(appIconSpan);
+        });
+    }
+    if (removeAppIconBtn) {
+        removeAppIconBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            appIcon = '​';
+            saveHeader();
+        });
+    }
+    
+    // Color option clicks
+    const colorOptions = document.querySelectorAll('.color-option');
+    colorOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            selectColor(option.dataset.color);
+        });
+    });
+    
+	// Dynamic styles and theme application...
 	    const isLight = isLightColor(themeColor);
 	    if (isLight) {
 	        const style = document.createElement('style');
@@ -1539,18 +1609,16 @@ function renderHeader() {
 	        const existingStyle = document.getElementById('dynamic-header-style');
 	        if (existingStyle) existingStyle.remove();
 	    }
-    // Apply current theme
-    applyTheme();
 
-    // Populate guide dropdown
+    applyTheme();
     populateGuideDropdown();
 
-	   // Add double-click edit for header (only when not in edit mode)
-	    if (!editMode) {
-	        const h1 = header.querySelector('h1');
-	        const spans = h1 ? h1.querySelectorAll('span') : [];
-	        const headerTitle = spans.length > 0 ? spans[spans.length - 1] : null; // Get last span
-	        const headerSubtitle = header.querySelector('p');
+    // Add double-click edit for header (only when not in edit mode)
+    if (!editMode) {
+        const h1 = header.querySelector('h1');
+        const spans = h1 ? h1.querySelectorAll('span') : [];
+        const headerTitle = spans.length > 0 ? spans[spans.length - 1] : null;
+        const headerSubtitle = header.querySelector('p');
         
         if (headerTitle) {
             headerTitle.addEventListener('dblclick', (e) => {
@@ -1569,19 +1637,18 @@ function renderHeader() {
         }
     }
 
-// Preserve Done button state if in edit mode
-	if (editMode) {
-	    setTimeout(() => {
-	        const saveBtn = document.getElementById('saveBtn');
-	        const menuBtn = document.getElementById('menuBtn');
-	        if (saveBtn) saveBtn.style.display = 'block';
-	        if (menuBtn) menuBtn.style.display = 'none';
-	    }, 0);
-	}
-	
     if (editMode) {
-        const editableTitle = header.querySelector('h1 span.editable');
-        const editableSubtitle = header.querySelector('p');
+        setTimeout(() => {
+            const saveBtn = document.getElementById('saveBtn');
+            const menuBtn = document.getElementById('menuBtn');
+            if (saveBtn) saveBtn.style.display = 'block';
+            if (menuBtn) menuBtn.style.display = 'none';
+        }, 0);
+    }
+    
+    if (editMode) {
+        const editableTitle = header.querySelector('#appTitleSpan');
+        const editableSubtitle = header.querySelector('#appSubtitleSpan');
         
         if (editableTitle) {
             editableTitle.addEventListener('blur', (e) => {
@@ -1597,11 +1664,11 @@ function renderHeader() {
         }
     }
     
-    // Initialize drawer swipe if drawer is open
     if (!editMode) {
         setTimeout(() => initDrawerSwipe(), 100);
     }
 }
+
 function populateGuideDropdown() {
     if (!currentUser) return;
     
@@ -1680,7 +1747,7 @@ function populateGuideDropdown() {
                     delBtn.style.borderRadius = '6px';
                     delBtn.style.fontSize = '12px';
                     delBtn.style.fontWeight = 'bold';
-                    delBtn.onclick = (e) => {
+                    delBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
                             remove(ref(database, `users/${currentUser.uid}/guides/${id}`));
@@ -1691,16 +1758,16 @@ function populateGuideDropdown() {
                                 populateGuideDropdown();
                             }
                         }
-                    };
+                    });
                     btn.appendChild(delBtn);
                 }
                 
-                btn.onclick = (e) => {
+                btn.addEventListener('click', (e) => {
                     if (!e.target.textContent.includes('del')) {
                         switchGuide(id);
                         closeDrawer();
                     }
-                };
+                });
                 
                 if (id === currentGuideId) {
                     btn.classList.add('current-guide');
@@ -1952,20 +2019,20 @@ function showEmojiPicker(target, callback) {
         
         iconBtn.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="${icon.path}"/></svg>`;
         
-        iconBtn.onmouseover = () => {
+        iconBtn.addEventListener('mouseover', () => {
             iconBtn.style.transform = 'scale(1.1)';
             iconBtn.style.borderColor = '#3498db';
-        };
-        iconBtn.onmouseout = () => {
+        });
+        iconBtn.addEventListener('mouseout', () => {
             iconBtn.style.transform = 'scale(1)';
             iconBtn.style.borderColor = 'transparent';
-        };
+        });
         
-        iconBtn.onclick = () => {
+        iconBtn.addEventListener('click', () => {
             // Store as SVG data
             callback(`svg:${JSON.stringify({name: icon.name, bg: icon.bg, path: icon.path})}`);
             inputWrapper.remove();
-        };
+        });
         
         iconGrid.appendChild(iconBtn);
     });
@@ -1976,7 +2043,7 @@ function showEmojiPicker(target, callback) {
     inputWrapper.appendChild(iconContent);
     
     // Tab switching
-    emojiTab.onclick = () => {
+    emojiTab.addEventListener('click', () => {
         emojiTab.style.borderBottom = '3px solid #3498db';
         emojiTab.style.fontWeight = 'bold';
         emojiTab.style.color = '#3498db';
@@ -1985,9 +2052,9 @@ function showEmojiPicker(target, callback) {
         iconTab.style.color = '#666';
         emojiContent.style.display = 'block';
         iconContent.style.display = 'none';
-    };
+    });
     
-    iconTab.onclick = () => {
+    iconTab.addEventListener('click', () => {
         iconTab.style.borderBottom = '3px solid #3498db';
         iconTab.style.fontWeight = 'bold';
         iconTab.style.color = '#3498db';
@@ -1996,7 +2063,7 @@ function showEmojiPicker(target, callback) {
         emojiTab.style.color = '#666';
         iconContent.style.display = 'block';
         emojiContent.style.display = 'none';
-    };
+    });
     
     // Buttons
     const buttonContainer = document.createElement('div');
@@ -2013,12 +2080,12 @@ function showEmojiPicker(target, callback) {
     confirmBtn.style.border = 'none';
     confirmBtn.style.borderRadius = '6px';
     confirmBtn.style.cursor = 'pointer';
-    confirmBtn.onclick = () => {
+    confirmBtn.addEventListener('click', () => {
         if (input.value) {
             callback(input.value);
         }
         inputWrapper.remove();
-    };
+    });
     buttonContainer.appendChild(confirmBtn);
     
     const cancelBtn = document.createElement('button');
@@ -2030,7 +2097,7 @@ function showEmojiPicker(target, callback) {
     cancelBtn.style.border = 'none';
     cancelBtn.style.borderRadius = '6px';
     cancelBtn.style.cursor = 'pointer';
-    cancelBtn.onclick = () => inputWrapper.remove();
+    cancelBtn.addEventListener('click', () => inputWrapper.remove());
     buttonContainer.appendChild(cancelBtn);
     
     emojiContent.appendChild(buttonContainer);
@@ -2245,15 +2312,36 @@ function renderTabs() {
 			    tabIconToShow = "+";
 			}
 
-tab.innerHTML = `
-    <span class="editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)" style="display: inline-block; position: relative;">
-        <span class="tab-icon" style="opacity: ${hasTabIcon ? '1' : '0.3'};">${tabIconToShow}</span>
-        ${hasTabIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${i}].icon = '​'; saveCategories(); renderTabs(); renderContent();">×</span>` : ''}
-    </span>
-    <span class="tab-name editable" contenteditable="true" onclick="event.stopPropagation()">${cat.name}</span>
-`;
+			tab.innerHTML = `
+			    <span class="editable-icon" style="display: inline-block; position: relative;">
+			        <span class="tab-icon" data-cat-index="${i}" style="opacity: ${hasTabIcon ? '1' : '0.3'};">${tabIconToShow}</span>
+			        ${hasTabIcon ? `<span class="emoji-remove-btn" data-cat-index="${i}">×</span>` : ''}
+			    </span>
+			    <span class="tab-name editable" contenteditable="true">${cat.name}</span>
+			`;
             
-            // Save name when editing
+            // Add event listeners for edit mode
+            const tabIcon = tab.querySelector('.tab-icon');
+            if (tabIcon) {
+                tabIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const catIndex = parseInt(e.target.dataset.catIndex);
+                    editCategoryIcon(catIndex, e.target);
+                });
+            }
+            
+            const removeIconBtn = tab.querySelector('.emoji-remove-btn');
+            if (removeIconBtn) {
+                removeIconBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const catIndex = parseInt(e.target.dataset.catIndex);
+                    categories[catIndex].icon = '​';
+                    saveCategories();
+                    renderTabs();
+                    renderContent();
+                });
+            }
+            
             const nameSpan = tab.querySelector('.tab-name');
             nameSpan.addEventListener('blur', (e) => {
                 categories[i].name = e.target.textContent.trim();
@@ -2265,8 +2353,10 @@ tab.innerHTML = `
                     e.target.blur();
                 }
             });
+            nameSpan.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
             
-            // Click to switch tabs (but not when editing text)
             tab.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('editable') && !e.target.classList.contains('editable-icon')) {
                     switchTab(i);
@@ -2308,10 +2398,10 @@ tab.innerHTML = `
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-tab-btn';
             deleteBtn.textContent = '×';
-            deleteBtn.onclick = (e) => {
+            deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteCategory(i);
-            };
+            });
             tabWrapper.appendChild(deleteBtn);
         }
         
@@ -2322,7 +2412,7 @@ tab.innerHTML = `
         const addCategoryBtn = document.createElement('button');
         addCategoryBtn.className = 'nav-tab add-category-tab';
         addCategoryBtn.textContent = '+';
-        addCategoryBtn.onclick = addCategory;
+        addCategoryBtn.addEventListener('click', addCategory);
         navTabs.appendChild(addCategoryBtn);
     }
 	// Preserve Done button state if in edit mode
@@ -2421,14 +2511,42 @@ function renderContent() {
 			}
 			
 			titleDiv.innerHTML += `
-   				<span class="editable-icon" onclick="event.stopPropagation();" ondblclick="event.stopPropagation();" style="display: inline-block; position: relative; margin-right: 8px;">
-			       <span class="icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
-			       ${editMode && hasIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` : ''}
+   				<span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
+			       <span class="icon" data-cat-index="${catIndex}" data-skill-index="${skillIndex}" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
+			       ${editMode && hasIcon ? `<span class="emoji-remove-btn" data-cat-index="${catIndex}" data-skill-index="${skillIndex}">×</span>` : ''}
 			   </span>
 			   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
 			`;
+
+			// Add event listeners after creating the titleDiv
+			if (editMode) {
+			    const iconSpan = titleDiv.querySelector('.icon');
+			    if (iconSpan) {
+			        iconSpan.addEventListener('click', (e) => {
+			            e.stopPropagation();
+			            const catIdx = parseInt(e.target.dataset.catIndex);
+			            const skillIdx = parseInt(e.target.dataset.skillIndex);
+			            editSkillIcon(catIdx, skillIdx, e.target);
+			        });
+			        iconSpan.addEventListener('dblclick', (e) => {
+			            e.stopPropagation();
+			        });
+			    }
+			    
+			    const removeIconBtn = titleDiv.querySelector('.emoji-remove-btn');
+			    if (removeIconBtn) {
+			        removeIconBtn.addEventListener('click', (e) => {
+			            e.stopPropagation();
+			            const catIdx = parseInt(e.target.dataset.catIndex);
+			            const skillIdx = parseInt(e.target.dataset.skillIndex);
+			            categories[catIdx].skills[skillIdx].icon = '​';
+			            saveCategories();
+			            renderContent();
+			        });
+			    }
+			}
+
 			// Add collapse button for headings mode
-				// Add collapse button for headings mode
 				if (layoutMode === 'headings' && !editMode) {
 				    const collapseBtn = document.createElement('button');
 				    collapseBtn.className = 'collapse-btn';
@@ -2440,13 +2558,13 @@ function renderContent() {
 				            <line x1="3" y1="21" x2="10" y2="14"></line>
 				        </svg>
 				    `;
-				    collapseBtn.onclick = (e) => {
+				    collapseBtn.addEventListener('click', (e) => {
 				        e.stopPropagation();
 				        card.classList.remove('expanded');
 				        const cardId = `${catIndex}-${skillIndex}`;
 				        delete expandedCards[cardId];
 				        saveExpandedCards();
-				    };
+				    });
 				    titleDiv.appendChild(collapseBtn);
 				}
                                       
@@ -2481,10 +2599,10 @@ function renderContent() {
 			    toggleBtn.className = 'skill-control-btn';
 			    toggleBtn.textContent = bulletIcons[bulletStyle];
 			    toggleBtn.title = 'Change bullet style';
-			    toggleBtn.onclick = (e) => {
+			    toggleBtn.addEventListener('click', (e) => {
 			        e.stopPropagation();
 			        toggleBulletStyle(catIndex, skillIndex);
-			    };
+			    });
 			    
 			    // Duplicate button
 			    const duplicateBtn = document.createElement('button');
@@ -2492,20 +2610,20 @@ function renderContent() {
 			    duplicateBtn.innerHTML = '⧉';
 				duplicateBtn.style.fontSize = '13px';
 			    duplicateBtn.title = 'Duplicate card';
-			    duplicateBtn.onclick = (e) => {
+			    duplicateBtn.addEventListener('click', (e) => {
 			        e.stopPropagation();
 			        duplicateSkill(catIndex, skillIndex);
-			    };
+			    });
 			    
 			    // Delete button
 			    const deleteBtn = document.createElement('button');
 			    deleteBtn.className = 'skill-control-btn delete-control';
 			    deleteBtn.innerHTML = '×';
 			    deleteBtn.title = 'Delete card';
-			    deleteBtn.onclick = (e) => {
+			    deleteBtn.addEventListener('click', (e) => {
 			        e.stopPropagation();
 			        deleteSkill(catIndex, skillIndex);
-			    };
+			    });
 			    
 			    // Add in order: bullet, duplicate, delete (left to right)
 			    controlsContainer.appendChild(toggleBtn);
@@ -2596,10 +2714,10 @@ function renderContent() {
                 
                 // Only checkbox/bullet triggers the check, not the whole item
                 if (!editMode) {
-                    bulletElement.onclick = (e) => {
+                    bulletElement.addEventListener('click', (e) => {
                         e.stopPropagation();
                         toggleCheck(itemId);
-                    };
+                    });
                     bulletElement.style.cursor = 'pointer';
                 }
                 
@@ -2626,10 +2744,10 @@ function renderContent() {
 				    const deleteItemBtn = document.createElement('button');
 				    deleteItemBtn.className = 'delete-btn';
 				    deleteItemBtn.textContent = '×';
-				    deleteItemBtn.onclick = (e) => {
+				    deleteItemBtn.addEventListener('click', (e) => {
 				        e.stopPropagation();
 				        deleteItem(catIndex, skillIndex, itemIndex);
-				    };
+				    });
 				    checkItem.appendChild(deleteItemBtn);
                     
                     textDiv.addEventListener('blur', (e) => { 
@@ -2644,12 +2762,11 @@ function renderContent() {
             const addItemBtn = document.createElement('button'); 
             addItemBtn.className = 'add-item-btn'; 
             addItemBtn.textContent = '+ Add Item'; 
-            addItemBtn.onclick = () => addItem(catIndex, skillIndex); 
+            addItemBtn.addEventListener('click', () => addItem(catIndex, skillIndex));
             card.appendChild(addItemBtn); 
             
             grid.appendChild(card); 
 			// Add click handler for headings mode
-            // Add click handler for headings mode
 			if (layoutMode === 'headings' && !editMode) {
 			    const cardId = `${catIndex}-${skillIndex}`;
 			    
@@ -2678,7 +2795,7 @@ function renderContent() {
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
         addSkillBtn.textContent = '+ Add New Card'; 
-        addSkillBtn.onclick = () => addSkill(catIndex); 
+        addSkillBtn.addEventListener('click', () => addSkill(catIndex));
         catDiv.appendChild(addSkillBtn); 
         
         contentArea.appendChild(catDiv); 
@@ -2760,6 +2877,7 @@ function toggleEditMode() {
         }
     }
 }
+
 function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
     if (editMode) return;
     
@@ -2837,7 +2955,7 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
     element.addEventListener('keydown', keyHandler);
 }
 
-		function enableQuickEditHeader(element, type) {
+function enableQuickEditHeader(element, type) {
     if (editMode) return;
     
     const originalText = element.textContent.trim();
@@ -2892,17 +3010,20 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
     element.addEventListener('blur', saveEdit);
     element.addEventListener('keydown', keyHandler);
 }
+
 function editAppIcon(el) {
     showEmojiPicker(el, (emoji) => {
         appIcon = emoji;
         saveHeader();
     });
 }
-		// Save expanded cards to Firebase
+
+// Save expanded cards to Firebase
 function saveExpandedCards() {
     if (!currentUser) return;
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/expandedCards`), expandedCards);
 }
+
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
         title: "New Skill", 
@@ -2912,6 +3033,7 @@ function addSkill(catIndex) {
     saveCategories();
     renderContent(); 
 }
+
 function editSkillIcon(catIndex, skillIndex, el) {
     showEmojiPicker(el, (emoji) => {
         categories[catIndex].skills[skillIndex].icon = emoji;
@@ -3001,6 +3123,7 @@ function updateLayoutButton() {
         btn.style.opacity = '0.2'; // Make visible after content is set
     }
 }
+
 function deleteCategory(catIndex) {
     if (confirm('Delete this entire category?')) {
         categories.splice(catIndex, 1);
@@ -3012,6 +3135,7 @@ function deleteCategory(catIndex) {
         renderContent();
     }
 }
+
 // Close menus when clicking outside
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('dropdownMenu');
@@ -3060,127 +3184,50 @@ setInterval(() => {
     }
 }, 60 * 60 * 1000);
 
-// Login screen event listeners
-document.getElementById('loginBtn').addEventListener('click', () => {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    login(email, password);
-});
-
-// Handle Enter key on login inputs
-document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        login(email, password);
-    }
-});
-
-// Load data when page loads - handled by onAuthStateChanged
-// Don't call loadUserData directly here anymore
-
 // Wait for DOM to load before attaching login screen listeners
 window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        login(email, password);
-    });
+    const loginBtn = document.getElementById('loginBtn');
+    const googleBtn = document.getElementById('googleBtn');
+    const signupBtn = document.getElementById('signupBtn');
+    const loginPassword = document.getElementById('loginPassword');
+    const layoutBtn = document.getElementById('layoutBtn');
     
-    document.getElementById('googleBtn').addEventListener('click', () => {
-        loginWithGoogle();
-    });
-    
-    document.getElementById('signupBtn').addEventListener('click', () => {
-        showSignup();
-    });
-    
-    document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             login(email, password);
-        }
-    });
+        });
+    }
+    
+    if (googleBtn) {
+        googleBtn.addEventListener('click', () => {
+            loginWithGoogle();
+        });
+    }
+    
+    if (signupBtn) {
+        signupBtn.addEventListener('click', () => {
+            showSignup();
+        });
+    }
+    
+    if (loginPassword) {
+        loginPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                login(email, password);
+            }
+        });
+    }
+    
+    // Add layout button listener
+    if (layoutBtn) {
+        layoutBtn.addEventListener('click', toggleLayout);
+    }
 });
-// Expose functions to global scope for onclick handlers
-window.toggleMenu = toggleMenu;
-window.toggleGuideMenu = toggleGuideMenu;
-window.toggleEditMode = toggleEditMode;
-window.saveAndExitEdit = saveAndExitEdit;
-window.saveHeader = saveHeader;
-window.closeDrawer = closeDrawer;
-window.createNewGuide = createNewGuide;
-window.logout = logout;
-window.duplicateGuide = duplicateGuide;
-window.deleteGuide = deleteGuide;
-window.changeGuideCategory = changeGuideCategory;
-window.toggleColorPicker = toggleColorPicker;
-window.toggleDarkMode = toggleDarkMode;
-window.clearAllChecks = clearAllChecks;
-window.toggleAutoRefresh = toggleAutoRefresh;
-window.selectColor = selectColor;
-window.applyCustomColor = applyCustomColor;
-window.toggleLayout = toggleLayout;
-window.switchTab = switchTab;
-window.addSkill = addSkill;
-window.addItem = addItem;
-window.addCategory = addCategory;
-window.deleteSkill = deleteSkill;
-window.deleteItem = deleteItem;
-window.deleteCategory = deleteCategory;
-window.editAppIcon = editAppIcon;
-window.editSkillIcon = editSkillIcon;
-window.editCategoryIcon = editCategoryIcon;
-window.toggleBulletStyle = toggleBulletStyle;
-window.duplicateSkill = duplicateSkill;
-window.showSignup = showSignup;
-    </script>
+</script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
