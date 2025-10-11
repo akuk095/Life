@@ -1197,7 +1197,7 @@ function renderHeader() {
 </div>
 </div>
 <h1>
-    <span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
+    <span class="editable-icon" onclick="event.stopPropagation();" ondblclick="event.stopPropagation();" style="display: inline-block; position: relative; margin-right: 8px;">
         <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
             (() => {
                 const hasIconContent = appIcon && appIcon !== "​";
@@ -1250,10 +1250,12 @@ function renderHeader() {
     // Populate guide dropdown
     populateGuideDropdown();
 
-    // Add double-click edit for header (only when not in edit mode)
-    if (!editMode) {
-        const headerTitle = header.querySelector('h1 span:not(.editable-icon):not(.icon)');
-        const headerSubtitle = header.querySelector('p');
+	   // Add double-click edit for header (only when not in edit mode)
+	    if (!editMode) {
+	        const h1 = header.querySelector('h1');
+	        const spans = h1 ? h1.querySelectorAll('span') : [];
+	        const headerTitle = spans.length > 0 ? spans[spans.length - 1] : null; // Get last span
+	        const headerSubtitle = header.querySelector('p');
         
         if (headerTitle) {
             headerTitle.addEventListener('dblclick', (e) => {
@@ -2072,8 +2074,10 @@ function renderContent() {
 			    titleDiv.addEventListener('dblclick', (e) => {
 			        e.stopPropagation();
 			        e.preventDefault();
-			        const titleSpan = titleDiv.querySelector('span:not(.editable-icon):not(.icon)');
-			        if (titleSpan) {
+			        // Find the text span (last child that's not an icon)
+			        const spans = titleDiv.querySelectorAll('span');
+			        const titleSpan = spans[spans.length - 1]; // Get last span (the text)
+			        if (titleSpan && !titleSpan.classList.contains('editable-icon') && !titleSpan.classList.contains('icon')) {
 			            enableQuickEdit(titleSpan, catIndex, skillIndex);
 			        }
 			    });
@@ -2103,7 +2107,7 @@ function renderContent() {
 			}
 			
 			titleDiv.innerHTML += `
-			   <span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
+   				<span class="editable-icon" onclick="event.stopPropagation();" ondblclick="event.stopPropagation();" style="display: inline-block; position: relative; margin-right: 8px;">
 			       <span class="icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
 			       ${editMode && hasIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` : ''}
 			   </span>
@@ -2709,6 +2713,7 @@ loadFromFirebase();
 
 </body>
 </html>
+
 
 
 
