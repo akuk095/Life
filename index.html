@@ -492,13 +492,13 @@ let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
 let expandedCards = {};
 const guideCategories = [
-    { name: 'Habits', icon: 'M8.5 15.8c-0.9-0.9-1.4-2.1-1.4-3.5 0-1.8 1.1-3.4 2.6-4.2v2l7.7-4.5-7.7-4.5v3.1c-3.5 1-6.2 4.3-6.2 8.2 0 2.3 1 4.5 2.5 6zM15.5 8.2c0.9 0.9 1.4 2.1 1.4 3.5 0 1.8-1.1 3.4-2.6 4.2v-2l-7.7 4.5 7.7 4.5v-3.1c3.5-1 6.2-4.3 6.2-8.2 0-2.3-1-4.5-2.5-6z'},
-	{ name: 'Notes', icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M8 13h8 M8 17h8' },
-	{ name: 'To-Do', icon: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
-    { name: 'Tracking', icon: 'M22 6L13 15L9 11L2 18M17 6L22 6L22 11' },
-	{ name: 'Recipes', icon: 'M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6ZM6 17L18 17' },
-	{ name: 'Goals', icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' },
-    { name: 'Journal 📜🪶', icon: 'M4 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM4 2v20M8 6h8M8 10h8M8 14h5'}
+    { name: 'Habits', icon: 'M8.5 15.8c-0.9-0.9-1.4-2.1-1.4-3.5 0-1.8 1.1-3.4 2.6-4.2v2l7.7-4.5-7.7-4.5v3.1c-3.5 1-6.2 4.3-6.2 8.2 0 2.3 1 4.5 2.5 6zM15.5 8.2c0.9 0.9 1.4 2.1 1.4 3.5 0 1.8-1.1 3.4-2.6 4.2v-2l-7.7 4.5 7.7 4.5v-3.1c3.5-1 6.2-4.3 6.2-8.2 0-2.3-1-4.5-2.5-6z', color: '#8B5CF6' },
+	{ name: 'Notes', icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M8 13h8 M8 17h8', color: '#3B82F6' },
+	{ name: 'To-Do', icon: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', color: '#10B981' },
+    { name: 'Tracking', icon: 'M22 6L13 15L9 11L2 18M17 6L22 6L22 11', color: '#F59E0B' },
+	{ name: 'Recipes', icon: 'M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6ZM6 17L18 17', color: '#EF4444' },
+	{ name: 'Goals', icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z', color: '#FBBF24' },
+    { name: 'Journal 📜🪶', icon: 'M4 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM4 2v20M8 6h8M8 10h8M8 14h5', color: '#8B7355' }
 ];
 // Drag and drop state
 let draggedCard = null;
@@ -1325,15 +1325,15 @@ function closeDrawer() {
     const dropdown = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
     const footer = document.getElementById('drawerFooter');
-    const floatingBtn = document.getElementById('layoutBtn');
     
     dropdown.classList.remove('show');
     backdrop.classList.remove('show');
     dropdown.style.transform = '';
     backdrop.style.opacity = '';
-    if (footer) footer.style.transform = ''; // Reset footer transform
+    if (footer) footer.style.transform = '';
     document.body.style.overflow = '';
-    if (floatingBtn) floatingBtn.style.display = 'flex';
+    
+    updateFloatingButtonVisibility();
 }
 
 // Touch swipe to close drawer
@@ -1499,16 +1499,11 @@ function toggleGuideMenu(e) {
     e.stopPropagation();
     const dropdown = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
-    const floatingBtn = document.getElementById('layoutBtn');
     
     const isShowing = dropdown.classList.contains('show');
     
     if (isShowing) {
-        // Close drawer
-        dropdown.classList.remove('show');
-        backdrop.classList.remove('show');
-        document.body.style.overflow = '';
-        if (floatingBtn) floatingBtn.style.display = 'flex';
+        closeDrawer();
     } else {
         // Open drawer
         dropdown.classList.add('show');
@@ -1518,7 +1513,8 @@ function toggleGuideMenu(e) {
         const footer = document.getElementById('drawerFooter');
         if (footer) footer.style.transform = 'translateX(0)';
         document.body.style.overflow = 'hidden';
-        if (floatingBtn) floatingBtn.style.display = 'none';
+        
+        updateFloatingButtonVisibility();
         
         // Initialize swipe after drawer is open
         setTimeout(() => initDrawerSwipe(), 100);
@@ -1533,27 +1529,34 @@ function toggleMenu(e) {
     e.stopPropagation();
     const menu = document.getElementById('dropdownMenu');
     const floatingBtn = document.getElementById('layoutBtn');
-    const isCurrentlyShown = menu.classList.contains('show');
     
     menu.classList.toggle('show');
     
-    // Hide/show floating button based on menu state
-    if (floatingBtn) {
-        if (menu.classList.contains('show')) {
-            floatingBtn.style.display = 'none';
-        } else {
-            floatingBtn.style.display = 'flex';
-        }
-    }
+    // Update floating button visibility
+    updateFloatingButtonVisibility();
     
     // Close other menus
     const guideMenu = document.getElementById('guideDropdown');
     if (guideMenu) guideMenu.classList.remove('show');
+    const backdrop = document.getElementById('drawerBackdrop');
+    if (backdrop) backdrop.classList.remove('show');
+}
+
+function updateFloatingButtonVisibility() {
+    const floatingBtn = document.getElementById('layoutBtn');
+    const menu = document.getElementById('dropdownMenu');
+    const drawer = document.getElementById('guideDropdown');
     
-    // If we just closed it, trigger a re-render to reset button state
-    if (isCurrentlyShown) {
-        // Force button to lose focus
-        e.target.blur();
+    if (!floatingBtn) return;
+    
+    // Show floating button only if both menu and drawer are closed AND not in edit mode
+    const menuOpen = menu && menu.classList.contains('show');
+    const drawerOpen = drawer && drawer.classList.contains('show');
+    
+    if (!menuOpen && !drawerOpen && !editMode) {
+        floatingBtn.style.display = 'flex';
+    } else {
+        floatingBtn.style.display = 'none';
     }
 }
 
@@ -1799,7 +1802,7 @@ function renderHeader() {
     <button id="editModeMenuBtn">Edit</button>
     <button id="duplicateGuideBtn">Duplicate</button>
     <button id="deleteGuideBtn">Delete</button>
-	<button id="moveCategoryBtn">Move</button>
+	<button id="moveCategoryBtn">Move to...</button>
 	<button id="toggleColorBtn">Theme</button>
 	<button id="toggleDarkModeBtn">${darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}</button>
 	<div class="color-picker-menu" id="colorPickerMenu">
@@ -1831,7 +1834,7 @@ function renderHeader() {
 	</div>
 </div>
 </div>
-		<div class="dropdown-menu" id="categoryMenu" style="display: none;">
+		<div class="dropdown-menu" id="categoryMenu" style="display: none; min-width: 160px; width: auto;">
 		    <button data-category="Habits">Habits</button>
 		    <button data-category="Notes">Notes</button>
 		    <button data-category="To-Do">To-Do</button>
@@ -1871,10 +1874,10 @@ function renderHeader() {
     const guideMenuBtn = document.getElementById('guideMenuBtn');
     const drawerBackdrop = document.getElementById('drawerBackdrop');
     const createGuideBtn = document.getElementById('createGuideBtn');
-    const logoutBtn = document.getElementById('logoutMenuBtn');  // Changed from 'logoutBtn' to match new ID
-	const logoutMenu = document.getElementById('logoutMenu');
-	const logoutConfirmBtn = document.getElementById('logoutBtn');  // The actual logout button inside menu
-	const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+    const logoutMenuBtn = document.getElementById('logoutMenuBtn');  // Button that opens the menu
+    const logoutMenu = document.getElementById('logoutMenu');
+    const logoutConfirmBtn = document.getElementById('logoutBtn');  // The actual logout button inside menu
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
     const saveBtn = document.getElementById('saveBtn');
     const menuBtn = document.getElementById('menuBtn');
     const editModeMenuBtn = document.getElementById('editModeMenuBtn');
@@ -1889,47 +1892,52 @@ function renderHeader() {
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
 
-	if (logoutBtn) { logoutBtn.addEventListener('click', (e) => { e.stopPropagation(); logoutMenu.classList.toggle('show'); });}
-	if (logoutConfirmBtn) {logoutConfirmBtn.addEventListener('click', () => { logout(); logoutMenu.classList.remove('show'); closeDrawer(); });}
-	if (deleteAccountBtn) { deleteAccountBtn.addEventListener('click', () => {logoutMenu.classList.remove('show'); deleteAccount(); });}
-    if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
+    if (logoutMenuBtn) { logoutMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); if (logoutMenu) logoutMenu.classList.toggle('show'); });}
+    if (logoutConfirmBtn) { logoutConfirmBtn.addEventListener('click', () => { if (logoutMenu) logoutMenu.classList.remove('show'); logout(); closeDrawer(); });}
+    if (deleteAccountBtn) { deleteAccountBtn.addEventListener('click', () => { if (logoutMenu) logoutMenu.classList.remove('show'); deleteAccount(); });}
+	if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
     if (createGuideBtn) { createGuideBtn.addEventListener('click', () => { createNewGuide(); closeDrawer();}); }
-    if (logoutBtn) { logoutBtn.addEventListener('click', () => { logout();  closeDrawer(); });}
+    if (logoutMenu && !logoutMenu.contains(e.target) && !e.target.closest('#logoutMenuBtn')) {logoutMenu.classList.remove('show');}
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
     if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
     if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
     if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
     if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
-    if (document.getElementById('moveCategoryBtn')) {
-	    document.getElementById('moveCategoryBtn').addEventListener('click', (e) => {
-	        e.stopPropagation();
-	        const mainMenu = document.getElementById('dropdownMenu');
-	        const categoryMenu = document.getElementById('categoryMenu');
-	        
-	        // Position category menu at same location as main menu
-	        const rect = mainMenu.getBoundingClientRect();
-	        categoryMenu.style.top = rect.top + 'px';
-	        categoryMenu.style.right = (window.innerWidth - rect.right) + 'px';
-	        
-	        mainMenu.classList.remove('show');
-	        categoryMenu.classList.add('show');
-	    });
-	}
-	
-	// Add click handlers for category buttons
-	document.querySelectorAll('#categoryMenu button').forEach(btn => {
-	    btn.addEventListener('click', (e) => {
-	        e.stopPropagation();
-	        const newCategory = btn.dataset.category;
-	        if (currentUser) {
-	            set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/category`), newCategory);
-	            document.getElementById('categoryMenu').classList.remove('show');
-	            populateGuideDropdown();
-	            alert(`Moved to: ${newCategory}`);
-	        }
-	    });
-	});
+    
+    const moveCategoryBtn = document.getElementById('moveCategoryBtn');
+    if (moveCategoryBtn) { moveCategoryBtn.addEventListener('click', (e) => {e.stopPropagation();const mainMenu = document.getElementById('dropdownMenu');const categoryMenu = document.getElementById('categoryMenu');
+        
+    // Position category menu at same location as main menu
+        const rect = mainMenu.getBoundingClientRect();
+        categoryMenu.style.top = rect.top + 'px';
+        categoryMenu.style.right = (window.innerWidth - rect.right) + 'px';
+        categoryMenu.style.display = 'block'; // Make sure it's visible
+        
+        mainMenu.classList.remove('show');
+        categoryMenu.classList.add('show');
+        
+        // Add click handlers for category buttons each time menu opens
+        const categoryButtons = categoryMenu.querySelectorAll('button[data-category]');
+        categoryButtons.forEach(btn => {
+            // Remove old listeners by cloning
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            newBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const newCategory = newBtn.dataset.category;
+                if (currentUser) {
+                    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/category`), newCategory);
+                    categoryMenu.classList.remove('show');
+                    categoryMenu.style.display = 'none';
+                    populateGuideDropdown();
+                    alert(`Moved to: ${newCategory}`);
+                }
+            });
+        });
+    });
+}
     if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
     if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
     if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
@@ -2045,6 +2053,13 @@ function renderHeader() {
 function populateGuideDropdown() {
     if (!currentUser) return;
     
+    const dropdown = document.getElementById('guideDropdown');
+    if (!dropdown) {
+        console.error('Guide dropdown not found!');
+        return;
+    }
+    
+       
     get(ref(database, `users/${currentUser.uid}/guides`)).then((snapshot) => {
         const guides = snapshot.val() || {};
         const dropdown = document.getElementById('guideDropdown');
@@ -2091,13 +2106,14 @@ function populateGuideDropdown() {
 		    categoryHeader.style.gap = '8px';
 		    
 		    // Find the category icon
-		    const categoryData = guideCategories.find(cat => cat.name === categoryName);
-		    if (categoryData) {
-		        const iconSvg = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${categoryData.icon}"/></svg>`;
-		        categoryHeader.innerHTML = iconSvg + `<span>${categoryName}</span>`;
-		    } else {
-		        categoryHeader.textContent = categoryName;
-		    }
+            const categoryData = guideCategories.find(cat => cat.name === categoryName);
+            if (categoryData) {
+                const iconColor = categoryData.color || '#9ca3af';
+                const iconSvg = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${categoryData.icon}"/></svg>`;
+                categoryHeader.innerHTML = iconSvg + `<span>${categoryName}</span>`;
+            } else {
+                categoryHeader.textContent = categoryName;
+            }
 		    dropdown.appendChild(categoryHeader);
 		    
 		    // Add guides in this category
@@ -2857,13 +2873,10 @@ function renderTabs() {
                 nameSpan.addEventListener('dblclick', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    // Temporarily disable dragging
+                    // Disable dragging during edit
                     tab.draggable = false;
+                    tab.style.cursor = 'text';
                     enableQuickEdit(this, i, null);
-                    // Re-enable dragging after edit
-                    setTimeout(() => {
-                        tab.draggable = true;
-                    }, 100);
                 });
             }
             
@@ -3136,19 +3149,20 @@ function renderContent() {
 			    topRightArea.style.zIndex = '5';
 			    
 			    topRightArea.addEventListener('click', (e) => {
-			    e.stopPropagation();
-			    const controls = card.querySelector('.skill-card-controls');
-			    if (controls) {
-			        controls.classList.toggle('show');
-			        
-			        // Auto-hide after 5 seconds
-			        if (controls.classList.contains('show')) {
-			            setTimeout(() => {
-			                controls.classList.remove('show');
-			            }, 5000);
-			        }
-			    }
-			});
+                e.stopPropagation();
+                e.preventDefault(); // Add this
+                const controls = card.querySelector('.skill-card-controls');
+                if (controls) {
+                    controls.classList.toggle('show');
+                    
+                    // Auto-hide after 5 seconds
+                    if (controls.classList.contains('show')) {
+                        setTimeout(() => {
+                            controls.classList.remove('show');
+                        }, 5000);
+                    }
+                }
+            });
 			
 			topRightArea.addEventListener('touchend', (e) => {
 			    const currentTime = new Date().getTime();
@@ -3435,6 +3449,7 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
         // Re-enable tab dragging
         if (parentTab) {
             parentTab.draggable = true;
+            parentTab.style.cursor = '';
         }
         
         if (newText && newText !== originalText) {
@@ -3674,10 +3689,20 @@ document.addEventListener('click', (e) => {
     }
 
     // Close dropdown menu if clicking outside
-    if (menu && !menu.contains(e.target)) {
+    if (menu && !menu.contains(e.target) && !e.target.closest('#menuBtn')) {
         menu.classList.remove('show');
-        if (categoryMenu) categoryMenu.classList.remove('show');
-        if (colorMenu) colorMenu.classList.remove('show');
+        if (floatingBtn) floatingBtn.style.display = 'flex';
+    }
+
+    // Close category menu if clicking outside
+    if (categoryMenu && !categoryMenu.contains(e.target) && !e.target.closest('#moveCategoryBtn')) {
+        categoryMenu.classList.remove('show');
+        categoryMenu.style.display = 'none';
+    }
+
+    // Close color menu if clicking outside
+    if (colorMenu && !colorMenu.contains(e.target) && !e.target.closest('#toggleColorBtn')) {
+        colorMenu.classList.remove('show');
     }
 
     // Don't close drawer if clicking inside it or on the hamburger button
@@ -3784,14 +3809,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
 
