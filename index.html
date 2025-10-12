@@ -2678,40 +2678,40 @@ function renderTabs() {
         const tab = document.createElement('button'); 
         tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
 
-		// Make tabs draggable in edit mode
-		if (!editMode) {
-		    tab.draggable = true;
-		    tab.dataset.catIndex = i;
-		    tab.style.cursor = 'grab';
-		}
-		
+        // Make tabs draggable only when NOT in edit mode
+        if (!editMode) {
+            tab.draggable = true;
+            tab.dataset.catIndex = i;
+            tab.style.cursor = 'grab';
+        }
+        
         // Make tab editable in edit mode
         if (editMode) {
             const hasTabIcon = cat.icon && cat.icon !== "​";
-			let tabIconToShow;
-			if (hasTabIcon) {
-			    if (cat.icon.startsWith('svg:')) {
-			        const iconData = JSON.parse(cat.icon.substring(4));
-			        tabIconToShow = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-			    } else {
-			        tabIconToShow = cat.icon;
-			    }
-			} else {
-			    tabIconToShow = "+";
-			}
+            let tabIconToShow;
+            if (hasTabIcon) {
+                if (cat.icon.startsWith('svg:')) {
+                    const iconData = JSON.parse(cat.icon.substring(4));
+                    tabIconToShow = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+                } else {
+                    tabIconToShow = cat.icon;
+                }
+            } else {
+                tabIconToShow = "+";
+            }
 
-			tab.innerHTML = `
-			    <span class="editable-icon" style="display: inline-block; position: relative;">
-			        <span class="tab-icon" data-cat-index="${i}" style="opacity: ${hasTabIcon ? '1' : '0.3'};">${tabIconToShow}</span>
-			        ${hasTabIcon ? `<span class="emoji-remove-btn" data-cat-index="${i}">×</span>` : ''}
-			    </span>
-			    <span class="tab-name editable" contenteditable="true">${cat.name}</span>
-			`;
+            tab.innerHTML = `
+                <span class="editable-icon" style="display: inline-block; position: relative;">
+                    <span class="tab-icon" data-cat-index="${i}" style="opacity: ${hasTabIcon ? '1' : '0.3'};">${tabIconToShow}</span>
+                    ${hasTabIcon ? `<span class="emoji-remove-btn" data-cat-index="${i}">×</span>` : ''}
+                </span>
+                <span class="tab-name editable" contenteditable="false">${cat.name}</span>
+            `;
             
             // Add event listeners for edit mode
             const tabIcon = tab.querySelector('.tab-icon');
             if (tabIcon) {
-                tabIcon.addEventListener('click', (e) => {
+                tabIcon.addEventListener('dblclick', (e) => {
                     e.stopPropagation();
                     const catIndex = parseInt(e.target.dataset.catIndex);
                     editCategoryIcon(catIndex, e.target);
@@ -2731,79 +2731,155 @@ function renderTabs() {
             }
             
             const nameSpan = tab.querySelector('.tab-name');
-            nameSpan.addEventListener('blur', (e) => {
-                categories[i].name = e.target.textContent.trim();
-                saveCategories();
-            });
-            nameSpan.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.target.blur();
-                }
-            });
-            nameSpan.addEventListener('click', (e) => {
+            let isEditing = false;
+            
+            // Double-click on name to edit
+            nameSpan.addEventListener('dblclick', (e) => {
                 e.stopPropagation();
+                e.preventDefault();
+                isEditing = true;
+                nameSpan.contentEditable = true;
+                nameSpan.style.cursor = 'text';
+                nameSpan.focus();
+                
+                // Select all text
+                const range = document.createRange();
+                range.selectNodeContents(nameSpan);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
             });
             
-            tab.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('editable') && !e.target.classList.contains('editable-icon')) {
-                    switchTab(i);
+            // Save on blur
+            nameSpan.addEventListener('blur', (e) => {
+                if (isEditing) {
+                    const newName = e.target.textContent.trim();
+                    if (newName) {
+                        categories[i].name = newName;
+                        saveCategories();
+                    } else {
+                        // Restore original if empty
+                        e.target.textContent = cat.name;
+                    }
+                    nameSpan.contentEditable = false;
+                    nameSpan.style.cursor = '';
+                    isEditing = false;
                 }
             });
-	        } else {
-		    // Need to render SVG icons properly
-		    let displayIcon = cat.icon;
-		    if (cat.icon && cat.icon.startsWith('svg:')) {
-		        const iconData = JSON.parse(cat.icon.substring(4));
-		        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-		    }
-		    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
-		    
-		    // Make tabs draggable
-		    tab.draggable = true;
-		    tab.dataset.catIndex = i;
-		    
-		    const nameSpan = tab.querySelector('.tab-name-display');
-		    const iconSpan = tab.querySelector('.tab-icon-display');
-		    
-		    // Single click switches tab (but not on name/icon spans)
-		    tab.addEventListener('click', function(e) {
-		        // Don't switch if clicking directly on name or icon for editing
-		        if (e.target === nameSpan || nameSpan.contains(e.target) ||
-		            e.target === iconSpan || iconSpan.contains(e.target)) {
-		            return;
-		        }
-		        switchTab(i);
-		    });
-		    
-		    // Double-click on name to edit
-			if (nameSpan) {
-			    nameSpan.addEventListener('dblclick', function(e) {
-			        e.stopPropagation();
-			        e.preventDefault();
-			        // Temporarily disable dragging
-			        tab.draggable = false;
-			        enableQuickEdit(this, i, null);  // ← CORRECT: 3 parameters
-			        // Re-enable dragging after edit
-			        setTimeout(() => {
-			            tab.draggable = true;
-			        }, 100);
-			    });
-			}
-		    
-		    // Double-click on icon to edit
-		    if (iconSpan) {
-		        iconSpan.addEventListener('dblclick', function(e) {
-		            e.stopPropagation();
-		            e.preventDefault();
-		            tab.draggable = false;
-		            editCategoryIcon(i, this);
-		            setTimeout(() => {
-		                tab.draggable = true;
-		            }, 100);
-		        });
-		    }
-		}
+            
+            // Handle keyboard shortcuts
+            nameSpan.addEventListener('keydown', (e) => {
+                if (isEditing) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.target.blur();
+                    } else if (e.key === 'Escape') {
+                        e.target.textContent = cat.name;
+                        e.target.blur();
+                    }
+                }
+            });
+            
+            // Single click anywhere on tab switches tabs (unless in editing mode)
+            tab.addEventListener('click', (e) => {
+                // Don't switch if actively editing
+                if (isEditing) return;
+                
+                // Don't switch if clicking the remove emoji button
+                if (e.target.classList.contains('emoji-remove-btn')) return;
+                
+                switchTab(i);
+            });
+            
+            // Long press to enable dragging
+            let longPressTimer;
+            let dragEnabled = false;
+            
+            tab.addEventListener('mousedown', (e) => {
+                if (isEditing) return;
+                longPressTimer = setTimeout(() => {
+                    dragEnabled = true;
+                    tab.draggable = true;
+                    tab.style.cursor = 'grab';
+                }, 500); // 500ms long press
+            });
+            
+            tab.addEventListener('touchstart', (e) => {
+                if (isEditing) return;
+                longPressTimer = setTimeout(() => {
+                    dragEnabled = true;
+                    tab.draggable = true;
+                    tab.style.cursor = 'grab';
+                }, 500);
+            });
+            
+            tab.addEventListener('mouseup', () => {
+                clearTimeout(longPressTimer);
+            });
+            
+            tab.addEventListener('touchend', () => {
+                clearTimeout(longPressTimer);
+            });
+            
+            tab.addEventListener('mouseleave', () => {
+                clearTimeout(longPressTimer);
+            });
+            
+            tab.addEventListener('dragend', () => {
+                tab.draggable = false;
+                tab.style.cursor = '';
+                dragEnabled = false;
+            });
+            
+        } else {
+            // Non-edit mode
+            let displayIcon = cat.icon;
+            if (cat.icon && cat.icon.startsWith('svg:')) {
+                const iconData = JSON.parse(cat.icon.substring(4));
+                displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+            }
+            tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
+            
+            // Make tabs draggable
+            tab.draggable = true;
+            tab.dataset.catIndex = i;
+            
+            const nameSpan = tab.querySelector('.tab-name-display');
+            const iconSpan = tab.querySelector('.tab-icon-display');
+            
+            // Single click switches tab
+            tab.addEventListener('click', function(e) {
+                switchTab(i);
+            });
+            
+            // Double-click on name to edit
+            if (nameSpan) {
+                nameSpan.addEventListener('dblclick', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    // Temporarily disable dragging
+                    tab.draggable = false;
+                    enableQuickEdit(this, i, null);
+                    // Re-enable dragging after edit
+                    setTimeout(() => {
+                        tab.draggable = true;
+                    }, 100);
+                });
+            }
+            
+            // Double-click on icon to edit
+            if (iconSpan) {
+                iconSpan.addEventListener('dblclick', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    tab.draggable = false;
+                    editCategoryIcon(i, this);
+                    setTimeout(() => {
+                        tab.draggable = true;
+                    }, 100);
+                });
+            }
+        }
         
         tabWrapper.appendChild(tab);
         
@@ -2828,15 +2904,16 @@ function renderTabs() {
         addCategoryBtn.addEventListener('click', addCategory);
         navTabs.appendChild(addCategoryBtn);
     }
-	// Preserve Done button state if in edit mode
-	if (editMode) {
-	    setTimeout(() => {
-	        const saveBtn = document.getElementById('saveBtn');
-	        const menuBtn = document.getElementById('menuBtn');
-	        if (saveBtn) saveBtn.style.display = 'block';
-	        if (menuBtn) menuBtn.style.display = 'none';
-	    }, 0);
-	}
+    
+    // Preserve Done button state if in edit mode
+    if (editMode) {
+        setTimeout(() => {
+            const saveBtn = document.getElementById('saveBtn');
+            const menuBtn = document.getElementById('menuBtn');
+            if (saveBtn) saveBtn.style.display = 'block';
+            if (menuBtn) menuBtn.style.display = 'none';
+        }, 0);
+    }
 }
 		
 function toggleBulletStyle(catIndex, skillIndex) {
@@ -3707,6 +3784,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
