@@ -2,7 +2,7 @@
   "name": "Personal Notebook",
   "short_name": "Notebook",
   "description": "Jot down thoughts, capture ideas, and organise your mind — all in one place.",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f0f2f5",
   "theme_color": "#3498db",
