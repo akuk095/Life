@@ -1,3 +1,17 @@
+const CACHE_NAME = 'personal-notebook-v2.1';
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json',
+  './offline.html',
+  './icon-192.png',
+  './icon-512.png',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+  'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js',
+  'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js',
+  'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+];
+
 // At the top of service-worker.js
 self.addEventListener('activate', (event) => {
   event.waitUntil(
@@ -21,20 +35,6 @@ self.addEventListener('message', (event) => {
   }
 });
 
-
-const CACHE_NAME = 'personal-notebook-v2';
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './offline.html',
-  './icon-192.png',
-  './icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-  'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js',
-  'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js',
-  'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
-];
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
