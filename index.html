@@ -2049,10 +2049,13 @@ function populateGuideDropdown() {
         const guides = snapshot.val() || {};
         const dropdown = document.getElementById('guideDropdown');
         
-        // Keep header, clear only list
-        const header = dropdown.querySelector('.drawer-header');
-        dropdown.innerHTML = '';
-        if (header) dropdown.appendChild(header);
+        // Keep header, clear only guide items
+		const header = dropdown.querySelector('.drawer-header');
+		const headerHTML = header ? header.outerHTML : '';
+		const buttons = dropdown.querySelectorAll('button, div[style*="padding: 16px"]');
+		buttons.forEach(btn => {
+		    if (!btn.classList.contains('drawer-header')) btn.remove();
+		});
         
         // Group guides by category
 		const groupedGuides = {};
@@ -2078,7 +2081,7 @@ function populateGuideDropdown() {
 		    // Add category header with icon
 		    const categoryHeader = document.createElement('div');
 		    categoryHeader.style.padding = '16px 16px 8px';
-		    categoryHeader.style.fontSize = '22px';
+		    categoryHeader.style.fontSize = '15px';
 		    categoryHeader.style.fontWeight = 'bold';
 		    categoryHeader.style.color = '#9ca3af';
 		    categoryHeader.style.textTransform = 'uppercase';
@@ -2774,19 +2777,19 @@ function renderTabs() {
 		    });
 		    
 		    // Double-click on name to edit
-		    if (nameSpan) {
-		        nameSpan.addEventListener('dblclick', function(e) {
-		            e.stopPropagation();
-		            e.preventDefault();
-		            // Temporarily disable dragging
-		            tab.draggable = false;
-		            enableQuickEdit(this, i, null, null);
-		            // Re-enable dragging after edit
-		            setTimeout(() => {
-		                tab.draggable = true;
-		            }, 100);
-		        });
-		    }
+			if (nameSpan) {
+			    nameSpan.addEventListener('dblclick', function(e) {
+			        e.stopPropagation();
+			        e.preventDefault();
+			        // Temporarily disable dragging
+			        tab.draggable = false;
+			        enableQuickEdit(this, i, null);  // ← CORRECT: 3 parameters
+			        // Re-enable dragging after edit
+			        setTimeout(() => {
+			            tab.draggable = true;
+			        }, 100);
+			    });
+			}
 		    
 		    // Double-click on icon to edit
 		    if (iconSpan) {
@@ -3055,27 +3058,43 @@ function renderContent() {
 			    topRightArea.style.cursor = 'pointer';
 			    topRightArea.style.zIndex = '5';
 			    
-			    topRightArea.addEventListener('touchend', (e) => {
-			        const currentTime = new Date().getTime();
-			        const tapGap = currentTime - lastTap;
+			    topRightArea.addEventListener('click', (e) => {
+			    e.stopPropagation();
+			    const controls = card.querySelector('.skill-card-controls');
+			    if (controls) {
+			        controls.classList.toggle('show');
 			        
-			        if (tapGap < 300 && tapGap > 0) {
-			            // Double tap detected
-			            e.preventDefault();
-			            const controls = card.querySelector('.skill-card-controls');
-			            if (controls) {
-			                controls.classList.toggle('show');
-			                
-			                // Auto-hide after 5 seconds
-			                if (controls.classList.contains('show')) {
-			                    setTimeout(() => {
-			                        controls.classList.remove('show');
-			                    }, 5000);
-			                }
+			        // Auto-hide after 5 seconds
+			        if (controls.classList.contains('show')) {
+			            setTimeout(() => {
+			                controls.classList.remove('show');
+			            }, 5000);
+			        }
+			    }
+			});
+			
+			topRightArea.addEventListener('touchend', (e) => {
+			    const currentTime = new Date().getTime();
+			    const tapGap = currentTime - lastTap;
+			    
+			    if (tapGap < 300 && tapGap > 0) {
+			        // Double tap detected
+			        e.preventDefault();
+			        e.stopPropagation();
+			        const controls = card.querySelector('.skill-card-controls');
+			        if (controls) {
+			            controls.classList.toggle('show');
+			            
+			            // Auto-hide after 5 seconds
+			            if (controls.classList.contains('show')) {
+			                setTimeout(() => {
+			                    controls.classList.remove('show');
+			                }, 5000);
 			            }
 			        }
-			        lastTap = currentTime;
-			    });
+			    }
+			    lastTap = currentTime;
+			});
 			    
 			    card.appendChild(topRightArea);
 			}
@@ -3688,6 +3707,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
