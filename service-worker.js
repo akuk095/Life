@@ -1,4 +1,28 @@
-const CACHE_NAME = 'personal-notebook-v1';
+// At the top of service-worker.js
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
+// Check for updates every time the app opens
+self.addEventListener('message', (event) => {
+  if (event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
+
+
+const CACHE_NAME = 'personal-notebook-v2';
 const urlsToCache = [
   './',
   './index.html',
