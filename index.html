@@ -10,11 +10,11 @@
 	<!-- PWA Meta Tags -->
 	<meta name="description" content="Jot down thoughts, capture ideas, and organise your mind — all in one place.">
 	<meta name="theme-color" content="#3498db">
-	<link rel="manifest" href="/manifest.json">
+	<link rel="manifest" href="./manifest.json">
 	
 	<!-- iOS Specific -->
 	<meta name="apple-mobile-web-app-title" content="Notebook">
-	<link rel="apple-touch-icon" href="/icon-192.png">
+	<link rel="apple-touch-icon" href="./icon-192.png">
 	<link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png">
 	
 	<!-- Android Specific -->
@@ -262,7 +262,7 @@
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('./service-worker.js')
                     .then((registration) => {
                         console.log('Service Worker registered successfully:', registration.scope);
                         
@@ -3689,3 +3689,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
