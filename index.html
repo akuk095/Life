@@ -782,94 +782,96 @@ function loadUserData(userId) {
     });
     
     // Use Promise.all to wait for all data to load
-    Promise.all([
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/categories`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/checkedItems`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/appTitle`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/appSubtitle`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/appIcon`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/themeColor`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/layoutMode`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/expandedCards`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshEnabled`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshTime`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/darkMode`))
-    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, expandedSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, darkModeSnap]) => {
-        
-        // Load categories
-        if (categoriesSnap.val()) {
-            categories = categoriesSnap.val();
-        }
-        
-        // Load checked items
-        if (checkedSnap.val()) {
-            checkedItems = checkedSnap.val();
-        }
-        
-        // Load app title
-        if (titleSnap.val()) {
-            appTitle = titleSnap.val();
-        }
-        
-        // Load app subtitle
-        if (subtitleSnap.val()) {
-            appSubtitle = subtitleSnap.val();
-        }
-        
-        // Load app icon
-        if (iconSnap.val() !== null) {
-            appIcon = iconSnap.val();
-        }
-        
-        // Load theme color
-        if (themeSnap.val()) {
-            themeColor = themeSnap.val();
-        } else {
-            themeColor = '#607d8b';
-        }
-        
-        // Load layout mode
-        if (layoutSnap.val()) {
-            layoutMode = layoutSnap.val();
-        }
-        
-        // Load expanded cards
-        if (expandedSnap.val()) {
-            expandedCards = expandedSnap.val();
-        }
-        
-        // Load auto-refresh settings
-        if (autoRefreshEnabledSnap.val() !== null) {
-            autoRefreshEnabled = autoRefreshEnabledSnap.val();
-        }
-        if (autoRefreshTimeSnap.val()) {
-            autoRefreshTime = autoRefreshTimeSnap.val();
-        }
-        
-        // Load dark mode
-        if (darkModeSnap.val() !== null) {
-            darkMode = darkModeSnap.val();
-        }
-        
-        // Check if we need to auto-refresh
-        checkAndAutoRefresh(lastRefreshSnap.val());
-        
-        // Apply theme
-        applyTheme();
-        applyDarkMode();
-        
-        // Render everything
-        renderHeader();
-        renderTabs();
-        renderContent();
-        applyDarkMode();
-        updateLayoutButton();
-        
-        // Show container with fade-in effect
-        document.querySelector('.container').classList.add('loaded');
-    });
-}
+Promise.all([
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/categories`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/checkedItems`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/appTitle`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/appSubtitle`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/appIcon`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/themeColor`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/layoutMode`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/expandedCards`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshEnabled`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshTime`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
+    get(ref(database, `users/${userId}/guides/${currentGuideId}/darkMode`))
+]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, expandedSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, darkModeSnap]) => {
+    
+    // Load categories
+    if (categoriesSnap.val()) {
+        categories = categoriesSnap.val();
+    }
+    
+    // Load checked items
+    if (checkedSnap.val()) {
+        checkedItems = checkedSnap.val();
+    }
+    
+    // Load app title
+    if (titleSnap.val()) {
+        appTitle = titleSnap.val();
+    }
+    
+    // Load app subtitle
+    if (subtitleSnap.val()) {
+        appSubtitle = subtitleSnap.val();
+    }
+    
+    // Load app icon
+    if (iconSnap.val() !== null) {
+        appIcon = iconSnap.val();
+    }
+    
+    // Load theme color
+    if (themeSnap.val()) {
+        themeColor = themeSnap.val();
+    } else {
+        themeColor = '#607d8b';
+    }
+    
+    // Load layout mode
+    if (layoutSnap.val()) {
+        layoutMode = layoutSnap.val();
+    }
+    
+    // Load expanded cards
+    if (expandedSnap.val()) {
+        expandedCards = expandedSnap.val();
+    }
+    
+    // Load auto-refresh settings
+    if (autoRefreshEnabledSnap.val() !== null) {
+        autoRefreshEnabled = autoRefreshEnabledSnap.val();
+    }
+    if (autoRefreshTimeSnap.val()) {
+        autoRefreshTime = autoRefreshTimeSnap.val();
+    }
+    
+    // Load dark mode
+    if (darkModeSnap.val() !== null) {
+        darkMode = darkModeSnap.val();
+    }
+    
+    // Check if we need to auto-refresh
+    checkAndAutoRefresh(lastRefreshSnap.val());
+    
+    // Apply theme and styles
+    applyTheme();
+    applyDarkMode(); // Only call once here
+    
+    // Render everything
+    renderHeader();
+    renderTabs();
+    renderContent();
+    updateLayoutButton();
+    
+    // Show container with fade-in effect
+    document.querySelector('.container').classList.add('loaded');
+}).catch((error) => {
+    console.error('Error loading user data:', error);
+    // Optionally show error to user
+    alert('Error loading your data. Please refresh the page.');
+});
 
 function switchGuide(id) {
     currentGuideId = id;
@@ -3808,5 +3810,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
