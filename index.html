@@ -1898,7 +1898,6 @@ function renderHeader() {
 	if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
     if (createGuideBtn) { createGuideBtn.addEventListener('click', () => { createNewGuide(); closeDrawer();}); }
-    if (logoutMenu && !logoutMenu.contains(e.target) && !e.target.closest('#logoutMenuBtn')) {logoutMenu.classList.remove('show');}
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
     if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
     if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
@@ -3809,4 +3808,5 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
