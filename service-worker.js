@@ -1,4 +1,4 @@
-const CACHE_NAME = 'personal-notebook-v2.3';
+const CACHE_NAME = 'personal-notebook-v2.4';
 const urlsToCache = [
   './',
   './index.html',
