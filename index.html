@@ -2699,9 +2699,7 @@ function renderContent() {
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
         
         const grid = document.createElement('div'); 
-        grid.className = 'skill-grid' + 
-            (layoutMode === 'horizontal' ? ' horizontal' : '') + 
-            (layoutMode === 'headings' ? ' headings' : ''); 
+			grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : '');
         
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
@@ -2824,55 +2822,95 @@ function renderContent() {
             card.appendChild(titleDiv);
             
 
-				// Add control buttons (available always, shown on double-tap or in edit mode)
-				const controlsContainer = document.createElement('div');
-			    controlsContainer.className = 'skill-card-controls';
-			    
-			    // Bullet toggle button
-			    const bulletStyle = skill.bulletStyle || 'checkbox';
-			    const bulletIcons = {
-			        'checkbox': '☑',
-			        'number': '#',
-			        'square': '■',
-			        'circle': '●',
-			        'none': '—'
-			    };
-			    const toggleBtn = document.createElement('button');
-			    toggleBtn.className = 'skill-control-btn';
-			    toggleBtn.textContent = bulletIcons[bulletStyle];
-			    toggleBtn.title = 'Change bullet style';
-			    toggleBtn.addEventListener('click', (e) => {
-			        e.stopPropagation();
-			        toggleBulletStyle(catIndex, skillIndex);
-			    });
-			    
-			    // Duplicate button
-			    const duplicateBtn = document.createElement('button');
-			    duplicateBtn.className = 'skill-control-btn';
-			    duplicateBtn.innerHTML = '⧉';
-				duplicateBtn.style.fontSize = '13px';
-			    duplicateBtn.title = 'Duplicate card';
-			    duplicateBtn.addEventListener('click', (e) => {
-			        e.stopPropagation();
-			        duplicateSkill(catIndex, skillIndex);
-			    });
-			    
-			    // Delete button
-			    const deleteBtn = document.createElement('button');
-			    deleteBtn.className = 'skill-control-btn delete-control';
-			    deleteBtn.innerHTML = '×';
-			    deleteBtn.title = 'Delete card';
-			    deleteBtn.addEventListener('click', (e) => {
-			        e.stopPropagation();
-			        deleteSkill(catIndex, skillIndex);
-			    });
-			    
-			    // Add in order: bullet, duplicate, delete (left to right)
-			    controlsContainer.appendChild(toggleBtn);
-			    controlsContainer.appendChild(duplicateBtn);
-			    controlsContainer.appendChild(deleteBtn);
-			    
-			    card.appendChild(controlsContainer);
+				// Add control buttons in top right
+					const controlsContainer = document.createElement('div');
+					controlsContainer.className = 'skill-card-controls';
+					
+					// Expand/Collapse button (always visible in vertical mode)
+					if (layoutMode === 'vertical' && !editMode) {
+					    const cardId = `${catIndex}-${skillIndex}`;
+					    const isExpanded = expandedCards[cardId];
+					    
+					    const expandCollapseBtn = document.createElement('button');
+					    expandCollapseBtn.className = 'expand-btn';
+					    expandCollapseBtn.innerHTML = isExpanded ? `
+					        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					            <polyline points="4 14 10 14 10 20"></polyline>
+					            <polyline points="20 10 14 10 14 4"></polyline>
+					            <line x1="14" y1="10" x2="21" y2="3"></line>
+					            <line x1="3" y1="21" x2="10" y2="14"></line>
+					        </svg>
+					    ` : `
+					        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					            <polyline points="15 3 21 3 21 9"></polyline>
+					            <polyline points="9 21 3 21 3 15"></polyline>
+					            <line x1="21" y1="3" x2="14" y2="10"></line>
+					            <line x1="3" y1="21" x2="10" y2="14"></line>
+					        </svg>
+					    `;
+					    expandCollapseBtn.style.opacity = '1';
+					    expandCollapseBtn.style.pointerEvents = 'auto';
+					    expandCollapseBtn.addEventListener('click', (e) => {
+					        e.stopPropagation();
+					        const cardId = `${catIndex}-${skillIndex}`;
+					        if (expandedCards[cardId]) {
+					            card.classList.remove('expanded');
+					            delete expandedCards[cardId];
+					        } else {
+					            card.classList.add('expanded');
+					            expandedCards[cardId] = true;
+					        }
+					        saveExpandedCards();
+					        renderContent();
+					    });
+					    controlsContainer.appendChild(expandCollapseBtn);
+					}
+					
+					// Bullet toggle button
+					const bulletStyle = skill.bulletStyle || 'checkbox';
+					const bulletIcons = {
+					    'checkbox': '☑',
+					    'number': '#',
+					    'square': '■',
+					    'circle': '●',
+					    'none': '—'
+					};
+					const toggleBtn = document.createElement('button');
+					toggleBtn.className = 'skill-control-btn';
+					toggleBtn.textContent = bulletIcons[bulletStyle];
+					toggleBtn.title = 'Change bullet style';
+					toggleBtn.addEventListener('click', (e) => {
+					    e.stopPropagation();
+					    toggleBulletStyle(catIndex, skillIndex);
+					});
+					
+					// Duplicate button
+					const duplicateBtn = document.createElement('button');
+					duplicateBtn.className = 'skill-control-btn';
+					duplicateBtn.innerHTML = '⧉';
+					duplicateBtn.style.fontSize = '13px';
+					duplicateBtn.title = 'Duplicate card';
+					duplicateBtn.addEventListener('click', (e) => {
+					    e.stopPropagation();
+					    duplicateSkill(catIndex, skillIndex);
+					});
+					
+					// Delete button
+					const deleteBtn = document.createElement('button');
+					deleteBtn.className = 'skill-control-btn delete-control';
+					deleteBtn.innerHTML = '×';
+					deleteBtn.title = 'Delete card';
+					deleteBtn.addEventListener('click', (e) => {
+					    e.stopPropagation();
+					    deleteSkill(catIndex, skillIndex);
+					});
+					
+					// Add in order: expand/collapse (if vertical), bullet, duplicate, delete
+					controlsContainer.appendChild(toggleBtn);
+					controlsContainer.appendChild(duplicateBtn);
+					controlsContainer.appendChild(deleteBtn);
+					
+					card.appendChild(controlsContainer);
 			
 			
 			// Add double-tap to reveal controls when not in edit mode
@@ -3009,27 +3047,20 @@ function renderContent() {
             
             grid.appendChild(card); 
 			// Add click handler for headings mode
-			if (layoutMode === 'headings' && !editMode) {
-			    const cardId = `${catIndex}-${skillIndex}`;
-			    
-			    // Restore expanded state if it was expanded before
-			    if (expandedCards[cardId]) {
-			        card.classList.add('expanded');
-			    }
-			    
-			    card.addEventListener('click', function(e) {
-			        // Don't toggle if clicking on checkbox or editable content
-			        if (e.target.classList.contains('checkbox') || 
-			            e.target.classList.contains('editable') ||
-			            e.target.classList.contains('delete-btn')) {
-			            return;
-			        }
-			        // Only expand, never collapse
-			        this.classList.add('expanded');
-			        expandedCards[cardId] = true;
-			        saveExpandedCards();
-			    });
-			}
+			// Restore expanded state in vertical mode
+				if (layoutMode === 'vertical' && !editMode) {
+				    const cardId = `${catIndex}-${skillIndex}`;
+				    if (expandedCards[cardId]) {
+				        card.classList.add('expanded');
+				    } else {
+				        // Collapse by default - hide items
+				        card.querySelectorAll('.checklist-item').forEach(item => {
+				            item.style.display = 'none';
+				        });
+				        const addItemBtn = card.querySelector('.add-item-btn');
+				        if (addItemBtn) addItemBtn.style.display = 'none';
+				    }
+				}
         }); 
         
         catDiv.appendChild(grid); 
@@ -3346,8 +3377,6 @@ function toggleLayout() {
     if (!currentUser) return;
     if (layoutMode === 'vertical') {
         layoutMode = 'horizontal';
-    } else if (layoutMode === 'horizontal') {
-        layoutMode = 'headings';
     } else {
         layoutMode = 'vertical';
     }
@@ -3359,21 +3388,16 @@ function toggleLayout() {
 function updateLayoutButton() {
     const btn = document.getElementById('layoutBtn');
     if (btn) {
-        // Show icon for NEXT layout (what it will change TO)
         if (layoutMode === 'vertical') {
             // Next: horizontal (show side-by-side icon)
             btn.innerHTML = '<div style="display: flex; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
             btn.title = 'Switch to horizontal scrolling';
-        } else if (layoutMode === 'horizontal') {
-            // Next: headings (show stacked rectangles with rounded edges)
-            btn.innerHTML = '<div style="display: flex; flex-direction: column; gap: 2px;"><div style="width: 16px; height: 5px; background: white; border-radius: 2px;"></div><div style="width: 16px; height: 5px; background: white; border-radius: 2px;"></div></div>';
-            btn.title = 'Switch to headings only';
         } else {
             // Next: vertical (show stacked rounded squares)
             btn.innerHTML = '<div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
             btn.title = 'Switch to vertical grid';
         }
-        btn.style.opacity = '0.2'; // Make visible after content is set
+        btn.style.opacity = '0.2';
     }
 }
 
@@ -3518,6 +3542,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
