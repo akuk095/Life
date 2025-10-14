@@ -309,7 +309,7 @@ let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
-const guideCategories = ['Habits', 'Notes', 'To-Do', 'Tracking', 'Recipes', 'Goals', 'Journaling'];
+
 // Drag and drop state
 let draggedCard = null;
 let draggedCatIndex = null;
@@ -1066,7 +1066,6 @@ function createNewGuide() {
         appTitle: name,
         appSubtitle: "Click to edit subtitle",
         appIcon: "📘",
-        category: "Notes",
         categories: [
             {
                 name: "New Category",
@@ -1086,23 +1085,6 @@ function createNewGuide() {
     });
 }
 
-function changeGuideCategory() {
-    if (!currentUser) return;
-    const currentCategory = categories[0]?.category || 'Notes';
-    
-    const categoryList = guideCategories.map((cat, i) => `${i + 1}. ${cat}`).join('\n');
-    const selection = prompt(`Select a category:\n\n${categoryList}\n\nEnter the number (1-${guideCategories.length}):`, '2');
-    
-    if (selection && !isNaN(selection)) {
-        const index = parseInt(selection) - 1;
-        if (index >= 0 && index < guideCategories.length) {
-            const newCategory = guideCategories[index];
-            set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/category`), newCategory);
-            populateGuideDropdown();
-            alert(`Category changed to: ${newCategory}`);
-        }
-    }
-}
 		
 function closeDrawer() {
     const dropdown = document.getElementById('guideDropdown');
@@ -1516,7 +1498,6 @@ function renderHeader() {
     <button id="editModeMenuBtn">Edit</button>
     <button id="duplicateGuideBtn">Duplicate</button>
     <button id="deleteGuideBtn">Delete</button>
-	<button id="changeCategoryBtn">Change Category</button>
 	<button id="toggleColorBtn">Theme</button>
 	<div class="color-picker-menu" id="colorPickerMenu">
 	    <h3>Preset Themes</h3>
@@ -1583,7 +1564,6 @@ function renderHeader() {
     const editModeMenuBtn = document.getElementById('editModeMenuBtn');
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
-    const changeCategoryBtn = document.getElementById('changeCategoryBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
     const clearChecksBtn = document.getElementById('clearChecksBtn');
     const autoRefreshBtn = document.getElementById('autoRefreshBtn');
@@ -1610,7 +1590,6 @@ function renderHeader() {
     if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
     if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
     if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
-    if (changeCategoryBtn) changeCategoryBtn.addEventListener('click', changeGuideCategory);
     if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
     if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
     if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
@@ -1734,129 +1713,97 @@ function populateGuideDropdown() {
         dropdown.innerHTML = '';
         if (header) dropdown.appendChild(header);
         
-        // Group guides by category
-        const groupedGuides = {};
-        guideCategories.forEach(cat => groupedGuides[cat] = []);
-        groupedGuides['Uncategorized'] = [];
-        
         for (let id in guides) {
             const guide = guides[id];
-            const category = guide.category || 'Uncategorized';
-            if (!groupedGuides[category]) {
-                groupedGuides['Uncategorized'].push({id, guide});
+            const title = guide.appTitle || id;
+            const icon = guide.appIcon || '📄';
+            const guideTheme = guide.themeColor || '#3498db';
+            
+            const btn = document.createElement('button');
+            btn.className = 'guide-item';
+            btn.dataset.guideId = id;
+            btn.style.borderLeft = `4px solid ${guideTheme}`;
+            btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
+            btn.style.display = 'flex';
+            btn.style.alignItems = 'center';
+            btn.style.justifyContent = 'space-between';
+            btn.style.margin = '2px 0';
+            btn.style.padding = '8px 12px 8px 20px';
+            
+            const nameSpan = document.createElement('span');
+            if (icon.startsWith('svg:')) {
+                const iconData = JSON.parse(icon.substring(4));
+                nameSpan.innerHTML = `<span style="display: inline-flex; width: 18px; height: 18px; background: ${iconData.bg}; border-radius: 3px; align-items: center; justify-content: center; margin-right: 8px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span> ${title}`;
             } else {
-                groupedGuides[category].push({id, guide});
+                nameSpan.textContent = `${icon} ${title}`;
             }
-        }
-        
-        // Render each category group
-        [...guideCategories, 'Uncategorized'].forEach(categoryName => {
-            const guidesInCategory = groupedGuides[categoryName];
-            if (guidesInCategory.length === 0) return;
+            btn.appendChild(nameSpan);
             
-            // Add category header
-            const categoryHeader = document.createElement('div');
-            categoryHeader.style.padding = '12px 16px 6px';
-            categoryHeader.style.fontSize = '11px';
-            categoryHeader.style.fontWeight = 'bold';
-            categoryHeader.style.color = '#9ca3af';
-            categoryHeader.style.textTransform = 'uppercase';
-            categoryHeader.style.letterSpacing = '0.5px';
-            categoryHeader.textContent = categoryName;
-            dropdown.appendChild(categoryHeader);
-            
-            // Add guides in this category
-            guidesInCategory.forEach(({id, guide}) => {
-                const title = guide.appTitle || id;
-                const icon = guide.appIcon || '📄';
-                const guideTheme = guide.themeColor || '#3498db';
-                
-                const btn = document.createElement('button');
-                btn.className = 'guide-item';
-                btn.dataset.guideId = id;
-                btn.style.borderLeft = `4px solid ${guideTheme}`;
-                btn.style.background = `linear-gradient(90deg, ${guideTheme}15 0%, transparent 100%)`;
-                btn.style.display = 'flex';
-                btn.style.alignItems = 'center';
-                btn.style.justifyContent = 'space-between';
-                btn.style.margin = '2px 0';
-                btn.style.padding = '8px 12px 8px 20px';
-                
-                const nameSpan = document.createElement('span');
-                if (icon.startsWith('svg:')) {
-                    const iconData = JSON.parse(icon.substring(4));
-                    nameSpan.innerHTML = `<span style="display: inline-flex; width: 18px; height: 18px; background: ${iconData.bg}; border-radius: 3px; align-items: center; justify-content: center; margin-right: 8px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span> ${title}`;
-                } else {
-                    nameSpan.textContent = `${icon} ${title}`;
-                }
-                btn.appendChild(nameSpan);
-                
-                if (editMode && id !== 'defaultGuide') {
-                    const delBtn = document.createElement('span');
-                    delBtn.textContent = 'del';
-                    delBtn.style.background = '#e74c3c';
-                    delBtn.style.color = '#f8f9fa';
-                    delBtn.style.padding = '4px 10px';
-                    delBtn.style.borderRadius = '6px';
-                    delBtn.style.fontSize = '12px';
-                    delBtn.style.fontWeight = 'bold';
-                    delBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
-                            remove(ref(database, `users/${currentUser.uid}/guides/${id}`));
-                            if (currentGuideId === id) {
-                                currentGuideId = 'defaultGuide';
-                                loadUserData(currentUser.uid);
-                            } else {
-                                populateGuideDropdown();
-                            }
+            if (editMode && id !== 'defaultGuide') {
+                const delBtn = document.createElement('span');
+                delBtn.textContent = 'del';
+                delBtn.style.background = '#e74c3c';
+                delBtn.style.color = '#f8f9fa';
+                delBtn.style.padding = '4px 10px';
+                delBtn.style.borderRadius = '6px';
+                delBtn.style.fontSize = '12px';
+                delBtn.style.fontWeight = 'bold';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
+                        remove(ref(database, `users/${currentUser.uid}/guides/${id}`));
+                        if (currentGuideId === id) {
+                            currentGuideId = 'defaultGuide';
+                            loadUserData(currentUser.uid);
+                        } else {
+                            populateGuideDropdown();
                         }
-                    });
-                    btn.appendChild(delBtn);
-                }
-                
-                btn.addEventListener('click', (e) => {
-                    if (!e.target.textContent.includes('del')) {
-                        switchGuide(id);
-                        closeDrawer();
                     }
                 });
-                
-                if (id === currentGuideId) {
-                    btn.classList.add('current-guide');
-                    const isLight = isLightColor(guideTheme);
-                    btn.style.color = isLight ? 'var(--secondary-color)' : guideTheme;
-                    btn.style.fontWeight = '700';
-                    btn.style.fontSize = '15px';
-                    btn.style.background = `linear-gradient(90deg, ${guideTheme}35 0%, transparent 100%)`;
-                    const iconElement = nameSpan.querySelector('span') || nameSpan.childNodes[0];
-                    if (iconElement) {
-                        if (icon.startsWith('svg:')) {
-                            iconElement.style.transform = 'scale(1.15)';
-                        } else {
-                            nameSpan.style.fontSize = '16px';
-                        }
+                btn.appendChild(delBtn);
+            }
+            
+            btn.addEventListener('click', (e) => {
+                if (!e.target.textContent.includes('del')) {
+                    switchGuide(id);
+                    closeDrawer();
+                }
+            });
+            
+            if (id === currentGuideId) {
+                btn.classList.add('current-guide');
+                const isLight = isLightColor(guideTheme);
+                btn.style.color = isLight ? 'var(--secondary-color)' : guideTheme;
+                btn.style.fontWeight = '700';
+                btn.style.fontSize = '15px';
+                btn.style.background = `linear-gradient(90deg, ${guideTheme}35 0%, transparent 100%)`;
+                const iconElement = nameSpan.querySelector('span') || nameSpan.childNodes[0];
+                if (iconElement) {
+                    if (icon.startsWith('svg:')) {
+                        iconElement.style.transform = 'scale(1.15)';
+                    } else {
+                        nameSpan.style.fontSize = '16px';
                     }
                 }
+            }
 
-                // Enable drag-and-drop when NOT in edit mode
-                if (!editMode) {
-                    btn.draggable = true;
-                    btn.style.cursor = 'grab';
-                    btn.addEventListener('dragstart', handleDragStart.bind(btn));
-                    btn.addEventListener('dragend', handleDragEnd.bind(btn));
-                    btn.addEventListener('dragenter', handleDragEnter.bind(btn));
-                    btn.addEventListener('dragover', handleDragOver.bind(btn));
-                    btn.addEventListener('drop', handleDrop.bind(btn));
-                    btn.addEventListener('dragleave', handleDragLeave.bind(btn));
-                }
+            // Enable drag-and-drop when NOT in edit mode
+            if (!editMode) {
+                btn.draggable = true;
+                btn.style.cursor = 'grab';
+                btn.addEventListener('dragstart', handleDragStart.bind(btn));
+                btn.addEventListener('dragend', handleDragEnd.bind(btn));
+                btn.addEventListener('dragenter', handleDragEnter.bind(btn));
+                btn.addEventListener('dragover', handleDragOver.bind(btn));
+                btn.addEventListener('drop', handleDrop.bind(btn));
+                btn.addEventListener('dragleave', handleDragLeave.bind(btn));
+            }
 
-                dropdown.appendChild(btn);
-            });
-        });
+            dropdown.appendChild(btn);
+        }
     });
 }
-
+	
 // Drag and drop for category tabs
 let draggedTab = null;
 let draggedTabIndex = null;
@@ -3160,6 +3107,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
