@@ -114,12 +114,6 @@
 		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
 		.skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid { display: flex; flex-direction: column; gap: 32px; margin-top: 0; padding: 16px 0 0 0; transition: all 0.3s ease; }
-		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 20px 16px; }
-		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--secondary-color, #3498db); border-radius: 8px; background: white; border-bottom: 1px solid #e8eaed; cursor: pointer; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-		.skill-grid.headings .skill-card.expanded .checklist-item { display: flex; }
-		.skill-grid.headings .checklist-item { display: none; }
-		.skill-grid.headings .add-item-btn { display: none !important; }
 		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 30px; gap: 32px; }
 		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: 1px solid #e8eaed; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 		.skill-title { font-size: 17px; font-weight: 600; color: #1f2937; margin-bottom: 16px; letter-spacing: -0.2px; line-height: 1.4; }
@@ -315,7 +309,6 @@ let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
-let expandedCards = {};
 const guideCategories = ['Habits', 'Notes', 'To-Do', 'Tracking', 'Recipes', 'Goals', 'Journaling'];
 // Drag and drop state
 let draggedCard = null;
@@ -607,13 +600,11 @@ function loadUserData(userId) {
         get(ref(database, `users/${userId}/guides/${currentGuideId}/appIcon`)),
         get(ref(database, `users/${userId}/guides/${currentGuideId}/themeColor`)),
         get(ref(database, `users/${userId}/guides/${currentGuideId}/layoutMode`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/expandedCards`)),
         get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshEnabled`)),
         get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshTime`)),
         get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
         get(ref(database, `users/${userId}/guides/${currentGuideId}/darkMode`))
-    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, expandedSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, darkModeSnap]) => {
-        
+    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, darkModeSnap]) => {        
         // Load categories
         if (categoriesSnap.val()) {
             categories = categoriesSnap.val();
@@ -650,12 +641,7 @@ function loadUserData(userId) {
         if (layoutSnap.val()) {
             layoutMode = layoutSnap.val();
         }
-        
-        // Load expanded cards
-        if (expandedSnap.val()) {
-            expandedCards = expandedSnap.val();
-        }
-        
+             
         // Load auto-refresh settings
         if (autoRefreshEnabledSnap.val() !== null) {
             autoRefreshEnabled = autoRefreshEnabledSnap.val();
@@ -2526,126 +2512,93 @@ function duplicateSkill(catIndex, skillIndex) {
 }
 		
 function renderContent() { 
-	    const contentArea = document.getElementById('contentArea'); 
-	    contentArea.innerHTML = ''; 
-	    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
+    const contentArea = document.getElementById('contentArea'); 
+    contentArea.innerHTML = ''; 
+    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
     
     categories.forEach((cat, catIndex) => { 
-       const catDiv = document.createElement('div'); 
+        const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
         
         const grid = document.createElement('div'); 
-        grid.className = 'skill-grid' + 
-            (layoutMode === 'horizontal' ? ' horizontal' : '') + 
-            (layoutMode === 'headings' ? ' headings' : ''); 
+        grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : ''); 
         
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
-			card.className = 'skill-card';
-			// Set border color based on theme
-			const isLight = isLightColor(themeColor);
-			card.style.borderLeftColor = isLight ? 'var(--secondary-color)' : 'var(--primary-color)';
+            card.className = 'skill-card';
+            // Set border color based on theme
+            const isLight = isLightColor(themeColor);
+            card.style.borderLeftColor = isLight ? 'var(--secondary-color)' : 'var(--primary-color)';
             card.dataset.catIndex = catIndex;
             card.dataset.skillIndex = skillIndex; 
             
             const titleDiv = document.createElement('div'); 
-			titleDiv.className = 'skill-title';
-			
-			// Add double-click to edit (only when not in edit mode)
-			if (!editMode) {
-			    titleDiv.addEventListener('dblclick', (e) => {
-			        e.stopPropagation();
-			        e.preventDefault();
-			        // Find the text span (last child that's not an icon)
-			        const spans = titleDiv.querySelectorAll('span');
-			        const titleSpan = spans[spans.length - 1]; // Get last span (the text)
-			        if (titleSpan && !titleSpan.classList.contains('editable-icon') && !titleSpan.classList.contains('icon')) {
-			            enableQuickEdit(titleSpan, catIndex, skillIndex);
-			        }
-			    });
-			}
-			titleDiv.style.display = 'flex';
-			titleDiv.style.alignItems = 'center';
-			
-			// Make draggable in headings mode without the handle
-			if (!editMode && layoutMode === 'headings') {
-			    card.draggable = true;
-			    card.dataset.catIndex = catIndex;
-			    card.dataset.skillIndex = skillIndex;
-			    card.style.cursor = 'grab';
-			}
-			
-			const hasIcon = skill.icon && skill.icon !== "​";
-			let iconToShow;
-			if (hasIcon) {
-			    if (skill.icon.startsWith('svg:')) {
-			        const iconData = JSON.parse(skill.icon.substring(4));
-			        iconToShow = `<span style="display: inline-flex; width: 24px; height: 24px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-			    } else {
-			        iconToShow = skill.icon;
-			    }
-			} else {
-			    iconToShow = editMode ? "+" : "​";
-			}
-			
-			titleDiv.innerHTML += `
-   				<span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
-			       <span class="icon" data-cat-index="${catIndex}" data-skill-index="${skillIndex}" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
-			       ${editMode && hasIcon ? `<span class="emoji-remove-btn" data-cat-index="${catIndex}" data-skill-index="${skillIndex}">×</span>` : ''}
-			   </span>
-			   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-			`;
+            titleDiv.className = 'skill-title';
+            
+            // Add double-click to edit (only when not in edit mode)
+            if (!editMode) {
+                titleDiv.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    // Find the text span (last child that's not an icon)
+                    const spans = titleDiv.querySelectorAll('span');
+                    const titleSpan = spans[spans.length - 1]; // Get last span (the text)
+                    if (titleSpan && !titleSpan.classList.contains('editable-icon') && !titleSpan.classList.contains('icon')) {
+                        enableQuickEdit(titleSpan, catIndex, skillIndex);
+                    }
+                });
+            }
+            titleDiv.style.display = 'flex';
+            titleDiv.style.alignItems = 'center';
+            
+            const hasIcon = skill.icon && skill.icon !== "​";
+            let iconToShow;
+            if (hasIcon) {
+                if (skill.icon.startsWith('svg:')) {
+                    const iconData = JSON.parse(skill.icon.substring(4));
+                    iconToShow = `<span style="display: inline-flex; width: 24px; height: 24px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+                } else {
+                    iconToShow = skill.icon;
+                }
+            } else {
+                iconToShow = editMode ? "+" : "​";
+            }
+            
+            titleDiv.innerHTML += `
+                <span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
+                    <span class="icon" data-cat-index="${catIndex}" data-skill-index="${skillIndex}" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
+                    ${editMode && hasIcon ? `<span class="emoji-remove-btn" data-cat-index="${catIndex}" data-skill-index="${skillIndex}">×</span>` : ''}
+                </span>
+                <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+            `;
 
-			// Add event listeners after creating the titleDiv
-			if (editMode) {
-			    const iconSpan = titleDiv.querySelector('.icon');
-			    if (iconSpan) {
-			        iconSpan.addEventListener('click', (e) => {
-			            e.stopPropagation();
-			            const catIdx = parseInt(e.target.dataset.catIndex);
-			            const skillIdx = parseInt(e.target.dataset.skillIndex);
-			            editSkillIcon(catIdx, skillIdx, e.target);
-			        });
-			        iconSpan.addEventListener('dblclick', (e) => {
-			            e.stopPropagation();
-			        });
-			    }
-			    
-			    const removeIconBtn = titleDiv.querySelector('.emoji-remove-btn');
-			    if (removeIconBtn) {
-			        removeIconBtn.addEventListener('click', (e) => {
-			            e.stopPropagation();
-			            const catIdx = parseInt(e.target.dataset.catIndex);
-			            const skillIdx = parseInt(e.target.dataset.skillIndex);
-			            categories[catIdx].skills[skillIdx].icon = '​';
-			            saveCategories();
-			            renderContent();
-			        });
-			    }
-			}
-
-			// Add collapse button for headings mode
-				if (layoutMode === 'headings' && !editMode) {
-				    const collapseBtn = document.createElement('button');
-				    collapseBtn.className = 'collapse-btn';
-				    collapseBtn.innerHTML = `
-				        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				            <polyline points="4 14 10 14 10 20"></polyline>
-				            <polyline points="20 10 14 10 14 4"></polyline>
-				            <line x1="14" y1="10" x2="21" y2="3"></line>
-				            <line x1="3" y1="21" x2="10" y2="14"></line>
-				        </svg>
-				    `;
-				    collapseBtn.addEventListener('click', (e) => {
-				        e.stopPropagation();
-				        card.classList.remove('expanded');
-				        const cardId = `${catIndex}-${skillIndex}`;
-				        delete expandedCards[cardId];
-				        saveExpandedCards();
-				    });
-				    titleDiv.appendChild(collapseBtn);
-				}
-                                      
+            // Add event listeners after creating the titleDiv
+            if (editMode) {
+                const iconSpan = titleDiv.querySelector('.icon');
+                if (iconSpan) {
+                    iconSpan.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const catIdx = parseInt(e.target.dataset.catIndex);
+                        const skillIdx = parseInt(e.target.dataset.skillIndex);
+                        editSkillIcon(catIdx, skillIdx, e.target);
+                    });
+                    iconSpan.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                    });
+                }
+                
+                const removeIconBtn = titleDiv.querySelector('.emoji-remove-btn');
+                if (removeIconBtn) {
+                    removeIconBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const catIdx = parseInt(e.target.dataset.catIndex);
+                        const skillIdx = parseInt(e.target.dataset.skillIndex);
+                        categories[catIdx].skills[skillIdx].icon = '​';
+                        saveCategories();
+                        renderContent();
+                    });
+                }
+            }                                     
                           
             if (editMode) {
                 const editableSpan = titleDiv.querySelector('.editable');
@@ -2659,94 +2612,93 @@ function renderContent() {
             
             card.appendChild(titleDiv);
             
-
-				// Add control buttons (available always, shown on double-tap or in edit mode)
-				const controlsContainer = document.createElement('div');
-			    controlsContainer.className = 'skill-card-controls';
-			    
-			    // Bullet toggle button
-			    const bulletStyle = skill.bulletStyle || 'checkbox';
-			    const bulletIcons = {
-			        'checkbox': '☑',
-			        'number': '#',
-			        'square': '■',
-			        'circle': '●',
-			        'none': '—'
-			    };
-			    const toggleBtn = document.createElement('button');
-			    toggleBtn.className = 'skill-control-btn';
-			    toggleBtn.textContent = bulletIcons[bulletStyle];
-			    toggleBtn.title = 'Change bullet style';
-			    toggleBtn.addEventListener('click', (e) => {
-			        e.stopPropagation();
-			        toggleBulletStyle(catIndex, skillIndex);
-			    });
-			    
-			    // Duplicate button
-			    const duplicateBtn = document.createElement('button');
-			    duplicateBtn.className = 'skill-control-btn';
-			    duplicateBtn.innerHTML = '⧉';
-				duplicateBtn.style.fontSize = '13px';
-			    duplicateBtn.title = 'Duplicate card';
-			    duplicateBtn.addEventListener('click', (e) => {
-			        e.stopPropagation();
-			        duplicateSkill(catIndex, skillIndex);
-			    });
-			    
-			    // Delete button
-			    const deleteBtn = document.createElement('button');
-			    deleteBtn.className = 'skill-control-btn delete-control';
-			    deleteBtn.innerHTML = '×';
-			    deleteBtn.title = 'Delete card';
-			    deleteBtn.addEventListener('click', (e) => {
-			        e.stopPropagation();
-			        deleteSkill(catIndex, skillIndex);
-			    });
-			    
-			    // Add in order: bullet, duplicate, delete (left to right)
-			    controlsContainer.appendChild(toggleBtn);
-			    controlsContainer.appendChild(duplicateBtn);
-			    controlsContainer.appendChild(deleteBtn);
-			    
-			    card.appendChild(controlsContainer);
-			
-			
-			// Add double-tap to reveal controls when not in edit mode
-			if (!editMode) {
-			    let lastTap = 0;
-			    const topRightArea = document.createElement('div');
-			    topRightArea.style.position = 'absolute';
-			    topRightArea.style.top = '0';
-			    topRightArea.style.right = '0';
-			    topRightArea.style.width = '80px';
-			    topRightArea.style.height = '40px';
-			    topRightArea.style.cursor = 'pointer';
-			    topRightArea.style.zIndex = '5';
-			    
-			    topRightArea.addEventListener('touchend', (e) => {
-			        const currentTime = new Date().getTime();
-			        const tapGap = currentTime - lastTap;
-			        
-			        if (tapGap < 300 && tapGap > 0) {
-			            // Double tap detected
-			            e.preventDefault();
-			            const controls = card.querySelector('.skill-card-controls');
-			            if (controls) {
-			                controls.classList.toggle('show');
-			                
-			                // Auto-hide after 5 seconds
-			                if (controls.classList.contains('show')) {
-			                    setTimeout(() => {
-			                        controls.classList.remove('show');
-			                    }, 5000);
-			                }
-			            }
-			        }
-			        lastTap = currentTime;
-			    });
-			    
-			    card.appendChild(topRightArea);
-			}
+            // Add control buttons (available always, shown on double-tap or in edit mode)
+            const controlsContainer = document.createElement('div');
+            controlsContainer.className = 'skill-card-controls';
+            
+            // Bullet toggle button
+            const bulletStyle = skill.bulletStyle || 'checkbox';
+            const bulletIcons = {
+                'checkbox': '☑',
+                'number': '#',
+                'square': '■',
+                'circle': '●',
+                'none': '—'
+            };
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'skill-control-btn';
+            toggleBtn.textContent = bulletIcons[bulletStyle];
+            toggleBtn.title = 'Change bullet style';
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleBulletStyle(catIndex, skillIndex);
+            });
+            
+            // Duplicate button
+            const duplicateBtn = document.createElement('button');
+            duplicateBtn.className = 'skill-control-btn';
+            duplicateBtn.innerHTML = '⧉';
+            duplicateBtn.style.fontSize = '13px';
+            duplicateBtn.title = 'Duplicate card';
+            duplicateBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                duplicateSkill(catIndex, skillIndex);
+            });
+            
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'skill-control-btn delete-control';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.title = 'Delete card';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteSkill(catIndex, skillIndex);
+            });
+            
+            // Add in order: bullet, duplicate, delete (left to right)
+            controlsContainer.appendChild(toggleBtn);
+            controlsContainer.appendChild(duplicateBtn);
+            controlsContainer.appendChild(deleteBtn);
+            
+            card.appendChild(controlsContainer);
+            
+            // Add double-tap to reveal controls when not in edit mode
+            if (!editMode) {
+                let lastTap = 0;
+                const topRightArea = document.createElement('div');
+                topRightArea.style.position = 'absolute';
+                topRightArea.style.top = '0';
+                topRightArea.style.right = '0';
+                topRightArea.style.width = '80px';
+                topRightArea.style.height = '40px';
+                topRightArea.style.cursor = 'pointer';
+                topRightArea.style.zIndex = '5';
+                
+                topRightArea.addEventListener('touchend', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapGap = currentTime - lastTap;
+                    
+                    if (tapGap < 300 && tapGap > 0) {
+                        // Double tap detected
+                        e.preventDefault();
+                        const controls = card.querySelector('.skill-card-controls');
+                        if (controls) {
+                            controls.classList.toggle('show');
+                            
+                            // Auto-hide after 5 seconds
+                            if (controls.classList.contains('show')) {
+                                setTimeout(() => {
+                                    controls.classList.remove('show');
+                                }, 5000);
+                            }
+                        }
+                    }
+                    lastTap = currentTime;
+                });
+                
+                card.appendChild(topRightArea);
+            }
+            
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
@@ -2754,7 +2706,7 @@ function renderContent() {
                 checkItem.dataset.catIndex = catIndex;
                 checkItem.dataset.skillIndex = skillIndex;
                 checkItem.dataset.itemIndex = itemIndex;
-				
+                
                 // Make draggable in edit mode
                 if (!editMode) {
                     checkItem.draggable = true;
@@ -2765,30 +2717,30 @@ function renderContent() {
                 }
                 
                 // Render appropriate bullet based on style
-				const bulletStyle = skill.bulletStyle || 'checkbox';
-				let bulletElement;
-				
-				if (bulletStyle === 'checkbox') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'checkbox';
-				} else if (bulletStyle === 'number') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'bullet-number';
-				    bulletElement.textContent = itemIndex + 1;
-				} else if (bulletStyle === 'square') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'bullet-square';
-				    bulletElement.textContent = '■';
-				} else if (bulletStyle === 'circle') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'bullet-circle';
-				    bulletElement.textContent = '●';
-				} else if (bulletStyle === 'none') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'bullet-none';
-				}
-				
-				checkItem.appendChild(bulletElement);
+                const bulletStyle = skill.bulletStyle || 'checkbox';
+                let bulletElement;
+                
+                if (bulletStyle === 'checkbox') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'checkbox';
+                } else if (bulletStyle === 'number') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'bullet-number';
+                    bulletElement.textContent = itemIndex + 1;
+                } else if (bulletStyle === 'square') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'bullet-square';
+                    bulletElement.textContent = '■';
+                } else if (bulletStyle === 'circle') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'bullet-circle';
+                    bulletElement.textContent = '●';
+                } else if (bulletStyle === 'none') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'bullet-none';
+                }
+                
+                checkItem.appendChild(bulletElement);
                 
                 // Only checkbox/bullet triggers the check, not the whole item
                 if (!editMode) {
@@ -2819,14 +2771,14 @@ function renderContent() {
                 }
                 
                 if (editMode) {
-				    const deleteItemBtn = document.createElement('button');
-				    deleteItemBtn.className = 'delete-btn';
-				    deleteItemBtn.textContent = '×';
-				    deleteItemBtn.addEventListener('click', (e) => {
-				        e.stopPropagation();
-				        deleteItem(catIndex, skillIndex, itemIndex);
-				    });
-				    checkItem.appendChild(deleteItemBtn);
+                    const deleteItemBtn = document.createElement('button');
+                    deleteItemBtn.className = 'delete-btn';
+                    deleteItemBtn.textContent = '×';
+                    deleteItemBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteItem(catIndex, skillIndex, itemIndex);
+                    });
+                    checkItem.appendChild(deleteItemBtn);
                     
                     textDiv.addEventListener('blur', (e) => { 
                         categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
@@ -2844,28 +2796,6 @@ function renderContent() {
             card.appendChild(addItemBtn); 
             
             grid.appendChild(card); 
-			// Add click handler for headings mode
-			if (layoutMode === 'headings' && !editMode) {
-			    const cardId = `${catIndex}-${skillIndex}`;
-			    
-			    // Restore expanded state if it was expanded before
-			    if (expandedCards[cardId]) {
-			        card.classList.add('expanded');
-			    }
-			    
-			    card.addEventListener('click', function(e) {
-			        // Don't toggle if clicking on checkbox or editable content
-			        if (e.target.classList.contains('checkbox') || 
-			            e.target.classList.contains('editable') ||
-			            e.target.classList.contains('delete-btn')) {
-			            return;
-			        }
-			        // Only expand, never collapse
-			        this.classList.add('expanded');
-			        expandedCards[cardId] = true;
-			        saveExpandedCards();
-			    });
-			}
         }); 
         
         catDiv.appendChild(grid); 
@@ -2878,16 +2808,18 @@ function renderContent() {
         
         contentArea.appendChild(catDiv); 
     }); 
-	// Preserve Done button state if in edit mode
-if (editMode) {
-    setTimeout(() => {
-        const saveBtn = document.getElementById('saveBtn');
-        const menuBtn = document.getElementById('menuBtn');
-        if (saveBtn) saveBtn.style.display = 'block';
-        if (menuBtn) menuBtn.style.display = 'none';
-    }, 0);
+    
+    // Preserve Done button state if in edit mode
+    if (editMode) {
+        setTimeout(() => {
+            const saveBtn = document.getElementById('saveBtn');
+            const menuBtn = document.getElementById('menuBtn');
+            if (saveBtn) saveBtn.style.display = 'block';
+            if (menuBtn) menuBtn.style.display = 'none';
+        }, 0);
+    }
+    applyDarkMode();
 }
-applyDarkMode();}
 
 function switchTab(index) { 
     activeTabIndex = index; 
@@ -3096,12 +3028,6 @@ function editAppIcon(el) {
     });
 }
 
-// Save expanded cards to Firebase
-function saveExpandedCards() {
-    if (!currentUser) return;
-    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/expandedCards`), expandedCards);
-}
-
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
         title: "New Skill", 
@@ -3171,8 +3097,6 @@ function toggleLayout() {
     if (!currentUser) return;
     if (layoutMode === 'vertical') {
         layoutMode = 'horizontal';
-    } else if (layoutMode === 'horizontal') {
-        layoutMode = 'headings';
     } else {
         layoutMode = 'vertical';
     }
@@ -3184,21 +3108,14 @@ function toggleLayout() {
 function updateLayoutButton() {
     const btn = document.getElementById('layoutBtn');
     if (btn) {
-        // Show icon for NEXT layout (what it will change TO)
         if (layoutMode === 'vertical') {
-            // Next: horizontal (show side-by-side icon)
             btn.innerHTML = '<div style="display: flex; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
             btn.title = 'Switch to horizontal scrolling';
-        } else if (layoutMode === 'horizontal') {
-            // Next: headings (show stacked rectangles with rounded edges)
-            btn.innerHTML = '<div style="display: flex; flex-direction: column; gap: 2px;"><div style="width: 16px; height: 5px; background: white; border-radius: 2px;"></div><div style="width: 16px; height: 5px; background: white; border-radius: 2px;"></div></div>';
-            btn.title = 'Switch to headings only';
         } else {
-            // Next: vertical (show stacked rounded squares)
             btn.innerHTML = '<div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
             btn.title = 'Switch to vertical grid';
         }
-        btn.style.opacity = '0.2'; // Make visible after content is set
+        btn.style.opacity = '0.2';
     }
 }
 
@@ -3337,5 +3254,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
