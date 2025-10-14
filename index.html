@@ -6,11 +6,11 @@
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<meta name="mobile-web-app-capable" content="yes">
-    <title>Personal Notebook</title>
+    <title>Essential Life Skills Guide</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-select: none; }
 		.add-category-tab { background: #f59e0b !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
 		.add-category-tab:hover { background: #d97706 !important; }
 		.add-item-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 13px; font-weight: 500; display: none; width: 100%; transition: all 0.2s ease; }
@@ -43,7 +43,8 @@
 		.hue-slider { width: 100%; height: 20px; border-radius: 10px; background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%); cursor: pointer; position: relative; margin-bottom: 15px; }
 		.picker-indicator { position: absolute; width: 16px; height: 16px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.5); pointer-events: none; transform: translate(-50%, -50%); }
 		.hue-indicator { position: absolute; width: 8px; height: 24px; background: white; border: 2px solid #2c3e50; border-radius: 4px; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: #f0f2f5; border-radius: 0; box-shadow: none; overflow: visible; min-height: 100vh; }
+		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: #f0f2f5; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; min-height: 100vh; }
+		.container.loaded { opacity: 1; }
 		.content-area { padding: 0 12px 80px; background: transparent; min-height: calc(100vh - 250px); }
 		.delete-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: transparent; color: #6b7280; border: none; border-radius: 6px; font-size: 18px; font-weight: normal; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; padding: 0; }
 		.delete-btn:hover { background: rgba(220, 38, 38, 0.1); color: #dc2626; transform: scale(1.1); }
@@ -147,36 +148,23 @@
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
-		.skill-card-controls { position: absolute; top: 4px; right: 4px; display: flex; gap: 4px; align-items: center; padding: 4px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10; }
+		.skill-card-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; align-items: center; padding: 4px 4px 4px 8px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+		.skill-card-controls.show { opacity: 1; pointer-events: auto; }
 		.edit-mode .skill-card-controls { opacity: 1; pointer-events: auto; }
 		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0.4; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; font-weight: normal; }
 		.skill-control-btn:hover { color: #6b7280; transform: scale(1.1); }
 		.skill-control-btn.delete-control:hover {color: #dc2626;}
-		.skill-grid:not(.horizontal) .skill-card:not(.expanded) .checklist-item { display: none; }
-		.skill-grid:not(.horizontal) .skill-card:not(.expanded) .add-item-btn { display: none; }
-		.skill-grid:not(.horizontal) .skill-card.expanded .checklist-item { display: flex; }
 		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
 		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
 		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
 		.drawer-create-icon:hover { opacity: 0.8; transform: scale(1.05); }
 		.drawer-create-icon:active { opacity: 1; transform: scale(0.98); }
 		.drawer-create-icon svg { stroke: #2c3e50; width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
-		.logout-menu { position: fixed; bottom: 80px; left: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); display: none; z-index: 2002; overflow: hidden; min-width: 180px; }
-		.logout-menu.show { display: block; }
-		.logout-menu button { width: 100%; padding: 14px 20px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; display: flex; align-items: center; gap: 10px; }
-		.logout-menu button:hover { background: #f3f4f6; }
-		.logout-menu button:first-child { color: #1f2937; border-bottom: 1px solid #e5e7eb; }
-		.logout-menu button:last-child { color: #dc2626; }
-/* Hide all scrollbars but keep scroll functionality */
+		/* Hide all scrollbars but keep scroll functionality */
 		* { scrollbar-width: none; -ms-overflow-style: none; }
 		*::-webkit-scrollbar { display: none; }
 		#loginScreen { opacity: 0; transition: opacity 0.3s ease-in-out; }
 		#loginScreen.show { opacity: 1; }
-		.expand-btn { width: 20px; height: 20px; background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; margin-left: 4px; }
-		.expand-btn:hover { transform: scale(1.1); }
-		.expand-btn svg { width: 16px; height: 16px; stroke: #95a5a6; transition: stroke 0.2s ease; }
-		.expand-btn:hover svg { stroke: #2c3e50; }
-		
 
 		
 	</style>
@@ -230,7 +218,7 @@
     <div class="header-wrapper">
         <div class="header">
             <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            <h1>📓 Personal Notebook</h1>
+            <h1>📚 Personal Notebook</h1>
             <p>note description</p>
         </div>
         <div class="nav-tabs" id="navTabs"></div>
@@ -261,25 +249,25 @@
 	// Default data structure
 	let categories = [
 	    {
-	        name: "Helping you started", 
-	        icon: "❄️", 
+	        name: "Health & Body", 
+	        icon: "💪", 
 	        skills: [
 	            {
-	                title: "First steps", 
-	                icon: "🍵", 
+	                title: "Basic Hygiene", 
+	                icon: "🧼", 
 					bulletStyle: "checkbox",
-	                items: ["Create your first note", "Click on the 3 dots on top right for more actions", "Edit, duplicate or delete note"]
+	                items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
 	            }
 	        ]
 	    },
 	    {
-        name: "Do more", 
-        icon: "🍉", 
+        name: "Daily Living", 
+        icon: "🏡", 
         skills: [
             {
-                title: "Keep it Simple Stupid (KISS)", 
-                icon: "🍜", 
-                items: ["Write a note, journal or recipe", "Choose a theme", "Click on the hamburger menu to see all your notes"]
+                title: "Household Basics", 
+                icon: "🧹", 
+                items: ["Do laundry", "Clean regularly", "Take out trash"]
             }
         ]
     }
@@ -301,13 +289,13 @@ onAuthStateChanged(auth, (user) => {
             loginScreen.style.display = 'none';
             signupScreen.style.display = 'none';
             appContainer.style.display = 'block';
-            
-            // Load data and render BEFORE fading in
-            loadUserData(user.uid);
+            setTimeout(() => appContainer.classList.add('show'), 10);
         }, 300);
         
+        loadUserData(user.uid);
     } else {
         currentUser = null;
+        appContainer.classList.remove('show');
         appContainer.style.display = 'none';
         
         // Show login screen
@@ -320,23 +308,15 @@ onAuthStateChanged(auth, (user) => {
 let checkedItems = {};
 let editMode = false;
 let activeTabIndex = 0;
-let appIcon = "📓"; 
-let appTitle = "Welcome to your own Personal Notebook";
-let appSubtitle = "Jot down thoughts, capture ideas, and organise your mind — all in one place.";
+let appIcon = "📚"; 
+let appTitle = "Essential Life Skills Guide";
+let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
 let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
 let expandedCards = {};
-const guideCategories = [
-    { name: 'Habits', icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z' },
-    { name: 'Notes', icon: 'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z' },
-    { name: 'To-Do', icon: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
-    { name: 'Tracking', icon: 'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z' },
-    { name: 'Recipes', icon: 'M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z' },
-    { name: 'Goals', icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' },
-    { name: 'Journaling', icon: 'M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z' }
-];
+const guideCategories = ['Habits', 'Notes', 'To-Do', 'Tracking', 'Recipes', 'Goals', 'Journaling'];
 // Drag and drop state
 let draggedCard = null;
 let draggedCatIndex = null;
@@ -453,7 +433,7 @@ const colorThemes = [
     { name: 'Abort', bg: '#7C8B8B', path: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z' },
     
     // Miscellaneous Life Actions
-    { name: 'Thumbs-up', bg: '#9E9B9E', path: 'M2 20h2c.55 0 1-.45 1-1v-9c0-.55-.45-1-1-1H2v11zm19.83-7.12c.11-.25.17-.52.17-.80V11c0-1.1-.9-2-2-2h-5.5l.92-4.65c.05-.22.02-.46-.08-.66-.23-.45-.52-.86-.88-1.22L14 2 7.59 8.41C7.21 8.79 7 9.3 7 9.83v7.84C7 18.95 8.05 20 9.34 20h8.11c.7 0 1.36-.37 1.72-.97l2.66-6.15z' },
+    { name: 'Thumbs-up', bg: '#9E9B9E', path: 'M2 20h2c.55 0 1-.45 1-1v-9c0-.55-.45-1-1-1H2v11zm19.83-7.12c.11-.25.17-.52.17-.8V11c0-1.1-.9-2-2-2h-5.5l.92-4.65c.05-.22.02-.46-.08-.66-.23-.45-.52-.86-.88-1.22L14 2 7.59 8.41C7.21 8.79 7 9.3 7 9.83v7.84C7 18.95 8.05 20 9.34 20h8.11c.7 0 1.36-.37 1.72-.97l2.66-6.15z' },
     { name: 'Sleep', bg: '#8B9E8B', path: 'M7 14c1.66 0 3-1.34 3-3S8.66 8 7 8s-3 1.34-3 3 1.34 3 3 3zm0-4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm12-3h-8v8H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z' },
     { name: 'Connect', bg: '#9E7C9E', path: 'M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z' }
   ];
@@ -606,12 +586,8 @@ document.addEventListener('drop', (e) => {
 
 		
 function loadUserData(userId) {
-    const container = document.querySelector('.container');
-    const appContainer = document.getElementById('app');
-    
-    // Show container immediately
-    appContainer.style.display = 'block';
-    appContainer.style.opacity = '1';
+    // Hide container initially
+    document.querySelector('.container').classList.remove('loaded');
     
     // Check if guide exists for this user
     get(ref(database, `users/${userId}/guides/${currentGuideId}`)).then((snapshot) => {
@@ -706,6 +682,9 @@ function loadUserData(userId) {
         renderContent();
         applyDarkMode();
         updateLayoutButton();
+        
+        // Show container with fade-in effect
+        document.querySelector('.container').classList.add('loaded');
     });
 }
 
@@ -1104,25 +1083,12 @@ function createNewGuide() {
     if (!currentUser) return;
     const name = prompt("Enter a name for this new guide:");
     if (!name) return;
-    
-    // Show category selection
-    const categoryList = guideCategories.map((cat, i) => `${i + 1}. ${cat.name}`).join('\n');
-    const selection = prompt(`Select a category:\n\n${categoryList}\n\nEnter the number (1-${guideCategories.length}):`, '2');
-    
-    let selectedCategory = 'Notes'; // Default
-    if (selection && !isNaN(selection)) {
-        const index = parseInt(selection) - 1;
-        if (index >= 0 && index < guideCategories.length) {
-            selectedCategory = guideCategories[index].name;
-        }
-    }
-    
     const id = `guide_${Date.now()}`;
     const newGuide = {
         appTitle: name,
         appSubtitle: "Click to edit subtitle",
         appIcon: "📘",
-        category: selectedCategory,
+        category: "Notes",
         categories: [
             {
                 name: "New Category",
@@ -1144,14 +1110,15 @@ function createNewGuide() {
 
 function changeGuideCategory() {
     if (!currentUser) return;
+    const currentCategory = categories[0]?.category || 'Notes';
     
-    const categoryList = guideCategories.map((cat, i) => `${i + 1}. ${cat.name}`).join('\n');
+    const categoryList = guideCategories.map((cat, i) => `${i + 1}. ${cat}`).join('\n');
     const selection = prompt(`Select a category:\n\n${categoryList}\n\nEnter the number (1-${guideCategories.length}):`, '2');
     
     if (selection && !isNaN(selection)) {
         const index = parseInt(selection) - 1;
         if (index >= 0 && index < guideCategories.length) {
-            const newCategory = guideCategories[index].name;
+            const newCategory = guideCategories[index];
             set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/category`), newCategory);
             populateGuideDropdown();
             alert(`Category changed to: ${newCategory}`);
@@ -1496,10 +1463,6 @@ function duplicateGuide() {
         if (data.appTitle) {
             data.appTitle = data.appTitle + ' (Copy)';
         }
-        // Make sure category is preserved
-        if (!data.category) {
-            data.category = 'Notes';
-        }
         set(ref(database, `users/${currentUser.uid}/guides/${newId}`), data).then(() => {
             currentGuideId = newId;
             localStorage.setItem('currentGuideId', newId);
@@ -1521,37 +1484,6 @@ function deleteGuide() {
         loadUserData(currentUser.uid);
     }
 }
-
-function deleteAccount() {
-    if (!currentUser) return;
-    
-    const confirmation = prompt('⚠️ WARNING: This will permanently delete your account and ALL your data.\n\nType "DELETE" to confirm:');
-    
-    if (confirmation === 'DELETE') {
-        const finalConfirm = confirm('Are you absolutely sure? This cannot be undone!');
-        
-        if (finalConfirm) {
-            // Delete all user data from database
-            remove(ref(database, `users/${currentUser.uid}`))
-                .then(() => {
-                    // Delete the user account
-                    return currentUser.delete();
-                })
-                .then(() => {
-                    alert('Your account has been deleted.');
-                    closeDrawer();
-                })
-                .catch((error) => {
-                    if (error.code === 'auth/requires-recent-login') {
-                        alert('For security, please log out and log back in, then try deleting your account again.');
-                    } else {
-                        alert('Error deleting account: ' + error.message);
-                    }
-                });
-        }
-    }
-}
-
 	
 function saveHeader() {
   if (!currentUser) return;
@@ -1561,10 +1493,6 @@ function saveHeader() {
   renderHeader();
   populateGuideDropdown();
 }
-
-// Due to length limits, I'll continue the rest of the code in the next file...
-// This file contains the critical fixes for the visibility issue
-
 
 function renderHeader() {
     const header = document.querySelector('.header');
@@ -1586,47 +1514,16 @@ function renderHeader() {
 <button class="guide-menu-btn" id="guideMenuBtn">☰</button>
 <div id="drawerBackdrop" class="drawer-backdrop"></div>
 <div class="guide-dropdown" id="guideDropdown">
-    <div class="drawer-header">
-    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; margin-right: 8px; display: inline-block; vertical-align: middle;">
-        <rect x="2" y="2" width="10.5" height="10.5" rx="1"></rect>
-        <rect x="16" y="5" width="7" height="7" rx="1"></rect>
-        <rect x="3.6" y="16" width="8.4" height="8.4" rx="1"></rect>
-        <rect x="16" y="16" width="7" height="7" rx="1"></rect>
-    </svg>
-    My Notebook
-</div>
+    <div class="drawer-header">My Notebook ⊞</div>
 </div>
 <div class="drawer-footer" id="drawerFooter">
-    <button id="logoutMenuBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-right: auto; opacity: 0.5; transition: opacity 0.2s;">
+    <button id="logoutBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-right: auto; opacity: 0.5; transition: opacity 0.2s;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
         </svg>
     </button>
-    
-    <!-- Logout popup menu -->
-    <div class="logout-menu" id="logoutMenu">
-        <button id="logoutBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Logout
-        </button>
-        <button id="deleteAccountBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18"></path>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-            Delete Account
-        </button>
-    </div>
-    
     <button class="drawer-create-icon" id="createGuideBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -1641,7 +1538,7 @@ function renderHeader() {
     <button id="editModeMenuBtn">Edit</button>
     <button id="duplicateGuideBtn">Duplicate</button>
     <button id="deleteGuideBtn">Delete</button>
-	<button id="moveCategoryBtn">Move</button>
+	<button id="changeCategoryBtn">Change Category</button>
 	<button id="toggleColorBtn">Theme</button>
 	<button id="toggleDarkModeBtn">${darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}</button>
 	<div class="color-picker-menu" id="colorPickerMenu">
@@ -1673,16 +1570,6 @@ function renderHeader() {
 	</div>
 </div>
 </div>
-		<div class="dropdown-menu" id="categoryMenu" style="display: none;">
-		    <button data-category="Habits">Habits</button>
-		    <button data-category="Notes">Notes</button>
-		    <button data-category="To-Do">To-Do</button>
-		    <button data-category="Tracking">Tracking</button>
-		    <button data-category="Recipes">Recipes</button>
-		    <button data-category="Goals">Goals</button>
-		    <button data-category="Journaling">Journaling</button>
-		    <button data-category="Other">Other</button>
-		</div>
 <h1>
     <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
         <span class="icon" id="appIconSpan" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
@@ -1713,16 +1600,13 @@ function renderHeader() {
     const guideMenuBtn = document.getElementById('guideMenuBtn');
     const drawerBackdrop = document.getElementById('drawerBackdrop');
     const createGuideBtn = document.getElementById('createGuideBtn');
-    const logoutBtn = document.getElementById('logoutMenuBtn');  // Changed from 'logoutBtn' to match new ID
-	const logoutMenu = document.getElementById('logoutMenu');
-	const logoutConfirmBtn = document.getElementById('logoutBtn');  // The actual logout button inside menu
-	const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
     const saveBtn = document.getElementById('saveBtn');
     const menuBtn = document.getElementById('menuBtn');
     const editModeMenuBtn = document.getElementById('editModeMenuBtn');
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
-    const moveCategoryBtn = document.getElementById('moveCategoryBtn');
+    const changeCategoryBtn = document.getElementById('changeCategoryBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
     const toggleDarkModeBtn = document.getElementById('toggleDarkModeBtn');
     const clearChecksBtn = document.getElementById('clearChecksBtn');
@@ -1730,54 +1614,32 @@ function renderHeader() {
     const applyColorBtn = document.getElementById('applyColorBtn');
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
-
-	if (logoutBtn) { logoutBtn.addEventListener('click', (e) => { e.stopPropagation(); logoutMenu.classList.toggle('show'); });}
-	if (logoutConfirmBtn) {logoutConfirmBtn.addEventListener('click', () => { logout(); logoutMenu.classList.remove('show'); closeDrawer(); });}
-	if (deleteAccountBtn) { deleteAccountBtn.addEventListener('click', () => {logoutMenu.classList.remove('show'); deleteAccount(); });}
-	if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
-	if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
-	if (createGuideBtn) { createGuideBtn.addEventListener('click', () => { createNewGuide(); closeDrawer();}); }
-	if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
-	if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
-	if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
-	if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
-	if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
-	if (moveCategoryBtn) {
-	    moveCategoryBtn.addEventListener('click', (e) => {
-	        e.stopPropagation();
-	        const mainMenu = document.getElementById('dropdownMenu');
-	        const categoryMenu = document.getElementById('categoryMenu');
-	        
-	        // Position category menu at same location as main menu
-	        const rect = mainMenu.getBoundingClientRect();
-	        categoryMenu.style.top = rect.top + 'px';
-	        categoryMenu.style.right = (window.innerWidth - rect.right) + 'px';
-	        
-	        mainMenu.classList.remove('show');
-	        categoryMenu.classList.add('show');
-	    });
-	}
-	
-	// Add click handlers for category buttons
-	document.querySelectorAll('#categoryMenu button').forEach(btn => {
-	    btn.addEventListener('click', (e) => {
-	        e.stopPropagation();
-	        const newCategory = btn.dataset.category;
-	        if (currentUser) {
-	            set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/category`), newCategory);
-	            document.getElementById('categoryMenu').classList.remove('show');
-	            populateGuideDropdown();
-	            alert(`Moved to: ${newCategory}`);
-	        }
-	    });
-	});
-	if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
-	if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
-	if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
-	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
-	if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
-
-
+    
+    if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
+    if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
+    if (createGuideBtn) {
+        createGuideBtn.addEventListener('click', () => {
+            createNewGuide();
+            closeDrawer();
+        });
+    }
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            logout();
+            closeDrawer();
+        });
+    }
+    if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
+    if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+    if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
+    if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
+    if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
+    if (changeCategoryBtn) changeCategoryBtn.addEventListener('click', changeGuideCategory);
+    if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
+    if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
+    if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
+    if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
+    if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
     
     // App icon editing
     if (editMode && appIconSpan) {
@@ -1898,50 +1760,38 @@ function populateGuideDropdown() {
         if (header) dropdown.appendChild(header);
         
         // Group guides by category
-		const groupedGuides = {};
-		guideCategories.forEach(cat => groupedGuides[cat.name] = []);
-		groupedGuides['Other'] = [];
-		
-		for (let id in guides) {
-		    const guide = guides[id];
-		    const category = guide.category || 'Other';
-		    if (!groupedGuides[category]) {
-		        groupedGuides['Uncategorized'].push({id, guide});
-		    } else {
-		        groupedGuides[category].push({id, guide});
-		    }
-		}
+        const groupedGuides = {};
+        guideCategories.forEach(cat => groupedGuides[cat] = []);
+        groupedGuides['Uncategorized'] = [];
+        
+        for (let id in guides) {
+            const guide = guides[id];
+            const category = guide.category || 'Uncategorized';
+            if (!groupedGuides[category]) {
+                groupedGuides['Uncategorized'].push({id, guide});
+            } else {
+                groupedGuides[category].push({id, guide});
+            }
+        }
         
         // Render each category group
-		const categoryNames = guideCategories.map(cat => cat.name).concat(['Other']);
-		categoryNames.forEach(categoryName => {
-		    const guidesInCategory = groupedGuides[categoryName];
-		    if (guidesInCategory.length === 0) return;
-		    
-		    // Add category header with icon
-		    const categoryHeader = document.createElement('div');
-		    categoryHeader.style.padding = '16px 16px 8px';
-		    categoryHeader.style.fontSize = '22px';
-		    categoryHeader.style.fontWeight = 'bold';
-		    categoryHeader.style.color = '#9ca3af';
-		    categoryHeader.style.textTransform = 'uppercase';
-		    categoryHeader.style.letterSpacing = '0.5px';
-		    categoryHeader.style.display = 'flex';
-		    categoryHeader.style.alignItems = 'center';
-		    categoryHeader.style.gap = '8px';
-		    
-		    // Find the category icon
-		    const categoryData = guideCategories.find(cat => cat.name === categoryName);
-		    if (categoryData) {
-		        const iconSvg = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${categoryData.icon}"/></svg>`;
-		        categoryHeader.innerHTML = iconSvg + `<span>${categoryName}</span>`;
-		    } else {
-		        categoryHeader.textContent = categoryName;
-		    }
-		    dropdown.appendChild(categoryHeader);
-		    
-		    // Add guides in this category
-		    guidesInCategory.forEach(({id, guide}) => {
+        [...guideCategories, 'Uncategorized'].forEach(categoryName => {
+            const guidesInCategory = groupedGuides[categoryName];
+            if (guidesInCategory.length === 0) return;
+            
+            // Add category header
+            const categoryHeader = document.createElement('div');
+            categoryHeader.style.padding = '12px 16px 6px';
+            categoryHeader.style.fontSize = '11px';
+            categoryHeader.style.fontWeight = 'bold';
+            categoryHeader.style.color = '#9ca3af';
+            categoryHeader.style.textTransform = 'uppercase';
+            categoryHeader.style.letterSpacing = '0.5px';
+            categoryHeader.textContent = categoryName;
+            dropdown.appendChild(categoryHeader);
+            
+            // Add guides in this category
+            guidesInCategory.forEach(({id, guide}) => {
                 const title = guide.appTitle || id;
                 const icon = guide.appIcon || '📄';
                 const guideTheme = guide.themeColor || '#3498db';
@@ -2590,7 +2440,7 @@ function renderTabs() {
                     switchTab(i);
                 }
             });
-	        } else {
+        } else {
 		    // Need to render SVG icons properly
 		    let displayIcon = cat.icon;
 		    if (cat.icon && cat.icon.startsWith('svg:')) {
@@ -2599,21 +2449,15 @@ function renderTabs() {
 		    }
 		    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
 		    
-		    // Make tabs draggable
-		    tab.draggable = true;
-		    tab.dataset.catIndex = i;
-		    
 		    const nameSpan = tab.querySelector('.tab-name-display');
-		    const iconSpan = tab.querySelector('.tab-icon-display');
 		    
-		    // Single click switches tab (but not on name/icon spans)
+		    // Single click switches tab
 		    tab.addEventListener('click', function(e) {
-		        // Don't switch if clicking directly on name or icon for editing
-		        if (e.target === nameSpan || nameSpan.contains(e.target) ||
-		            e.target === iconSpan || iconSpan.contains(e.target)) {
-		            return;
+		        if (e.target === nameSpan || nameSpan.contains(e.target)) {
+		            // If clicking on name span, do nothing (let dblclick handle it)
+		        } else {
+		            switchTab(i);
 		        }
-		        switchTab(i);
 		    });
 		    
 		    // Double-click on name to edit
@@ -2621,26 +2465,7 @@ function renderTabs() {
 		        nameSpan.addEventListener('dblclick', function(e) {
 		            e.stopPropagation();
 		            e.preventDefault();
-		            // Temporarily disable dragging
-		            tab.draggable = false;
 		            enableQuickEdit(this, i, null, null);
-		            // Re-enable dragging after edit
-		            setTimeout(() => {
-		                tab.draggable = true;
-		            }, 100);
-		        });
-		    }
-		    
-		    // Double-click on icon to edit
-		    if (iconSpan) {
-		        iconSpan.addEventListener('dblclick', function(e) {
-		            e.stopPropagation();
-		            e.preventDefault();
-		            tab.draggable = false;
-		            editCategoryIcon(i, this);
-		            setTimeout(() => {
-		                tab.draggable = true;
-		            }, 100);
 		        });
 		    }
 		}
@@ -2710,7 +2535,9 @@ function renderContent() {
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
         
         const grid = document.createElement('div'); 
-			grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : '');
+        grid.className = 'skill-grid' + 
+            (layoutMode === 'horizontal' ? ' horizontal' : '') + 
+            (layoutMode === 'headings' ? ' headings' : ''); 
         
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
@@ -2833,95 +2660,55 @@ function renderContent() {
             card.appendChild(titleDiv);
             
 
-				// Add control buttons in top right
-					const controlsContainer = document.createElement('div');
-					controlsContainer.className = 'skill-card-controls';
-					
-					// Expand/Collapse button (always visible in vertical mode)
-					if (layoutMode === 'vertical' && !editMode) {
-					    const cardId = `${catIndex}-${skillIndex}`;
-					    const isExpanded = expandedCards[cardId];
-					    
-					    const expandCollapseBtn = document.createElement('button');
-					    expandCollapseBtn.className = 'expand-btn';
-					    expandCollapseBtn.innerHTML = isExpanded ? `
-					        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					            <polyline points="4 14 10 14 10 20"></polyline>
-					            <polyline points="20 10 14 10 14 4"></polyline>
-					            <line x1="14" y1="10" x2="21" y2="3"></line>
-					            <line x1="3" y1="21" x2="10" y2="14"></line>
-					        </svg>
-					    ` : `
-					        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					            <polyline points="15 3 21 3 21 9"></polyline>
-					            <polyline points="9 21 3 21 3 15"></polyline>
-					            <line x1="21" y1="3" x2="14" y2="10"></line>
-					            <line x1="3" y1="21" x2="10" y2="14"></line>
-					        </svg>
-					    `;
-					    expandCollapseBtn.style.opacity = '1';
-					    expandCollapseBtn.style.pointerEvents = 'auto';
-					    expandCollapseBtn.addEventListener('click', (e) => {
-					        e.stopPropagation();
-					        const cardId = `${catIndex}-${skillIndex}`;
-					        if (expandedCards[cardId]) {
-					            card.classList.remove('expanded');
-					            delete expandedCards[cardId];
-					        } else {
-					            card.classList.add('expanded');
-					            expandedCards[cardId] = true;
-					        }
-					        saveExpandedCards();
-					        renderContent();
-					    });
-					    controlsContainer.appendChild(expandCollapseBtn);
-					}
-					
-					// Bullet toggle button
-					const bulletStyle = skill.bulletStyle || 'checkbox';
-					const bulletIcons = {
-					    'checkbox': '☑',
-					    'number': '#',
-					    'square': '■',
-					    'circle': '●',
-					    'none': '—'
-					};
-					const toggleBtn = document.createElement('button');
-					toggleBtn.className = 'skill-control-btn';
-					toggleBtn.textContent = bulletIcons[bulletStyle];
-					toggleBtn.title = 'Change bullet style';
-					toggleBtn.addEventListener('click', (e) => {
-					    e.stopPropagation();
-					    toggleBulletStyle(catIndex, skillIndex);
-					});
-					
-					// Duplicate button
-					const duplicateBtn = document.createElement('button');
-					duplicateBtn.className = 'skill-control-btn';
-					duplicateBtn.innerHTML = '⧉';
-					duplicateBtn.style.fontSize = '13px';
-					duplicateBtn.title = 'Duplicate card';
-					duplicateBtn.addEventListener('click', (e) => {
-					    e.stopPropagation();
-					    duplicateSkill(catIndex, skillIndex);
-					});
-					
-					// Delete button
-					const deleteBtn = document.createElement('button');
-					deleteBtn.className = 'skill-control-btn delete-control';
-					deleteBtn.innerHTML = '×';
-					deleteBtn.title = 'Delete card';
-					deleteBtn.addEventListener('click', (e) => {
-					    e.stopPropagation();
-					    deleteSkill(catIndex, skillIndex);
-					});
-					
-					// Add in order: expand/collapse (if vertical), bullet, duplicate, delete
-					controlsContainer.appendChild(toggleBtn);
-					controlsContainer.appendChild(duplicateBtn);
-					controlsContainer.appendChild(deleteBtn);
-					
-					card.appendChild(controlsContainer);
+				// Add control buttons (available always, shown on double-tap or in edit mode)
+				const controlsContainer = document.createElement('div');
+			    controlsContainer.className = 'skill-card-controls';
+			    
+			    // Bullet toggle button
+			    const bulletStyle = skill.bulletStyle || 'checkbox';
+			    const bulletIcons = {
+			        'checkbox': '☑',
+			        'number': '#',
+			        'square': '■',
+			        'circle': '●',
+			        'none': '—'
+			    };
+			    const toggleBtn = document.createElement('button');
+			    toggleBtn.className = 'skill-control-btn';
+			    toggleBtn.textContent = bulletIcons[bulletStyle];
+			    toggleBtn.title = 'Change bullet style';
+			    toggleBtn.addEventListener('click', (e) => {
+			        e.stopPropagation();
+			        toggleBulletStyle(catIndex, skillIndex);
+			    });
+			    
+			    // Duplicate button
+			    const duplicateBtn = document.createElement('button');
+			    duplicateBtn.className = 'skill-control-btn';
+			    duplicateBtn.innerHTML = '⧉';
+				duplicateBtn.style.fontSize = '13px';
+			    duplicateBtn.title = 'Duplicate card';
+			    duplicateBtn.addEventListener('click', (e) => {
+			        e.stopPropagation();
+			        duplicateSkill(catIndex, skillIndex);
+			    });
+			    
+			    // Delete button
+			    const deleteBtn = document.createElement('button');
+			    deleteBtn.className = 'skill-control-btn delete-control';
+			    deleteBtn.innerHTML = '×';
+			    deleteBtn.title = 'Delete card';
+			    deleteBtn.addEventListener('click', (e) => {
+			        e.stopPropagation();
+			        deleteSkill(catIndex, skillIndex);
+			    });
+			    
+			    // Add in order: bullet, duplicate, delete (left to right)
+			    controlsContainer.appendChild(toggleBtn);
+			    controlsContainer.appendChild(duplicateBtn);
+			    controlsContainer.appendChild(deleteBtn);
+			    
+			    card.appendChild(controlsContainer);
 			
 			
 			// Add double-tap to reveal controls when not in edit mode
@@ -3057,19 +2844,31 @@ function renderContent() {
             card.appendChild(addItemBtn); 
             
             grid.appendChild(card); 
-			 }); 
-
-		catDiv.appendChild(grid);
-			// Restore expanded state in vertical mode
-						if (layoutMode === 'vertical' && !editMode) {
-					    const cardId = `${catIndex}-${skillIndex}`;
-					    if (expandedCards[cardId]) {
-					        card.classList.add('expanded');
-					    }
-					    // CSS will handle hiding items for non-expanded cards
-					}
+			// Add click handler for headings mode
+			if (layoutMode === 'headings' && !editMode) {
+			    const cardId = `${catIndex}-${skillIndex}`;
+			    
+			    // Restore expanded state if it was expanded before
+			    if (expandedCards[cardId]) {
+			        card.classList.add('expanded');
+			    }
+			    
+			    card.addEventListener('click', function(e) {
+			        // Don't toggle if clicking on checkbox or editable content
+			        if (e.target.classList.contains('checkbox') || 
+			            e.target.classList.contains('editable') ||
+			            e.target.classList.contains('delete-btn')) {
+			            return;
+			        }
+			        // Only expand, never collapse
+			        this.classList.add('expanded');
+			        expandedCards[cardId] = true;
+			        saveExpandedCards();
+			    });
+			}
+        }); 
         
-         
+        catDiv.appendChild(grid); 
         
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
@@ -3100,9 +2899,10 @@ function switchTab(index) {
 function toggleCheck(itemId) { 
     if (editMode) return; 
     
-    const tempExpandedCards = [];  // ← Changed variable name
+    // Store expanded state before re-render
+    const expandedCards = [];
     document.querySelectorAll('.skill-card.expanded').forEach(card => {
-        tempExpandedCards.push({  // ← Use new name
+        expandedCards.push({
             catIndex: card.dataset.catIndex,
             skillIndex: card.dataset.skillIndex
         });
@@ -3112,7 +2912,8 @@ function toggleCheck(itemId) {
     saveCheckedItems();
     renderContent(); 
     
-    tempExpandedCards.forEach(({catIndex, skillIndex}) => {  // ← Use new name
+    // Restore expanded state after re-render
+    expandedCards.forEach(({catIndex, skillIndex}) => {
         const card = document.querySelector(`.skill-card[data-cat-index="${catIndex}"][data-skill-index="${skillIndex}"]`);
         if (card) card.classList.add('expanded');
     });
@@ -3160,16 +2961,10 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
     
     const originalText = element.textContent.trim();
     const parentItem = element.closest('.checklist-item');
-    const parentTab = element.closest('.nav-tab');
     
     // Prevent checkbox toggle during editing
     if (parentItem) {
         parentItem.style.pointerEvents = 'none';
-    }
-    
-    // Disable tab dragging during editing
-    if (parentTab) {
-        parentTab.draggable = false;
     }
     
     element.contentEditable = true;
@@ -3201,11 +2996,6 @@ function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
         
         if (parentItem) {
             parentItem.style.pointerEvents = '';
-        }
-        
-        // Re-enable tab dragging
-        if (parentTab) {
-            parentTab.draggable = true;
         }
         
         if (newText && newText !== originalText) {
@@ -3381,6 +3171,8 @@ function toggleLayout() {
     if (!currentUser) return;
     if (layoutMode === 'vertical') {
         layoutMode = 'horizontal';
+    } else if (layoutMode === 'horizontal') {
+        layoutMode = 'headings';
     } else {
         layoutMode = 'vertical';
     }
@@ -3392,16 +3184,21 @@ function toggleLayout() {
 function updateLayoutButton() {
     const btn = document.getElementById('layoutBtn');
     if (btn) {
+        // Show icon for NEXT layout (what it will change TO)
         if (layoutMode === 'vertical') {
             // Next: horizontal (show side-by-side icon)
             btn.innerHTML = '<div style="display: flex; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
             btn.title = 'Switch to horizontal scrolling';
+        } else if (layoutMode === 'horizontal') {
+            // Next: headings (show stacked rectangles with rounded edges)
+            btn.innerHTML = '<div style="display: flex; flex-direction: column; gap: 2px;"><div style="width: 16px; height: 5px; background: white; border-radius: 2px;"></div><div style="width: 16px; height: 5px; background: white; border-radius: 2px;"></div></div>';
+            btn.title = 'Switch to headings only';
         } else {
             // Next: vertical (show stacked rounded squares)
             btn.innerHTML = '<div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
             btn.title = 'Switch to vertical grid';
         }
-        btn.style.opacity = '0.2';
+        btn.style.opacity = '0.2'; // Make visible after content is set
     }
 }
 
@@ -3420,38 +3217,32 @@ function deleteCategory(catIndex) {
 // Close menus when clicking outside
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('dropdownMenu');
-    const categoryMenu = document.getElementById('categoryMenu');
     const colorMenu = document.getElementById('colorPickerMenu');
     const floatingBtn = document.getElementById('layoutBtn');
-    const logoutMenu = document.getElementById('logoutMenu');
-    const guideMenu = document.getElementById('guideDropdown');
-    const backdrop = document.getElementById('drawerBackdrop');
-
-    // Close logout menu when clicking outside
-    if (logoutMenu && !logoutMenu.contains(e.target) && !e.target.closest('#logoutMenuBtn')) {
-        logoutMenu.classList.remove('show');
-    }
-
+    
     // Don't close dropdown if clicking inside color picker
     if (colorMenu && colorMenu.contains(e.target)) {
-        return;
+        return; // Keep everything open when interacting with color picker
     }
-
+    
     // Close dropdown menu if clicking outside
     if (menu && !menu.contains(e.target)) {
         menu.classList.remove('show');
-        if (categoryMenu) categoryMenu.classList.remove('show');
         if (colorMenu) colorMenu.classList.remove('show');
+        // Show floating button when menu closes
+        if (floatingBtn) floatingBtn.style.display = 'flex';
     }
-
+    
+    const guideMenu = document.getElementById('guideDropdown');
+    const backdrop = document.getElementById('drawerBackdrop');
+    
     // Don't close drawer if clicking inside it or on the hamburger button
-    if (guideMenu && !guideMenu.contains(e.target) && !e.target.closest('.guide-menu-btn')) {
+    if (guideMenu && !guideMenu.contains(e.target) && !e.target.classList.contains('guide-menu-btn')) {
         if (guideMenu.classList.contains('show')) {
             closeDrawer();
         }
     }
 });
-
 
 // Check for auto-refresh when page becomes visible
 document.addEventListener('visibilitychange', () => {
@@ -3546,13 +3337,5 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
