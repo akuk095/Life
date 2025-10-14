@@ -1711,7 +1711,7 @@ function renderHeader() {
     const editModeMenuBtn = document.getElementById('editModeMenuBtn');
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
-    const changeCategoryBtn = document.getElementById('changeCategoryBtn');
+    const moveCategoryBtn = document.getElementById('moveCategoryBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
     const toggleDarkModeBtn = document.getElementById('toggleDarkModeBtn');
     const clearChecksBtn = document.getElementById('clearChecksBtn');
@@ -1723,17 +1723,16 @@ function renderHeader() {
 	if (logoutBtn) { logoutBtn.addEventListener('click', (e) => { e.stopPropagation(); logoutMenu.classList.toggle('show'); });}
 	if (logoutConfirmBtn) {logoutConfirmBtn.addEventListener('click', () => { logout(); logoutMenu.classList.remove('show'); closeDrawer(); });}
 	if (deleteAccountBtn) { deleteAccountBtn.addEventListener('click', () => {logoutMenu.classList.remove('show'); deleteAccount(); });}
-    if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
-    if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
-    if (createGuideBtn) { createGuideBtn.addEventListener('click', () => { createNewGuide(); closeDrawer();}); }
-    if (logoutBtn) { logoutBtn.addEventListener('click', () => { logout();  closeDrawer(); });}
-    if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
-    if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
-    if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
-    if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
-    if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
-    if (document.getElementById('moveCategoryBtn')) {
-	    document.getElementById('moveCategoryBtn').addEventListener('click', (e) => {
+	if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
+	if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
+	if (createGuideBtn) { createGuideBtn.addEventListener('click', () => { createNewGuide(); closeDrawer();}); }
+	if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
+	if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+	if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
+	if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
+	if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
+	if (moveCategoryBtn) {
+	    moveCategoryBtn.addEventListener('click', (e) => {
 	        e.stopPropagation();
 	        const mainMenu = document.getElementById('dropdownMenu');
 	        const categoryMenu = document.getElementById('categoryMenu');
@@ -1761,11 +1760,13 @@ function renderHeader() {
 	        }
 	    });
 	});
-    if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
-    if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
-    if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
-    if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
-    if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
+	if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
+	if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
+	if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
+	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
+	if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
+
+
     
     // App icon editing
     if (editMode && appIconSpan) {
@@ -3517,6 +3518,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
