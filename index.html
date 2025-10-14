@@ -148,12 +148,14 @@
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
-		.skill-card-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; align-items: center; padding: 4px 4px 4px 8px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-		.skill-card-controls.show { opacity: 1; pointer-events: auto; }
+		.skill-card-controls { position: absolute; top: 4px; right: 4px; display: flex; gap: 4px; align-items: center; padding: 4px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10; }
 		.edit-mode .skill-card-controls { opacity: 1; pointer-events: auto; }
 		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0.4; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; font-weight: normal; }
 		.skill-control-btn:hover { color: #6b7280; transform: scale(1.1); }
 		.skill-control-btn.delete-control:hover {color: #dc2626;}
+		.skill-grid:not(.horizontal) .skill-card:not(.expanded) .checklist-item { display: none; }
+		.skill-grid:not(.horizontal) .skill-card:not(.expanded) .add-item-btn { display: none; }
+		.skill-grid:not(.horizontal) .skill-card.expanded .checklist-item { display: flex; }
 		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
 		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
 		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
@@ -175,7 +177,7 @@
 		.expand-btn:hover { transform: scale(1.1); }
 		.expand-btn svg { width: 16px; height: 16px; stroke: #95a5a6; transition: stroke 0.2s ease; }
 		.expand-btn:hover svg { stroke: #2c3e50; }
-		.skill-card-controls { position: absolute; top: 4px; right: 4px; display: flex; gap: 4px; align-items: center; padding: 4px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10; }
+		
 
 		
 	</style>
@@ -3053,23 +3055,13 @@ function renderContent() {
             grid.appendChild(card); 
 			// Add click handler for headings mode
 			// Restore expanded state in vertical mode
-				if (layoutMode === 'vertical' && !editMode) {
-				    const cardId = `${catIndex}-${skillIndex}`;
-				    if (expandedCards[cardId]) {
-				        card.classList.add('expanded');
-				    } else {
-				        // Collapse by default - hide items
-				        const items = card.querySelectorAll('.checklist-item');
-				        if (items && items.length > 0) {
-				            items.forEach(item => {
-				                item.style.display = 'none';
-				            });
-				        }
-				        const addItemBtn = card.querySelector('.add-item-btn');
-				        if (addItemBtn) addItemBtn.style.display = 'none';
-				    }
-				}
-        }); 
+						if (layoutMode === 'vertical' && !editMode) {
+					    const cardId = `${catIndex}-${skillIndex}`;
+					    if (expandedCards[cardId]) {
+					        card.classList.add('expanded');
+					    }
+					    // CSS will handle hiding items for non-expanded cards
+					}
         
         catDiv.appendChild(grid); 
         
@@ -3550,6 +3542,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
