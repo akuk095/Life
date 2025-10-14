@@ -171,6 +171,11 @@
 		*::-webkit-scrollbar { display: none; }
 		#loginScreen { opacity: 0; transition: opacity 0.3s ease-in-out; }
 		#loginScreen.show { opacity: 1; }
+		.expand-btn { width: 20px; height: 20px; background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; margin-left: 4px; }
+		.expand-btn:hover { transform: scale(1.1); }
+		.expand-btn svg { width: 16px; height: 16px; stroke: #95a5a6; transition: stroke 0.2s ease; }
+		.expand-btn:hover svg { stroke: #2c3e50; }
+		.skill-card-controls { position: absolute; top: 4px; right: 4px; display: flex; gap: 4px; align-items: center; padding: 4px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10; }
 
 		
 	</style>
@@ -3054,9 +3059,12 @@ function renderContent() {
 				        card.classList.add('expanded');
 				    } else {
 				        // Collapse by default - hide items
-				        card.querySelectorAll('.checklist-item').forEach(item => {
-				            item.style.display = 'none';
-				        });
+				        const items = card.querySelectorAll('.checklist-item');
+				        if (items && items.length > 0) {
+				            items.forEach(item => {
+				                item.style.display = 'none';
+				            });
+				        }
 				        const addItemBtn = card.querySelector('.add-item-btn');
 				        if (addItemBtn) addItemBtn.style.display = 'none';
 				    }
@@ -3542,6 +3550,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
