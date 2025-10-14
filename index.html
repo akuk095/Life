@@ -3053,7 +3053,9 @@ function renderContent() {
             card.appendChild(addItemBtn); 
             
             grid.appendChild(card); 
-			// Add click handler for headings mode
+			 }); 
+
+		catDiv.appendChild(grid);
 			// Restore expanded state in vertical mode
 						if (layoutMode === 'vertical' && !editMode) {
 					    const cardId = `${catIndex}-${skillIndex}`;
@@ -3063,7 +3065,7 @@ function renderContent() {
 					    // CSS will handle hiding items for non-expanded cards
 					}
         
-        catDiv.appendChild(grid); 
+         
         
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
@@ -3094,10 +3096,9 @@ function switchTab(index) {
 function toggleCheck(itemId) { 
     if (editMode) return; 
     
-    // Store expanded state before re-render
-    const expandedCards = [];
+    const tempExpandedCards = [];  // ← Changed variable name
     document.querySelectorAll('.skill-card.expanded').forEach(card => {
-        expandedCards.push({
+        tempExpandedCards.push({  // ← Use new name
             catIndex: card.dataset.catIndex,
             skillIndex: card.dataset.skillIndex
         });
@@ -3107,8 +3108,7 @@ function toggleCheck(itemId) {
     saveCheckedItems();
     renderContent(); 
     
-    // Restore expanded state after re-render
-    expandedCards.forEach(({catIndex, skillIndex}) => {
+    tempExpandedCards.forEach(({catIndex, skillIndex}) => {  // ← Use new name
         const card = document.querySelector(`.skill-card[data-cat-index="${catIndex}"][data-skill-index="${skillIndex}"]`);
         if (card) card.classList.add('expanded');
     });
@@ -3542,6 +3542,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
