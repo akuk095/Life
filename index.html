@@ -316,7 +316,6 @@ let draggedCatIndex = null;
 let draggedSkillIndex = null;
 let draggedElement = null;
 let placeholder = null;
-let darkMode = false;
 		
 const colorThemes = [
     { name: 'Soft Cream', primary: '#F5F7D9', secondary: '#E1E3C1' },
@@ -603,9 +602,9 @@ function loadUserData(userId) {
         get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshEnabled`)),
         get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshTime`)),
         get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
-        get(ref(database, `users/${userId}/guides/${currentGuideId}/darkMode`))
-    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, darkModeSnap]) => {        
-        // Load categories
+    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap]) => {       
+		
+		// Load categories
         if (categoriesSnap.val()) {
             categories = categoriesSnap.val();
         }
@@ -650,23 +649,16 @@ function loadUserData(userId) {
             autoRefreshTime = autoRefreshTimeSnap.val();
         }
         
-        // Load dark mode
-        if (darkModeSnap.val() !== null) {
-            darkMode = darkModeSnap.val();
-        }
-        
         // Check if we need to auto-refresh
         checkAndAutoRefresh(lastRefreshSnap.val());
         
         // Apply theme
         applyTheme();
-        applyDarkMode();
-        
+                
         // Render everything
         renderHeader();
         renderTabs();
         renderContent();
-        applyDarkMode();
         updateLayoutButton();
         
         // Show container with fade-in effect
@@ -1526,7 +1518,6 @@ function renderHeader() {
     <button id="deleteGuideBtn">Delete</button>
 	<button id="changeCategoryBtn">Change Category</button>
 	<button id="toggleColorBtn">Theme</button>
-	<button id="toggleDarkModeBtn">${darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}</button>
 	<div class="color-picker-menu" id="colorPickerMenu">
 	    <h3>Preset Themes</h3>
 	    <div class="color-options" id="colorOptionsContainer" style="margin-bottom: 15px;">
@@ -1594,7 +1585,6 @@ function renderHeader() {
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
     const changeCategoryBtn = document.getElementById('changeCategoryBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
-    const toggleDarkModeBtn = document.getElementById('toggleDarkModeBtn');
     const clearChecksBtn = document.getElementById('clearChecksBtn');
     const autoRefreshBtn = document.getElementById('autoRefreshBtn');
     const applyColorBtn = document.getElementById('applyColorBtn');
@@ -1622,7 +1612,6 @@ function renderHeader() {
     if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
     if (changeCategoryBtn) changeCategoryBtn.addEventListener('click', changeGuideCategory);
     if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
-    if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
     if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
     if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
     if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
@@ -2260,89 +2249,6 @@ function toggleAutoRefresh() {
     }
 }
 
-function toggleDarkMode() {
-    darkMode = !darkMode;
-    if (!currentUser) return;
-    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/darkMode`), darkMode);
-    applyDarkMode();
-    renderHeader();
-}
-
-function applyDarkMode() {
-    if (darkMode) {
-        // Dark mode styles
-        document.body.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)';
-        document.documentElement.style.setProperty('--bg-color', '#1e1e1e');
-        document.documentElement.style.setProperty('--card-bg', '#2a2a2a');
-        document.documentElement.style.setProperty('--text-color', '#e0e0e0');
-        document.documentElement.style.setProperty('--text-secondary', '#b0b0b0');
-        document.documentElement.style.setProperty('--border-color', '#3a3a3a');
-        document.documentElement.style.setProperty('--hover-bg', '#333333');
-        document.documentElement.style.setProperty('--item-bg', '#252525');
-        
-        // Update content area
-        const contentArea = document.getElementById('contentArea');
-        if (contentArea) contentArea.style.background = '#1e1e1e';
-        
-        // Update skill cards
-        document.querySelectorAll('.skill-card').forEach(card => {
-            card.style.background = '#2a2a2a';
-            card.style.color = '#e0e0e0';
-            card.style.borderBottom = '1px solid #3a3a3a';
-        });
-        
-        // Update checklist items
-        document.querySelectorAll('.checklist-item').forEach(item => {
-            item.style.background = '#252525';
-            item.style.color = '#e0e0e0';
-        });
-        
-        // Update nav tabs
-        document.querySelector('.nav-tabs').style.background = '#2a2a2a';
-        document.querySelector('.nav-tabs').style.borderBottom = '1px solid #3a3a3a';
-        
-        // Update drawer
-        const drawer = document.getElementById('guideDropdown');
-        if (drawer) drawer.style.background = '#2a2a2a';
-        
-    } else {
-        // Light mode styles
-        document.body.style.background = 'linear-gradient(135deg, var(--secondary-color)CC 0%, var(--primary-color)CC 100%)';
-        document.documentElement.style.setProperty('--bg-color', '#f8f9fa');
-        document.documentElement.style.setProperty('--card-bg', '#ffffff');
-        document.documentElement.style.setProperty('--text-color', '#1f2937');
-        document.documentElement.style.setProperty('--text-secondary', '#495057');
-        document.documentElement.style.setProperty('--border-color', '#e8eaed');
-        document.documentElement.style.setProperty('--hover-bg', '#e8f4f8');
-        document.documentElement.style.setProperty('--item-bg', '#f8f9fa');
-        
-        // Update content area
-        const contentArea = document.getElementById('contentArea');
-        if (contentArea) contentArea.style.background = '#f8f9fa';
-        
-        // Update skill cards
-        document.querySelectorAll('.skill-card').forEach(card => {
-            card.style.background = 'white';
-            card.style.color = '#1f2937';
-            card.style.borderBottom = '1px solid #e8eaed';
-        });
-        
-        // Update checklist items
-        document.querySelectorAll('.checklist-item').forEach(item => {
-            item.style.background = '#f8f9fa';
-            item.style.color = '#495057';
-        });
-        
-        // Update nav tabs
-        document.querySelector('.nav-tabs').style.background = 'white';
-        document.querySelector('.nav-tabs').style.borderBottom = '1px solid #e8eaed';
-        
-        // Update drawer
-        const drawer = document.getElementById('guideDropdown');
-        if (drawer) drawer.style.background = '#edeff0';
-    }
-}
-
 function renderTabs() { 
     const navTabs = document.getElementById('navTabs'); 
     navTabs.innerHTML = ''; 
@@ -2818,7 +2724,7 @@ function renderContent() {
             if (menuBtn) menuBtn.style.display = 'none';
         }, 0);
     }
-    applyDarkMode();
+   
 }
 
 function switchTab(index) { 
@@ -3254,6 +3160,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
