@@ -1679,16 +1679,15 @@ document.addEventListener('touchend', (e) => {
     currentRightSwipeItem = null;
 });
 
-// Diagonal swipe (down-left) to delete skill cards
+// Diagonal swipe (down-left) to delete skill cards - captures anywhere on card
 document.addEventListener('touchstart', (e) => {
+    // Check if touch is on or inside a skill card
     const card = e.target.closest('.skill-card');
     if (!card || editMode) return;
     
-    // Don't interfere with item interactions or card controls
-    if (e.target.closest('.checklist-item') || 
-        e.target.closest('.skill-control-btn') ||
-        e.target.closest('.add-item-btn') ||
-        e.target.closest('.skill-title')) {
+    // Don't interfere with card control buttons
+    if (e.target.closest('.skill-control-btn') || 
+        e.target.closest('.add-item-btn')) {
         return;
     }
     
@@ -1714,19 +1713,30 @@ document.addEventListener('touchmove', (e) => {
         return;
     }
     
-    // Only start if swipe is diagonal down-left (between 30-60 degrees down from left)
+    // Check if swipe is diagonal down-left
     if (!isCardDragging) {
         const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-        const isDiagonalDownLeft = deltaX < 0 && deltaY > 0 && angle > 135 && angle < 170;
+        // Down-left: angle between 120° and 170° (going down and to the left)
+        const isDiagonalDownLeft = deltaX < 0 && deltaY > 0 && angle > 120 && angle < 170;
         
         if (isDiagonalDownLeft && Math.abs(deltaX) > 30 && Math.abs(deltaY) > 20) {
             isCardDragging = true;
-            e.preventDefault();
-        } else if (Math.abs(deltaX) > 40 || Math.abs(deltaY) > 40) {
-            // Different direction - cancel
+            e.preventDefault(); // Prevent scrolling and item swipes
+            
+            // Cancel any active item swipe
+            if (currentSwipedItem) {
+                currentSwipedItem.style.transition = '';
+                currentSwipedItem.style.transform = '';
+                currentSwipedItem.style.background = '';
+                currentSwipedItem = null;
+                isItemDragging = false;
+            }
+        } else if ((Math.abs(deltaX) > 40 && Math.abs(deltaY) < 20) || Math.abs(deltaY) > 50) {
+            // Horizontal swipe (for items) or vertical scroll - cancel card swipe
             currentSwipedCard.style.transition = '';
             currentSwipedCard.style.transform = '';
             currentSwipedCard.style.background = '';
+            currentSwipedCard.style.boxShadow = '';
             currentSwipedCard = null;
             return;
         }
@@ -1734,7 +1744,16 @@ document.addEventListener('touchmove', (e) => {
     
     if (!isCardDragging) return;
     
-    // Apply diagonal movement
+    // Prevent item swipes while card is being swiped
+    if (currentSwipedItem) {
+        currentSwipedItem.style.transition = '';
+        currentSwipedItem.style.transform = '';
+        currentSwipedItem.style.background = '';
+        currentSwipedItem = null;
+        isItemDragging = false;
+    }
+    
+    // Apply diagonal movement with visual feedback
     if (deltaX < 0 && deltaY > 0) {
         const adjustedDeltaX = deltaX + 30;
         const adjustedDeltaY = deltaY - 20;
@@ -1755,7 +1774,7 @@ document.addEventListener('touchend', (e) => {
     const deltaX = cardTouchCurrentX - cardTouchStartX;
     const deltaY = cardTouchCurrentY - cardTouchStartY;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const threshold = 120;
+    const threshold = 100; // Reduced from 120 for easier triggering
     
     currentSwipedCard.style.transition = 'all 0.3s ease';
     
@@ -1767,6 +1786,7 @@ document.addEventListener('touchend', (e) => {
         // Confirm deletion
         if (confirm('Delete this entire card?')) {
             // Delete the card with animation
+            currentSwipedCard.style.transition = 'all 0.3s ease';
             currentSwipedCard.style.transform = 'translate(-150%, 100%) rotate(-15deg)';
             currentSwipedCard.style.opacity = '0';
             
@@ -1780,6 +1800,7 @@ document.addEventListener('touchend', (e) => {
             }, 300);
         } else {
             // User cancelled - snap back
+            currentSwipedCard.style.transition = 'all 0.3s ease';
             currentSwipedCard.style.transform = '';
             currentSwipedCard.style.background = '';
             currentSwipedCard.style.boxShadow = '';
@@ -1787,6 +1808,7 @@ document.addEventListener('touchend', (e) => {
         }
     } else {
         // Not enough swipe - snap back
+        currentSwipedCard.style.transition = 'all 0.3s ease';
         currentSwipedCard.style.transform = '';
         currentSwipedCard.style.background = '';
         currentSwipedCard.style.boxShadow = '';
@@ -4033,3 +4055,4 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
