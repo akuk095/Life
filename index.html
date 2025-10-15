@@ -110,12 +110,12 @@
 		.nav-tab:hover { color: var(--primary-color); background: rgba(52, 152, 219, 0.1); }
 		.nav-tab.active { color: var(--tab-active-color, var(--primary-color)); background: white; font-weight: 600; box-shadow: 0 -4px 12px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06); z-index: 10; }
 		/* Only disable pointer events when NOT in edit mode */
-		body:not(.edit-mode) .nav-tab * { pointer-events: none; }
-		body:not(.edit-mode) .nav-tab { pointer-events: auto; }
+		body:not(.edit-mode-active) .nav-tab * { pointer-events: none; }
+		body:not(.edit-mode-active) .nav-tab { pointer-events: auto; }
 		/* In edit mode, allow interactions */
-		.edit-mode .nav-tab .tab-icon { cursor: pointer; pointer-events: auto; }
-		.edit-mode .nav-tab .tab-name { cursor: text; pointer-events: auto; }
-		.edit-mode .nav-tab .emoji-remove-btn { pointer-events: auto; }
+		.edit-mode-active .nav-tab .tab-icon { cursor: pointer; pointer-events: auto; }
+		.edit-mode-active .nav-tab .tab-name { cursor: text; pointer-events: auto; }
+		.edit-mode-active .nav-tab .emoji-remove-btn { pointer-events: auto; }
 		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
 		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }	
 		.nav-tabs { display: flex; background: white; border-bottom: none; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: sticky; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 0 0 16px 16px; padding: 8px 8px 0; margin-bottom: 12px; }
@@ -3349,6 +3349,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
