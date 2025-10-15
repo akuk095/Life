@@ -82,13 +82,13 @@
 		.floating-layout-btn { position: fixed; bottom: max(env(safe-area-inset-bottom), 24px); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 999; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
 		.floating-layout-btn:active { transform: scale(0.9); }
 		.floating-layout-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 1; }
-		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 85%; max-width: 320px; background: rgba(237, 239, 240, 1); box-shadow: 2px 0 20px rgba(0,0,0,0.2); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: 140px; scrollbar-width: none; -ms-overflow-style: none; will-change: transform; }
-		.guide-dropdown::-webkit-scrollbar { display: none; }
-		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
-		.guide-dropdown button:hover { background: #f8f9fa; }
-		.guide-dropdown button:last-child { border-bottom: none; }
-		.guide-dropdown .current-guide { background: rgba(25, 118, 210, 0.1); font-weight: 700; color: var(--primary-color, #1976d2); font-size: 15px; }
-		.guide-dropdown.show { transform: translateX(0); }
+		.guide- { position: fixed; top: 0; left: 0; height: 100vh; width: 85%; max-width: 320px; background: rgba(237, 239, 240, 1); box-shadow: 2px 0 20px rgba(0,0,0,0.2); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: 140px; scrollbar-width: none; -ms-overflow-style: none; will-change: transform; }
+		.guide-::-webkit-scrollbar { display: none; }
+		.guide- button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+		.guide- button:hover { background: #f8f9fa; }
+		.guide- button:last-child { border-bottom: none; }
+		.guide- .current-guide { background: rgba(25, 118, 210, 0.1); font-weight: 700; color: var(--primary-color, #1976d2); font-size: 15px; }
+		.guide-.show { transform: translateX(0); }
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
 		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: max(env(safe-area-inset-top), 20px) 20px 20px; text-align: center; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.15); border-radius: 0 0 20px 20px; }
@@ -153,7 +153,7 @@
 		.skill-control-btn:hover { color: #6b7280; transform: scale(1.1); }
 		.skill-control-btn.delete-control:hover {color: #dc2626;}
 		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
-		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
+		.guide-.show ~ .drawer-footer { transform: translateX(0); }
 		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
 		.drawer-create-icon:hover { opacity: 0.8; transform: scale(1.05); }
 		.drawer-create-icon:active { opacity: 1; transform: scale(0.98); }
@@ -787,9 +787,9 @@ function selectColor(color) {
     applyTheme();
     renderHeader();
     
-    // Close both color picker and dropdown menu
+    // Close both color picker and  menu
     document.getElementById('colorPickerMenu').classList.remove('show');
-    document.getElementById('dropdownMenu').classList.remove('show');
+    document.getElementById('Menu').classList.remove('show');
 }
 
 function initColorPicker() {
@@ -1061,7 +1061,7 @@ function applyCustomColor() {
         selectCustomColor(color);
         // Close the color picker
         document.getElementById('colorPickerMenu').classList.remove('show');
-        document.getElementById('dropdownMenu').classList.remove('show');
+        document.getElementById('Menu').classList.remove('show');
     } else {
         alert('Please enter a valid color code (e.g., #FF0000)');
     }
@@ -1562,6 +1562,8 @@ function renderHeader() {
     <button id="autoRefreshBtn">
         ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
     </button>
+</div>
+</div>
 </div>
 <h1>
     <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
@@ -3199,6 +3201,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
