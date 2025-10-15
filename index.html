@@ -1522,6 +1522,69 @@ document.addEventListener('touchend', (e) => {
     currentSwipedItem = null;
 });
 
+// Swipe down to toggle checkboxes
+let checkboxTouchStartY = 0;
+let checkboxTouchCurrentY = 0;
+let isCheckboxSwiping = false;
+let currentCheckbox = null;
+
+document.addEventListener('touchstart', (e) => {
+    // Only on checkbox/bullet elements
+    const checkbox = e.target.closest('.checkbox, .bullet-number, .bullet-square, .bullet-circle');
+    if (!checkbox || editMode) return;
+    
+    checkboxTouchStartY = e.touches[0].clientY;
+    checkboxTouchCurrentY = checkboxTouchStartY;
+    isCheckboxSwiping = false;
+    currentCheckbox = checkbox;
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+    if (!currentCheckbox) return;
+    
+    checkboxTouchCurrentY = e.touches[0].clientY;
+    const deltaY = checkboxTouchCurrentY - checkboxTouchStartY;
+    
+    // Only trigger if swiping DOWN (positive delta) and movement > 30px
+    if (deltaY > 30 && !isCheckboxSwiping) {
+        isCheckboxSwiping = true;
+        
+        // Add visual feedback
+        currentCheckbox.style.transform = 'scale(1.2)';
+        currentCheckbox.style.transition = 'transform 0.2s ease';
+    }
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+    if (!currentCheckbox) return;
+    
+    const deltaY = checkboxTouchCurrentY - checkboxTouchStartY;
+    const threshold = 40; // Minimum swipe distance
+    
+    if (isCheckboxSwiping && deltaY > threshold) {
+        // Get the item ID and toggle it
+        const item = currentCheckbox.closest('.checklist-item');
+        if (item) {
+            const catIndex = item.dataset.catIndex;
+            const skillIndex = item.dataset.skillIndex;
+            const itemIndex = item.dataset.itemIndex;
+            const itemId = `${catIndex}-${skillIndex}-${itemIndex}`;
+            
+            // Toggle the checkbox
+            toggleCheck(itemId);
+        }
+    }
+    
+    // Reset visual feedback
+    if (currentCheckbox) {
+        currentCheckbox.style.transform = '';
+        currentCheckbox.style.transition = '';
+    }
+    
+    isCheckboxSwiping = false;
+    currentCheckbox = null;
+});
+	
 function toggleGuideMenu(e) {
     e.stopPropagation();
     const dropdown = document.getElementById('guideDropdown');
@@ -3676,6 +3739,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
