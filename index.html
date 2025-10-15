@@ -3524,27 +3524,40 @@ function renderContent() {
                 addCardZone.style.bottom = '0';
                 addCardZone.style.left = '50%';
                 addCardZone.style.transform = 'translateX(-50%)';
-                addCardZone.style.width = '60px';
-                addCardZone.style.height = '30px';
+                addCardZone.style.width = '80px';
+                addCardZone.style.height = '40px';
                 addCardZone.style.cursor = 'pointer';
                 addCardZone.style.display = 'flex';
                 addCardZone.style.alignItems = 'center';
                 addCardZone.style.justifyContent = 'center';
                 addCardZone.style.opacity = '0';
                 addCardZone.style.transition = 'opacity 0.2s';
+                addCardZone.style.zIndex = '5';
                 addCardZone.innerHTML = '+';
-                addCardZone.style.fontSize = '24px';
+                addCardZone.style.fontSize = '28px';
                 addCardZone.style.color = 'var(--primary-color)';
                 addCardZone.style.fontWeight = 'bold';
                 
+                // Touch/hover events
                 addCardZone.addEventListener('mouseenter', () => {
-                    addCardZone.style.opacity = '0.6';
-                    addCardZone.style.background = 'rgba(255,255,255,0.9)';
-                    addCardZone.style.borderRadius = '8px 8px 0 0';
+                    addCardZone.style.opacity = '0.7';
+                    addCardZone.style.background = 'rgba(255,255,255,0.95)';
+                    addCardZone.style.borderRadius = '12px 12px 0 0';
+                    addCardZone.style.boxShadow = '0 -2px 8px rgba(0,0,0,0.1)';
                 });
                 addCardZone.addEventListener('mouseleave', () => {
                     addCardZone.style.opacity = '0';
                     addCardZone.style.background = '';
+                    addCardZone.style.boxShadow = '';
+                });
+                
+                // Touch support for mobile
+                addCardZone.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    addCardZone.style.opacity = '0.7';
+                    addCardZone.style.background = 'rgba(255,255,255,0.95)';
+                    addCardZone.style.borderRadius = '12px 12px 0 0';
+                    addCardZone.style.boxShadow = '0 -2px 8px rgba(0,0,0,0.1)';
                 });
                 
                 addCardZone.addEventListener('click', (e) => {
@@ -3560,8 +3573,10 @@ function renderContent() {
                 });
                 
                 card.appendChild(addCardZone);
+                card.style.position = 'relative'; // Ensure card has position for absolute child
             }
             
+                      
             grid.appendChild(card); 
         }); 
         
@@ -4055,4 +4070,5 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
