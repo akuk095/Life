@@ -2045,15 +2045,15 @@ function toggleMenu(e) {
 
 // Authentication functions
 async function login(email, password) {
-    signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            currentUser = userCredential.user;
-            loadUserData(currentUser.uid);
-        })
-        .catch((error) => {
-            await customAlert(error.message, 'Login Failed');
-        });
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        currentUser = userCredential.user;
+        loadUserData(currentUser.uid);
+    } catch (error) {
+        await customAlert(error.message, 'Login Failed');
+    }
 }
+
 
 async function signup(email, password) {
     createUserWithEmailAndPassword(auth, email, password)
@@ -4232,6 +4232,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
