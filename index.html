@@ -1160,17 +1160,32 @@ function applyHeaderImage() {
         detectImageBrightness(headerImage, (isLight) => {
             console.log('Image is', isLight ? 'LIGHT' : 'DARK');
             const textColor = isLight ? '#2c3e50' : 'white';
-            const scrimColor = isLight ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.3)';
+            const scrimColor = isLight ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.25)';
             
-            // Apply background directly to text elements
+            // Apply background to header container to merge h1 and p
             const h1 = header.querySelector('h1');
             const p = header.querySelector('p');
             
-            if (h1) {
-                h1.style.cssText = `
+            // Create a wrapper for merged background
+            if (h1 && p) {
+                // Check if wrapper already exists
+                let wrapper = header.querySelector('.header-text-wrapper');
+                if (!wrapper) {
+                    wrapper = document.createElement('div');
+                    wrapper.className = 'header-text-wrapper';
+                    
+                    // Insert wrapper before h1
+                    h1.parentNode.insertBefore(wrapper, h1);
+                    
+                    // Move h1 and p into wrapper
+                    wrapper.appendChild(h1);
+                    wrapper.appendChild(p);
+                }
+                
+                // Style the wrapper with merged background
+                wrapper.style.cssText = `
                     position: relative;
                     z-index: 1;
-                    color: ${textColor};
                     background: linear-gradient(90deg, 
                         transparent 0%, 
                         ${scrimColor} 15%, 
@@ -1178,30 +1193,23 @@ function applyHeaderImage() {
                         transparent 100%);
                     backdrop-filter: blur(8px);
                     -webkit-backdrop-filter: blur(8px);
-                    padding: 8px 20px;
+                    padding: 12px 24px;
                     border-radius: 10px;
                     display: inline-block;
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    margin-bottom: 6px;
                 `;
-            }
-            
-            if (p) {
-                p.style.cssText = `
-                    position: relative;
-                    z-index: 1;
+                
+                // Style h1 and p without their own backgrounds
+                h1.style.cssText = `
                     color: ${textColor};
-                    background: linear-gradient(90deg, 
-                        transparent 0%, 
-                        ${scrimColor} 15%, 
-                        ${scrimColor} 85%, 
-                        transparent 100%);
-                    backdrop-filter: blur(8px);
-                    -webkit-backdrop-filter: blur(8px);
-                    padding: 6px 16px;
-                    border-radius: 8px;
-                    display: inline-block;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    margin: 0 0 4px 0;
+                    font-size: 20px;
+                `;
+                
+                p.style.cssText = `
+                    color: ${textColor};
+                    margin: 0;
+                    font-size: 12px;
                 `;
             }
             
@@ -1231,6 +1239,20 @@ function applyHeaderImage() {
         header.style.backgroundPosition = '';
         header.style.backgroundRepeat = '';
         
+        // Remove wrapper and reset text styles
+        const wrapper = header.querySelector('.header-text-wrapper');
+        if (wrapper) {
+            const h1 = wrapper.querySelector('h1');
+            const p = wrapper.querySelector('p');
+            
+            // Move elements back to header
+            if (h1) header.appendChild(h1);
+            if (p) header.appendChild(p);
+            
+            // Remove wrapper
+            wrapper.remove();
+        }
+        
         // Reset text styles completely
         const h1 = header.querySelector('h1');
         const p = header.querySelector('p');
@@ -1245,7 +1267,6 @@ function applyHeaderImage() {
         applyTheme();
     }
 }
-
 function detectImageBrightness(imageSrc, callback) {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
@@ -3674,6 +3695,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
