@@ -1282,28 +1282,30 @@ document.addEventListener('touchend', (e) => {
     currentSwipedItem.style.transition = 'all 0.3s ease';
     
     if (deltaX < 0 && Math.abs(deltaX) > threshold) {
-        // Delete the item with animation
-        currentSwipedItem.style.transform = 'translateX(-100%)';
-        currentSwipedItem.style.opacity = '0';
-        
         // Get the data immediately before animation
         const catIndex = parseInt(currentSwipedItem.dataset.catIndex);
         const skillIndex = parseInt(currentSwipedItem.dataset.skillIndex);
         const itemIndex = parseInt(currentSwipedItem.dataset.itemIndex);
         
-        setTimeout(() => {
-            // Delete the item
-            if (!isNaN(catIndex) && !isNaN(skillIndex) && !isNaN(itemIndex)) {
-                categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
-                saveCategories();
-                renderContent();
-            }
-        }, 300);
-    } else {
-        // Snap back
-        currentSwipedItem.style.transform = 'translateX(0)';
-        currentSwipedItem.style.background = '#f8f9fa';
-    }
+        // Confirm deletion
+        if (confirm('Delete this item?')) {
+            // Delete the item with animation
+            currentSwipedItem.style.transform = 'translateX(-100%)';
+            currentSwipedItem.style.opacity = '0';
+            
+            setTimeout(() => {
+                // Delete the item
+                if (!isNaN(catIndex) && !isNaN(skillIndex) && !isNaN(itemIndex)) {
+                    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
+                    saveCategories();
+                    renderContent();
+                }
+            }, 300);
+        } else {
+            // User cancelled - snap back
+            currentSwipedItem.style.transform = 'translateX(0)';
+            currentSwipedItem.style.background = '#f8f9fa';
+        }
     
     isItemDragging = false;
     currentSwipedItem = null;
@@ -3125,10 +3127,12 @@ function deleteSkill(catIndex, skillIndex) {
     } 
 }
 
-function deleteItem(catIndex, skillIndex, itemIndex) { 
-    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
-    saveCategories();
-    renderContent(); 
+function deleteItem(catIndex, skillIndex, itemIndex) {
+    if (confirm('Delete this item?')) {
+        categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
+        saveCategories();
+        renderContent();
+    }
 }
 
 function addItem(catIndex, skillIndex) { 
@@ -3358,6 +3362,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
