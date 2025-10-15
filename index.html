@@ -1477,53 +1477,26 @@ document.addEventListener('touchmove', (e) => {
         const adjustedDelta = deltaX + 30;
         currentSwipedItem.style.transform = `translateX(${adjustedDelta}px)`;
         
-        // Show delete button background as user swipes
-        const maxSwipe = 100;
-        const swipeProgress = Math.min(Math.abs(adjustedDelta) / maxSwipe, 1);
-        currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #ef4444 100%)`;
-    }
-});
-
-document.addEventListener('touchmove', (e) => {
-    if (!currentSwipedItem) return;
-    
-    itemTouchCurrentX = e.touches[0].clientX;
-    itemTouchCurrentY = e.touches[0].clientY;
-    const deltaX = itemTouchCurrentX - itemTouchStartX;
-    const deltaY = itemTouchCurrentY - itemTouchStartY;
-    
-    // Dead zone - ignore first 30px of movement
-    if (!isItemDragging && Math.abs(deltaX) < 30) {
-        return;
-    }
-    
-    // Only start swiping if horizontal movement is greater than vertical
-    if (!isItemDragging) {
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
-            isItemDragging = true;
-        } else if (Math.abs(deltaY) > 15) {
-            // Vertical scroll detected - cancel swipe
-            currentSwipedItem.style.transition = '';
-            currentSwipedItem.style.transform = '';
-            currentSwipedItem.style.background = '';
-            currentSwipedItem = null;
-            return;
-        }
-    }
-    
-    if (!isItemDragging) return;
-    
-    // Only allow swiping left (negative delta)
-    if (deltaX < 0) {
-        // Subtract dead zone from visual movement for smoother feel
-        const adjustedDelta = deltaX + 30;
-        currentSwipedItem.style.transform = `translateX(${adjustedDelta}px)`;
-        
         // Show delete button background as user swipes - MORE OPAQUE
         const maxSwipe = 100;
         const swipeProgress = Math.min(Math.abs(adjustedDelta) / maxSwipe, 1);
-        currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #dc2626 100%)`; // Changed from #ef4444 to #dc2626 (darker red)
+        currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #dc2626 100%)`;
     }
+});
+
+document.addEventListener('touchend', (e) => {
+    if (!currentSwipedItem) return;
+    
+    const deltaX = itemTouchCurrentX - itemTouchStartX;
+    const threshold = 100;
+    
+    currentSwipedItem.style.transition = 'all 0.3s ease';
+    
+    if (isItemDragging && deltaX < 0 && Math.abs(deltaX) > threshold) {
+        // Get the data immediately before animation
+        const catIndex = parseInt(currentSwipedItem.dataset.catIndex);
+        const skillIndex = parseInt(currentSwipedItem.dataset.skillIndex);
+        const itemIndex = parseInt(currentSwipedItem.dataset.itemIndex);
         
         // Confirm deletion
         if (confirm('Delete this item?')) {
@@ -1543,8 +1516,13 @@ document.addEventListener('touchmove', (e) => {
             // User cancelled - snap back
             currentSwipedItem.style.transform = 'translateX(0)';
             currentSwipedItem.style.background = '#f8f9fa';
-        
-	}
+        }
+    } else {
+        // Not enough swipe - snap back
+        currentSwipedItem.style.transform = 'translateX(0)';
+        currentSwipedItem.style.background = '#f8f9fa';
+    }
+    
     isItemDragging = false;
     currentSwipedItem = null;
 });
@@ -1602,11 +1580,39 @@ document.addEventListener('touchmove', (e) => {
     
     if (!isRightSwiping) return;
     
-    // Visual feedback - slight movement and color change
+    // Visual feedback - animate the checkbox/bullet
     if (deltaX > 0) {
-        const adjustedDelta = Math.min(deltaX - 20, 40); // Max 40px movement
-        currentRightSwipeItem.style.transform = `translateX(${adjustedDelta}px)`;
-        currentRightSwipeItem.style.background = `linear-gradient(90deg, #3b82f6 0%, #f8f9fa ${adjustedDelta * 2.5}%)`; // Blue gradient
+        const adjustedDelta = Math.min(deltaX - 20, 60); // Max 60px movement
+        const progress = adjustedDelta / 60;
+        
+        // Find the checkbox or bullet element
+        const bullet = currentRightSwipeItem.querySelector('.checkbox, .bullet-number, .bullet-square, .bullet-circle');
+        if (bullet) {
+            // Pulse and scale animation
+            bullet.style.transform = `scale(${1 + progress * 0.5}) rotate(${progress * 360}deg)`;
+            bullet.style.transition = 'none';
+            
+            // Color change based on next bullet type
+            const catIndex = parseInt(currentRightSwipeItem.dataset.catIndex);
+            const skillIndex = parseInt(currentRightSwipeItem.dataset.skillIndex);
+            const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
+            const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
+            const currentIndex = styles.indexOf(currentStyle);
+            const nextIndex = (currentIndex + 1) % styles.length;
+            
+            // Show preview color based on next type
+            const colors = {
+                'checkbox': '#10b981',
+                'number': '#3b82f6', 
+                'square': '#8b5cf6',
+                'circle': '#f59e0b',
+                'none': '#6b7280'
+            };
+            bullet.style.background = colors[styles[nextIndex]];
+        }
+        
+        // Subtle background gradient
+        currentRightSwipeItem.style.background = `linear-gradient(90deg, #f8f9fa 0%, #dbeafe ${adjustedDelta}%)`; 
         currentRightSwipeItem.style.transition = 'none';
     }
 });
@@ -3277,7 +3283,43 @@ function renderContent() {
                 textDiv.contentEditable = editMode;
                 textDiv.textContent = item;
                 checkItem.appendChild(textDiv);
-                
+
+				// Add click zone on right end to add new item below (only when NOT in edit mode)
+                if (!editMode) {
+                    const addZone = document.createElement('div');
+                    addZone.style.position = 'absolute';
+                    addZone.style.right = '0';
+                    addZone.style.top = '0';
+                    addZone.style.width = '50px';
+                    addZone.style.height = '100%';
+                    addZone.style.cursor = 'pointer';
+                    addZone.style.display = 'flex';
+                    addZone.style.alignItems = 'center';
+                    addZone.style.justifyContent = 'center';
+                    addZone.style.opacity = '0';
+                    addZone.style.transition = 'opacity 0.2s';
+                    addZone.innerHTML = '+';
+                    addZone.style.fontSize = '20px';
+                    addZone.style.color = 'var(--primary-color)';
+                    
+                    addZone.addEventListener('mouseenter', () => {
+                        addZone.style.opacity = '0.5';
+                    });
+                    addZone.addEventListener('mouseleave', () => {
+                        addZone.style.opacity = '0';
+                    });
+                    
+                    addZone.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        categories[catIndex].skills[skillIndex].items.splice(itemIndex + 1, 0, "New item");
+                        saveCategories();
+                        renderContent();
+                    });
+                    
+                    checkItem.appendChild(addZone);
+                    checkItem.style.position = 'relative';
+                }
+				
                 // Add double-click to edit (only when not in edit mode)
                 if (!editMode) {
                     textDiv.addEventListener('dblclick', function(e) {
@@ -3315,6 +3357,51 @@ function renderContent() {
             addItemBtn.textContent = '+ Add Item'; 
             addItemBtn.addEventListener('click', () => addItem(catIndex, skillIndex));
             card.appendChild(addItemBtn); 
+            
+            // Add click zone at center bottom to add card below (only when NOT in edit mode)
+            if (!editMode) {
+                const addCardZone = document.createElement('div');
+                addCardZone.style.position = 'absolute';
+                addCardZone.style.bottom = '0';
+                addCardZone.style.left = '50%';
+                addCardZone.style.transform = 'translateX(-50%)';
+                addCardZone.style.width = '60px';
+                addCardZone.style.height = '30px';
+                addCardZone.style.cursor = 'pointer';
+                addCardZone.style.display = 'flex';
+                addCardZone.style.alignItems = 'center';
+                addCardZone.style.justifyContent = 'center';
+                addCardZone.style.opacity = '0';
+                addCardZone.style.transition = 'opacity 0.2s';
+                addCardZone.innerHTML = '+';
+                addCardZone.style.fontSize = '24px';
+                addCardZone.style.color = 'var(--primary-color)';
+                addCardZone.style.fontWeight = 'bold';
+                
+                addCardZone.addEventListener('mouseenter', () => {
+                    addCardZone.style.opacity = '0.6';
+                    addCardZone.style.background = 'rgba(255,255,255,0.9)';
+                    addCardZone.style.borderRadius = '8px 8px 0 0';
+                });
+                addCardZone.addEventListener('mouseleave', () => {
+                    addCardZone.style.opacity = '0';
+                    addCardZone.style.background = '';
+                });
+                
+                addCardZone.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const newSkill = {
+                        title: "New Skill",
+                        icon: "✨",
+                        items: ["New item - click to edit"]
+                    };
+                    categories[catIndex].skills.splice(skillIndex + 1, 0, newSkill);
+                    saveCategories();
+                    renderContent();
+                });
+                
+                card.appendChild(addCardZone);
+            }
             
             grid.appendChild(card); 
         }); 
@@ -3809,6 +3896,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
