@@ -1173,20 +1173,23 @@ function applyHeaderImage() {
             if (h1 && p) {
                 const scrim = document.createElement('div');
                 scrim.className = 'header-text-scrim';
+                
+                // More visible scrim with solid background (no reliance on backdrop-filter)
                 scrim.style.cssText = `
                     position: absolute;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
                     background: ${scrimColor};
-                    backdrop-filter: blur(15px);
-                    -webkit-backdrop-filter: blur(15px);
-                    padding: 25px 40px;
+                    padding: 30px 50px;
                     border-radius: 16px;
                     z-index: 0;
                     pointer-events: none;
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                    border: 2px solid ${isLight ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'};
                 `;
+                console.log('Creating scrim with color:', scrimColor);
+                
                 header.style.position = 'relative';
                 
                 // Insert scrim before the first child
@@ -1196,10 +1199,12 @@ function applyHeaderImage() {
                 h1.style.position = 'relative';
                 h1.style.zIndex = '1';
                 h1.style.color = textColor;
+                h1.style.textShadow = isLight ? '0 1px 2px rgba(255,255,255,0.8)' : '0 2px 4px rgba(0,0,0,0.8)';
                 
                 p.style.position = 'relative';
                 p.style.zIndex = '1';
                 p.style.color = textColor;
+                p.style.textShadow = isLight ? '0 1px 2px rgba(255,255,255,0.8)' : '0 2px 4px rgba(0,0,0,0.8)';
             }
             
             // Keep buttons visible and in correct position
@@ -3675,6 +3680,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
