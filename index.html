@@ -455,6 +455,12 @@ const colorThemes = [
 
 // Skill card drag start
 document.addEventListener('dragstart', (e) => {
+    // Prevent dragging if any element is being edited
+    if (document.querySelector('[contenteditable="true"]')) {
+        e.preventDefault();
+        return false;
+    }
+    
     if (e.target.classList.contains('skill-card') && !editMode && layoutMode === 'headings') {
         draggedCard = e.target;
         draggedCatIndex = parseInt(e.target.dataset.catIndex);
@@ -470,6 +476,12 @@ document.addEventListener('dragstart', (e) => {
     
     // Tab drag start
     if (e.target.classList.contains('nav-tab') && !editMode && e.target.draggable) {
+        // Prevent dragging if any element is being edited
+        if (document.querySelector('[contenteditable="true"]')) {
+            e.preventDefault();
+            return false;
+        }
+        
         draggedTab = e.target;
         draggedTabIndex = parseInt(e.target.dataset.catIndex);
         e.target.style.opacity = '0.5';
@@ -2352,19 +2364,14 @@ function renderTabs() {
 			`;
             
             // Add event listeners for edit mode
-const tabIcon = tab.querySelector('.tab-icon');
-if (tabIcon) {
-    tabIcon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Get the index from the closest element that has it
-        let targetElement = e.target;
-        if (!targetElement.dataset.catIndex) {
-            targetElement = e.target.closest('[data-cat-index]');
-        }
-        if (targetElement && targetElement.dataset.catIndex) {
-            const catIndex = parseInt(targetElement.dataset.catIndex);
-            editCategoryIcon(catIndex, tabIcon);
-        }
+			const tabIcon = tab.querySelector('.tab-icon');
+			if (tabIcon) {
+			    tabIcon.addEventListener('click', (e) => {
+			        e.stopPropagation();
+			        const catIndex = parseInt(tabIcon.dataset.catIndex);
+			        editCategoryIcon(catIndex, tabIcon);
+			    });
+			}
     });
 }
             
@@ -2373,7 +2380,7 @@ if (tabIcon) {
                 removeIconBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const catIndex = parseInt(e.target.dataset.catIndex);
-                    categories[catIndex].icon = '​';
+                    categories[catIndex].icon = '';
                     saveCategories();
                     renderTabs();
                     renderContent();
@@ -3309,5 +3316,6 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
