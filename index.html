@@ -1226,7 +1226,7 @@ document.addEventListener('touchmove', (e) => {
         // Show delete button background as user swipes
         const maxSwipe = 100;
         const swipeProgress = Math.min(Math.abs(deltaX) / maxSwipe, 1);
-        currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #fee2e2 100%)`;
+        currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #ef4444 100%)`;
     }
 });
 
@@ -3167,6 +3167,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
