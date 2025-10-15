@@ -885,11 +885,11 @@ async function loadUserData(userId) {
         
         // Show container with fade-in effect
         document.querySelector('.container').classList.add('loaded');
-    }).catch((error) => {
+    	}).catch(async (error) => {
         console.error('Error loading user data:', error);
         
         // Show error message to user
-        await customAlert('Failed to load your data. Please check your internet connection and try refreshing the page.');
+        await customAlert('Failed to load your data. Please check your internet connection and try refreshing the page.', 'Connection Error');
         
         // Still try to show the app with default data
         applyTheme();
@@ -4232,6 +4232,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
