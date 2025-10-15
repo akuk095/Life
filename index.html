@@ -1522,67 +1522,82 @@ document.addEventListener('touchend', (e) => {
     currentSwipedItem = null;
 });
 
-// Swipe down to toggle checkboxes
-let checkboxTouchStartY = 0;
-let checkboxTouchCurrentY = 0;
-let isCheckboxSwiping = false;
-let currentCheckbox = null;
+// Swipe down to cycle bullet styles
+let bulletTouchStartY = 0;
+let bulletTouchCurrentY = 0;
+let isBulletSwiping = false;
+let currentBulletItem = null;
 
 document.addEventListener('touchstart', (e) => {
     // Only on checkbox/bullet elements
-    const checkbox = e.target.closest('.checkbox, .bullet-number, .bullet-square, .bullet-circle');
-    if (!checkbox || editMode) return;
+    const bullet = e.target.closest('.checkbox, .bullet-number, .bullet-square, .bullet-circle, .bullet-none');
+    if (!bullet || editMode) return;
     
-    checkboxTouchStartY = e.touches[0].clientY;
-    checkboxTouchCurrentY = checkboxTouchStartY;
-    isCheckboxSwiping = false;
-    currentCheckbox = checkbox;
+    const item = bullet.closest('.checklist-item');
+    if (!item) return;
+    
+    bulletTouchStartY = e.touches[0].clientY;
+    bulletTouchCurrentY = bulletTouchStartY;
+    isBulletSwiping = false;
+    currentBulletItem = item;
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
-    if (!currentCheckbox) return;
+    if (!currentBulletItem) return;
     
-    checkboxTouchCurrentY = e.touches[0].clientY;
-    const deltaY = checkboxTouchCurrentY - checkboxTouchStartY;
+    bulletTouchCurrentY = e.touches[0].clientY;
+    const deltaY = bulletTouchCurrentY - bulletTouchStartY;
     
     // Only trigger if swiping DOWN (positive delta) and movement > 30px
-    if (deltaY > 30 && !isCheckboxSwiping) {
-        isCheckboxSwiping = true;
+    if (deltaY > 30 && !isBulletSwiping) {
+        isBulletSwiping = true;
         
-        // Add visual feedback
-        currentCheckbox.style.transform = 'scale(1.2)';
-        currentCheckbox.style.transition = 'transform 0.2s ease';
+        // Add visual feedback to the bullet
+        const bullet = currentBulletItem.querySelector('.checkbox, .bullet-number, .bullet-square, .bullet-circle, .bullet-none');
+        if (bullet) {
+            bullet.style.transform = 'scale(1.3) translateY(5px)';
+            bullet.style.transition = 'transform 0.2s ease';
+        }
     }
 }, { passive: true });
 
 document.addEventListener('touchend', (e) => {
-    if (!currentCheckbox) return;
+    if (!currentBulletItem) return;
     
-    const deltaY = checkboxTouchCurrentY - checkboxTouchStartY;
+    const deltaY = bulletTouchCurrentY - bulletTouchStartY;
     const threshold = 40; // Minimum swipe distance
     
-    if (isCheckboxSwiping && deltaY > threshold) {
-        // Get the item ID and toggle it
-        const item = currentCheckbox.closest('.checklist-item');
-        if (item) {
-            const catIndex = item.dataset.catIndex;
-            const skillIndex = item.dataset.skillIndex;
-            const itemIndex = item.dataset.itemIndex;
-            const itemId = `${catIndex}-${skillIndex}-${itemIndex}`;
+    if (isBulletSwiping && deltaY > threshold) {
+        // Get item data
+        const catIndex = parseInt(currentBulletItem.dataset.catIndex);
+        const skillIndex = parseInt(currentBulletItem.dataset.skillIndex);
+        
+        if (!isNaN(catIndex) && !isNaN(skillIndex)) {
+            // Get current bullet style
+            const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
             
-            // Toggle the checkbox
-            toggleCheck(itemId);
+            // Cycle through styles: checkbox → number → square → circle → none → checkbox
+            const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
+            const currentIndex = styles.indexOf(currentStyle);
+            const nextIndex = (currentIndex + 1) % styles.length;
+            const nextStyle = styles[nextIndex];
+            
+            // Update the bullet style
+            categories[catIndex].skills[skillIndex].bulletStyle = nextStyle;
+            saveCategories();
+            renderContent();
         }
     }
     
     // Reset visual feedback
-    if (currentCheckbox) {
-        currentCheckbox.style.transform = '';
-        currentCheckbox.style.transition = '';
+    const bullet = currentBulletItem ? currentBulletItem.querySelector('.checkbox, .bullet-number, .bullet-square, .bullet-circle, .bullet-none') : null;
+    if (bullet) {
+        bullet.style.transform = '';
+        bullet.style.transition = '';
     }
     
-    isCheckboxSwiping = false;
-    currentCheckbox = null;
+    isBulletSwiping = false;
+    currentBulletItem = null;
 });
 	
 function toggleGuideMenu(e) {
@@ -3739,6 +3754,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
