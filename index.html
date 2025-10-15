@@ -1148,9 +1148,9 @@ function applyHeaderImage() {
         return;
     }
     
-    // Remove any existing overlay first
-    const existingOverlay = header.querySelector('.header-overlay');
-    if (existingOverlay) existingOverlay.remove();
+    // Remove any existing overlay/scrim
+    const existingScrim = header.querySelector('.header-text-scrim');
+    if (existingScrim) existingScrim.remove();
     
     if (headerImage) {
         console.log('Applying header image');
@@ -1159,6 +1159,61 @@ function applyHeaderImage() {
         header.style.backgroundSize = 'cover';
         header.style.backgroundPosition = 'center';
         header.style.backgroundRepeat = 'no-repeat';
+        
+        // Detect image brightness and set text color
+        detectImageBrightness(headerImage, (isLight) => {
+            const textColor = isLight ? '#2c3e50' : 'white';
+            const scrimColor = isLight ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)';
+            
+            // Add scrim behind text only
+            const h1 = header.querySelector('h1');
+            const p = header.querySelector('p');
+            
+            if (h1 || p) {
+                const scrim = document.createElement('div');
+                scrim.className = 'header-text-scrim';
+                scrim.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: ${scrimColor};
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    padding: 20px 30px;
+                    border-radius: 12px;
+                    z-index: 0;
+                    pointer-events: none;
+                `;
+                header.style.position = 'relative';
+                
+                // Insert scrim before text elements
+                if (h1) {
+                    header.insertBefore(scrim, h1);
+                    h1.style.position = 'relative';
+                    h1.style.zIndex = '1';
+                    h1.style.color = textColor;
+                }
+                if (p) {
+                    p.style.position = 'relative';
+                    p.style.zIndex = '1';
+                    p.style.color = textColor;
+                }
+            }
+            
+            // Keep buttons visible
+            const menuBtn = header.querySelector('.edit-btn, #menuBtn');
+            const guideMenuBtn = header.querySelector('.guide-menu-btn');
+            const saveBtn = header.querySelector('.save-btn');
+            
+            [menuBtn, guideMenuBtn, saveBtn].forEach(btn => {
+                if (btn) {
+                    btn.style.color = textColor;
+                    btn.style.position = 'relative';
+                    btn.style.zIndex = '10';
+                }
+            });
+        });
     } else {
         console.log('Removing header image, reverting to theme');
         // Remove image background and revert to theme gradient
@@ -1167,9 +1222,57 @@ function applyHeaderImage() {
         header.style.backgroundPosition = '';
         header.style.backgroundRepeat = '';
         
+        // Reset text colors
+        const h1 = header.querySelector('h1');
+        const p = header.querySelector('p');
+        if (h1) h1.style.color = '';
+        if (p) p.style.color = '';
+        
         // Reapply theme gradient
         applyTheme();
     }
+}
+
+function detectImageBrightness(imageSrc, callback) {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = imageSrc;
+    
+    img.onload = function() {
+        // Create canvas to analyze image
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Use smaller size for faster processing
+        canvas.width = 100;
+        canvas.height = 100;
+        
+        ctx.drawImage(img, 0, 0, 100, 100);
+        
+        // Get center area of image (where text typically is)
+        const imageData = ctx.getImageData(25, 25, 50, 50);
+        const data = imageData.data;
+        
+        let brightness = 0;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            // Calculate perceived brightness
+            brightness += (0.299 * r + 0.587 * g + 0.114 * b);
+        }
+        
+        brightness = brightness / (data.length / 4);
+        
+        // If brightness > 128, image is light, use dark text
+        const isLight = brightness > 128;
+        callback(isLight);
+    };
+    
+    img.onerror = function() {
+        // If image fails to load, default to dark text
+        callback(true);
+    };
 }
 	
 function createNewGuide() {
@@ -3556,6 +3659,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
