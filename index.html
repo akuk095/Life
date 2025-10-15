@@ -159,7 +159,13 @@
 		*::-webkit-scrollbar { display: none; }
 		#loginScreen { opacity: 0; transition: opacity 0.3s ease-in-out; }
 		#loginScreen.show { opacity: 1; }
-
+		.logout-menu { display: none; position: fixed; bottom: 70px; left: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; z-index: 2002; min-width: 150px; }
+		.logout-menu button { width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+		.logout-menu button:last-child { border-bottom: none; }
+		.logout-menu button:hover { background: #f8f9fa; }
+		.logout-menu button.danger { color: #dc2626; }
+		.logout-menu button.danger:hover { background: #fee2e2; }
+		.logout-menu.show { display: block; }
 		
 	</style>
     </head>
@@ -1413,6 +1419,26 @@ function backToLogin() {
         setTimeout(() => loginScreen.classList.add('show'), 10);
     }, 300);
 }
+
+function deleteAccount() {
+    if (!currentUser) return;
+    const user = currentUser;
+    const userId = user.uid;
+    
+    // Delete all user data from database
+    remove(ref(database, `users/${userId}`)).then(() => {
+        // Delete the authentication account
+        user.delete().then(() => {
+            alert('Your account has been deleted.');
+            currentUser = null;
+        }).catch((error) => {
+            alert('Error deleting account: ' + error.message);
+        });
+    }).catch((error) => {
+        alert('Error deleting user data: ' + error.message);
+    });
+}
+	
 function duplicateGuide() {
     if (!currentUser) return;
     const timestamp = Date.now();
@@ -1478,12 +1504,16 @@ function renderHeader() {
 </div>
 <div class="drawer-footer" id="drawerFooter">
     <button id="logoutBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-right: auto; opacity: 0.5; transition: opacity 0.2s;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-    </button>
+	    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+	        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+	        <polyline points="16 17 21 12 16 7"></polyline>
+	        <line x1="21" y1="12" x2="9" y2="12"></line>
+	    </svg>
+	</button>
+	<div class="logout-menu" id="logoutMenu">
+	    <button id="logoutOptionBtn">Logout</button>
+	    <button id="deleteAccountBtn" class="danger">Delete Account</button>
+	</div>
     <button class="drawer-create-icon" id="createGuideBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -1580,11 +1610,37 @@ function renderHeader() {
         });
     }
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            logout();
-            closeDrawer();
-        });
-    }
+	    logoutBtn.addEventListener('click', (e) => {
+	        e.stopPropagation();
+	        const logoutMenu = document.getElementById('logoutMenu');
+	        logoutMenu.classList.toggle('show');
+	    });
+	}
+
+	const logoutOptionBtn = document.getElementById('logoutOptionBtn');
+	const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+	
+	if (logoutOptionBtn) {
+	    logoutOptionBtn.addEventListener('click', () => {
+	        if (confirm('Are you sure you want to log out?')) {
+	            logout();
+	            closeDrawer();
+	        }
+	        document.getElementById('logoutMenu').classList.remove('show');
+	    });
+	}
+	
+	if (deleteAccountBtn) {
+	    deleteAccountBtn.addEventListener('click', () => {
+	        if (confirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!\n\nType "DELETE" to confirm.') === true) {
+	            const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+	            if (confirmation === 'DELETE') {
+	                deleteAccount();
+	            }
+	        }
+	        document.getElementById('logoutMenu').classList.remove('show');
+	    });
+	}
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
     if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
     if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
@@ -3012,6 +3068,11 @@ document.addEventListener('click', (e) => {
             closeDrawer();
         }
     }
+	// Close logout menu if clicking outside
+    const logoutMenu = document.getElementById('logoutMenu');
+    if (logoutMenu && !logoutMenu.contains(e.target) && !e.target.closest('#logoutBtn')) {
+        logoutMenu.classList.remove('show');
+    }
 });
 
 // Check for auto-refresh when page becomes visible
@@ -3107,6 +3168,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
