@@ -111,7 +111,6 @@
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
-		.nav-tab:active { background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color)) !important; opacity: 0.2; transition: none;}
 		.save-btn { position: absolute; top: 5px; right: 5px; background: transparent; color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 16px; cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(255, 255, 255, 0.1); transition: all 0.2s ease; display: none; z-index: 10; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
 		.save-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.2); }
 		.save-btn:active { box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4); transform: translateY(1px); }
@@ -1607,16 +1606,30 @@ function renderHeader() {
 	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
 	
 	if (checkboxOptionsBtn) {
-	    checkboxOptionsBtn.addEventListener('click', (e) => {
-	        e.stopPropagation();
-	        const checkboxMenu = document.getElementById('checkboxMenu');
-	        if (checkboxMenu) {
-	            checkboxMenu.classList.toggle('show');
-	        }
-	    });
-	}
-	if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
-	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
+    checkboxOptionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        if (checkboxMenu) {
+            checkboxMenu.classList.toggle('show');
+        }
+    });
+}
+if (clearChecksBtn) {
+    clearChecksBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearAllChecks();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        if (checkboxMenu) checkboxMenu.classList.remove('show');
+    });
+}
+if (autoRefreshBtn) {
+    autoRefreshBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleAutoRefresh();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        if (checkboxMenu) checkboxMenu.classList.remove('show');
+    });
+}
 
 	
     const applyColorBtn = document.getElementById('applyColorBtn');
@@ -2358,46 +2371,72 @@ function renderTabs() {
                 }
             });
         } else {
-	    // Need to render SVG icons properly
-	    let displayIcon = cat.icon;
-	    if (cat.icon && cat.icon.startsWith('svg:')) {
-	        const iconData = JSON.parse(cat.icon.substring(4));
-	        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-	    }
-	    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
-	    
-	    const nameSpan = tab.querySelector('.tab-name-display');
-	    
-	    // Use a timeout to distinguish single click from double click
-	    let clickTimer = null;
-	    let clickCount = 0;
-	    
-	    tab.addEventListener('click', function(e) {
-	        // Ignore clicks on the icon
-	        if (e.target.closest('.tab-icon-display')) {
-	            return;
-	        }
-	        
-	        clickCount++;
-	        
-	        if (clickCount === 1) {
-	            clickTimer = setTimeout(() => {
-	                // Single click - switch tab
-	                switchTab(i);
-	                clickCount = 0;
-	            }, 250);
-	        } else if (clickCount === 2) {
-	            // Double click - edit
-	            clearTimeout(clickTimer);
-	            clickCount = 0;
-	            e.stopPropagation();
-	            e.preventDefault();
-	            if (nameSpan) {
-	                enableQuickEdit(nameSpan, i, null, null);
-	            }
-	        }
-	    });
-	}
+    // Need to render SVG icons properly
+    let displayIcon = cat.icon;
+    if (cat.icon && cat.icon.startsWith('svg:')) {
+        const iconData = JSON.parse(cat.icon.substring(4));
+        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+    }
+    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
+    
+    const nameSpan = tab.querySelector('.tab-name-display');
+    
+    // Use a timeout to distinguish single click from double click
+    let clickTimer = null;
+    let clickCount = 0;
+    let isEditing = false;
+    
+    tab.addEventListener('click', function(e) {
+        // Ignore clicks while editing
+        if (isEditing) {
+            return;
+        }
+        
+        // Ignore clicks on the icon
+        if (e.target.closest('.tab-icon-display')) {
+            return;
+        }
+        
+        clickCount++;
+        
+        if (clickCount === 1) {
+            clickTimer = setTimeout(() => {
+                // Single click - switch tab
+                if (!isEditing) {
+                    switchTab(i);
+                }
+                clickCount = 0;
+            }, 250);
+        } else if (clickCount === 2) {
+            // Double click - edit
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            e.stopPropagation();
+            e.preventDefault();
+            if (nameSpan) {
+                isEditing = true;
+                enableQuickEdit(nameSpan, i, null, null);
+                
+                // Monitor when editing ends
+                const observer = new MutationObserver(() => {
+                    if (nameSpan.contentEditable === 'false') {
+                        isEditing = false;
+                        observer.disconnect();
+                    }
+                });
+                observer.observe(nameSpan, { attributes: true, attributeFilter: ['contenteditable'] });
+                
+                // Backup: also check on blur
+                nameSpan.addEventListener('blur', function resetEditing() {
+                    setTimeout(() => {
+                        isEditing = false;
+                    }, 100);
+                    nameSpan.removeEventListener('blur', resetEditing);
+                }, { once: true });
+            }
+        }
+    });
+}
         
         tabWrapper.appendChild(tab);
         
@@ -3212,6 +3251,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
