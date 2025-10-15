@@ -2713,9 +2713,13 @@ function renderContent() {
             duplicateBtn.innerHTML = '⧉';
             duplicateBtn.style.fontSize = '13px';
             duplicateBtn.title = 'Duplicate card';
-            duplicateBtn.addEventListener('click', (e) => {
+           duplicateBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 duplicateSkill(catIndex, skillIndex);
+                // Auto-hide controls after action
+                if (!editMode) {
+                    controlsContainer.classList.remove('show');
+                }
             });
             
             // Delete button
@@ -2726,6 +2730,10 @@ function renderContent() {
             deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteSkill(catIndex, skillIndex);
+                // Auto-hide controls after action
+                if (!editMode) {
+                    controlsContainer.classList.remove('show');
+                }
             });
             
             // Add in order: bullet, duplicate, delete (left to right)
@@ -2770,6 +2778,13 @@ function renderContent() {
                 });
                 
                 card.appendChild(topRightArea);
+                
+                // Hide controls when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!card.contains(e.target) && controlsContainer.classList.contains('show')) {
+                        controlsContainer.classList.remove('show');
+                    }
+                });
             }
             
             skill.items.forEach((item, itemIndex) => { 
@@ -3362,6 +3377,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
