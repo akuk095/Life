@@ -1160,7 +1160,7 @@ function applyHeaderImage() {
         detectImageBrightness(headerImage, (isLight) => {
             console.log('Image is', isLight ? 'LIGHT' : 'DARK');
             const textColor = isLight ? '#2c3e50' : 'white';
-            const scrimColor = isLight ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)';
+            const scrimColor = isLight ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.3)';
             
             // Apply background directly to text elements
             const h1 = header.querySelector('h1');
@@ -1171,14 +1171,18 @@ function applyHeaderImage() {
                     position: relative;
                     z-index: 1;
                     color: ${textColor};
-                    background: ${scrimColor};
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    padding: 12px 24px;
-                    border-radius: 12px;
+                    background: linear-gradient(90deg, 
+                        transparent 0%, 
+                        ${scrimColor} 15%, 
+                        ${scrimColor} 85%, 
+                        transparent 100%);
+                    backdrop-filter: blur(8px);
+                    -webkit-backdrop-filter: blur(8px);
+                    padding: 8px 20px;
+                    border-radius: 10px;
                     display: inline-block;
-                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-                    margin-bottom: 8px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    margin-bottom: 6px;
                 `;
             }
             
@@ -1187,13 +1191,17 @@ function applyHeaderImage() {
                     position: relative;
                     z-index: 1;
                     color: ${textColor};
-                    background: ${scrimColor};
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    padding: 8px 20px;
-                    border-radius: 10px;
+                    background: linear-gradient(90deg, 
+                        transparent 0%, 
+                        ${scrimColor} 15%, 
+                        ${scrimColor} 85%, 
+                        transparent 100%);
+                    backdrop-filter: blur(8px);
+                    -webkit-backdrop-filter: blur(8px);
+                    padding: 6px 16px;
+                    border-radius: 8px;
                     display: inline-block;
-                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 `;
             }
             
@@ -3666,6 +3674,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
