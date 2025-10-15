@@ -1421,9 +1421,9 @@ function initDrawerSwipe() {
 
 // Swipe to delete checklist items (horizontal only)
 let itemTouchStartX = 0;
-let itemTouchStartY = 0;  // ADD THIS - needed for angle detection
+let itemTouchStartY = 0;
 let itemTouchCurrentX = 0;
-let itemTouchCurrentY = 0;  // ADD THIS - needed for angle detection
+let itemTouchCurrentY = 0;
 let isItemDragging = false;
 let currentSwipedItem = null;
 
@@ -1446,21 +1446,15 @@ document.addEventListener('touchstart', (e) => {
     }
     
     itemTouchStartX = e.touches[0].clientX;
+    itemTouchStartY = e.touches[0].clientY;  // FIXED: Added this
     itemTouchCurrentX = itemTouchStartX;
-    isItemDragging = true;
+    itemTouchCurrentY = itemTouchStartY;  // FIXED: Added this
+    isItemDragging = false;  // FIXED: Changed from true to false
     currentSwipedItem = item;
     item.style.transition = 'none';
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
-    if (!currentSwipedItem) return;
-    
-    itemTouchCurrentX = e.touches[0].clientX;
-    itemTouchCurrentY = e.touches[0].clientY;
-    const deltaX = itemTouchCurrentX - itemTouchStartX;
-    const deltaY = itemTouchCurrentY - itemTouchStartY;
-    
-    document.addEventListener('touchmove', (e) => {
     if (!currentSwipedItem) return;
     
     itemTouchCurrentX = e.touches[0].clientX;
@@ -1522,6 +1516,7 @@ document.addEventListener('touchend', (e) => {
         // Confirm deletion
         if (confirm('Delete this item?')) {
             // Delete the item with animation
+            currentSwipedItem.style.transition = 'all 0.3s ease';  // FIXED: Re-set transition
             currentSwipedItem.style.transform = 'translateX(-100%)';
             currentSwipedItem.style.opacity = '0';
             
@@ -1535,11 +1530,13 @@ document.addEventListener('touchend', (e) => {
             }, 300);
         } else {
             // User cancelled - snap back
+            currentSwipedItem.style.transition = 'all 0.3s ease';  // FIXED: Re-set transition
             currentSwipedItem.style.transform = 'translateX(0)';
             currentSwipedItem.style.background = '#f8f9fa';
         }
     } else {
         // Not enough swipe - snap back
+        currentSwipedItem.style.transition = 'all 0.3s ease';  // FIXED: Re-set transition
         currentSwipedItem.style.transform = 'translateX(0)';
         currentSwipedItem.style.background = '#f8f9fa';
     }
@@ -4036,34 +4033,3 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
