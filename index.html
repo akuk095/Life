@@ -1605,50 +1605,7 @@ function renderHeader() {
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
-    const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
-	const clearChecksBtn = document.getElementById('clearChecksBtn');
-	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
-	
-	// Checkbox options button and menu
-if (checkboxOptionsBtn) {
-    checkboxOptionsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const checkboxMenu = document.getElementById('checkboxMenu');
-        const colorMenu = document.getElementById('colorPickerMenu');
-        
-        // Close color picker if open
-        if (colorMenu) colorMenu.classList.remove('show');
-        
-        if (checkboxMenu) {
-            checkboxMenu.classList.toggle('show');
-        }
-    });
-}
-
-// Clear checks button
-if (clearChecksBtn) {
-    clearChecksBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        clearAllChecks();
-        const checkboxMenu = document.getElementById('checkboxMenu');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        if (checkboxMenu) checkboxMenu.classList.remove('show');
-        if (dropdownMenu) dropdownMenu.classList.remove('show');
-    });
-}
-
-// Auto-refresh button
-if (autoRefreshBtn) {
-    autoRefreshBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleAutoRefresh();
-        const checkboxMenu = document.getElementById('checkboxMenu');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        if (checkboxMenu) checkboxMenu.classList.remove('show');
-        if (dropdownMenu) dropdownMenu.classList.remove('show');
-    });
-}
-
+   
 	
     const applyColorBtn = document.getElementById('applyColorBtn');
     const appIconSpan = document.getElementById('appIconSpan');
@@ -1726,6 +1683,46 @@ if (autoRefreshBtn) {
             selectColor(option.dataset.color);
         });
     });
+
+	// Checkbox options button and menu
+if (checkboxOptionsBtn) {
+    checkboxOptionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        const colorMenu = document.getElementById('colorPickerMenu');
+        
+        // Close color picker if open
+        if (colorMenu) colorMenu.classList.remove('show');
+        
+        if (checkboxMenu) {
+            checkboxMenu.classList.toggle('show');
+        }
+    });
+}
+
+// Clear checks button
+if (clearChecksBtn) {
+    clearChecksBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearAllChecks();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (checkboxMenu) checkboxMenu.classList.remove('show');
+        if (dropdownMenu) dropdownMenu.classList.remove('show');
+    });
+}
+
+// Auto-refresh button
+if (autoRefreshBtn) {
+    autoRefreshBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleAutoRefresh();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (checkboxMenu) checkboxMenu.classList.remove('show');
+        if (dropdownMenu) dropdownMenu.classList.remove('show');
+    });
+}
     
 	// Dynamic styles and theme application...
 	    const isLight = isLightColor(themeColor);
@@ -3286,6 +3283,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
