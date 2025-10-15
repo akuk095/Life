@@ -88,7 +88,7 @@
 		.emoji-remove-btn { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #e74c3c; color: white; border: 2px solid white; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; }
 		.emoji-remove-btn:hover { background: #c0392b; transform: scale(1.1); }
 		.editable-icon { position: relative; display: inline-block; }
-		.floating-layout-btn { position: fixed; bottom: max(env(safe-area-inset-bottom), 24px); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 999; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+		.floating-layout-btn { position: fixed; bottom: calc(60px + max(env(safe-area-inset-bottom), 24px)); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 999; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
 		.floating-layout-btn:active { transform: scale(0.9); }
 		.floating-layout-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 1; }
 		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 85%; max-width: 320px; background: rgba(237, 239, 240, 1); box-shadow: 2px 0 20px rgba(0,0,0,0.2); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: 140px; scrollbar-width: none; -ms-overflow-style: none; will-change: transform; }
@@ -3309,4 +3309,5 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
