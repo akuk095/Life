@@ -1688,8 +1688,8 @@ function renderHeader() {
 			   <div class="header-image-menu" id="headerImageMenu">
 				    <h3>Header Background</h3>
 				    <input type="file" id="headerImageInput" accept="image/*" style="display: none;">
-				    <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; display: ${headerImage ? 'none' : 'block'};">Upload Image</button>
-				    <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; display: ${headerImage ? 'block' : 'none'};">Remove Image</button>
+				    <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px;">Upload Image</button>
+				    <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer;">Remove Image</button>
 				</div>
 	        <button id="checkboxOptionsBtn">Checkbox options</button>
 	        <div class="checkbox-menu" id="checkboxMenu">
@@ -1805,9 +1805,20 @@ function renderHeader() {
 	        const imageMenu = document.getElementById('headerImageMenu');
 	        const colorMenu = document.getElementById('colorPickerMenu');
 	        const checkboxMenu = document.getElementById('checkboxMenu');
+	        const uploadBtn = document.getElementById('uploadHeaderImageBtn');
+	        const removeBtn = document.getElementById('removeHeaderImageBtn');
 	        
 	        if (colorMenu) colorMenu.classList.remove('show');
 	        if (checkboxMenu) checkboxMenu.classList.remove('show');
+	        
+	        // Update button visibility based on current state
+	        if (headerImage) {
+	            if (uploadBtn) uploadBtn.style.display = 'none';
+	            if (removeBtn) removeBtn.style.display = 'block';
+	        } else {
+	            if (uploadBtn) uploadBtn.style.display = 'block';
+	            if (removeBtn) removeBtn.style.display = 'none';
+	        }
 	        
 	        if (imageMenu) {
 	            imageMenu.classList.toggle('show');
@@ -1839,16 +1850,17 @@ function renderHeader() {
     }
 
     if (removeHeaderImageBtn) {
-        removeHeaderImageBtn.addEventListener('click', () => {
-            if (confirm('Remove header background image?')) {
-                headerImage = null;
-                saveHeaderImage();
-                applyHeaderImage();
-                document.getElementById('headerImageMenu').classList.remove('show');
-                document.getElementById('dropdownMenu').classList.remove('show');
-            }
-        });
-    }
+	    removeHeaderImageBtn.addEventListener('click', () => {
+	        if (confirm('Remove header background image?')) {
+	            headerImage = null;
+	            saveHeaderImage();
+	            applyHeaderImage();
+	            document.getElementById('headerImageMenu').classList.remove('show');
+	            document.getElementById('dropdownMenu').classList.remove('show');
+	            renderHeader(); 
+	        }
+	    });
+	}
     // App icon editing
     if (editMode && appIconSpan) {
         appIconSpan.addEventListener('click', (e) => {
@@ -3537,6 +3549,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
