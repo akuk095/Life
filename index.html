@@ -162,16 +162,16 @@
 		.skill-card-controls.show { pointer-events: auto; }
 		.edit-mode .skill-card-controls { pointer-events: auto; }
 		body:not(.edit-mode-active) .skill-card-controls.show { pointer-events: auto; }
-		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0; cursor: pointer; padding: 4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: normal; pointer-events: auto !important; position: absolute; right: 0; top: 0; transition: all 0.3s ease; }
+		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0; cursor: pointer; padding: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: normal; pointer-events: auto !important; position: absolute; right: 0; top: 0; transition: all 0.3s ease; }
 		.skill-card-controls.show .skill-control-btn { opacity: 0.6; }
-		.skill-card-controls.show .skill-control-btn:nth-child(1) { transform: translateX(-28px); transition-delay: 0.05s; }
-		.skill-card-controls.show .skill-control-btn:nth-child(2) { transform: translateX(-56px); transition-delay: 0.1s; }
-		.skill-card-controls.show .skill-control-btn:nth-child(3) { transform: translateX(-84px); transition-delay: 0.15s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(1) { transform: translateX(-36px); transition-delay: 0.05s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(2) { transform: translateX(-72px); transition-delay: 0.1s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(3) { transform: translateX(-108px); transition-delay: 0.15s; }
 		.skill-control-btn:hover { opacity: 1 !important; color: #6b7280; }
 		.skill-control-btn.delete-control:hover { color: #dc2626; }
-		.skill-card-controls.show .skill-control-btn:nth-child(1):hover { transform: translateX(-28px) scale(1.1); }
-		.skill-card-controls.show .skill-control-btn:nth-child(2):hover { transform: translateX(-56px) scale(1.1); }
-		.skill-card-controls.show .skill-control-btn:nth-child(3):hover { transform: translateX(-84px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(1):hover { transform: translateX(-36px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(2):hover { transform: translateX(-72px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(3):hover { transform: translateX(-108px) scale(1.1); }
 		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
 		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
 		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
@@ -2724,12 +2724,7 @@ function renderContent() {
            duplicateBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 duplicateSkill(catIndex, skillIndex);
-                // Auto-hide after duplicate (creates new card)
-                if (!editMode) {
-                    setTimeout(() => {
-                        controlsContainer.classList.remove('show');
-                    }, 100);
-                }
+                // Don't auto-hide - let user continue interacting
             });
             
             // Delete button
@@ -2759,14 +2754,16 @@ function renderContent() {
                 menuBtn.style.top = '8px';
                 menuBtn.style.right = '8px';
                 menuBtn.style.opacity = '0.3';
-                menuBtn.style.fontSize = '20px';
+                menuBtn.style.fontSize = '24px';
                 menuBtn.style.zIndex = '10';
                 menuBtn.style.background = 'white';
                 menuBtn.style.borderRadius = '4px';
-                menuBtn.style.padding = '4px 8px';
+                menuBtn.style.padding = '6px 10px';
                 menuBtn.style.border = 'none';
                 menuBtn.style.cursor = 'pointer';
                 menuBtn.title = 'Card options';
+                
+                let hideTimeout;
                 
                 menuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -2779,12 +2776,24 @@ function renderContent() {
                     
                     controlsContainer.classList.toggle('show');
                     
-                    // Auto-hide after 5 seconds if showing
+                    // Clear existing timeout
+                    if (hideTimeout) clearTimeout(hideTimeout);
+                    
+                    // Auto-hide after 10 seconds if showing
                     if (!isShowing) {
-                        setTimeout(() => {
+                        hideTimeout = setTimeout(() => {
                             controlsContainer.classList.remove('show');
-                        }, 5000);
+                        }, 10000);
                     }
+                });
+                
+                // Reset timeout on any interaction with controls
+                controlsContainer.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (hideTimeout) clearTimeout(hideTimeout);
+                    hideTimeout = setTimeout(() => {
+                        controlsContainer.classList.remove('show');
+                    }, 10000);
                 });
                 
                 card.appendChild(menuBtn);
@@ -3383,6 +3392,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
