@@ -17,7 +17,7 @@
 		.add-item-btn:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
 		.add-skill-btn { background: #8b5cf6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; width: auto; margin: 20px auto; transition: all 0.2s ease; display: none; }
 		.add-skill-btn:hover { background: #7c3aed; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3); }
-		.wallpaper-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
+		.wallpaper-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: fixed; bottom: 60px; left: 0; right: 0; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); width: 100%; border-top: 1px solid #e9ecef; z-index: 1001; max-height: calc(100vh - 60px); overflow-y: auto; }
 		.wallpaper-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
 		.wallpaper-menu.show { display: block; }
 		/* Bottom Navigation Bar */
@@ -2252,19 +2252,13 @@ async function renderHeader() {
 	    </button>
 	</div><div class="edit-toggle">
     <button class="save-btn" id="saveBtn" style="display: none;">Done</button>
-    <button class="save-btn" onclick="toggleWallpaperMenu()" style="right: 50px; display: block;" title="Wallpaper">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-        </svg>
-    </button>
     <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
     <div class="dropdown-menu" id="dropdownMenu">
         <button id="editModeMenuBtn">Edit</button>
         <button id="duplicateGuideBtn">Duplicate</button>
         <button id="deleteGuideBtn">Delete</button>
         <button id="headerImageBtn">Header Image</button>
+		<button id="wallpaperBtn">Wallpaper</button>
         <button id="toggleColorBtn">Theme</button>
         <button id="checkboxOptionsBtn">Checkbox Options</button>
     </div>
@@ -2362,9 +2356,8 @@ async function renderHeader() {
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
-   
-	
-    const applyColorBtn = document.getElementById('applyColorBtn');
+	const wallpaperBtn = document.getElementById('wallpaperBtn');
+   	const applyColorBtn = document.getElementById('applyColorBtn');
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
     
@@ -2409,21 +2402,22 @@ async function renderHeader() {
 	    });
 	}
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
-    if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
-    if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
-    if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
-    if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
-    if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
-    if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
-    if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
-    if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
+	if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+	if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
+	if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
+	if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
+	if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
+	if (wallpaperBtn) wallpaperBtn.addEventListener('click', toggleWallpaperMenu);
+	if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
+	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
+	if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
 
 	    // Header image event listeners
     const headerImageBtn = document.getElementById('headerImageBtn');
     const uploadHeaderImageBtn = document.getElementById('uploadHeaderImageBtn');
     const removeHeaderImageBtn = document.getElementById('removeHeaderImageBtn');
     const headerImageInput = document.getElementById('headerImageInput');
-
+	
     if (headerImageBtn) {
 	    headerImageBtn.addEventListener('click', (e) => {
 	        e.stopPropagation();
@@ -4261,12 +4255,16 @@ function toggleWallpaperMenu() {
     const menu = document.getElementById('wallpaperMenu');
     const colorMenu = document.getElementById('colorPickerMenu');
     const headerImageMenu = document.getElementById('headerImageMenu');
+    const checkboxMenu = document.getElementById('checkboxMenu');
+    const dropdown = document.getElementById('dropdownMenu');
     
     // Close other menus
     if (colorMenu) colorMenu.classList.remove('show');
     if (headerImageMenu) headerImageMenu.classList.remove('show');
+    if (checkboxMenu) checkboxMenu.classList.remove('show');
+    if (dropdown) dropdown.classList.remove('show');
     
-    // Toggle background menu
+    // Toggle wallpaper menu
     menu.classList.toggle('show');
 }
 
@@ -4364,6 +4362,7 @@ function loadWallpaper() {
 </div>
 </body>
 </html>
+
 
 
 
