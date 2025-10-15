@@ -2765,6 +2765,13 @@ function renderContent() {
                 
                 let hideTimeout;
                 
+                const startHideTimer = () => {
+                    if (hideTimeout) clearTimeout(hideTimeout);
+                    hideTimeout = setTimeout(() => {
+                        controlsContainer.classList.remove('show');
+                    }, 10000);
+                };
+                
                 menuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const isShowing = controlsContainer.classList.contains('show');
@@ -2776,24 +2783,19 @@ function renderContent() {
                     
                     controlsContainer.classList.toggle('show');
                     
-                    // Clear existing timeout
-                    if (hideTimeout) clearTimeout(hideTimeout);
-                    
-                    // Auto-hide after 10 seconds if showing
+                    // Start timer if showing
                     if (!isShowing) {
-                        hideTimeout = setTimeout(() => {
-                            controlsContainer.classList.remove('show');
-                        }, 10000);
+                        startHideTimer();
+                    } else {
+                        if (hideTimeout) clearTimeout(hideTimeout);
                     }
                 });
                 
-                // Reset timeout on any interaction with controls
-                controlsContainer.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (hideTimeout) clearTimeout(hideTimeout);
-                    hideTimeout = setTimeout(() => {
-                        controlsContainer.classList.remove('show');
-                    }, 10000);
+                // Reset timeout on any interaction with the controls
+                [toggleBtn, duplicateBtn, deleteBtn].forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        startHideTimer();
+                    });
                 });
                 
                 card.appendChild(menuBtn);
@@ -3392,6 +3394,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
