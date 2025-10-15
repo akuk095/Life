@@ -2744,56 +2744,44 @@ function renderContent() {
             
             card.appendChild(controlsContainer);
             
-            // Add double-tap to reveal controls when not in edit mode
+            // Add a visible menu button when not in edit mode
             if (!editMode) {
-                let lastTap = 0;
-                const topRightArea = document.createElement('div');
-                topRightArea.style.position = 'absolute';
-                topRightArea.style.top = '0';
-                topRightArea.style.right = '0';
-                topRightArea.style.width = '100px';
-                topRightArea.style.height = '60px';
-                topRightArea.style.cursor = 'pointer';
-                topRightArea.style.zIndex = '15';
-                // For debugging - uncomment to see the area:
-                // topRightArea.style.background = 'rgba(255,0,0,0.2)';
+                const menuBtn = document.createElement('button');
+                menuBtn.className = 'skill-control-btn';
+                menuBtn.innerHTML = '⋮';
+                menuBtn.style.position = 'absolute';
+                menuBtn.style.top = '8px';
+                menuBtn.style.right = '8px';
+                menuBtn.style.opacity = '0.3';
+                menuBtn.style.fontSize = '20px';
+                menuBtn.style.zIndex = '10';
+                menuBtn.style.background = 'white';
+                menuBtn.style.borderRadius = '4px';
+                menuBtn.style.padding = '4px 8px';
+                menuBtn.style.border = 'none';
+                menuBtn.style.cursor = 'pointer';
+                menuBtn.title = 'Card options';
                 
-                topRightArea.addEventListener('touchend', (e) => {
+                menuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const currentTime = new Date().getTime();
-                    const tapGap = currentTime - lastTap;
+                    const isShowing = controlsContainer.classList.contains('show');
                     
-                    if (tapGap < 300 && tapGap > 0) {
-                        // Double tap detected
-                        e.preventDefault();
-                        console.log('Double tap detected!'); // Debug
-                        const controls = card.querySelector('.skill-card-controls');
-                        if (controls) {
-                            const isShowing = controls.classList.contains('show');
-                            controls.classList.toggle('show');
-                            console.log('Controls toggled:', !isShowing); // Debug
-                            
-                            // Auto-hide after 5 seconds if showing
-                            if (!isShowing) {
-                                setTimeout(() => {
-                                    controls.classList.remove('show');
-                                }, 5000);
-                            }
-                        }
-                    }
-                    lastTap = currentTime;
-                });
-                
-                // Also support regular click as backup
-                topRightArea.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const controls = card.querySelector('.skill-card-controls');
-                    if (controls) {
-                        controls.classList.toggle('show');
+                    // Hide all other open controls first
+                    document.querySelectorAll('.skill-card-controls.show').forEach(c => {
+                        if (c !== controlsContainer) c.classList.remove('show');
+                    });
+                    
+                    controlsContainer.classList.toggle('show');
+                    
+                    // Auto-hide after 5 seconds if showing
+                    if (!isShowing) {
+                        setTimeout(() => {
+                            controlsContainer.classList.remove('show');
+                        }, 5000);
                     }
                 });
                 
-                card.appendChild(topRightArea);
+                card.appendChild(menuBtn);
                 
                 // Hide controls when clicking outside
                 document.addEventListener('click', (e) => {
@@ -3389,6 +3377,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
