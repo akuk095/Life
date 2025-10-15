@@ -697,14 +697,8 @@ function loadUserData(userId) {
         if (autoRefreshTimeSnap.val()) {
             autoRefreshTime = autoRefreshTimeSnap.val();
         }
-        
-        // Check if we need to auto-refresh
-        checkAndAutoRefresh(lastRefreshSnap.val());
-        
-        // Apply theme
-        applyTheme();
 
-		// Load header image
+		// Load header image BEFORE applying theme
 		if (headerImageSnap.val()) {
 		    headerImage = headerImageSnap.val();
 		    console.log('Header image loaded from Firebase, length:', headerImage.length);
@@ -712,11 +706,21 @@ function loadUserData(userId) {
 		    headerImage = null;
 		    console.log('No header image in Firebase');
 		}
+        
+        // Check if we need to auto-refresh
+        checkAndAutoRefresh(lastRefreshSnap.val());
+        
+        // Apply theme (now knows if headerImage exists)
+        applyTheme();
+        
         // Render everything
         renderHeader();
         renderTabs();
         renderContent();
         updateLayoutButton();
+        
+        // Apply header image AFTER header is rendered
+        setTimeout(() => applyHeaderImage(), 50);
         
         // Show container with fade-in effect
         document.querySelector('.container').classList.add('loaded');
@@ -728,11 +732,11 @@ function loadUserData(userId) {
         
         // Still try to show the app with default data
         applyTheme();
-		applyHeaderImage();
         renderHeader();
         renderTabs();
         renderContent();
         updateLayoutButton();
+        setTimeout(() => applyHeaderImage(), 50);
         document.querySelector('.container').classList.add('loaded');
     });
 }
@@ -3578,6 +3582,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
