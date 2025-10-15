@@ -1320,18 +1320,43 @@ document.addEventListener('touchstart', (e) => {
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
-    if (!isItemDragging || !currentSwipedItem) return;
+    if (!currentSwipedItem) return;
     
     itemTouchCurrentX = e.touches[0].clientX;
+    itemTouchCurrentY = e.touches[0].clientY;
     const deltaX = itemTouchCurrentX - itemTouchStartX;
+    const deltaY = itemTouchCurrentY - itemTouchStartY;
+    
+    // Dead zone - ignore first 30px of movement
+    if (!isItemDragging && Math.abs(deltaX) < 30) {
+        return;
+    }
+    
+    // Only start swiping if horizontal movement is greater than vertical
+    if (!isItemDragging) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
+            isItemDragging = true;
+        } else if (Math.abs(deltaY) > 15) {
+            // Vertical scroll detected - cancel swipe
+            currentSwipedItem.style.transition = '';
+            currentSwipedItem.style.transform = '';
+            currentSwipedItem.style.background = '';
+            currentSwipedItem = null;
+            return;
+        }
+    }
+    
+    if (!isItemDragging) return;
     
     // Only allow swiping left (negative delta)
     if (deltaX < 0) {
-        currentSwipedItem.style.transform = `translateX(${deltaX}px)`;
+        // Subtract dead zone from visual movement for smoother feel
+        const adjustedDelta = deltaX + 30;
+        currentSwipedItem.style.transform = `translateX(${adjustedDelta}px)`;
         
         // Show delete button background as user swipes
         const maxSwipe = 100;
-        const swipeProgress = Math.min(Math.abs(deltaX) / maxSwipe, 1);
+        const swipeProgress = Math.min(Math.abs(adjustedDelta) / maxSwipe, 1);
         currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #ef4444 100%)`;
     }
 });
@@ -3512,6 +3537,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
