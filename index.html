@@ -1555,17 +1555,13 @@ function renderHeader() {
 	        </div>
 	    </div>
 	</div>
-	    <button id="checkboxOptionsBtn" style="position: relative;">
-		    Checkbox options
-		    <div class="checkbox-menu" id="checkboxMenu">
-		        <button id="clearChecksBtn">Clear all checks</button>
-		        <button id="autoRefreshBtn">
-		            ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
-		        </button>
-		    </div>
-		</button>
-	</div>
+	<button id="checkboxOptionsBtn">Checkbox options</button>
 </div>
+<div class="checkbox-menu" id="checkboxMenu">
+    <button id="clearChecksBtn">Clear all checks</button>
+    <button id="autoRefreshBtn">
+        ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
+    </button>
 </div>
 <h1>
     <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
@@ -3203,6 +3199,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
