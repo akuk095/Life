@@ -21,7 +21,11 @@
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
 		.checkbox:hover { border-color: var(--primary-color, #3498db); }
-		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
+		.checkbox-menu { display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1001; margin-top: 4px; }
+		.checkbox-menu button { width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+		.checkbox-menu button:last-child { border-bottom: none; }
+		.checkbox-menu button:hover { background: #f8f9fa; }
+		.checkbox-menu.show { display: block; }.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
 		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
@@ -1551,10 +1555,15 @@ function renderHeader() {
 	        </div>
 	    </div>
 	</div>
-	    <button id="clearChecksBtn">Clear all checks</button>
-	    <button id="autoRefreshBtn">
-	        ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
-	    </button>
+	    <button id="checkboxOptionsBtn" style="position: relative;">
+		    Checkbox options
+		    <div class="checkbox-menu" id="checkboxMenu">
+		        <button id="clearChecksBtn">Clear all checks</button>
+		        <button id="autoRefreshBtn">
+		            ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
+		        </button>
+		    </div>
+		</button>
 	</div>
 </div>
 </div>
@@ -1595,8 +1604,19 @@ function renderHeader() {
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
-    const clearChecksBtn = document.getElementById('clearChecksBtn');
-    const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+    const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
+	const checkboxMenu = document.getElementById('checkboxMenu');
+	const clearChecksBtn = document.getElementById('clearChecksBtn');
+	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+	
+	if (checkboxOptionsBtn) {
+	    checkboxOptionsBtn.addEventListener('click', (e) => {
+	        e.stopPropagation();
+	        if (checkboxMenu) {
+	            checkboxMenu.classList.toggle('show');
+	        }
+	    });
+	}
     const applyColorBtn = document.getElementById('applyColorBtn');
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
@@ -3036,16 +3056,23 @@ function deleteCategory(catIndex) {
     }
 }
 
-// Close menus when clicking outside
-document.addEventListener('click', (e) => {
-    const menu = document.getElementById('dropdownMenu');
-    const colorMenu = document.getElementById('colorPickerMenu');
-    const floatingBtn = document.getElementById('layoutBtn');
-    
-    // Don't close dropdown if clicking inside color picker
-    if (colorMenu && colorMenu.contains(e.target)) {
-        return; // Keep everything open when interacting with color picker
-    }
+	// Close menus when clicking outside
+	document.addEventListener('click', (e) => {
+	    const menu = document.getElementById('dropdownMenu');
+	    const colorMenu = document.getElementById('colorPickerMenu');
+	    const floatingBtn = document.getElementById('layoutBtn');
+	    
+	    // Don't close dropdown if clicking inside color picker
+	    if (colorMenu && colorMenu.contains(e.target)) {
+	        return; // Keep everything open when interacting with color picker
+	    }
+
+	// Close checkbox menu if clicking outside
+		const checkboxMenu = document.getElementById('checkboxMenu');
+		const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
+		if (checkboxMenu && !checkboxMenu.contains(e.target) && !checkboxOptionsBtn?.contains(e.target)) {
+		    checkboxMenu.classList.remove('show');
+		}
     
     // Close dropdown menu if clicking outside
 	if (menu && !menu.contains(e.target)) {
@@ -3167,6 +3194,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
