@@ -805,29 +805,35 @@ document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, $
     // Apply background gradient
     document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${primaryColor}CC 100%)`;
     
-    // Apply header styling with adjusted text color
-    const header = document.querySelector('.header');
-    if (header) {
-        header.style.background = `linear-gradient(135deg, ${secondaryColor} 0%, ${primaryColor} 100%)`;
-        header.style.color = isLight ? '#2c3e50' : 'white';
-        
-        // Adjust all text elements in header
-        const headerTexts = header.querySelectorAll('h1, p, .editable');
-        headerTexts.forEach(el => {
-            el.style.color = isLight ? '#2c3e50' : 'white';
-        });
-        
-        // Adjust button colors in header
-        const headerButtons = header.querySelectorAll('.edit-btn, .guide-menu-btn');
-        headerButtons.forEach(btn => {
-            btn.style.color = isLight ? '#2c3e50' : 'white';
-        });
-    }
     
     // Adjust floating button
     const floatingBtn = document.getElementById('layoutBtn');
     if (floatingBtn) {
         floatingBtn.style.backgroundColor = secondaryColor;
+    }
+    
+    // Don't apply gradient to header if image exists
+    if (headerImage) {
+        // Header will be handled by applyHeaderImage()
+    } else {
+        // Apply background gradient to header only if no image
+        const header = document.querySelector('.header');
+        if (header) {
+            header.style.background = `linear-gradient(135deg, ${secondaryColor} 0%, ${primaryColor} 100%)`;
+            header.style.color = isLight ? '#2c3e50' : 'white';
+            
+            // Adjust all text elements in header
+            const headerTexts = header.querySelectorAll('h1, p, .editable');
+            headerTexts.forEach(el => {
+                el.style.color = isLight ? '#2c3e50' : 'white';
+            });
+            
+            // Adjust button colors in header
+            const headerButtons = header.querySelectorAll('.edit-btn, .guide-menu-btn');
+            headerButtons.forEach(btn => {
+                btn.style.color = isLight ? '#2c3e50' : 'white';
+            });
+        }
     }
 }
 
@@ -3574,6 +3580,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
