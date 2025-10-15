@@ -193,6 +193,22 @@
 		.header-image-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
 		.header-image-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
 		.header-image-menu.show { display: block; }
+		/* Custom Dialog Overlay */ 
+		.custom-dialog-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; transition: opacity 0.2s ease; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); } 
+		.custom-dialog-overlay.show { opacity: 1; } 
+		.custom-dialog { background: white; border-radius: 14px; min-width: 270px; max-width: 90%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); overflow: hidden; transform: scale(0.9); transition: transform 0.2s ease; } 
+		.custom-dialog-overlay.show .custom-dialog { transform: scale(1); } 
+		.custom-dialog-title { padding: 20px 16px 10px; text-align: center; font-size: 17px; font-weight: 600; color: #000; line-height: 1.4; } 
+		.custom-dialog-message { padding: 0 16px 20px; text-align: center; font-size: 13px; color: #000; line-height: 1.4; opacity: 0.8; } 
+		.custom-dialog-buttons { border-top: 0.5px solid rgba(0, 0, 0, 0.1); display: flex; } 
+		.custom-dialog-button { flex: 1; padding: 12px; background: none; border: none; font-size: 17px; cursor: pointer; transition: background 0.15s; color: #007AFF; font-weight: 400; } 
+		.custom-dialog-button:active { background: rgba(0, 0, 0, 0.05); } 
+		.custom-dialog-button.primary { font-weight: 600; } 
+		.custom-dialog-button.destructive { color: #FF3B30; font-weight: 600; } 
+		.custom-dialog-button:not(:last-child) { border-right: 0.5px solid rgba(0, 0, 0, 0.1); } 
+		.custom-dialog-input { margin: 0 16px 20px; padding: 8px 12px; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px; font-size: 15px; width: calc(100% - 32px); box-sizing: border-box; background: rgba(0, 0, 0, 0.03); } 
+		.custom-dialog-input:focus { outline: none; border-color: #007AFF; background: white; }
+
 		
 	</style>
     </head>
@@ -267,7 +283,152 @@
 	  messagingSenderId: "80383828301",
 	  appId: "1:80383828301:web:7c001b7375f63fc5055704",
 	};
-	
+
+	// Custom dialog functions to replace alert, confirm, and prompt
+function customAlert(message, title = '') {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'custom-dialog-overlay';
+        
+        const dialog = document.createElement('div');
+        dialog.className = 'custom-dialog';
+        
+        let html = '';
+        if (title) {
+            html += `<div class="custom-dialog-title">${title}</div>`;
+        }
+        html += `<div class="custom-dialog-message">${message}</div>`;
+        html += `<div class="custom-dialog-buttons">
+            <button class="custom-dialog-button primary">OK</button>
+        </div>`;
+        
+        dialog.innerHTML = html;
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        setTimeout(() => overlay.classList.add('show'), 10);
+        
+        const closeDialog = () => {
+            overlay.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+                resolve();
+            }, 200);
+        };
+        
+        dialog.querySelector('.custom-dialog-button').addEventListener('click', closeDialog);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeDialog();
+        });
+    });
+}
+
+function customConfirm(message, title = '') {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'custom-dialog-overlay';
+        
+        const dialog = document.createElement('div');
+        dialog.className = 'custom-dialog';
+        
+        let html = '';
+        if (title) {
+            html += `<div class="custom-dialog-title">${title}</div>`;
+        }
+        html += `<div class="custom-dialog-message">${message}</div>`;
+        html += `<div class="custom-dialog-buttons">
+            <button class="custom-dialog-button" data-result="false">Cancel</button>
+            <button class="custom-dialog-button destructive" data-result="true">Delete</button>
+        </div>`;
+        
+        dialog.innerHTML = html;
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        setTimeout(() => overlay.classList.add('show'), 10);
+        
+        const closeDialog = (result) => {
+            overlay.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+                resolve(result);
+            }, 200);
+        };
+        
+        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                closeDialog(btn.dataset.result === 'true');
+            });
+        });
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeDialog(false);
+        });
+    });
+}
+
+function customPrompt(message, defaultValue = '', title = '') {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'custom-dialog-overlay';
+        
+        const dialog = document.createElement('div');
+        dialog.className = 'custom-dialog';
+        
+        let html = '';
+        if (title) {
+            html += `<div class="custom-dialog-title">${title}</div>`;
+        }
+        html += `<div class="custom-dialog-message">${message}</div>`;
+        html += `<input type="text" class="custom-dialog-input" value="${defaultValue}" placeholder="${defaultValue}">`;
+        html += `<div class="custom-dialog-buttons">
+            <button class="custom-dialog-button" data-result="cancel">Cancel</button>
+            <button class="custom-dialog-button primary" data-result="ok">OK</button>
+        </div>`;
+        
+        dialog.innerHTML = html;
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        const input = dialog.querySelector('.custom-dialog-input');
+        
+        setTimeout(() => {
+            overlay.classList.add('show');
+            input.focus();
+            input.select();
+        }, 10);
+        
+        const closeDialog = (result) => {
+            overlay.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+                resolve(result);
+            }, 200);
+        };
+        
+        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.dataset.result === 'ok') {
+                    closeDialog(input.value || null);
+                } else {
+                    closeDialog(null);
+                }
+            });
+        });
+        
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                closeDialog(input.value || null);
+            } else if (e.key === 'Escape') {
+                closeDialog(null);
+            }
+        });
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeDialog(null);
+        });
+    });
+}
 	const app = initializeApp(firebaseConfig);
 	const database = getDatabase(app);
 	const auth = getAuth(app);
@@ -728,7 +889,7 @@ function loadUserData(userId) {
         console.error('Error loading user data:', error);
         
         // Show error message to user
-        alert('Failed to load your data. Please check your internet connection and try refreshing the page.');
+        await customAlert('Failed to load your data. Please check your internet connection and try refreshing the page.');
         
         // Still try to show the app with default data
         applyTheme();
@@ -1132,7 +1293,7 @@ function applyCustomColor() {
         document.getElementById('colorPickerMenu').classList.remove('show');
         document.getElementById('dropdownMenu').classList.remove('show');
     } else {
-        alert('Please enter a valid color code (e.g., #FF0000)');
+        await customAlert('Please enter a valid color code (e.g., #FF0000)');
     }
 }
 
@@ -1292,9 +1453,9 @@ function detectImageBrightness(imageSrc, callback) {
     };
 }
 
-function createNewGuide() {
+async function createNewGuide() {
     if (!currentUser) return;
-    const name = prompt("Enter a name for this new guide:");
+    const name = await customPrompt("Enter a name for this new guide:", "My New Guide", "Create Guide");
     if (!name) return;
     const id = `guide_${Date.now()}`;
     const newGuide = {
@@ -1514,7 +1675,7 @@ document.addEventListener('touchend', (e) => {
         const itemIndex = parseInt(currentSwipedItem.dataset.itemIndex);
         
         // Confirm deletion
-        if (confirm('Delete this item?')) {
+        if (await customConfirm('Are you sure you want to delete this item?')) {
             // Delete the item with animation
             currentSwipedItem.style.transition = 'all 0.3s ease';  // FIXED: Re-set transition
             currentSwipedItem.style.transform = 'translateX(-100%)';
@@ -1784,7 +1945,7 @@ document.addEventListener('touchend', (e) => {
         const skillIndex = parseInt(currentSwipedCard.dataset.skillIndex);
         
         // Confirm deletion
-        if (confirm('Delete this entire card?')) {
+        if (await customConfirm('Are you sure you want to delete this card?')) {
             // Delete the card with animation
             currentSwipedCard.style.transition = 'all 0.3s ease';
             currentSwipedCard.style.transform = 'translate(-150%, 100%) rotate(-15deg)';
@@ -1883,25 +2044,25 @@ function toggleMenu(e) {
 }
 
 // Authentication functions
-function login(email, password) {
+async function login(email, password) {
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             currentUser = userCredential.user;
             loadUserData(currentUser.uid);
         })
         .catch((error) => {
-            alert('Login failed: ' + error.message);
+            await customAlert(error.message, 'Login Failed');
         });
 }
 
-function signup(email, password) {
+async function signup(email, password) {
     createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             currentUser = userCredential.user;
             loadUserData(currentUser.uid);
         })
         .catch((error) => {
-            alert('Signup failed: ' + error.message);
+            await customAlert(error.message, 'Signup Failed');
         });
 }
 
@@ -1917,7 +2078,7 @@ function loginWithGoogle() {
         })
         .catch((error) => {
             console.error('Google login error:', error);
-            alert('Google login failed: ' + error.message);
+            await customAlert('Google login failed: ' + error.message);
         });
 }
 
@@ -1939,23 +2100,23 @@ function showSignup() {
         setTimeout(() => signupScreen.classList.add('show'), 10);
     }, 300);
 }
-function processSignup() {
+async function processSignup() {
     const email = document.getElementById('signupEmail').value;
     const password = document.getElementById('signupPassword').value;
     const confirmPassword = document.getElementById('signupPasswordConfirm').value;
     
     if (!email || !password) {
-        alert('Please enter email and password');
+        await customAlert('Please enter your email and password', 'Missing Information');
         return;
     }
     
     if (password.length < 6) {
-        alert('Password must be at least 6 characters long');
+        await customAlert('Password must be at least 6 characters long', 'Invalid Password');
         return;
     }
     
     if (password !== confirmPassword) {
-        alert('Passwords do not match');
+        await customAlert('The passwords you entered do not match', 'Password Mismatch');
         return;
     }
     
@@ -1974,7 +2135,7 @@ function backToLogin() {
     }, 300);
 }
 
-function deleteAccount() {
+async function deleteAccount() {
     if (!currentUser) return;
     const user = currentUser;
     const userId = user.uid;
@@ -1983,13 +2144,13 @@ function deleteAccount() {
     remove(ref(database, `users/${userId}`)).then(() => {
         // Delete the authentication account
         user.delete().then(() => {
-            alert('Your account has been deleted.');
+            await customAlert('Your account has been permanently deleted.', 'Account Deleted');
             currentUser = null;
         }).catch((error) => {
-            alert('Error deleting account: ' + error.message);
+            await customAlert(error.message, 'Error Deleting Account');
         });
     }).catch((error) => {
-        alert('Error deleting user data: ' + error.message);
+        await customAlert(error.message, 'Error Deleting Data');
     });
 }
 	
@@ -2011,13 +2172,13 @@ function duplicateGuide() {
     });
 }
 
-function deleteGuide() {
+async function deleteGuide() {
     if (!currentUser) return;
     if (currentGuideId === 'defaultGuide') {
-        alert("Cannot delete the default guide!");
+        await customAlert("The default guide cannot be deleted.", "Cannot Delete");
         return;
     }
-    if (confirm("Delete this entire guide? This cannot be undone.")) {
+    if (await customConfirm("This will permanently delete this guide and all its content. This cannot be undone.", "Delete Guide")) {
         remove(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}`));
         currentGuideId = 'defaultGuide';
         localStorage.setItem('currentGuideId', 'defaultGuide');
@@ -2185,7 +2346,7 @@ function renderHeader() {
 	
 	if (logoutOptionBtn) {
 	    logoutOptionBtn.addEventListener('click', () => {
-	        if (confirm('Are you sure you want to log out?')) {
+	        if (await customConfirm('Are you sure you want to log out?')) {
 	            logout();
 	            closeDrawer();
 	        }
@@ -2195,8 +2356,8 @@ function renderHeader() {
 	
 	if (deleteAccountBtn) {
 	    deleteAccountBtn.addEventListener('click', () => {
-	        if (confirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!\n\nType "DELETE" to confirm.') === true) {
-	            const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+	        if (await customConfirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!\n\nType "DELETE" to confirm.') === true) {
+	            const confirmation = await customAlert('Type "DELETE" to confirm account deletion:');
 	            if (confirmation === 'DELETE') {
 	                deleteAccount();
 	            }
@@ -2276,7 +2437,7 @@ function renderHeader() {
 
     if (removeHeaderImageBtn) {
 	    removeHeaderImageBtn.addEventListener('click', () => {
-	        if (confirm('Remove header background image?')) {
+	        if (await customConfirm('Remove header background image?')) {
 	            headerImage = null;
 	            saveHeaderImage();
 	            applyHeaderImage();
@@ -2504,7 +2665,7 @@ function populateGuideDropdown() {
                 delBtn.style.fontWeight = 'bold';
                 delBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
+                    if (await customConfirm(`Delete guide "${title}"? This cannot be undone.`)) {
                         remove(ref(database, `users/${currentUser.uid}/guides/${id}`));
                         if (currentGuideId === id) {
                             currentGuideId = 'defaultGuide';
@@ -2912,8 +3073,8 @@ function checkAndAutoRefresh(lastRefreshDate) {
     }
 }
 
-function clearAllChecks() {
-    if (confirm('Clear all checkmarks? This cannot be undone.')) {
+async function clearAllChecks() {
+    if (await customConfirm('This will clear all checkmarks. This cannot be undone.', 'Clear All Checks')) {
         checkedItems = {};
         saveCheckedItems();
         const today = new Date().toDateString();
@@ -2922,21 +3083,22 @@ function clearAllChecks() {
     }
 }
 
-function toggleAutoRefresh() {
-    const enabled = confirm(
-        autoRefreshEnabled 
-            ? 'Disable automatic daily refresh?' 
-            : `Enable automatic daily refresh at ${autoRefreshTime}?\n\nThis will clear all checkmarks at the specified time each day.`
-    );
-    
-    if (enabled) {
-        if (!autoRefreshEnabled) {
-            const time = prompt('Enter refresh time (HH:MM format, 24-hour):', autoRefreshTime);
+async function toggleAutoRefresh() {
+    const enabled = await customConfirm(
+    autoRefreshEnabled 
+        ? 'This will disable the automatic daily refresh.' 
+        : `This will clear all checkmarks at ${autoRefreshTime} each day.`,
+    autoRefreshEnabled ? 'Disable Auto-Refresh' : 'Enable Auto-Refresh'
+);
+
+if (enabled) {
+    if (!autoRefreshEnabled) {
+        const time = await customPrompt('Enter time in 24-hour format', autoRefreshTime, 'Set Refresh Time');
             if (time && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
                 autoRefreshTime = time;
                 autoRefreshEnabled = true;
             } else {
-                alert('Invalid time format. Please use HH:MM (e.g., 09:00 or 23:30)');
+                await customAlert('Please use HH:MM format (e.g., 09:00 or 23:30)', 'Invalid Time Format');
                 return;
             }
         } else {
@@ -3827,16 +3989,16 @@ function editSkillIcon(catIndex, skillIndex, el) {
     });
 }
 
-function deleteSkill(catIndex, skillIndex) { 
-    if (confirm('Delete this skill?')) { 
+async function deleteSkill(catIndex, skillIndex) { 
+    if (await customConfirm('Are you sure you want to delete this card?')) { 
         categories[catIndex].skills.splice(skillIndex, 1); 
         saveCategories();
         renderContent(); 
     } 
 }
 
-function deleteItem(catIndex, skillIndex, itemIndex) {
-    if (confirm('Delete this item?')) {
+async function deleteItem(catIndex, skillIndex, itemIndex) {
+    if (await customConfirm('Are you sure you want to delete this item?')) {
         categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
         saveCategories();
         renderContent();
@@ -3902,8 +4064,8 @@ function updateLayoutButton() {
     }
 }
 
-function deleteCategory(catIndex) {
-    if (confirm('Delete this entire category?')) {
+async function deleteCategory(catIndex) {
+    if (await customConfirm('Are you sure you want to delete this category?', 'Delete Category')) {
         categories.splice(catIndex, 1);
         if (activeTabIndex >= categories.length) {
             activeTabIndex = Math.max(0, categories.length - 1);
@@ -4070,5 +4232,6 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
