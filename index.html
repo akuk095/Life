@@ -190,6 +190,9 @@
 		.logout-menu button.danger { color: #dc2626; }
 		.logout-menu button.danger:hover { background: #fee2e2; }
 		.logout-menu.show { display: block; }
+		.header-image-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
+		.header-image-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
+		.header-image-menu.show { display: block; }
 		
 	</style>
     </head>
@@ -339,6 +342,7 @@ let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
+let headerImage = null; 
 
 // Drag and drop state
 let draggedCard = null;
@@ -646,7 +650,8 @@ function loadUserData(userId) {
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshEnabled`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshTime`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
-	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap]) => {
+			get(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/headerImage`)),
+	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap]) => {
 			
 		// Load categories
         if (categoriesSnap.val()) {
@@ -698,7 +703,11 @@ function loadUserData(userId) {
         
         // Apply theme
         applyTheme();
-                
+
+		// After loading autoRefreshTime, add:
+		if (headerImageSnap.val()) {
+		    headerImage = headerImageSnap.val();
+		}
         // Render everything
         renderHeader();
         renderTabs();
@@ -715,6 +724,7 @@ function loadUserData(userId) {
         
         // Still try to show the app with default data
         applyTheme();
+		applyHeaderImage();
         renderHeader();
         renderTabs();
         renderContent();
@@ -1113,7 +1123,50 @@ function applyCustomColor() {
         alert('Please enter a valid color code (e.g., #FF0000)');
     }
 }
-		
+
+function saveHeaderImage() {
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/headerImage`), headerImage);
+}
+
+function applyHeaderImage() {
+    const header = document.querySelector('.header');
+    if (!header) return;
+    
+    if (headerImage) {
+        // Apply image as background
+        header.style.backgroundImage = `url(${headerImage})`;
+        header.style.backgroundSize = 'cover';
+        header.style.backgroundPosition = 'center';
+        header.style.backgroundRepeat = 'no-repeat';
+        // Add overlay for better text readability
+        header.style.position = 'relative';
+        if (!header.querySelector('.header-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'header-overlay';
+            overlay.style.position = 'absolute';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.right = '0';
+            overlay.style.bottom = '0';
+            overlay.style.background = 'rgba(0, 0, 0, 0.4)';
+            overlay.style.borderRadius = '0 0 20px 20px';
+            header.insertBefore(overlay, header.firstChild);
+        }
+        // Ensure text is visible
+        header.style.color = 'white';
+        const headerTexts = header.querySelectorAll('h1, p, .editable');
+        headerTexts.forEach(el => el.style.color = 'white');
+    } else {
+        // Remove image and overlay
+        header.style.backgroundImage = '';
+        const overlay = header.querySelector('.header-overlay');
+        if (overlay) overlay.remove();
+        // Reapply theme
+        applyTheme();
+    }
+}
+	
 function createNewGuide() {
     if (!currentUser) return;
     const name = prompt("Enter a name for this new guide:");
@@ -1581,6 +1634,7 @@ function renderHeader() {
 	        <button id="editModeMenuBtn">Edit</button>
 	        <button id="duplicateGuideBtn">Duplicate</button>
 	        <button id="deleteGuideBtn">Delete</button>
+			<button id="headerImageBtn">Header Image</button>
 	        <button id="toggleColorBtn">Theme</button>
 	        <div class="color-picker-menu" id="colorPickerMenu">
 	            <h3>Preset Themes</h3>
@@ -1604,6 +1658,13 @@ function renderHeader() {
 	                </div>
 	            </div>
 	        </div>
+			<button id="headerImageBtn">Header Image</button>
+		        <div class="header-image-menu" id="headerImageMenu">
+		            <h3>Header Background</h3>
+		            <input type="file" id="headerImageInput" accept="image/*" style="display: none;">
+		            <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px;">Upload Image</button>
+		            <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; display: none;">Remove Image</button>
+		        </div>
 	        <button id="checkboxOptionsBtn">Checkbox options</button>
 	        <div class="checkbox-menu" id="checkboxMenu">
 	            <button id="clearChecksBtn">Clear all checks</button>
@@ -1705,7 +1766,68 @@ function renderHeader() {
     if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
     if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
     if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
-    
+
+	    // Header image event listeners
+    const headerImageBtn = document.getElementById('headerImageBtn');
+    const uploadHeaderImageBtn = document.getElementById('uploadHeaderImageBtn');
+    const removeHeaderImageBtn = document.getElementById('removeHeaderImageBtn');
+    const headerImageInput = document.getElementById('headerImageInput');
+
+    if (headerImageBtn) {
+        headerImageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const imageMenu = document.getElementById('headerImageMenu');
+            const colorMenu = document.getElementById('colorPickerMenu');
+            const checkboxMenu = document.getElementById('checkboxMenu');
+            
+            if (colorMenu) colorMenu.classList.remove('show');
+            if (checkboxMenu) checkboxMenu.classList.remove('show');
+            
+            if (imageMenu) {
+                imageMenu.classList.toggle('show');
+                if (removeHeaderImageBtn && headerImage) {
+                    removeHeaderImageBtn.style.display = 'block';
+                } else if (removeHeaderImageBtn) {
+                    removeHeaderImageBtn.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    if (uploadHeaderImageBtn) {
+        uploadHeaderImageBtn.addEventListener('click', () => {
+            headerImageInput.click();
+        });
+    }
+
+    if (headerImageInput) {
+        headerImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    headerImage = event.target.result;
+                    saveHeaderImage();
+                    applyHeaderImage();
+                    document.getElementById('headerImageMenu').classList.remove('show');
+                    document.getElementById('dropdownMenu').classList.remove('show');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (removeHeaderImageBtn) {
+        removeHeaderImageBtn.addEventListener('click', () => {
+            if (confirm('Remove header background image?')) {
+                headerImage = null;
+                saveHeaderImage();
+                applyHeaderImage();
+                document.getElementById('headerImageMenu').classList.remove('show');
+                document.getElementById('dropdownMenu').classList.remove('show');
+            }
+        });
+    }
     // App icon editing
     if (editMode && appIconSpan) {
         appIconSpan.addEventListener('click', (e) => {
@@ -3394,4 +3516,5 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
