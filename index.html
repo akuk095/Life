@@ -68,6 +68,7 @@
 		.edit-mode .add-item-btn { display: block; }
 		.edit-mode .add-skill-btn { display: block; }
 		.edit-mode .delete-btn { display: inline-flex; }
+		.edit-mode .nav-tab .tab-name[contenteditable="true"] { user-select: text !important; -webkit-user-select: text !important; cursor: text !important;}
 		.edit-mode-active .floating-layout-btn { display: none; }
 		.edit-toggle { position: absolute; top: 10px; right: 10px; }
 		.editable { cursor: text; padding: 2px 4px; border-radius: 4px; transition: all 0.2s ease; }
@@ -2329,14 +2330,21 @@ function renderTabs() {
 			`;
             
             // Add event listeners for edit mode
-            const tabIcon = tab.querySelector('.tab-icon');
-            if (tabIcon) {
-                tabIcon.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const catIndex = parseInt(e.target.dataset.catIndex);
-                    editCategoryIcon(catIndex, e.target);
-                });
-            }
+const tabIcon = tab.querySelector('.tab-icon');
+if (tabIcon) {
+    tabIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Get the index from the closest element that has it
+        let targetElement = e.target;
+        if (!targetElement.dataset.catIndex) {
+            targetElement = e.target.closest('[data-cat-index]');
+        }
+        if (targetElement && targetElement.dataset.catIndex) {
+            const catIndex = parseInt(targetElement.dataset.catIndex);
+            editCategoryIcon(catIndex, tabIcon);
+        }
+    });
+}
             
             const removeIconBtn = tab.querySelector('.emoji-remove-btn');
             if (removeIconBtn) {
@@ -2351,19 +2359,29 @@ function renderTabs() {
             }
             
             const nameSpan = tab.querySelector('.tab-name');
-            nameSpan.addEventListener('blur', (e) => {
-                categories[i].name = e.target.textContent.trim();
-                saveCategories();
-            });
-            nameSpan.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.target.blur();
-                }
-            });
-            nameSpan.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
+if (nameSpan) {
+    // Enable text selection for editing
+    nameSpan.style.userSelect = 'text';
+    nameSpan.style.webkitUserSelect = 'text';
+    nameSpan.style.cursor = 'text';
+    
+    nameSpan.addEventListener('blur', (e) => {
+        categories[i].name = e.target.textContent.trim();
+        saveCategories();
+    });
+    nameSpan.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.target.blur();
+        }
+    });
+    nameSpan.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    nameSpan.addEventListener('focus', (e) => {
+        e.stopPropagation();
+    });
+}
             
             tab.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('editable') && !e.target.classList.contains('editable-icon')) {
@@ -3251,6 +3269,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
