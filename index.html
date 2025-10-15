@@ -2056,14 +2056,13 @@ async function login(email, password) {
 
 
 async function signup(email, password) {
-    createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            currentUser = userCredential.user;
-            loadUserData(currentUser.uid);
-        })
-        .catch((error) => {
-            await customAlert(error.message, 'Signup Failed');
-        });
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        currentUser = userCredential.user;
+        loadUserData(currentUser.uid);
+    } catch (error) {
+        await customAlert(error.message, 'Signup Failed');
+    }
 }
 
 async function loginWithGoogle() {
@@ -2071,15 +2070,15 @@ async function loginWithGoogle() {
     provider.setCustomParameters({
         prompt: 'select_account'
     });
-    signInWithPopup(auth, provider)
-        .then((result) => {
-            currentUser = result.user;
-            loadUserData(currentUser.uid);
-        })
-        .catch((error) => {
-            console.error('Google login error:', error);
-            await customAlert('Google login failed: ' + error.message);
-        });
+    
+    try {
+        const result = await signInWithPopup(auth, provider);
+        currentUser = result.user;
+        loadUserData(currentUser.uid);
+    } catch (error) {
+        console.error('Google login error:', error);
+        await customAlert('Google login failed: ' + error.message);
+    }
 }
 
 function logout() {
@@ -2140,18 +2139,18 @@ async function deleteAccount() {
     const user = currentUser;
     const userId = user.uid;
     
-    // Delete all user data from database
-    remove(ref(database, `users/${userId}`)).then(() => {
+    try {
+        // Delete all user data from database
+        await remove(ref(database, `users/${userId}`));
+        
         // Delete the authentication account
-        user.delete().then(() => {
-            await customAlert('Your account has been permanently deleted.', 'Account Deleted');
-            currentUser = null;
-        }).catch((error) => {
-            await customAlert(error.message, 'Error Deleting Account');
-        });
-    }).catch((error) => {
-        await customAlert(error.message, 'Error Deleting Data');
-    });
+        await user.delete();
+        
+        await customAlert('Your account has been permanently deleted.', 'Account Deleted');
+        currentUser = null;
+    } catch (error) {
+        await customAlert(error.message, 'Error Deleting Account');
+    }
 }
 	
 function duplicateGuide() {
@@ -4232,6 +4231,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
