@@ -2356,30 +2356,39 @@ function renderTabs() {
                 }
             });
         } else {
-		    // Need to render SVG icons properly
-		    let displayIcon = cat.icon;
-		    if (cat.icon && cat.icon.startsWith('svg:')) {
-		        const iconData = JSON.parse(cat.icon.substring(4));
-		        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-		    }
-		    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
-		    
-		    const nameSpan = tab.querySelector('.tab-name-display');
-		    
-		    // Single click switches tab
-		    tab.addEventListener('click', function(e) {
-		        switchTab(i);
-		    });
-		    
-		    // Double-click on name to edit
-		    if (nameSpan) {
-		        nameSpan.addEventListener('dblclick', function(e) {
-		            e.stopPropagation();
-		            e.preventDefault();
-		            enableQuickEdit(this, i, null, null);
-		        });
-		    }
-		}
+	    // Need to render SVG icons properly
+	    let displayIcon = cat.icon;
+	    if (cat.icon && cat.icon.startsWith('svg:')) {
+	        const iconData = JSON.parse(cat.icon.substring(4));
+	        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+	    }
+	    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
+	    
+	    const nameSpan = tab.querySelector('.tab-name-display');
+	    
+	    // Use a timeout to distinguish single click from double click
+	    let clickTimer = null;
+	    
+	    tab.addEventListener('click', function(e) {
+	        if (clickTimer === null) {
+	            clickTimer = setTimeout(() => {
+	                switchTab(i);
+	                clickTimer = null;
+	            }, 250); // Wait 250ms to see if it's a double click
+	        }
+	    });
+	    
+	    // Double-click on name to edit
+	    if (nameSpan) {
+	        nameSpan.addEventListener('dblclick', function(e) {
+	            e.stopPropagation();
+	            e.preventDefault();
+	            clearTimeout(clickTimer);
+	            clickTimer = null;
+	            enableQuickEdit(this, i, null, null);
+	        });
+	    }
+	}
         
         tabWrapper.appendChild(tab);
         
@@ -3194,6 +3203,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
