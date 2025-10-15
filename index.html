@@ -1147,11 +1147,7 @@ function applyHeaderImage() {
         console.log('Header not found, cannot apply image');
         return;
     }
-    
-    // Remove any existing overlay/scrim
-    const existingScrim = header.querySelector('.header-text-scrim');
-    if (existingScrim) existingScrim.remove();
-    
+      
     if (headerImage) {
         console.log('Applying header image');
         // Apply image as background (replaces theme gradient)
@@ -1166,57 +1162,42 @@ function applyHeaderImage() {
             const textColor = isLight ? '#2c3e50' : 'white';
             const scrimColor = isLight ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)';
             
-            // Add scrim behind text only
+            // Apply background directly to text elements
             const h1 = header.querySelector('h1');
             const p = header.querySelector('p');
             
-            if (h1 && p) {
-                // Measure the text area first
-                const h1Rect = h1.getBoundingClientRect();
-                const pRect = p.getBoundingClientRect();
-                
-                // Calculate combined height and max width
-                const textHeight = h1Rect.height + pRect.height + 10; // 10px gap between
-                const textWidth = Math.max(h1Rect.width, pRect.width);
-                
-                const scrim = document.createElement('div');
-                scrim.className = 'header-text-scrim';
-                
-                // Scrim matches text dimensions with padding
-                scrim.style.cssText = `
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
+            if (h1) {
+                h1.style.cssText = `
+                    position: relative;
+                    z-index: 1;
+                    color: ${textColor};
                     background: ${scrimColor};
-                    width: ${textWidth + 60}px;
-                    height: ${textHeight + 40}px;
-                    border-radius: 16px;
-                    z-index: 0;
-                    pointer-events: none;
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                    border: 2px solid ${isLight ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'};
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    padding: 12px 24px;
+                    border-radius: 12px;
+                    display: inline-block;
+                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+                    margin-bottom: 8px;
                 `;
-                console.log('Creating scrim - width:', textWidth + 60, 'height:', textHeight + 40);
-                
-                header.style.position = 'relative';
-                
-                // Insert scrim before the first child
-                header.insertBefore(scrim, header.firstChild);
-                
-                // Style text elements
-                h1.style.position = 'relative';
-                h1.style.zIndex = '1';
-                h1.style.color = textColor;
-                h1.style.textShadow = isLight ? '0 1px 2px rgba(255,255,255,0.8)' : '0 2px 4px rgba(0,0,0,0.8)';
-                
-                p.style.position = 'relative';
-                p.style.zIndex = '1';
-                p.style.color = textColor;
-                p.style.textShadow = isLight ? '0 1px 2px rgba(255,255,255,0.8)' : '0 2px 4px rgba(0,0,0,0.8)';
             }
             
-            // Keep buttons visible and in correct position
+            if (p) {
+                p.style.cssText = `
+                    position: relative;
+                    z-index: 1;
+                    color: ${textColor};
+                    background: ${scrimColor};
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    padding: 8px 20px;
+                    border-radius: 10px;
+                    display: inline-block;
+                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+                `;
+            }
+            
+            // Keep buttons visible with correct color
             const menuBtn = header.querySelector('.edit-btn, #menuBtn');
             const guideMenuBtn = header.querySelector('.guide-menu-btn');
             const saveBtn = header.querySelector('.save-btn');
@@ -1242,18 +1223,14 @@ function applyHeaderImage() {
         header.style.backgroundPosition = '';
         header.style.backgroundRepeat = '';
         
-        // Reset text colors
+        // Reset text styles completely
         const h1 = header.querySelector('h1');
         const p = header.querySelector('p');
         if (h1) {
-            h1.style.color = '';
-            h1.style.position = '';
-            h1.style.zIndex = '';
+            h1.style.cssText = '';
         }
         if (p) {
-            p.style.color = '';
-            p.style.position = '';
-            p.style.zIndex = '';
+            p.style.cssText = '';
         }
         
         // Reapply theme gradient
@@ -3689,6 +3666,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
