@@ -2469,6 +2469,13 @@ if (nameSpan) {
     tab.addEventListener('click', function(e) {
         // Ignore clicks while editing
         if (isEditing) {
+            e.stopPropagation();
+            return;
+        }
+        
+        // Ignore clicks if the name span is contenteditable
+        if (nameSpan && nameSpan.contentEditable === 'true') {
+            e.stopPropagation();
             return;
         }
         
@@ -2495,7 +2502,9 @@ if (nameSpan) {
             e.preventDefault();
             if (nameSpan) {
                 isEditing = true;
-                enableQuickEdit(nameSpan, i, null, null);
+                e.stopPropagation(); 
+                e.preventDefault();
+				enableQuickEdit(nameSpan, i, null, null);
                 
                 // Monitor when editing ends
                 const observer = new MutationObserver(() => {
@@ -3349,6 +3358,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
