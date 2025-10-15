@@ -3052,12 +3052,15 @@ document.addEventListener('click', (e) => {
     }
     
     // Close dropdown menu if clicking outside
-    if (menu && !menu.contains(e.target)) {
-        menu.classList.remove('show');
-        if (colorMenu) colorMenu.classList.remove('show');
-        // Show floating button when menu closes
-        if (floatingBtn) floatingBtn.style.display = 'flex';
-    }
+	if (menu && !menu.contains(e.target)) {
+	    menu.classList.remove('show');
+	    if (colorMenu) colorMenu.classList.remove('show');
+	    // Only show floating button if drawer is also closed
+	    const guideMenu = document.getElementById('guideDropdown');
+	    if (floatingBtn && !guideMenu.classList.contains('show')) {
+	        floatingBtn.style.display = 'flex';
+	    }
+	}
     
     const guideMenu = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
@@ -3168,6 +3171,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
