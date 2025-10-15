@@ -158,13 +158,13 @@
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
-		.skill-card-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; align-items: center; padding: 4px 4px 4px 8px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10; }
-		.skill-card-controls.show { opacity: 1; pointer-events: auto; }
-		.edit-mode .skill-card-controls { opacity: 1; pointer-events: auto; }
+		.skill-card-controls { position: absolute; top: 8px; right: 40px; display: flex; gap: 4px; align-items: center; padding: 0; background: white; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); transform: translateX(20px) scale(0.8); z-index: 9; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+		.skill-card-controls.show { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); }
+		.edit-mode .skill-card-controls { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); right: 8px; }
 		body:not(.edit-mode-active) .skill-card-controls.show { opacity: 1; pointer-events: auto; }
-		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0.4; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; font-weight: normal; pointer-events: auto !important; }
-		.skill-control-btn:hover { color: #6b7280; transform: scale(1.1); }
-		.skill-control-btn.delete-control:hover {color: #dc2626;}
+		.skill-control-btn { background: white; border: none; color: var(--primary-color, #3498db); opacity: 0.6; cursor: pointer; padding: 6px 8px; width: auto; height: auto; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s ease; font-weight: normal; pointer-events: auto !important; border-radius: 4px; }
+		.skill-control-btn:hover { opacity: 1; color: #6b7280; transform: scale(1.1); background: #f3f4f6; }
+		.skill-control-btn.delete-control:hover { color: #dc2626; background: #fee2e2; }
 		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
 		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
 		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
@@ -3377,6 +3377,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
