@@ -1162,52 +1162,48 @@ function applyHeaderImage() {
             const textColor = isLight ? '#2c3e50' : 'white';
             const scrimColor = isLight ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.5)';
             
-            // Apply background to header container to merge h1 and p
+            // Apply background directly to text elements
             const h1 = header.querySelector('h1');
             const p = header.querySelector('p');
             
-            // Create a wrapper for merged background
-            if (h1 && p) {
-                // Check if wrapper already exists
-                let wrapper = header.querySelector('.header-text-wrapper');
-                if (!wrapper) {
-                    wrapper = document.createElement('div');
-                    wrapper.className = 'header-text-wrapper';
-                    
-                    // Insert wrapper before h1
-                    h1.parentNode.insertBefore(wrapper, h1);
-                    
-                    // Move h1 and p into wrapper
-                    wrapper.appendChild(h1);
-                    wrapper.appendChild(p);
-                }
-                
-                // Style the wrapper with merged background
-                wrapper.style.cssText = `
+            if (h1) {
+                h1.style.cssText = `
                     position: relative;
                     z-index: 1;
-                    background: radial-gradient(ellipse at center, 
-					    ${scrimColor} 0%, 
-					    ${scrimColor} 25%, 
-					    transparent 80%);
-                    backdrop-filter: blur(4px);
-                    -webkit-backdrop-filter: blur(4px);
-                    padding: 8px 16px;
-                    border-radius: 10px;
-                    display: inline-block;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                `;
-                
-                // Style h1 and p without their own backgrounds
-                h1.style.cssText = `
                     color: ${textColor};
-                    margin: 0 0 4px 0;
+                    background: radial-gradient(ellipse at center, 
+                        rgba(${r}, ${g}, ${b}, 0.5) 0%, 
+                        rgba(${r}, ${g}, ${b}, 0.5) 50%, 
+                        transparent 100%);
+                    backdrop-filter: blur(8px);
+                    -webkit-backdrop-filter: blur(8px);
+                    padding: 8px 24px;
+                    border-radius: 10px;
+                    display: block;
+                    text-align: center;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    margin-bottom: 2px;
                     font-size: 20px;
                 `;
-                
+            }
+            
+            if (p) {
                 p.style.cssText = `
+                    position: relative;
+                    z-index: 1;
                     color: ${textColor};
-                    margin: 0;
+                    background: radial-gradient(ellipse at center, 
+                        rgba(${r}, ${g}, ${b}, 0.5) 0%, 
+                        rgba(${r}, ${g}, ${b}, 0.5) 50%, 
+                        transparent 100%);
+                    backdrop-filter: blur(8px);
+                    -webkit-backdrop-filter: blur(8px);
+                    padding: 6px 20px;
+                    border-radius: 8px;
+                    display: block;
+                    text-align: center;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    margin-top: 2px;
                     font-size: 12px;
                 `;
             }
@@ -1219,15 +1215,15 @@ function applyHeaderImage() {
             
             if (menuBtn) {
                 menuBtn.style.color = textColor;
-                menuBtn.style.zIndex = '10';
+                menuBtn.style.zIndex = '100';
             }
             if (guideMenuBtn) {
                 guideMenuBtn.style.color = textColor;
-                guideMenuBtn.style.zIndex = '10';
+                guideMenuBtn.style.zIndex = '100';
             }
             if (saveBtn) {
                 saveBtn.style.color = textColor;
-                saveBtn.style.zIndex = '10';
+                saveBtn.style.zIndex = '100';
             }
         });
     } else {
@@ -1237,20 +1233,6 @@ function applyHeaderImage() {
         header.style.backgroundSize = '';
         header.style.backgroundPosition = '';
         header.style.backgroundRepeat = '';
-        
-        // Remove wrapper and reset text styles
-        const wrapper = header.querySelector('.header-text-wrapper');
-        if (wrapper) {
-            const h1 = wrapper.querySelector('h1');
-            const p = wrapper.querySelector('p');
-            
-            // Move elements back to header
-            if (h1) header.appendChild(h1);
-            if (p) header.appendChild(p);
-            
-            // Remove wrapper
-            wrapper.remove();
-        }
         
         // Reset text styles completely
         const h1 = header.querySelector('h1');
@@ -1265,7 +1247,6 @@ function applyHeaderImage() {
         // Reapply theme gradient
         applyTheme();
     }
-}
 function detectImageBrightness(imageSrc, callback) {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
@@ -3694,6 +3675,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
