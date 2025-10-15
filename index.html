@@ -2348,11 +2348,7 @@ function renderTabs() {
 		    
 		    // Single click switches tab
 		    tab.addEventListener('click', function(e) {
-		        if (e.target === nameSpan || nameSpan.contains(e.target)) {
-		            // If clicking on name span, do nothing (let dblclick handle it)
-		        } else {
-		            switchTab(i);
-		        }
+		        switchTab(i);
 		    });
 		    
 		    // Double-click on name to edit
@@ -3171,6 +3167,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 </body>
 </html>
+
 
 
 
