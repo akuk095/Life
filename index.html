@@ -17,7 +17,7 @@
 		.add-item-btn:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
 		.add-skill-btn { background: #8b5cf6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; width: auto; margin: 20px auto; transition: all 0.2s ease; display: none; }
 		.add-skill-btn:hover { background: #7c3aed; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3); }
-		.wallpaper-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: fixed; bottom: 60px; left: 0; right: 0; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); width: 100%; border-top: 1px solid #e9ecef; z-index: 1001; max-height: calc(100vh - 60px); overflow-y: auto; }
+		.wallpaper-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
 		.wallpaper-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
 		.wallpaper-menu.show { display: block; }
 		/* Bottom Navigation Bar */
@@ -205,12 +205,12 @@
 		.custom-dialog-overlay.show { opacity: 1; }
 		.custom-dialog { background: white; border-radius: 24px; min-width: 320px; max-width: 440px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); overflow: hidden; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 		.custom-dialog-overlay.show .custom-dialog { transform: scale(1); }
-		.custom-dialog-title { padding: 32px 24px 16px; text-align: center; font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.3; letter-spacing: -0.3px; }
-		.custom-dialog-message { padding: 0 24px 24px; text-align: center; font-size: 15px; color: #666666; line-height: 1.6; font-weight: 400; }
+		.custom-dialog-title { padding: 32px 24px 16px; text-align: center; font-size: 24px; font-weight: 800; color: #1a1a1a; line-height: 1.3; letter-spacing: -0.4px; }
+		.custom-dialog-message { padding: 0 24px 24px; text-align: center; font-size: 16px; color: #666666; line-height: 1.6; font-weight: 400; }
 		.custom-dialog-link { display: block; text-align: center; padding: 0 24px 24px; font-size: 15px; color: var(--primary-color, #3498db); text-decoration: underline; cursor: pointer; font-weight: 500; }
 		.custom-dialog-link:hover { opacity: 0.8; }
 		.custom-dialog-buttons { display: flex; gap: 12px; padding: 0 16px 16px; }
-		.custom-dialog-button { flex: 1; padding: 16px 24px; background: #f0f0f0; border: none; border-radius: 16px; font-size: 17px; cursor: pointer; transition: all 0.2s ease; font-weight: 600; color: #333; font-family: inherit; }
+		.custom-dialog-button { flex: 1; padding: 16px 24px; background: #f0f0f0; border: none; border-radius: 16px; font-size: 18px; cursor: pointer; transition: all 0.2s ease; font-weight: 700; color: #333; font-family: inherit; }
 		.custom-dialog-button:hover { background: #e0e0e0; transform: translateY(-1px); }
 		.custom-dialog-button:active { transform: translateY(0); }
 		.custom-dialog-button.primary { background: var(--primary-color, #3498db); color: white; }
@@ -219,6 +219,50 @@
 		.custom-dialog-button.danger:hover { background: #e62e24; transform: translateY(-1px); }
 		.custom-dialog-buttons.single-button { display: block; padding: 0 24px 24px; }
 		.custom-dialog-buttons.single-button .custom-dialog-button { width: 100%; max-width: 200px; margin: 0 auto; display: block; }
+		.guides-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: var(--bg-primary, #0f172a); z-index: 99; overflow-y: auto; color: var(--text-primary, #f8fafc); }
+		.guides-page.active { display: block; }
+		.guides-page :root { --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #1e293b; --text-primary: #f8fafc; --text-secondary: #cbd5e1; --text-muted: #64748b; --accent: #3b82f6; --accent-hover: #2563eb; --border: rgba(148, 163, 184, 0.1); --shadow: rgba(0, 0, 0, 0.3); }
+		.guides-container { max-width: 680px; margin: 0 auto; padding: 24px 20px 40px; }
+		.guides-header { margin-bottom: 32px; animation: fadeInDown 0.6s ease-out; }
+		.guides-logo { font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.5px; margin-bottom: 16px; }
+		.guides-search-container { position: relative; margin-bottom: 32px; animation: fadeInDown 0.6s ease-out 0.1s backwards; }
+		.guides-search-wrapper { position: relative; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: all 0.3s ease; }
+		.guides-search-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+		.guides-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 20px; pointer-events: none; }
+		.guides-search-input { width: 100%; padding: 16px 18px 16px 52px; border: none; background: transparent; color: var(--text-primary); font-size: 16px; outline: none; font-family: inherit; }
+		.guides-search-input::placeholder { color: var(--text-muted); }
+		.guides-favorites-section { margin-bottom: 40px; animation: fadeInUp 0.6s ease-out 0.2s backwards; }
+		.guides-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 0 4px; }
+		.guides-section-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+		.guides-favorites-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+		.guides-favorite-card { aspect-ratio: 1; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+		.guides-favorite-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 0%, rgba(59, 130, 246, 0.1) 100%); opacity: 0; transition: opacity 0.4s ease; }
+		.guides-favorite-card:hover::before { opacity: 1; }
+		.guides-favorite-card:hover { transform: translateY(-4px) scale(1.02); border-color: var(--accent); box-shadow: 0 12px 24px var(--shadow); }
+		.guides-favorite-icon { font-size: 36px; margin-bottom: 8px; transition: transform 0.4s ease; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)); }
+		.guides-favorite-card:hover .guides-favorite-icon { transform: scale(1.1) rotate(-5deg); }
+		.guides-favorite-name { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-align: center; }
+		.guides-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 40px 0; }
+		.guides-list-section { position: relative; animation: fadeInUp 0.6s ease-out 0.3s backwards; }
+		.guides-list { position: relative; perspective: 1500px; }
+		.guide-list-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 12px; overflow: hidden; cursor: pointer; transform-origin: top center; position: sticky; will-change: transform, opacity; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(10px); }
+		.guide-list-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%); opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+		.guide-list-card:hover::before { opacity: 1; }
+		.guide-list-card:hover { border-color: var(--accent); box-shadow: 0 20px 40px var(--shadow); }
+		.guide-list-card-inner { display: flex; padding: 0; gap: 0; min-height: 130px; }
+		.guide-list-thumbnail { width: 130px; min-width: 130px; display: flex; align-items: center; justify-content: center; font-size: 48px; position: relative; overflow: hidden; border-radius: 20px 0 0 20px; }
+		.guide-list-thumbnail::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%); }
+		.guide-list-thumbnail span { position: relative; z-index: 1; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)); }
+		.guide-list-content { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 20px; overflow: hidden; }
+		.guide-list-title { font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; letter-spacing: -0.3px; }
+		.guide-list-preview { font-size: 14px; color: var(--text-muted); line-height: 1.5; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+		.guide-list-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+		.guide-list-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; font-size: 11px; font-weight: 600; color: var(--accent); }
+		@keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+		@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+		@keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+		.guide-list-card.entering { animation: slideIn 0.5s ease-out; }
+
 		
 	</style>
     </head>
@@ -514,7 +558,8 @@ let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
 let headerImage = null; 
-
+let wallpaperUrl = '';
+	
 // Drag and drop state
 let draggedCard = null;
 let draggedCatIndex = null;
@@ -822,7 +867,7 @@ async function loadUserData(userId) {
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshTime`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/headerImage`)),
-			get(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/wallpaper`)),
+			get(ref(database, `users/${userId}/guides/${currentGuideId}/wallpaper`)),
 	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap]) => {
 
 			// Wallpaper
@@ -1468,7 +1513,70 @@ function detectImageBrightness(imageSrc, callback) {
         callback(true);
     };
 }
+// Wallpaper Management
 
+function toggleWallpaperMenu() {
+    const menu = document.getElementById('wallpaperMenu');
+    const colorMenu = document.getElementById('colorPickerMenu');
+    const headerImageMenu = document.getElementById('headerImageMenu');
+    const checkboxMenu = document.getElementById('checkboxMenu');
+    
+    // Close other menus
+    if (colorMenu) colorMenu.classList.remove('show');
+    if (headerImageMenu) headerImageMenu.classList.remove('show');
+    if (checkboxMenu) checkboxMenu.classList.remove('show');
+    
+    // Toggle wallpaper menu
+    menu.classList.toggle('show');
+}
+
+function uploadWallpaper() {
+    const input = document.getElementById('wallpaperInput');
+    input.click();
+}
+
+function removeWallpaper() {
+    wallpaperUrl = '';
+    applyWallpaper();
+    saveWallpaper();
+    const menu = document.getElementById('wallpaperMenu');
+    if (menu) menu.classList.remove('show');
+}
+
+function applyWallpaper() {
+    const contentArea = document.querySelector('.content-area');
+    
+    if (wallpaperUrl) {
+        contentArea.classList.add('has-background');
+        
+        // Apply to pseudo-element through a style tag
+        let styleTag = document.getElementById('dynamic-bg-style');
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = 'dynamic-bg-style';
+            document.head.appendChild(styleTag);
+        }
+        styleTag.textContent = `.content-area::before { background-image: url(${wallpaperUrl}); }`;
+        
+        // Create overlay if it doesn't exist
+        let overlay = document.querySelector('.content-area-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'content-area-overlay';
+            document.body.appendChild(overlay);
+        }
+    } else {
+        contentArea.classList.remove('has-background');
+        const styleTag = document.getElementById('dynamic-bg-style');
+        if (styleTag) styleTag.textContent = '';
+    }
+}
+
+function saveWallpaper() {
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/wallpaper`), wallpaperUrl);
+}
+	
 async function createNewGuide() {
     if (!currentUser) return;
     const name = await customPrompt("Enter a name for this new guide:", "My New Guide", "Create Guide");
@@ -2296,20 +2404,12 @@ async function renderHeader() {
     </div>
     
     <!-- Wallpaper Menu -->
-    <div class="wallpaper-menu" id="wallpaperMenu">
-        <h3>Wallpaper</h3>
-        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-            <button onclick="uploadWallpaper()" style="flex: 1; padding: 10px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
-                📁 Upload
-            </button>
-            <button onclick="removeWallpaper()" style="flex: 1; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
-                🗑️ Remove
-            </button>
-        </div>
-        <div style="font-size: 12px; color: #6c757d; text-align: center;">
-            Set a custom wallpaper behind your cards
-        </div>
-    </div>
+	<div class="wallpaper-menu" id="wallpaperMenu">
+	    <h3>Wallpaper</h3>
+	    <input type="file" id="wallpaperInput" accept="image/*" style="display: none;">
+	    <button id="uploadWallpaperBtn" style="width: 100%; padding: 10px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500;">Upload Image</button>
+	    <button id="removeWallpaperBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Remove Image</button>
+	</div>
     
     <!-- Checkbox Menu -->
     <div class="checkbox-menu" id="checkboxMenu">
@@ -2356,8 +2456,7 @@ async function renderHeader() {
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
-	const wallpaperBtn = document.getElementById('wallpaperBtn');
-   	const applyColorBtn = document.getElementById('applyColorBtn');
+	const applyColorBtn = document.getElementById('applyColorBtn');
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
     
@@ -2417,6 +2516,10 @@ async function renderHeader() {
     const uploadHeaderImageBtn = document.getElementById('uploadHeaderImageBtn');
     const removeHeaderImageBtn = document.getElementById('removeHeaderImageBtn');
     const headerImageInput = document.getElementById('headerImageInput');
+	const wallpaperBtn = document.getElementById('wallpaperBtn');
+	const uploadWallpaperBtn = document.getElementById('uploadWallpaperBtn');
+	const removeWallpaperBtn = document.getElementById('removeWallpaperBtn');
+	const wallpaperInput = document.getElementById('wallpaperInput');
 	
     if (headerImageBtn) {
 	    headerImageBtn.addEventListener('click', (e) => {
@@ -2484,6 +2587,26 @@ async function renderHeader() {
 	        }
 	    });
 	}
+	if (wallpaperBtn) wallpaperBtn.addEventListener('click', toggleWallpaperMenu);
+if (uploadWallpaperBtn) uploadWallpaperBtn.addEventListener('click', uploadWallpaper);
+if (removeWallpaperBtn) removeWallpaperBtn.addEventListener('click', removeWallpaper);
+
+// Wallpaper file input handler
+if (wallpaperInput) {
+    wallpaperInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                wallpaperUrl = event.target.result;
+                applyWallpaper();
+                saveWallpaper();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+	
     // App icon editing
     if (editMode && appIconSpan) {
         appIconSpan.addEventListener('click', (e) => {
@@ -4248,100 +4371,293 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-	// Wallpaper Management
-let wallpaperUrl = '';
 
-function toggleWallpaperMenu() {
-    const menu = document.getElementById('wallpaperMenu');
-    const colorMenu = document.getElementById('colorPickerMenu');
-    const headerImageMenu = document.getElementById('headerImageMenu');
-    const checkboxMenu = document.getElementById('checkboxMenu');
-    const dropdown = document.getElementById('dropdownMenu');
-    
-    // Close other menus
-    if (colorMenu) colorMenu.classList.remove('show');
-    if (headerImageMenu) headerImageMenu.classList.remove('show');
-    if (checkboxMenu) checkboxMenu.classList.remove('show');
-    if (dropdown) dropdown.classList.remove('show');
-    
-    // Toggle wallpaper menu
-    menu.classList.toggle('show');
-}
+	// Guides List Page Functionality
+function initGuidesPage() {
+    const favorites = [
+        { name: 'Daily', icon: '☀️', color: '#f59e0b' },
+        { name: 'Work', icon: '💼', color: '#8b5cf6' },
+        { name: 'Health', icon: '💪', color: '#10b981' },
+        { name: 'Learn', icon: '📚', color: '#3b82f6' }
+    ];
 
-function uploadWallpaper() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                wallpaperUrl = event.target.result;
-                applyWallpaper();
-                saveWallpaper();
-            };
-            reader.readAsDataURL(file);
+    const guides = [
+        {
+            title: 'Morning Routine Excellence',
+            preview: 'Start your day with intention and energy. Build powerful morning habits.',
+            color: '#ef4444',
+            icon: '🌅',
+            items: 12,
+            updated: '2d ago',
+            badge: 'Daily'
+        },
+        {
+            title: 'Healthy Meal Planning',
+            preview: 'Weekly meal prep guide with nutritious, delicious recipes.',
+            color: '#14b8a6',
+            icon: '🥗',
+            items: 24,
+            updated: '1w ago',
+            badge: 'Health'
+        },
+        {
+            title: 'Complete Fitness Journey',
+            preview: 'Full body workout routines with progress tracking and goals.',
+            color: '#06b6d4',
+            icon: '🏋️',
+            items: 18,
+            updated: '3d ago',
+            badge: 'Active'
+        },
+        {
+            title: 'Project Management Pro',
+            preview: 'Track tasks, deadlines, and collaborate with your team effectively.',
+            color: '#f97316',
+            icon: '📊',
+            items: 32,
+            updated: 'Today',
+            badge: 'Work'
+        },
+        {
+            title: 'Master Python Programming',
+            preview: 'Step-by-step tutorials, exercises, and real-world projects.',
+            color: '#8b5cf6',
+            icon: '🐍',
+            items: 45,
+            updated: '5d ago',
+            badge: 'Learning'
+        },
+        {
+            title: 'Dream Travel Planner',
+            preview: 'Complete checklist for your next adventure around the world.',
+            color: '#ec4899',
+            icon: '✈️',
+            items: 28,
+            updated: '1mo ago',
+            badge: 'Travel'
+        },
+        {
+            title: 'Home Care Schedule',
+            preview: 'Organized weekly and monthly cleaning tasks for a spotless home.',
+            color: '#6366f1',
+            icon: '🧹',
+            items: 15,
+            updated: 'Yesterday',
+            badge: 'Home'
+        },
+        {
+            title: 'Personal Finance Master',
+            preview: 'Budget tracking, savings goals, and investment strategies.',
+            color: '#eab308',
+            icon: '💰',
+            items: 20,
+            updated: '1w ago',
+            badge: 'Money'
+        },
+        {
+            title: 'Reading List 2024',
+            preview: 'Curated book list with notes, reviews, and reading goals.',
+            color: '#7c3aed',
+            icon: '📖',
+            items: 36,
+            updated: '2w ago',
+            badge: 'Reading'
+        },
+        {
+            title: 'Creative Writing Studio',
+            preview: 'Story ideas, character development, and writing prompts.',
+            color: '#f43f5e',
+            icon: '✏️',
+            items: 42,
+            updated: '4d ago',
+            badge: 'Creative'
         }
-    };
-    
-    input.click();
-}
+    ];
 
-function removeWallpaper() {
-    wallpaperUrl = '';
-    applyWallpaper();
-    saveWallpaper();
-    document.getElementById('wallpaperMenu').classList.remove('show');
-}
+    // Render favorites
+    const favoritesGrid = document.getElementById('guidesFavoritesGrid');
+    favoritesGrid.innerHTML = '';
+    favorites.forEach((fav, index) => {
+        const card = document.createElement('div');
+        card.className = 'guides-favorite-card';
+        card.style.background = `linear-gradient(135deg, ${fav.color}22, ${fav.color}44)`;
+        card.style.animationDelay = `${0.4 + index * 0.05}s`;
+        card.style.animation = 'fadeInUp 0.5s ease-out backwards';
+        card.innerHTML = `
+            <div class="guides-favorite-icon">${fav.icon}</div>
+            <div class="guides-favorite-name">${fav.name}</div>
+        `;
+        card.addEventListener('click', () => {
+            console.log('Favorite clicked:', fav.name);
+        });
+        favoritesGrid.appendChild(card);
+    });
 
-function applyWallpaper() {
-    const contentArea = document.querySelector('.content-area');
-    
-    if (wallpaperUrl) {
-        contentArea.classList.add('has-background');
-        contentArea.style.setProperty('--bg-image', `url(${wallpaperUrl})`);
+    // Render guides
+    const guidesList = document.getElementById('guidesListContainer');
+    guidesList.innerHTML = '';
+    guides.forEach((guide, index) => {
+        const card = document.createElement('div');
+        card.className = 'guide-list-card entering';
+        card.style.animationDelay = `${index * 0.08}s`;
         
-        // Apply to pseudo-element through a style tag
-        let styleTag = document.getElementById('dynamic-bg-style');
-        if (!styleTag) {
-            styleTag = document.createElement('style');
-            styleTag.id = 'dynamic-bg-style';
-            document.head.appendChild(styleTag);
-        }
-        styleTag.textContent = `.content-area::before { wallpaper: url(${wallpaperUrl}); }`;
+        card.innerHTML = `
+            <div class="guide-list-card-inner">
+                <div class="guide-list-thumbnail" style="background: linear-gradient(135deg, ${guide.color}dd, ${guide.color})">
+                    <span>${guide.icon}</span>
+                </div>
+                <div class="guide-list-content">
+                    <div class="guide-list-title">${guide.title}</div>
+                    <div class="guide-list-preview">${guide.preview}</div>
+                    <div class="guide-list-meta">
+                        <div>📝 ${guide.items}</div>
+                        <div>🕒 ${guide.updated}</div>
+                        <span class="guide-list-badge">${guide.badge}</span>
+                    </div>
+                </div>
+            </div>
+        `;
         
-        // Create overlay if it doesn't exist
-        let overlay = document.querySelector('.content-area-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'content-area-overlay';
-            document.body.appendChild(overlay);
-        }
-    } else {
-        contentArea.classList.remove('has-background');
-        const styleTag = document.getElementById('dynamic-bg-style');
-        if (styleTag) styleTag.textContent = '';
+        card.addEventListener('click', () => {
+            console.log('Guide clicked:', guide.title);
+        });
+        
+        guidesList.appendChild(card);
+    });
+
+    // Card stacking parallax effect
+    const cards = document.querySelectorAll('.guide-list-card');
+    
+    // Set sticky positions
+    cards.forEach((card, index) => {
+        const stickyTop = 200 + (index * 6);
+        card.style.top = `${stickyTop}px`;
+    });
+
+    // Parallax on scroll
+    const guidesPageEl = document.getElementById('guidesPage');
+    let ticking = false;
+    
+    function updateGuidesParallax() {
+        cards.forEach((card, index) => {
+            const rect = card.getBoundingClientRect();
+            const stickyTop = 200 + (index * 6);
+            
+            if (rect.top <= stickyTop) {
+                let stackedAbove = 0;
+                for (let i = 0; i < index; i++) {
+                    const prevCard = cards[i];
+                    const prevRect = prevCard.getBoundingClientRect();
+                    const prevStickyTop = 200 + (i * 6);
+                    if (prevRect.top <= prevStickyTop) {
+                        stackedAbove++;
+                    }
+                }
+                
+                const scale = Math.max(0.96, 1 - (stackedAbove * 0.012));
+                const opacity = Math.max(0.75, 1 - (stackedAbove * 0.04));
+                const translateY = stackedAbove * -1.5;
+                
+                card.style.transform = `scale(${scale}) translateY(${translateY}px)`;
+                card.style.opacity = opacity;
+                card.style.zIndex = index;
+                card.style.pointerEvents = stackedAbove >= 5 ? 'none' : 'auto';
+            } else {
+                card.style.transform = 'scale(1) translateY(0)';
+                card.style.opacity = '1';
+                card.style.zIndex = index;
+                card.style.pointerEvents = 'auto';
+            }
+        });
     }
-}
 
-function saveWallpaper() {
-    if (!currentUser) return;
-    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/wallpaper`), wallpaperUrl);
-}
-
-function loadWallpaper() {
-    if (!currentUser) return;
-    get(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/wallpaper`)).then((snapshot) => {
-        if (snapshot.exists()) {
-            wallpaperUrl = snapshot.val();
-            applyWallpaper();
+    guidesPageEl.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                updateGuidesParallax();
+                ticking = false;
+            });
+            ticking = true;
         }
     });
+
+    updateGuidesParallax();
+
+    // Search functionality
+    const searchInput = document.getElementById('guidesSearchInput');
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        cards.forEach(card => {
+            const title = card.querySelector('.guide-list-title').textContent.toLowerCase();
+            const preview = card.querySelector('.guide-list-preview').textContent.toLowerCase();
+            
+            if (title.includes(searchTerm) || preview.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
 }
+
+// Bottom Navigation Handler
+document.addEventListener('DOMContentLoaded', () => {
+    const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+    const guidesPage = document.getElementById('guidesPage');
+    const mainContainer = document.querySelector('.container');
+    
+    bottomNavItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            // Remove active class from all items
+            bottomNavItems.forEach(nav => nav.classList.remove('active'));
+            // Add active class to clicked item
+            item.classList.add('active');
+            
+            // Handle Home button (first item, index 0)
+            if (index === 0) {
+                guidesPage.classList.add('active');
+                mainContainer.style.display = 'none';
+                initGuidesPage();
+            } else {
+                guidesPage.classList.remove('active');
+                mainContainer.style.display = 'block';
+            }
+        });
+    });
+});
 </script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
+	<!-- Guides List Page -->
+<div class="guides-page" id="guidesPage">
+    <div class="guides-container">
+        <div class="guides-header">
+            <div class="guides-logo">Guides</div>
+        </div>
+
+        <div class="guides-search-container">
+            <div class="guides-search-wrapper">
+                <div class="guides-search-icon">🔍</div>
+                <input type="text" class="guides-search-input" id="guidesSearchInput" placeholder="Search your guides...">
+            </div>
+        </div>
+
+        <div class="guides-favorites-section">
+            <div class="guides-section-header">
+                <div class="guides-section-title">⭐ Favorites</div>
+            </div>
+            <div class="guides-favorites-grid" id="guidesFavoritesGrid"></div>
+        </div>
+
+        <div class="guides-divider"></div>
+
+        <div class="guides-list-section">
+            <div class="guides-section-header">
+                <div class="guides-section-title">All Guides</div>
+            </div>
+            <div class="guides-list" id="guidesListContainer"></div>
+        </div>
+    </div>
+</div>
 	<div class="bottom-nav">
     <div class="bottom-nav-item active">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -4362,6 +4678,7 @@ function loadWallpaper() {
 </div>
 </body>
 </html>
+
 
 
 
