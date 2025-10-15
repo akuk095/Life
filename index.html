@@ -650,7 +650,7 @@ function loadUserData(userId) {
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshEnabled`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshTime`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
-			get(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/headerImage`)),
+			get(ref(database, `users/${userId}/guides/${currentGuideId}/headerImage`)),
 	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap]) => {
 			
 		// Load categories
@@ -704,9 +704,11 @@ function loadUserData(userId) {
         // Apply theme
         applyTheme();
 
-		// After loading autoRefreshTime, add:
+		// Load header image
 		if (headerImageSnap.val()) {
 		    headerImage = headerImageSnap.val();
+		} else {
+		    headerImage = null;
 		}
         // Render everything
         renderHeader();
@@ -1658,13 +1660,12 @@ function renderHeader() {
 	                </div>
 	            </div>
 	        </div>
-			<button id="headerImageBtn">Header Image</button>
-		        <div class="header-image-menu" id="headerImageMenu">
-		            <h3>Header Background</h3>
-		            <input type="file" id="headerImageInput" accept="image/*" style="display: none;">
-		            <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px;">Upload Image</button>
-		            <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; display: none;">Remove Image</button>
-		        </div>
+			   <div class="header-image-menu" id="headerImageMenu">
+				    <h3>Header Background</h3>
+				    <input type="file" id="headerImageInput" accept="image/*" style="display: none;">
+				    <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; display: ${headerImage ? 'none' : 'block'};">Upload Image</button>
+				    <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; display: ${headerImage ? 'block' : 'none'};">Remove Image</button>
+				</div>
 	        <button id="checkboxOptionsBtn">Checkbox options</button>
 	        <div class="checkbox-menu" id="checkboxMenu">
 	            <button id="clearChecksBtn">Clear all checks</button>
@@ -1774,25 +1775,20 @@ function renderHeader() {
     const headerImageInput = document.getElementById('headerImageInput');
 
     if (headerImageBtn) {
-        headerImageBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const imageMenu = document.getElementById('headerImageMenu');
-            const colorMenu = document.getElementById('colorPickerMenu');
-            const checkboxMenu = document.getElementById('checkboxMenu');
-            
-            if (colorMenu) colorMenu.classList.remove('show');
-            if (checkboxMenu) checkboxMenu.classList.remove('show');
-            
-            if (imageMenu) {
-                imageMenu.classList.toggle('show');
-                if (removeHeaderImageBtn && headerImage) {
-                    removeHeaderImageBtn.style.display = 'block';
-                } else if (removeHeaderImageBtn) {
-                    removeHeaderImageBtn.style.display = 'none';
-                }
-            }
-        });
-    }
+	    headerImageBtn.addEventListener('click', (e) => {
+	        e.stopPropagation();
+	        const imageMenu = document.getElementById('headerImageMenu');
+	        const colorMenu = document.getElementById('colorPickerMenu');
+	        const checkboxMenu = document.getElementById('checkboxMenu');
+	        
+	        if (colorMenu) colorMenu.classList.remove('show');
+	        if (checkboxMenu) checkboxMenu.classList.remove('show');
+	        
+	        if (imageMenu) {
+	            imageMenu.classList.toggle('show');
+	        }
+	    });
+	}
 
     if (uploadHeaderImageBtn) {
         uploadHeaderImageBtn.addEventListener('click', () => {
@@ -3516,5 +3512,6 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
