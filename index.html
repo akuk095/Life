@@ -707,8 +707,10 @@ function loadUserData(userId) {
 		// Load header image
 		if (headerImageSnap.val()) {
 		    headerImage = headerImageSnap.val();
+		    console.log('Header image loaded from Firebase, length:', headerImage.length);
 		} else {
 		    headerImage = null;
+		    console.log('No header image in Firebase');
 		}
         // Render everything
         renderHeader();
@@ -1833,21 +1835,25 @@ function renderHeader() {
     }
 
     if (headerImageInput) {
-        headerImageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    headerImage = event.target.result;
-                    saveHeaderImage();
-                    applyHeaderImage();
-                    document.getElementById('headerImageMenu').classList.remove('show');
-                    document.getElementById('dropdownMenu').classList.remove('show');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+	    headerImageInput.addEventListener('change', (e) => {
+	        const file = e.target.files[0];
+	        if (file) {
+	            console.log('File selected:', file.name);
+	            const reader = new FileReader();
+	            reader.onload = (event) => {
+	                headerImage = event.target.result;
+	                console.log('Image loaded, length:', headerImage.length);
+	                saveHeaderImage();
+	                console.log('Save called');
+	                applyHeaderImage();
+	                document.getElementById('headerImageMenu').classList.remove('show');
+	                document.getElementById('dropdownMenu').classList.remove('show');
+	                renderHeader();
+	            };
+	            reader.readAsDataURL(file);
+	        }
+	    });
+	}
 
     if (removeHeaderImageBtn) {
 	    removeHeaderImageBtn.addEventListener('click', () => {
@@ -3549,6 +3555,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
