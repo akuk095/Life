@@ -2721,9 +2721,11 @@ function renderContent() {
            duplicateBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 duplicateSkill(catIndex, skillIndex);
-                // Auto-hide controls after action
+                // Auto-hide after duplicate (creates new card)
                 if (!editMode) {
-                    controlsContainer.classList.remove('show');
+                    setTimeout(() => {
+                        controlsContainer.classList.remove('show');
+                    }, 100);
                 }
             });
             
@@ -2735,10 +2737,7 @@ function renderContent() {
             deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteSkill(catIndex, skillIndex);
-                // Auto-hide controls after action
-                if (!editMode) {
-                    controlsContainer.classList.remove('show');
-                }
+                // Don't need to hide - card is being deleted anyway
             });
             
             // Add in order: bullet, duplicate, delete (left to right)
@@ -3381,6 +3380,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
