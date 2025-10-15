@@ -190,7 +190,27 @@
 		.logout-menu button.danger { color: #dc2626; }
 		.logout-menu button.danger:hover { background: #fee2e2; }
 		.logout-menu.show { display: block; }
-		
+		/* Home Page Styles */ 
+		.home-page { display: none; padding: 20px; max-width: 800px; margin: 0 auto; } 
+		.home-page.active { display: block; } 
+		.home-welcome { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); } 
+		.home-welcome h2 { font-size: 24px; margin-bottom: 8px; color: #2c3e50; } 
+		.home-welcome p { color: #7f8c8d; font-size: 14px; line-height: 1.6; } 
+		.home-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; } 
+		.stat-card { background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); } 
+		.stat-number { font-size: 28px; font-weight: 700; color: #2c3e50; margin-bottom: 4px; } 
+		.stat-label { font-size: 12px; color: #95a5a6; text-transform: uppercase; letter-spacing: 0.5px; } 
+		.home-categories { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); } 
+		.home-categories h3 { font-size: 18px; margin-bottom: 16px; color: #2c3e50; } 
+		.category-list { display: flex; flex-direction: column; gap: 12px; } 
+		.category-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f8f9fa; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; } 
+		.category-item:hover { background: #e9ecef; transform: translateX(4px); } 
+		.category-item-left { display: flex; align-items: center; gap: 12px; } 
+		.category-icon { font-size: 24px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 10px; } 
+		.category-info h4 { font-size: 15px; color: #2c3e50; margin-bottom: 2px; } 
+		.category-info p { font-size: 12px; color: #95a5a6; } 
+		.category-arrow { color: #bdc3c7; font-size: 18px; }
+
 	</style>
     </head>
 <body>
@@ -247,7 +267,8 @@
         </div>
         <div class="nav-tabs" id="navTabs"></div>
     </div>
-    <div class="content-area" id="contentArea"></div>
+    <div class="home-page" id="homePage"></div>
+	<div class="content-area" id="contentArea"></div>
 </div>
 <script type="module">
 	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -719,10 +740,40 @@ function loadUserData(userId) {
         renderTabs();
         renderContent();
         updateLayoutButton();
+		renderHomePage();
+		document.getElementById('homePage').classList.add('active');
+		document.getElementById('contentArea').style.display = 'none';
         document.querySelector('.container').classList.add('loaded');
     });
 }
-
+// Update bottom nav click handlers
+document.querySelectorAll('.bottom-nav-item').forEach((item, index) => {
+    item.addEventListener('click', () => {
+        const homePage = document.getElementById('homePage');
+        const contentArea = document.getElementById('contentArea');
+        
+        // Remove active from all
+        document.querySelectorAll('.bottom-nav-item').forEach(navItem => {
+            navItem.classList.remove('active');
+            navItem.querySelector('svg').style.stroke = '#95a5a6';
+            navItem.querySelector('span').style.color = '#95a5a6';
+        });
+        
+        // Add active to clicked
+        item.classList.add('active');
+        item.querySelector('svg').style.stroke = themeColor;
+        item.querySelector('span').style.color = themeColor;
+        
+        if (index === 0) { // Home button
+            homePage.classList.add('active');
+            contentArea.style.display = 'none';
+            renderHomePage();
+        } else {
+            homePage.classList.remove('active');
+            contentArea.style.display = 'block';
+        }
+    });
+});
 function switchGuide(id) {
     currentGuideId = id;
     localStorage.setItem('currentGuideId', id);
@@ -2570,7 +2621,87 @@ function renderTabs() {
         }, 0);
     }
 }
-		
+
+
+
+function renderHomePage() {
+    const homePage = document.getElementById('homePage');
+    
+    // Calculate stats
+    const totalCategories = categories.length;
+    const totalSkills = categories.reduce((sum, cat) => sum + cat.skills.length, 0);
+    const totalItems = categories.reduce((sum, cat) => 
+        sum + cat.skills.reduce((skillSum, skill) => skillSum + skill.items.length, 0), 0);
+    const completedItems = Object.values(checkedItems).filter(v => v).length;
+    const completionRate = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+    
+    homePage.innerHTML = `
+        <div class="home-welcome">
+            <h2>Welcome back! 👋</h2>
+            <p>Track your progress and explore your life skills journey</p>
+        </div>
+        
+        <div class="home-stats">
+            <div class="stat-card">
+                <div class="stat-number">${totalCategories}</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${totalSkills}</div>
+                <div class="stat-label">Skills</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${completionRate}%</div>
+                <div class="stat-label">Complete</div>
+            </div>
+        </div>
+        
+        <div class="home-categories">
+            <h3>Your Categories</h3>
+            <div class="category-list">
+                ${categories.map((cat, index) => {
+                    const skillCount = cat.skills.length;
+                    const itemCount = cat.skills.reduce((sum, skill) => sum + skill.items.length, 0);
+                    return `
+                        <div class="category-item" onclick="navigateToCategory(${index})">
+                            <div class="category-item-left">
+                                <div class="category-icon">${cat.icon}</div>
+                                <div class="category-info">
+                                    <h4>${cat.name}</h4>
+                                    <p>${skillCount} skill${skillCount !== 1 ? 's' : ''} • ${itemCount} item${itemCount !== 1 ? 's' : ''}</p>
+                                </div>
+                            </div>
+                            <span class="category-arrow">›</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+}
+
+	function navigateToCategory(catIndex) {
+    activeTabIndex = catIndex;
+    
+    // Hide home page and show content
+    const homePage = document.getElementById('homePage');
+    const contentArea = document.getElementById('contentArea');
+    homePage.classList.remove('active');
+    contentArea.style.display = 'block';
+    
+    // Update bottom nav
+    document.querySelectorAll('.bottom-nav-item').forEach((item, index) => {
+        if (index === 0) { // Home icon
+            item.classList.remove('active');
+            item.querySelector('svg').style.stroke = '#95a5a6';
+            item.querySelector('span').style.color = '#95a5a6';
+        }
+    });
+    
+    renderTabs();
+    renderContent();
+}
+	
 function toggleBulletStyle(catIndex, skillIndex) {
     const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
     const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
@@ -3394,24 +3525,4 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
