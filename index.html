@@ -158,9 +158,10 @@
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
-		.skill-card-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; align-items: center; padding: 4px 4px 4px 8px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+		.skill-card-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; align-items: center; padding: 4px 4px 4px 8px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10; }
 		.skill-card-controls.show { opacity: 1; pointer-events: auto; }
 		.edit-mode .skill-card-controls { opacity: 1; pointer-events: auto; }
+		body:not(.edit-mode-active) .skill-card-controls.show { opacity: 1; pointer-events: auto; }
 		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0.4; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; font-weight: normal; pointer-events: auto !important; }
 		.skill-control-btn:hover { color: #6b7280; transform: scale(1.1); }
 		.skill-control-btn.delete-control:hover {color: #dc2626;}
@@ -2750,24 +2751,30 @@ function renderContent() {
                 topRightArea.style.position = 'absolute';
                 topRightArea.style.top = '0';
                 topRightArea.style.right = '0';
-                topRightArea.style.width = '80px';
-                topRightArea.style.height = '40px';
+                topRightArea.style.width = '100px';
+                topRightArea.style.height = '60px';
                 topRightArea.style.cursor = 'pointer';
-                topRightArea.style.zIndex = '5';
+                topRightArea.style.zIndex = '15';
+                // For debugging - uncomment to see the area:
+                // topRightArea.style.background = 'rgba(255,0,0,0.2)';
                 
                 topRightArea.addEventListener('touchend', (e) => {
+                    e.stopPropagation();
                     const currentTime = new Date().getTime();
                     const tapGap = currentTime - lastTap;
                     
                     if (tapGap < 300 && tapGap > 0) {
                         // Double tap detected
                         e.preventDefault();
+                        console.log('Double tap detected!'); // Debug
                         const controls = card.querySelector('.skill-card-controls');
                         if (controls) {
+                            const isShowing = controls.classList.contains('show');
                             controls.classList.toggle('show');
+                            console.log('Controls toggled:', !isShowing); // Debug
                             
-                            // Auto-hide after 5 seconds
-                            if (controls.classList.contains('show')) {
+                            // Auto-hide after 5 seconds if showing
+                            if (!isShowing) {
                                 setTimeout(() => {
                                     controls.classList.remove('show');
                                 }, 5000);
@@ -2775,6 +2782,15 @@ function renderContent() {
                         }
                     }
                     lastTap = currentTime;
+                });
+                
+                // Also support regular click as backup
+                topRightArea.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const controls = card.querySelector('.skill-card-controls');
+                    if (controls) {
+                        controls.classList.toggle('show');
+                    }
                 });
                 
                 card.appendChild(topRightArea);
@@ -2795,12 +2811,9 @@ function renderContent() {
                 checkItem.dataset.skillIndex = skillIndex;
                 checkItem.dataset.itemIndex = itemIndex;
                 
-                // Make draggable in edit mode
+                // Make draggable when NOT in edit mode
                 if (!editMode) {
                     checkItem.draggable = true;
-                    checkItem.dataset.catIndex = catIndex;
-                    checkItem.dataset.skillIndex = skillIndex;
-                    checkItem.dataset.itemIndex = itemIndex;
                     checkItem.style.cursor = 'grab';
                 }
                 
@@ -2906,9 +2919,8 @@ function renderContent() {
             if (menuBtn) menuBtn.style.display = 'none';
         }, 0);
     }
-   
 }
-
+	
 function switchTab(index) { 
     activeTabIndex = index; 
     renderTabs();
@@ -3377,6 +3389,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
