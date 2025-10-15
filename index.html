@@ -1548,8 +1548,8 @@ document.addEventListener('touchmove', (e) => {
     bulletTouchCurrentY = e.touches[0].clientY;
     const deltaY = bulletTouchCurrentY - bulletTouchStartY;
     
-    // Only trigger if swiping DOWN (positive delta) and movement > 30px
-    if (deltaY > 30 && !isBulletSwiping) {
+    // Easier trigger - only 15px movement needed
+    if (deltaY > 15 && !isBulletSwiping) {
         isBulletSwiping = true;
         
         // Add visual feedback to the bullet
@@ -1565,7 +1565,7 @@ document.addEventListener('touchend', (e) => {
     if (!currentBulletItem) return;
     
     const deltaY = bulletTouchCurrentY - bulletTouchStartY;
-    const threshold = 40; // Minimum swipe distance
+    const threshold = 20; // Much lower threshold - easier to trigger
     
     if (isBulletSwiping && deltaY > threshold) {
         // Get item data
@@ -3754,6 +3754,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
