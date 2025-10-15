@@ -2,25 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
     <title>Essential Life Skills Guide</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; }
+		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0 0 60px 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-select: none; }
 		.add-category-tab { background: #f59e0b !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
 		.add-category-tab:hover { background: #d97706 !important; }
 		.add-item-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 13px; font-weight: 500; display: none; width: 100%; transition: all 0.2s ease; }
 		.add-item-btn:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
 		.add-skill-btn { background: #8b5cf6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; width: auto; margin: 20px auto; transition: all 0.2s ease; display: none; }
 		.add-skill-btn:hover { background: #7c3aed; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3); }
+		/* Bottom Navigation Bar */
+		.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: white; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 12px rgba(0,0,0,0.1); z-index: 1000; padding-bottom: max(env(safe-area-inset-bottom), 0); }
+		.bottom-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 8px 20px; transition: all 0.2s ease; flex: 1; -webkit-tap-highlight-color: transparent; }
+		.bottom-nav-item:active { transform: scale(0.95); }
+		.bottom-nav-item svg { width: 24px; height: 24px; stroke: #95a5a6; stroke-width: 2; fill: none; transition: stroke 0.2s ease; margin-bottom: 4px; }
+		.bottom-nav-item span { font-size: 11px; color: #95a5a6; font-weight: 500; transition: color 0.2s ease; }
+		.bottom-nav-item.active svg { stroke: var(--primary-color); }
+		.bottom-nav-item.active span { color: var(--primary-color); font-weight: 600; }
 		.category { display: none; }
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
 		.checkbox:hover { border-color: var(--primary-color, #3498db); }
-		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; position: relative; }
+		.checkbox-menu { display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1001; margin-top: 4px; }
+		.checkbox-menu button { width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+		.checkbox-menu button:last-child { border-bottom: none; }
+		.checkbox-menu button:hover { background: #f8f9fa; }
+		.checkbox-menu.show { display: block; }.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
+		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
+		.checklist-item.checked .checkbox:after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
 		.checklist-item:hover { background: #e8f4f8; border-color: var(--primary-color, #3498db); }
 		.checklist-text { flex: 1; font-size: 14px; line-height: 1.5; color: #495057; }
 		.collapse-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s ease; width: 20px; height: 20px; display: none; }
@@ -38,9 +55,9 @@
 		.hue-slider { width: 100%; height: 20px; border-radius: 10px; background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%); cursor: pointer; position: relative; margin-bottom: 15px; }
 		.picker-indicator { position: absolute; width: 16px; height: 16px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.5); pointer-events: none; transform: translate(-50%, -50%); }
 		.hue-indicator { position: absolute; width: 8px; height: 24px; background: white; border: 2px solid #2c3e50; border-radius: 4px; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: white; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; }
+		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: #f0f2f5; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; min-height: 100vh; }
 		.container.loaded { opacity: 1; }
-		.content-area { padding: 0; background: #f8f9fa; min-height: calc(100vh - 200px); }
+		.content-area { padding: 0 12px 140px; background: transparent; min-height: calc(100vh - 250px); }
 		.delete-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: transparent; color: #6b7280; border: none; border-radius: 6px; font-size: 18px; font-weight: normal; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; padding: 0; }
 		.delete-btn:hover { background: rgba(220, 38, 38, 0.1); color: #dc2626; transform: scale(1.1); }
 		.delete-tab-btn { width: 22px; height: 22px; background: transparent; color: #9ca3af; border: none; border-radius: 50%; font-size: 18px; font-weight: 600; margin-left: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; padding: 0; }
@@ -59,6 +76,7 @@
 		.edit-mode .add-item-btn { display: block; }
 		.edit-mode .add-skill-btn { display: block; }
 		.edit-mode .delete-btn { display: inline-flex; }
+		.edit-mode .nav-tab .tab-name[contenteditable="true"] { user-select: text !important; -webkit-user-select: text !important; cursor: text !important;}
 		.edit-mode-active .floating-layout-btn { display: none; }
 		.edit-toggle { position: absolute; top: 10px; right: 10px; }
 		.editable { cursor: text; padding: 2px 4px; border-radius: 4px; transition: all 0.2s ease; }
@@ -70,9 +88,11 @@
 		.emoji-remove-btn { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #e74c3c; color: white; border: 2px solid white; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; }
 		.emoji-remove-btn:hover { background: #c0392b; transform: scale(1.1); }
 		.editable-icon { position: relative; display: inline-block; }
-		.floating-layout-btn { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color, #3498db); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+		.floating-layout-btn { position: fixed; bottom: calc(60px + max(env(safe-area-inset-bottom), 24px)); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 999; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+		.floating-layout-btn:active { transform: scale(0.9); }
 		.floating-layout-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 1; }
-		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 300px; background: rgba(237, 239, 240); box-shadow: 2px 0 12px rgba(0,0,0,0.15); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: 0; }
+		.guide-dropdown { position: fixed; top: 0; left: 0; height: 100vh; width: 85%; max-width: 320px; background: rgba(237, 239, 240, 1); box-shadow: 2px 0 20px rgba(0,0,0,0.2); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: 140px; scrollbar-width: none; -ms-overflow-style: none; will-change: transform; }
+		.guide-dropdown::-webkit-scrollbar { display: none; }
 		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.guide-dropdown button:hover { background: #f8f9fa; }
 		.guide-dropdown button:last-child { border-bottom: none; }
@@ -80,42 +100,39 @@
 		.guide-dropdown.show { transform: translateX(0); }
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
-		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 24px 30px; text-align: center; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: max(env(safe-area-inset-top), 20px) 20px 20px; text-align: center; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.15); border-radius: 0 0 20px 20px; }
 		.header h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px; }
 		.header p { opacity: 0.95; font-size: 13px; font-weight: 400; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
 		.header .editable-icon { cursor: pointer; margin-right: 8px; font-size: 24px; }
-		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; }
-		.nav-tab { padding: 16px 28px; cursor: pointer; border: none; background: none; font-size: 14px; font-weight: 500; color: #5f6368; transition: all 0.2s ease; white-space: nowrap; border-bottom: 3px solid transparent; flex-shrink: 0; position: relative; }
-		.nav-tab:hover { color: var(--primary-color, #3498db); background: rgba(52, 152, 219, 0.05); }
-		.nav-tab.active { color: var(--tab-active-color, var(--primary-color, #3498db)); border-bottom-color: var(--tab-active-color, var(--primary-color, #3498db)); background: white; font-weight: 600; }
-		.nav-tab .tab-icon { margin-right: 5px; cursor: pointer; }
-		.nav-tab .tab-name { cursor: text; }
+		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; padding-bottom: 8px; }
+		.nav-tab { padding: 12px 20px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #5f6368; transition: all 0.3s ease; white-space: nowrap; border-radius: 12px 12px 0 0; flex-shrink: 0; position: relative; margin: 0 4px; -webkit-tap-highlight-color: transparent; }
+		.nav-tab:hover { color: var(--primary-color); background: rgba(52, 152, 219, 0.1); }
+		.nav-tab.active { color: var(--tab-active-color, var(--primary-color)); background: white; font-weight: 600; box-shadow: 0 -4px 12px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06); z-index: 10; }
+		/* Only disable pointer events when NOT in edit mode */
+		body:not(.edit-mode) .nav-tab * { pointer-events: none; }
+		body:not(.edit-mode) .nav-tab { pointer-events: auto; }
+		/* In edit mode, allow interactions */
+		.edit-mode .nav-tab .tab-icon { cursor: pointer; pointer-events: auto; }
+		.edit-mode .nav-tab .tab-name { cursor: text; pointer-events: auto; }
+		.edit-mode .nav-tab .emoji-remove-btn { pointer-events: auto; }
 		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
-		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }
-		.nav-tabs { display: flex; background: white; border-bottom: 1px solid #e8eaed; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; position: sticky; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-		.nav-tabs::-webkit-scrollbar { height: 4px; }
+		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }	
+		.nav-tabs { display: flex; background: white; border-bottom: none; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: sticky; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 0 0 16px 16px; padding: 8px 8px 0; margin-bottom: 12px; }
+		.nav-tabs::-webkit-scrollbar { display: none; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
 		.save-btn { position: absolute; top: 5px; right: 5px; background: transparent; color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 16px; cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(255, 255, 255, 0.1); transition: all 0.2s ease; display: none; z-index: 10; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
 		.save-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.2); }
 		.save-btn:active { box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4); transform: translateY(1px); }
-		.skill-card { background: white; border-radius: 0; padding: 24px; border-left: 4px solid var(--primary-color, #3498db); border-bottom: 1px solid #e8eaed; box-shadow: 0 4px 8px var(--shadow-color); transition: all 0.3s ease; position: relative; }
-		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #d0d4d9; }
+		.skill-card { background: white; border-radius: 0; padding: 24px; border-left: 4px solid var(--primary-color); border-bottom: 1px solid #e8eaed; box-shadow: 0 4px 8px var(--shadow-color); transition: all 0.3s ease; position: relative; margin-bottom: 16px; }
+		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
 		.skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid { display: flex; flex-direction: column; gap: 32px; margin-top: 0; padding: 16px 0 0 0; transition: all 0.3s ease; }
-		.skill-grid.headings { display: flex; flex-direction: column; gap: 12px; padding: 20px 16px; }
-		.skill-grid.headings .skill-card { padding: 15px 20px; border-left: 4px solid var(--secondary-color, #3498db); border-radius: 8px; background: white; border-bottom: 1px solid #e8eaed; cursor: pointer; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-		.skill-grid.headings .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-		.skill-grid.headings .skill-card.expanded .checklist-item { display: flex; }
-		.skill-grid.headings .checklist-item { display: none; }
-		.skill-grid.headings .add-item-btn { display: none !important; }
-		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 30px; gap: 32px; }
-		.skill-grid.horizontal .skill-card { min-width: 300px; max-width: 300px; scroll-snap-align: start; flex-shrink: 0; border-radius: 12px; border-bottom: 1px solid #e8eaed; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+		.skill-grid.horizontal { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: none; padding: 30px 30px 30px 16px; gap: 32px; }
+		.skill-grid.horizontal .skill-card { min-width: 85vw; max-width: 400px; scroll-snap-align: start; flex-shrink: 0; border-radius: 0; border-bottom: 1px solid #e8eaed; box-shadow: 0 4px 8px var(--shadow-color); }
 		.skill-title { font-size: 17px; font-weight: 600; color: #1f2937; margin-bottom: 16px; letter-spacing: -0.2px; line-height: 1.4; }
-		.skill-title .delete-btn { position: static; width: auto; height: auto; background: transparent; color: #9ca3af; border: none; border-radius: 4px; font-size: 20px; padding: 4px 6px; margin-left: 8px; }
-		.skill-title .delete-btn:hover { background: #fee2e2; color: #dc2626; }
 		.tab-wrapper { display: flex; align-items: center; gap: 5px; }
 		.checklist-item:has(.delete-btn:hover) { background: #fee2e2 !important; border-color: #fca5a5 !important; }
 		.skill-card:has(> .skill-title .delete-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
@@ -123,7 +140,8 @@
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@supports (-webkit-touch-callout: none) { /* iOS specific - use native emoji keyboard */ input[type="text"].emoji-input {  font-size: 32px; } }
-    	.guide-item { cursor: move; }
+    	@supports (-webkit-overflow-scrolling: touch) { body { overscroll-behavior-y: contain; } }
+		.guide-item { cursor: move; }
 		.guide-item.dragging { opacity: 0.5; }
 		.guide-item.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
 		.drag-handle { position: absolute; left: 8px; top: 0; bottom: 0; display: flex; align-items: center; cursor: grab; padding: 0 4px; color: rgba(0, 0, 0, 0.15); font-size: 16px; line-height: 1; user-select: none; transition: all 0.2s; font-weight: normal; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8); letter-spacing: -2px; }
@@ -131,61 +149,134 @@
 		.drag-handle:active { cursor: grabbing; }
 		.skill-card.dragging { opacity: 0.5; background: #f3f4f6; }
 		.skill-card.drag-over { border-top: 3px solid var(--primary-color, #3498db); }
-		.bullet-toggle-btn { position: absolute; top: 12px; right: 42px; background: rgba(0, 0, 0, 0.05); color: #6b7280; border: none; border-radius: 6px; cursor: pointer; padding: 6px 10px; font-size: 12px; font-weight: 600; transition: all 0.2s ease; z-index: 5; }
-		.bullet-toggle-btn:hover { background: rgba(0, 0, 0, 0.1); color: #374151; }
 		.checklist-item .bullet-number { width: 20px; height: 20px; border-radius: 50%; background: #d1d5db; color: white; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-		.checklist-item .bullet-square { width: 20px; height: 20px; border-radius: 5px; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
-		.checklist-item .bullet-circle { width: 20px; height: 20px; border-radius: 50%; background: var(--secondary-color, #27ae60); flex-shrink: 0; margin-top: 2px; }
+		.checklist-item .bullet-square { flex-shrink: 0; margin-top: 2px; font-size: 20px; line-height: 1; color: var(--primary-color, #3498db); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+		.checklist-item .bullet-circle { flex-shrink: 0; margin-top: 2px; font-size: 20px; line-height: 1; color: var(--primary-color, #3498db); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
 		.checklist-item .bullet-none { width: 0px; height: 20px; flex-shrink: 0; margin-top: 2px; }
-
+		.checklist-item.dragging { opacity: 0.5; background: #f3f4f6; }
+		.checklist-item.drag-over { border-top: 3px solid var(--primary-color); }
+		.checklist-text[contenteditable="true"],
+		.skill-title span[contenteditable="true"],
+		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
+		.skill-card-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; align-items: center; padding: 4px 4px 4px 8px; background: transparent; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+		.skill-card-controls.show { opacity: 1; pointer-events: auto; }
+		.edit-mode .skill-card-controls { opacity: 1; pointer-events: auto; }
+		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0.4; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; font-weight: normal; pointer-events: auto !important; }
+		.skill-control-btn:hover { color: #6b7280; transform: scale(1.1); }
+		.skill-control-btn.delete-control:hover {color: #dc2626;}
+		.drawer-footer { position: fixed; bottom: 0; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
+		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
+		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
+		.drawer-create-icon:hover { opacity: 0.8; transform: scale(1.05); }
+		.drawer-create-icon:active { opacity: 1; transform: scale(0.98); }
+		.drawer-create-icon svg { stroke: #2c3e50; width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+		/* Hide all scrollbars but keep scroll functionality */
+		* { scrollbar-width: none; -ms-overflow-style: none; }
+		*::-webkit-scrollbar { display: none; }
+		#loginScreen { opacity: 0; transition: opacity 0.3s ease-in-out; }
+		#loginScreen.show { opacity: 1; }
+		.logout-menu { display: none; position: fixed; bottom: 70px; left: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; z-index: 2002; min-width: 150px; }
+		.logout-menu button { width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+		.logout-menu button:last-child { border-bottom: none; }
+		.logout-menu button:hover { background: #f8f9fa; }
+		.logout-menu button.danger { color: #dc2626; }
+		.logout-menu button.danger:hover { background: #fee2e2; }
+		.logout-menu.show { display: block; }
 		
 	</style>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-</head>
+    </head>
 <body>
-    <div class="container">
-		<div class="header-wrapper">
-        	<div class="header">
-            	<div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            	<h1>📚 Essential Life Skills Guide</h1>
-            <p>Fundamental knowledge everyone should have to navigate life successfully</p>
+    <div id="loginScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; z-index: 9999;">
+    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
+        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Welcome Back</h2>
+        
+        <input type="email" id="loginEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+        
+        <input type="password" id="loginPassword" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+        
+        <button id="loginBtn" style="width: 100%; padding: 14px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px;">Login</button>
+        
+        <button id="googleBtn" style="width: 100%; padding: 14px; background: white; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Continue with Google
+        </button>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <span style="color: #666;">Don't have an account?</span>
+            <button id="signupBtn" style="background: none; border: none; color: #667eea; font-weight: 600; cursor: pointer; margin-left: 5px;">Sign Up</button>
+        </div>
+    </div>
+</div>
+    <div id="signupScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; z-index: 9999;">
+    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
+        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Create Account</h2>
+        
+        <input type="email" id="signupEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+        
+        <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+        
+        <input type="password" id="signupPasswordConfirm" placeholder="Confirm Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+        
+        <button id="signupSubmitBtn" style="width: 100%; padding: 14px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px;">Create Account</button>
+        
+        <button id="googleSignupBtn" style="width: 100%; padding: 14px; background: white; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Sign up with Google
+        </button>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <span style="color: #666;">Already have an account?</span>
+            <button id="backToLoginBtn" style="background: none; border: none; color: #667eea; font-weight: 600; cursor: pointer; margin-left: 5px;">Login</button>
+        </div>
+    </div>
+</div>
+    <div class="container" id="app" style="display: none;">
+    <div class="header-wrapper">
+        <div class="header">
+            <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
+            <h1>📚 Personal Notebook</h1>
+            <p>note description</p>
         </div>
         <div class="nav-tabs" id="navTabs"></div>
-		</div>
-        <div class="content-area" id="contentArea"></div>
     </div>
-    <script>
-// Initialize Firebase - REPLACE WITH YOUR CONFIG
-const firebaseConfig = {
-  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
-  authDomain: "life-akuk095.firebaseapp.com",
-  databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "life-akuk095",
-  storageBucket: "life-akuk095.firebasestorage.app",
-  messagingSenderId: "80383828301",
-  appId: "1:80383828301:web:7c001b7375f63fc5055704",
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-let currentGuideId = localStorage.getItem('currentGuideId') || "defaultGuide";
-// Default data structure
-let categories = [
-    {
-        name: "Health & Body", 
-        icon: "💪", 
-        skills: [
-            {
-                title: "Basic Hygiene", 
-                icon: "🧼", 
-				bulletStyle: "checkbox",
-                items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
-            }
-        ]
-    },
-    {
+    <div class="content-area" id="contentArea"></div>
+</div>
+<script type="module">
+	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+	import { getDatabase, ref, set, get, update, remove, onValue, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+	import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+	
+	// Initialize Firebase
+	const firebaseConfig = {
+	  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
+	  authDomain: "life-akuk095.firebaseapp.com",
+	  databaseURL: "https://life-akuk095-default-rtdb.europe-west1.firebasedatabase.app",
+	  projectId: "life-akuk095",
+	  storageBucket: "life-akuk095.firebasestorage.app",
+	  messagingSenderId: "80383828301",
+	  appId: "1:80383828301:web:7c001b7375f63fc5055704",
+	};
+	
+	const app = initializeApp(firebaseConfig);
+	const database = getDatabase(app);
+	const auth = getAuth(app);
+	let currentUser = null;
+	let currentGuideId = localStorage.getItem('currentGuideId') || "defaultGuide";
+	// Default data structure
+	let categories = [
+	    {
+	        name: "Health & Body", 
+	        icon: "💪", 
+	        skills: [
+	            {
+	                title: "Basic Hygiene", 
+	                icon: "🧼", 
+					bulletStyle: "checkbox",
+	                items: ["Brush teeth twice daily", "Shower regularly", "Wash hands before eating"]
+	            }
+	        ]
+	    },
+	    {
         name: "Daily Living", 
         icon: "🏡", 
         skills: [
@@ -197,6 +288,38 @@ let categories = [
         ]
     }
 ];
+// Check if user is logged in
+onAuthStateChanged(auth, (user) => {
+    const loginScreen = document.getElementById('loginScreen');
+    const signupScreen = document.getElementById('signupScreen');
+    const appContainer = document.getElementById('app');
+    
+    if (user) {
+        currentUser = user;
+        
+        // Hide both auth screens
+        loginScreen.classList.remove('show');
+        signupScreen.classList.remove('show');
+        
+        setTimeout(() => {
+            loginScreen.style.display = 'none';
+            signupScreen.style.display = 'none';
+            appContainer.style.display = 'block';
+            setTimeout(() => appContainer.classList.add('show'), 10);
+        }, 300);
+        
+        loadUserData(user.uid);
+    } else {
+        currentUser = null;
+        appContainer.classList.remove('show');
+        appContainer.style.display = 'none';
+        
+        // Show login screen
+        loginScreen.style.display = 'flex';
+        setTimeout(() => loginScreen.classList.add('show'), 10);
+    }
+});
+
 
 let checkedItems = {};
 let editMode = false;
@@ -208,7 +331,6 @@ let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
-let expandedCards = {};
 
 // Drag and drop state
 let draggedCard = null;
@@ -216,8 +338,9 @@ let draggedCatIndex = null;
 let draggedSkillIndex = null;
 let draggedElement = null;
 let placeholder = null;
-
-		
+let draggedTab = null;
+let draggedTabIndex = null;
+	
 const colorThemes = [
     { name: 'Soft Cream', primary: '#F5F7D9', secondary: '#E1E3C1' },
 	{ name: 'Warm Sand', primary: '#E5D4B0', secondary: '#DAC898' },
@@ -332,22 +455,43 @@ const colorThemes = [
   ];
 
 
+// Skill card drag start
 document.addEventListener('dragstart', (e) => {
-    if (e.target.classList.contains('skill-card') && editMode && layoutMode === 'headings') {
+    // Prevent dragging if any element is being edited
+    if (document.querySelector('[contenteditable="true"]')) {
+        e.preventDefault();
+        return false;
+    }
+    
+    if (e.target.classList.contains('skill-card') && !editMode && layoutMode === 'headings') {
         draggedCard = e.target;
         draggedCatIndex = parseInt(e.target.dataset.catIndex);
         draggedSkillIndex = parseInt(e.target.dataset.skillIndex);
         e.target.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
         
-        // Set drag image offset to cursor position
         const rect = e.target.getBoundingClientRect();
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
         e.dataTransfer.setDragImage(e.target, offsetX, offsetY);
     }
+    
+    // Tab drag start
+    if (e.target.classList.contains('nav-tab') && !editMode && e.target.draggable) {
+        // Prevent dragging if any element is being edited
+        if (document.querySelector('[contenteditable="true"]')) {
+            e.preventDefault();
+            return false;
+        }
+        
+        draggedTab = e.target;
+        draggedTabIndex = parseInt(e.target.dataset.catIndex);
+        e.target.style.opacity = '0.5';
+        e.dataTransfer.effectAllowed = 'move';
+    }
 });
 
+// Combined drag end
 document.addEventListener('dragend', (e) => {
     if (e.target.classList.contains('skill-card')) {
         e.target.classList.remove('dragging');
@@ -356,63 +500,7 @@ document.addEventListener('dragend', (e) => {
         });
         draggedCard = null;
     }
-});
-
-document.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    if (!draggedCard) return;
     
-    const target = e.target.closest('.skill-card');
-    if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
-        e.dataTransfer.dropEffect = 'move';
-    }
-});
-
-document.addEventListener('dragenter', (e) => {
-    const target = e.target.closest('.skill-card');
-    if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
-        target.classList.add('drag-over');
-    }
-});
-
-document.addEventListener('dragleave', (e) => {
-    const target = e.target.closest('.skill-card');
-    if (target) {
-        target.classList.remove('drag-over');
-    }
-});
-
-document.addEventListener('drop', (e) => {
-    e.preventDefault();
-    const target = e.target.closest('.skill-card');
-    
-    if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
-        const targetCatIndex = parseInt(target.dataset.catIndex);
-        const targetSkillIndex = parseInt(target.dataset.skillIndex);
-        
-        // Reorder skills array
-        const [movedSkill] = categories[draggedCatIndex].skills.splice(draggedSkillIndex, 1);
-        categories[targetCatIndex].skills.splice(targetSkillIndex, 0, movedSkill);
-        
-        saveCategories();
-        renderContent();
-    }
-});
-
-// Drag and drop for category tabs
-let draggedTab = null;
-let draggedTabIndex = null;
-
-document.addEventListener('dragstart', (e) => {
-    if (e.target.classList.contains('nav-tab') && editMode && e.target.draggable) {
-        draggedTab = e.target;
-        draggedTabIndex = parseInt(e.target.dataset.catIndex);
-        e.target.style.opacity = '0.5';
-        e.dataTransfer.effectAllowed = 'move';
-    }
-});
-
-document.addEventListener('dragend', (e) => {
     if (e.target.classList.contains('nav-tab')) {
         e.target.style.opacity = '';
         document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -422,86 +510,137 @@ document.addEventListener('dragend', (e) => {
     }
 });
 
+// Combined drag over
 document.addEventListener('dragover', (e) => {
     e.preventDefault();
-    if (!draggedTab) return;
     
-    const target = e.target.closest('.nav-tab');
-    if (target && target !== draggedTab && target.draggable) {
-        e.dataTransfer.dropEffect = 'move';
+    // Skill cards
+    if (draggedCard) {
+        const target = e.target.closest('.skill-card');
+        if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
+            e.dataTransfer.dropEffect = 'move';
+        }
+    }
+    
+    // Tabs
+    if (draggedTab) {
+        const target = e.target.closest('.nav-tab');
+        if (target && target !== draggedTab && target.draggable) {
+            e.dataTransfer.dropEffect = 'move';
+        }
     }
 });
 
+// Combined drag enter
 document.addEventListener('dragenter', (e) => {
-    const target = e.target.closest('.nav-tab');
-    if (target && target !== draggedTab && target.draggable) {
-        target.style.borderLeft = '3px solid var(--primary-color)';
+    // Skill cards
+    if (draggedCard) {
+        const target = e.target.closest('.skill-card');
+        if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
+            target.classList.add('drag-over');
+        }
+    }
+    
+    // Tabs
+    if (draggedTab) {
+        const target = e.target.closest('.nav-tab');
+        if (target && target !== draggedTab && target.draggable) {
+            target.style.borderLeft = '3px solid var(--primary-color)';
+        }
     }
 });
 
+// Combined drag leave
 document.addEventListener('dragleave', (e) => {
-    const target = e.target.closest('.nav-tab');
-    if (target) {
-        target.style.borderLeft = '';
+    // Skill cards
+    if (draggedCard) {
+        const target = e.target.closest('.skill-card');
+        if (target) {
+            target.classList.remove('drag-over');
+        }
+    }
+    
+    // Tabs
+    if (draggedTab) {
+        const target = e.target.closest('.nav-tab');
+        if (target) {
+            target.style.borderLeft = '';
+        }
     }
 });
 
+// Combined drop
 document.addEventListener('drop', (e) => {
     e.preventDefault();
-    const target = e.target.closest('.nav-tab');
     
-    if (target && target !== draggedTab && target.draggable) {
-        const targetIndex = parseInt(target.dataset.catIndex);
-        
-        // Reorder categories array
-        const [movedCategory] = categories.splice(draggedTabIndex, 1);
-        categories.splice(targetIndex, 0, movedCategory);
-        
-        // Update active tab index if needed
-        if (activeTabIndex === draggedTabIndex) {
-            activeTabIndex = targetIndex;
-        } else if (draggedTabIndex < activeTabIndex && targetIndex >= activeTabIndex) {
-            activeTabIndex--;
-        } else if (draggedTabIndex > activeTabIndex && targetIndex <= activeTabIndex) {
-            activeTabIndex++;
+    // Skill cards drop
+    if (draggedCard) {
+        const target = e.target.closest('.skill-card');
+        if (target && target !== draggedCard && target.dataset.catIndex === draggedCard.dataset.catIndex) {
+            const targetCatIndex = parseInt(target.dataset.catIndex);
+            const targetSkillIndex = parseInt(target.dataset.skillIndex);
+            
+            const [movedSkill] = categories[draggedCatIndex].skills.splice(draggedSkillIndex, 1);
+            categories[targetCatIndex].skills.splice(targetSkillIndex, 0, movedSkill);
+            
+            saveCategories();
+            renderContent();
         }
-        
-        saveCategories();
-        renderTabs();
-        renderContent();
+    }
+    
+    // Tabs drop
+    if (draggedTab) {
+        const target = e.target.closest('.nav-tab');
+        if (target && target !== draggedTab && target.draggable) {
+            const targetIndex = parseInt(target.dataset.catIndex);
+            
+            const [movedCategory] = categories.splice(draggedTabIndex, 1);
+            categories.splice(targetIndex, 0, movedCategory);
+            
+            if (activeTabIndex === draggedTabIndex) {
+                activeTabIndex = targetIndex;
+            } else if (draggedTabIndex < activeTabIndex && targetIndex >= activeTabIndex) {
+                activeTabIndex--;
+            } else if (draggedTabIndex > activeTabIndex && targetIndex <= activeTabIndex) {
+                activeTabIndex++;
+            }
+            
+            saveCategories();
+            renderTabs();
+            renderContent();
+        }
     }
 });
 
 		
-// Load data from Firebase on startup
-function loadFromFirebase() {
+function loadUserData(userId) {
     // Hide container initially
     document.querySelector('.container').classList.remove('loaded');
     
-    database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
+    // Check if guide exists for this user
+    get(ref(database, `users/${userId}/guides/${currentGuideId}`)).then((snapshot) => {
         if (!snapshot.exists()) {
-            database.ref(`guides/${currentGuideId}`).set({
+            set(ref(database, `users/${userId}/guides/${currentGuideId}`), {
                 appTitle, appSubtitle, appIcon, categories, checkedItems, themeColor
             });
         }
     });
-
-    // Use Promise.all to wait for all data to load
-    Promise.all([
-    database.ref(`guides/${currentGuideId}/categories`).once('value'),
-    database.ref(`guides/${currentGuideId}/checkedItems`).once('value'),
-    database.ref(`guides/${currentGuideId}/appTitle`).once('value'),
-    database.ref(`guides/${currentGuideId}/appSubtitle`).once('value'),
-    database.ref(`guides/${currentGuideId}/appIcon`).once('value'),
-    database.ref(`guides/${currentGuideId}/themeColor`).once('value'),
-    database.ref(`guides/${currentGuideId}/layoutMode`).once('value'),
-    database.ref(`guides/${currentGuideId}/expandedCards`).once('value'),
-    database.ref(`guides/${currentGuideId}/autoRefreshEnabled`).once('value'),
-    database.ref(`guides/${currentGuideId}/autoRefreshTime`).once('value'),
-    database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value')
-]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, expandedSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap]) => {
-		
-        // Load categories
+    
+	    // Use Promise.all to wait for all data to load
+	    Promise.all([
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/categories`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/checkedItems`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/appTitle`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/appSubtitle`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/appIcon`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/themeColor`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/layoutMode`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshEnabled`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/autoRefreshTime`)),
+	        get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
+	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap]) => {
+			
+		// Load categories
         if (categoriesSnap.val()) {
             categories = categoriesSnap.val();
         }
@@ -530,30 +669,28 @@ function loadFromFirebase() {
         if (themeSnap.val()) {
             themeColor = themeSnap.val();
         } else {
-    		themeColor = '#607d8b'; // Default grey if no theme saved
-		}
+            themeColor = '#607d8b';
+        }
         
         // Load layout mode
         if (layoutSnap.val()) {
             layoutMode = layoutSnap.val();
         }
-		// Load expanded cards
-		if (expandedSnap.val()) {
-		    expandedCards = expandedSnap.val();
-		}
+             
         // Load auto-refresh settings
-		if (autoRefreshEnabledSnap.val() !== null) {
-    		autoRefreshEnabled = autoRefreshEnabledSnap.val();
-		}
-		if (autoRefreshTimeSnap.val()) {
-    		autoRefreshTime = autoRefreshTimeSnap.val();
-		}
-
-		// Check if we need to auto-refresh
-		checkAndAutoRefresh(lastRefreshSnap.val());
+        if (autoRefreshEnabledSnap.val() !== null) {
+            autoRefreshEnabled = autoRefreshEnabledSnap.val();
+        }
+        if (autoRefreshTimeSnap.val()) {
+            autoRefreshTime = autoRefreshTimeSnap.val();
+        }
+        
+        // Check if we need to auto-refresh
+        checkAndAutoRefresh(lastRefreshSnap.val());
+        
         // Apply theme
         applyTheme();
-        
+                
         // Render everything
         renderHeader();
         renderTabs();
@@ -561,6 +698,19 @@ function loadFromFirebase() {
         updateLayoutButton();
         
         // Show container with fade-in effect
+        document.querySelector('.container').classList.add('loaded');
+    }).catch((error) => {
+        console.error('Error loading user data:', error);
+        
+        // Show error message to user
+        alert('Failed to load your data. Please check your internet connection and try refreshing the page.');
+        
+        // Still try to show the app with default data
+        applyTheme();
+        renderHeader();
+        renderTabs();
+        renderContent();
+        updateLayoutButton();
         document.querySelector('.container').classList.add('loaded');
     });
 }
@@ -570,7 +720,7 @@ function switchGuide(id) {
     localStorage.setItem('currentGuideId', id);
     // Reset to default theme before loading
     themeColor = '#607d8b';
-    loadFromFirebase();
+    loadUserData(currentUser.uid);
 }
 function applyTheme() {
     const theme = colorThemes.find(t => t.primary === themeColor);
@@ -658,6 +808,7 @@ document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, $
         floatingBtn.style.backgroundColor = secondaryColor;
     }
 }
+
 function toggleColorPicker(e) {
     e.stopPropagation();
     const picker = document.getElementById('colorPickerMenu');
@@ -670,14 +821,16 @@ function toggleColorPicker(e) {
 
 function selectColor(color) {
     themeColor = color;
-    database.ref(`guides/${currentGuideId}/themeColor`).set(themeColor);
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/themeColor`), themeColor);
     applyTheme();
-    renderHeader(); // Re-render to update selected color
+    renderHeader();
     
     // Close both color picker and dropdown menu
     document.getElementById('colorPickerMenu').classList.remove('show');
     document.getElementById('dropdownMenu').classList.remove('show');
 }
+
 function initColorPicker() {
     const canvas = document.getElementById('colorCanvas');
     const hueSlider = document.getElementById('hueSlider');
@@ -829,7 +982,6 @@ function updateHue(clientX) {
         }
     });
     
-    // Remove auto-apply on blur since we now have a Done button
     hexInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             applyCustomColor();
@@ -935,7 +1087,8 @@ function selectCustomColor(color) {
         }
     }
     
-    database.ref(`guides/${currentGuideId}/themeColor`).set(themeColor);
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/themeColor`), themeColor);
 }
 
 
@@ -954,6 +1107,7 @@ function applyCustomColor() {
 }
 		
 function createNewGuide() {
+    if (!currentUser) return;
     const name = prompt("Enter a name for this new guide:");
     if (!name) return;
     const id = `guide_${Date.now()}`;
@@ -973,15 +1127,193 @@ function createNewGuide() {
         checkedItems: {},
         themeColor: themeColor
     };
-    database.ref(`guides/${id}`).set(newGuide).then(() => {
+    set(ref(database, `users/${currentUser.uid}/guides/${id}`), newGuide).then(() => {
         currentGuideId = id;
-        loadFromFirebase();
+        localStorage.setItem('currentGuideId', id);
+        loadUserData(currentUser.uid);
     });
 }
+
+		
+function closeDrawer() {
+    const dropdown = document.getElementById('guideDropdown');
+    const backdrop = document.getElementById('drawerBackdrop');
+    const footer = document.getElementById('drawerFooter');
+    const floatingBtn = document.getElementById('layoutBtn');
+    
+    dropdown.classList.remove('show');
+    backdrop.classList.remove('show');
+    dropdown.style.transform = '';
+    backdrop.style.opacity = '';
+    if (footer) footer.style.transform = ''; // Reset footer transform
+    document.body.style.overflow = '';
+    if (floatingBtn) floatingBtn.style.display = 'flex';
+}
+
+// Touch swipe to close drawer
+let touchStartX = 0;
+let touchCurrentX = 0;
+let isDragging = false;
+
+// Define handlers outside so they can be referenced
+let handleDrawerTouchStart, handleDrawerTouchMove, handleDrawerTouchEnd;
+
+function initDrawerSwipe() {
+    const drawer = document.getElementById('guideDropdown');
+    const backdrop = document.getElementById('drawerBackdrop');
+    
+    if (!drawer || !backdrop) return;
+    
+    // Remove old listeners if they exist
+    if (handleDrawerTouchStart) {
+        drawer.removeEventListener('touchstart', handleDrawerTouchStart);
+        drawer.removeEventListener('touchmove', handleDrawerTouchMove);
+        drawer.removeEventListener('touchend', handleDrawerTouchEnd);
+    }
+    
+    // Touch start
+    handleDrawerTouchStart = function(e) {
+        // Allow swiping from anywhere on the drawer
+        const footer = document.getElementById('drawerFooter');
+        
+        touchStartX = e.touches[0].clientX;
+        touchCurrentX = touchStartX;
+        isDragging = true;
+        drawer.style.transition = 'none';
+        if (footer) footer.style.transition = 'none';
+    };
+    
+    // Touch move
+    handleDrawerTouchMove = function(e) {
+        if (!isDragging) return;
+        
+        touchCurrentX = e.touches[0].clientX;
+        const deltaX = touchCurrentX - touchStartX;
+        const footer = document.getElementById('drawerFooter');
+        
+        if (deltaX < 0) {
+            drawer.style.transform = `translateX(${deltaX}px)`;
+            if (footer) footer.style.transform = `translateX(${deltaX}px)`;
+            
+            const maxDrag = drawer.offsetWidth;
+            const opacity = 1 - (Math.abs(deltaX) / maxDrag);
+            backdrop.style.opacity = opacity;
+        }
+    };
+    
+    // Touch end
+    handleDrawerTouchEnd = function(e) {
+        if (!isDragging) return;
+        
+        const deltaX = touchCurrentX - touchStartX;
+        const threshold = drawer.offsetWidth * 0.3;
+        const footer = document.getElementById('drawerFooter');
+        
+        drawer.style.transition = 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)';
+        if (footer) footer.style.transition = 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)';
+        backdrop.style.transition = 'opacity 0.3s ease';
+        
+        if (Math.abs(deltaX) > threshold) {
+            closeDrawer();
+        } else {
+            drawer.style.transform = 'translateX(0)';
+            if (footer) footer.style.transform = 'translateX(0)';
+            backdrop.style.opacity = '1';
+        }
+        
+        isDragging = false;
+    };
+    
+    drawer.addEventListener('touchstart', handleDrawerTouchStart, { passive: true });
+    drawer.addEventListener('touchmove', handleDrawerTouchMove, { passive: true });
+    drawer.addEventListener('touchend', handleDrawerTouchEnd);
+    
+    backdrop.addEventListener('touchstart', (e) => {
+        closeDrawer();
+    });
+}
+
+// Swipe to delete checklist items
+let itemTouchStartX = 0;
+let itemTouchCurrentX = 0;
+let isItemDragging = false;
+let currentSwipedItem = null;
+
+document.addEventListener('touchstart', (e) => {
+    const item = e.target.closest('.checklist-item');
+    if (!item || editMode) return;
+    
+    // Don't interfere with checkbox clicks
+    if (e.target.closest('.checkbox') || e.target.closest('.bullet-number') || 
+        e.target.closest('.bullet-square') || e.target.closest('.bullet-circle')) {
+        return;
+    }
+    
+    itemTouchStartX = e.touches[0].clientX;
+    itemTouchCurrentX = itemTouchStartX;
+    isItemDragging = true;
+    currentSwipedItem = item;
+    item.style.transition = 'none';
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+    if (!isItemDragging || !currentSwipedItem) return;
+    
+    itemTouchCurrentX = e.touches[0].clientX;
+    const deltaX = itemTouchCurrentX - itemTouchStartX;
+    
+    // Only allow swiping left (negative delta)
+    if (deltaX < 0) {
+        currentSwipedItem.style.transform = `translateX(${deltaX}px)`;
+        
+        // Show delete button background as user swipes
+        const maxSwipe = 100;
+        const swipeProgress = Math.min(Math.abs(deltaX) / maxSwipe, 1);
+        currentSwipedItem.style.background = `linear-gradient(90deg, #f8f9fa ${100 - (swipeProgress * 100)}%, #ef4444 100%)`;
+    }
+});
+
+document.addEventListener('touchend', (e) => {
+    if (!isItemDragging || !currentSwipedItem) return;
+    
+    const deltaX = itemTouchCurrentX - itemTouchStartX;
+    const threshold = 80; // Swipe 80px to delete
+    
+    currentSwipedItem.style.transition = 'all 0.3s ease';
+    
+    if (deltaX < 0 && Math.abs(deltaX) > threshold) {
+        // Delete the item with animation
+        currentSwipedItem.style.transform = 'translateX(-100%)';
+        currentSwipedItem.style.opacity = '0';
+        
+        // Get the data immediately before animation
+        const catIndex = parseInt(currentSwipedItem.dataset.catIndex);
+        const skillIndex = parseInt(currentSwipedItem.dataset.skillIndex);
+        const itemIndex = parseInt(currentSwipedItem.dataset.itemIndex);
+        
+        setTimeout(() => {
+            // Delete the item
+            if (!isNaN(catIndex) && !isNaN(skillIndex) && !isNaN(itemIndex)) {
+                categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
+                saveCategories();
+                renderContent();
+            }
+        }, 300);
+    } else {
+        // Snap back
+        currentSwipedItem.style.transform = 'translateX(0)';
+        currentSwipedItem.style.background = '#f8f9fa';
+    }
+    
+    isItemDragging = false;
+    currentSwipedItem = null;
+});
+
 function toggleGuideMenu(e) {
     e.stopPropagation();
     const dropdown = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
+    const floatingBtn = document.getElementById('layoutBtn');
     
     const isShowing = dropdown.classList.contains('show');
     
@@ -989,26 +1321,26 @@ function toggleGuideMenu(e) {
         // Close drawer
         dropdown.classList.remove('show');
         backdrop.classList.remove('show');
-        document.body.style.overflow = ''; // Restore scrolling
+        document.body.style.overflow = '';
+        if (floatingBtn) floatingBtn.style.display = 'flex';
     } else {
         // Open drawer
         dropdown.classList.add('show');
         backdrop.classList.add('show');
-        document.body.style.overflow = 'hidden'; // Prevent background scroll
+        dropdown.style.transform = 'translateX(0)';
+        backdrop.style.opacity = '1';
+        const footer = document.getElementById('drawerFooter');
+        if (footer) footer.style.transform = 'translateX(0)';
+        document.body.style.overflow = 'hidden';
+        if (floatingBtn) floatingBtn.style.display = 'none';
+        
+        // Initialize swipe after drawer is open
+        setTimeout(() => initDrawerSwipe(), 100);
     }
     
     // Close other menus
     const otherMenu = document.getElementById('dropdownMenu');
     if (otherMenu) otherMenu.classList.remove('show');
-}
-
-function closeDrawer() {
-    const dropdown = document.getElementById('guideDropdown');
-    const backdrop = document.getElementById('drawerBackdrop');
-    
-    dropdown.classList.remove('show');
-    backdrop.classList.remove('show');
-    document.body.style.overflow = '';
 }
 
 function toggleMenu(e) {
@@ -1039,43 +1371,157 @@ function toggleMenu(e) {
     }
 }
 
+// Authentication functions
+function login(email, password) {
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            currentUser = userCredential.user;
+            loadUserData(currentUser.uid);
+        })
+        .catch((error) => {
+            alert('Login failed: ' + error.message);
+        });
+}
+
+function signup(email, password) {
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            currentUser = userCredential.user;
+            loadUserData(currentUser.uid);
+        })
+        .catch((error) => {
+            alert('Signup failed: ' + error.message);
+        });
+}
+
+function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+        prompt: 'select_account'
+    });
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            currentUser = result.user;
+            loadUserData(currentUser.uid);
+        })
+        .catch((error) => {
+            console.error('Google login error:', error);
+            alert('Google login failed: ' + error.message);
+        });
+}
+
+function logout() {
+    signOut(auth).then(() => {
+        currentUser = null;
+        categories = [];
+    });
+}
+
+function showSignup() {
+    const loginScreen = document.getElementById('loginScreen');
+    const signupScreen = document.getElementById('signupScreen');
+    
+    loginScreen.classList.remove('show');
+    setTimeout(() => {
+        loginScreen.style.display = 'none';
+        signupScreen.style.display = 'flex';
+        setTimeout(() => signupScreen.classList.add('show'), 10);
+    }, 300);
+}
+function processSignup() {
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupPasswordConfirm').value;
+    
+    if (!email || !password) {
+        alert('Please enter email and password');
+        return;
+    }
+    
+    if (password.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+    }
+    
+    signup(email, password);
+}
+
+function backToLogin() {
+    const loginScreen = document.getElementById('loginScreen');
+    const signupScreen = document.getElementById('signupScreen');
+    
+    signupScreen.classList.remove('show');
+    setTimeout(() => {
+        signupScreen.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        setTimeout(() => loginScreen.classList.add('show'), 10);
+    }, 300);
+}
+
+function deleteAccount() {
+    if (!currentUser) return;
+    const user = currentUser;
+    const userId = user.uid;
+    
+    // Delete all user data from database
+    remove(ref(database, `users/${userId}`)).then(() => {
+        // Delete the authentication account
+        user.delete().then(() => {
+            alert('Your account has been deleted.');
+            currentUser = null;
+        }).catch((error) => {
+            alert('Error deleting account: ' + error.message);
+        });
+    }).catch((error) => {
+        alert('Error deleting user data: ' + error.message);
+    });
+}
+	
 function duplicateGuide() {
+    if (!currentUser) return;
     const timestamp = Date.now();
     const newId = `${currentGuideId}_copy_${timestamp}`;
     
-    database.ref(`guides/${currentGuideId}`).once('value', (snapshot) => {
+    get(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}`)).then((snapshot) => {
         const data = snapshot.val();
         if (data.appTitle) {
             data.appTitle = data.appTitle + ' (Copy)';
         }
-        database.ref(`guides/${newId}`).set(data).then(() => {
+        set(ref(database, `users/${currentUser.uid}/guides/${newId}`), data).then(() => {
             currentGuideId = newId;
-            loadFromFirebase();
+            localStorage.setItem('currentGuideId', newId);
+            loadUserData(currentUser.uid);
         });
     });
 }
 
 function deleteGuide() {
+    if (!currentUser) return;
     if (currentGuideId === 'defaultGuide') {
         alert("Cannot delete the default guide!");
         return;
     }
     if (confirm("Delete this entire guide? This cannot be undone.")) {
-        database.ref(`guides/${currentGuideId}`).remove();
+        remove(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}`));
         currentGuideId = 'defaultGuide';
         localStorage.setItem('currentGuideId', 'defaultGuide');
-        loadGuideList();
-        loadFromFirebase();
+        loadUserData(currentUser.uid);
     }
 }
+	
 function saveHeader() {
-  database.ref(`guides/${currentGuideId}/appTitle`).set(appTitle);
-  database.ref(`guides/${currentGuideId}/appSubtitle`).set(appSubtitle);
-  database.ref(`guides/${currentGuideId}/appIcon`).set(appIcon);
-  renderHeader(); // Update display immediately
-  populateGuideDropdown(); // Update drawer list
+  if (!currentUser) return;
+  set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appTitle`), appTitle);
+  set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appSubtitle`), appSubtitle);
+  set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appIcon`), appIcon);
+  renderHeader();
+  populateGuideDropdown();
 }
-
 
 function renderHeader() {
     const header = document.querySelector('.header');
@@ -1087,81 +1533,233 @@ function renderHeader() {
         colorOptionsHTML += `
             <div class="color-option ${isSelected}" 
                  style="background: linear-gradient(135deg, ${theme.secondary} 0%, ${theme.primary} 100%);"
-                 onclick="selectColor('${theme.primary}')"
+                 data-color="${theme.primary}"
                  title="${theme.name}">
             </div>
         `;
     });
     
     header.innerHTML = `
-<button class="guide-menu-btn" onclick="toggleGuideMenu(event)">☰</button>
-<div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
-<div class="guide-dropdown" id="guideDropdown">
-    <div class="drawer-header">My Notebook</div>
-</div>
-<div class="edit-toggle">
-    <button class="save-btn" id="saveBtn" onclick="saveAndExitEdit()" style="display: none;">Done</button>
-    <button class="edit-btn" id="menuBtn" onclick="toggleMenu(event)" style="display: block;">⋮</button>
-<div class="dropdown-menu" id="dropdownMenu">
-    <button onclick="toggleEditMode()">Edit</button>
-    <button onclick="duplicateGuide()">Duplicate</button>
-    <button onclick="deleteGuide()">Delete</button>
-	<button onclick="toggleColorPicker(event)">Theme</button>
-	<div class="color-picker-menu" id="colorPickerMenu">
-	    <h3>Preset Themes</h3>
-	    <div class="color-options" style="margin-bottom: 15px;">
-	        ${colorOptionsHTML}
-	    </div>
-	    <h3>Custom Color</h3>
-	    <div style="margin-bottom: 15px;">
-	        <div id="colorCanvas" class="color-picker-canvas" style="background-color: hsl(0, 100%, 50%);">
-	            <div class="picker-indicator" id="canvasIndicator" style="left: 100%; top: 0%;"></div>
-	        </div>
-	        <div class="hue-slider" id="hueSlider">
-	            <div class="hue-indicator" id="hueIndicator" style="left: 0%;"></div>
-	        </div>
-	        <div style="display: flex; align-items: center; gap: 10px;">
-	            <div style="width: 32px; height: 32px; border-radius: 6px; border: 2px solid #dee2e6; background-color: ${themeColor}; flex-shrink: 0;" id="colorPreview"></div>
-	            <input type="text" id="hexInput" value="${themeColor}" 
-	                   style="flex: 1; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;"
-	                   maxlength="7" placeholder="#FF0000">
-	            <button onclick="applyCustomColor()" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">Done</button>
-	        </div>
-	    </div>
+	<button class="guide-menu-btn" id="guideMenuBtn">☰</button>
+	<div id="drawerBackdrop" class="drawer-backdrop"></div>
+	<div class="guide-dropdown" id="guideDropdown">
+	    <div class="drawer-header">My Notebook ⊞</div>
 	</div>
-	    <button onclick="clearAllChecks()">Clear all checks</button>
-	    <button onclick="toggleAutoRefresh()">
-	        ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
+	<div class="drawer-footer" id="drawerFooter">
+	    <button id="logoutBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-right: auto; opacity: 0.5; transition: opacity 0.2s;">
+		    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+		        <polyline points="16 17 21 12 16 7"></polyline>
+		        <line x1="21" y1="12" x2="9" y2="12"></line>
+		    </svg>
+		</button>
+		<div class="logout-menu" id="logoutMenu">
+		    <button id="logoutOptionBtn">Logout</button>
+		    <button id="deleteAccountBtn" class="danger">Delete Account</button>
+		</div>
+	    <button class="drawer-create-icon" id="createGuideBtn">
+	        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+	            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+	            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+	        </svg>
 	    </button>
 	</div>
-</div>
-</div>
-<h1>
-    <span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
-        <span class="icon" ${editMode ? 'onclick="editAppIcon(this)"' : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
-            (() => {
-                const hasIconContent = appIcon && appIcon !== "​";
-                if (hasIconContent) {
-                    if (appIcon.startsWith('svg:')) {
-                        const iconData = JSON.parse(appIcon.substring(4));
-                        return `<span style="display: inline-flex; width: 28px; height: 28px; background: ${iconData.bg}; border-radius: 6px; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-                    } else {
-                        return appIcon;
-                    }
-                } else {
-                    return editMode ? "+" : "​";
-                }
-            })()
-        }</span>
-        ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" onclick="event.stopPropagation(); appIcon = \'​\'; saveHeader();">×</span>' : ''}
-    </span>
-    <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">
-        ${appTitle}
-    </span>
-</h1>
-<p class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${appSubtitle}</p>
-    `;
-	// Add dynamic styles for light/dark theme
+	<div class="edit-toggle">
+	    <button class="save-btn" id="saveBtn" style="display: none;">Done</button>
+	    <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
+	    <div class="dropdown-menu" id="dropdownMenu">
+	        <button id="editModeMenuBtn">Edit</button>
+	        <button id="duplicateGuideBtn">Duplicate</button>
+	        <button id="deleteGuideBtn">Delete</button>
+	        <button id="toggleColorBtn">Theme</button>
+	        <div class="color-picker-menu" id="colorPickerMenu">
+	            <h3>Preset Themes</h3>
+	            <div class="color-options" id="colorOptionsContainer" style="margin-bottom: 15px;">
+	                ${colorOptionsHTML}
+	            </div>
+	            <h3>Custom Color</h3>
+	            <div style="margin-bottom: 15px;">
+	                <div id="colorCanvas" class="color-picker-canvas" style="background-color: hsl(0, 100%, 50%);">
+	                    <div class="picker-indicator" id="canvasIndicator" style="left: 100%; top: 0%;"></div>
+	                </div>
+	                <div class="hue-slider" id="hueSlider">
+	                    <div class="hue-indicator" id="hueIndicator" style="left: 0%;"></div>
+	                </div>
+	                <div style="display: flex; align-items: center; gap: 10px;">
+	                    <div style="width: 32px; height: 32px; border-radius: 6px; border: 2px solid #dee2e6; background-color: ${themeColor}; flex-shrink: 0;" id="colorPreview"></div>
+	                    <input type="text" id="hexInput" value="${themeColor}" 
+	                           style="flex: 1; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;"
+	                           maxlength="7" placeholder="#FF0000">
+	                    <button id="applyColorBtn" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">Done</button>
+	                </div>
+	            </div>
+	        </div>
+	        <button id="checkboxOptionsBtn">Checkbox options</button>
+	        <div class="checkbox-menu" id="checkboxMenu">
+	            <button id="clearChecksBtn">Clear all checks</button>
+	            <button id="autoRefreshBtn">
+	                ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh daily'}
+	            </button>
+	        </div>
+	    </div>
+	</div>
+	<h1>
+	    <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
+	        <span class="icon" id="appIconSpan" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
+	            (() => {
+	                const hasIconContent = appIcon && appIcon !== "​";
+	                if (hasIconContent) {
+	                    if (appIcon.startsWith('svg:')) {
+	                        const iconData = JSON.parse(appIcon.substring(4));
+	                        return `<span style="display: inline-flex; width: 28px; height: 28px; background: ${iconData.bg}; border-radius: 6px; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+	                    } else {
+	                        return appIcon;
+	                    }
+	                } else {
+	                    return editMode ? "+" : "​";
+	                }
+	            })()
+	        }</span>
+	        ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" id="removeAppIconBtn">×</span>' : ''}
+	    </span>
+	    <span class="${editMode ? 'editable' : ''}" id="appTitleSpan" contenteditable="${editMode}">
+	        ${appTitle}
+	    </span>
+	</h1>
+	<p class="${editMode ? 'editable' : ''}" id="appSubtitleSpan" contenteditable="${editMode}">${appSubtitle}</p>
+	    `;
+
+    // Add event listeners after HTML is rendered
+    const guideMenuBtn = document.getElementById('guideMenuBtn');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const createGuideBtn = document.getElementById('createGuideBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const menuBtn = document.getElementById('menuBtn');
+    const editModeMenuBtn = document.getElementById('editModeMenuBtn');
+    const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
+    const deleteGuideBtn = document.getElementById('deleteGuideBtn');
+    const toggleColorBtn = document.getElementById('toggleColorBtn');
+   
+	
+    const applyColorBtn = document.getElementById('applyColorBtn');
+    const appIconSpan = document.getElementById('appIconSpan');
+    const removeAppIconBtn = document.getElementById('removeAppIconBtn');
+    
+    if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
+    if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
+    if (createGuideBtn) {
+        createGuideBtn.addEventListener('click', () => {
+            createNewGuide();
+            closeDrawer();
+        });
+    }
+    if (logoutBtn) {
+	    logoutBtn.addEventListener('click', (e) => {
+	        e.stopPropagation();
+	        const logoutMenu = document.getElementById('logoutMenu');
+	        logoutMenu.classList.toggle('show');
+	    });
+	}
+
+	const logoutOptionBtn = document.getElementById('logoutOptionBtn');
+	const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+	
+	if (logoutOptionBtn) {
+	    logoutOptionBtn.addEventListener('click', () => {
+	        if (confirm('Are you sure you want to log out?')) {
+	            logout();
+	            closeDrawer();
+	        }
+	        document.getElementById('logoutMenu').classList.remove('show');
+	    });
+	}
+	
+	if (deleteAccountBtn) {
+	    deleteAccountBtn.addEventListener('click', () => {
+	        if (confirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!\n\nType "DELETE" to confirm.') === true) {
+	            const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+	            if (confirmation === 'DELETE') {
+	                deleteAccount();
+	            }
+	        }
+	        document.getElementById('logoutMenu').classList.remove('show');
+	    });
+	}
+    if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
+    if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+    if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
+    if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
+    if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
+    if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
+    if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
+    if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
+    if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
+    
+    // App icon editing
+    if (editMode && appIconSpan) {
+        appIconSpan.addEventListener('click', (e) => {
+            e.stopPropagation();
+            editAppIcon(appIconSpan);
+        });
+    }
+    if (removeAppIconBtn) {
+        removeAppIconBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            appIcon = '​';
+            saveHeader();
+        });
+    }
+    
+    // Color option clicks
+    const colorOptions = document.querySelectorAll('.color-option');
+    colorOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            selectColor(option.dataset.color);
+        });
+    });
+
+	// Checkbox options button and menu
+if (checkboxOptionsBtn) {
+    checkboxOptionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        const colorMenu = document.getElementById('colorPickerMenu');
+        
+        // Close color picker if open
+        if (colorMenu) colorMenu.classList.remove('show');
+        
+        if (checkboxMenu) {
+            checkboxMenu.classList.toggle('show');
+        }
+    });
+}
+
+// Clear checks button
+if (clearChecksBtn) {
+    clearChecksBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearAllChecks();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (checkboxMenu) checkboxMenu.classList.remove('show');
+        if (dropdownMenu) dropdownMenu.classList.remove('show');
+    });
+}
+
+// Auto-refresh button
+if (autoRefreshBtn) {
+    autoRefreshBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleAutoRefresh();
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (checkboxMenu) checkboxMenu.classList.remove('show');
+        if (dropdownMenu) dropdownMenu.classList.remove('show');
+    });
+}
+    
+	// Dynamic styles and theme application...
 	    const isLight = isLightColor(themeColor);
 	    if (isLight) {
 	        const style = document.createElement('style');
@@ -1184,35 +1782,75 @@ function renderHeader() {
 	        const existingStyle = document.getElementById('dynamic-header-style');
 	        if (existingStyle) existingStyle.remove();
 	    }
-    // Apply current theme
-    applyTheme();
 
-    // Populate guide dropdown
+    applyTheme();
     populateGuideDropdown();
 
-	// Preserve Done button state if in edit mode
-	if (editMode) {
-	    setTimeout(() => {
-	        const saveBtn = document.getElementById('saveBtn');
-	        const menuBtn = document.getElementById('menuBtn');
-	        if (saveBtn) saveBtn.style.display = 'block';
-	        if (menuBtn) menuBtn.style.display = 'none';
-	    }, 0);
-	}
+    // Add double-click edit for header (only when not in edit mode)
+    if (!editMode) {
+        const h1 = header.querySelector('h1');
+        const spans = h1 ? h1.querySelectorAll('span') : [];
+        const headerTitle = spans.length > 0 ? spans[spans.length - 1] : null;
+        const headerSubtitle = header.querySelector('p');
+        
+        if (headerTitle) {
+            headerTitle.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                enableQuickEditHeader(headerTitle, 'title');
+            });
+        }
+        
+        if (headerSubtitle) {
+            headerSubtitle.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                enableQuickEditHeader(headerSubtitle, 'subtitle');
+            });
+        }
+    }
+
     if (editMode) {
-        header.querySelector('h1 span.editable').addEventListener('blur', (e) => {
-            appTitle = e.target.textContent.trim();
-            saveHeader();
-        });
-        header.querySelector('p').addEventListener('blur', (e) => {
-            appSubtitle = e.target.textContent.trim();
-            saveHeader();
-        });
+        setTimeout(() => {
+            const saveBtn = document.getElementById('saveBtn');
+            const menuBtn = document.getElementById('menuBtn');
+            if (saveBtn) saveBtn.style.display = 'block';
+            if (menuBtn) menuBtn.style.display = 'none';
+        }, 0);
+    }
+    
+    if (editMode) {
+        const editableTitle = header.querySelector('#appTitleSpan');
+        const editableSubtitle = header.querySelector('#appSubtitleSpan');
+        
+        if (editableTitle) {
+            editableTitle.addEventListener('blur', (e) => {
+                appTitle = e.target.textContent.trim();
+                saveHeader();
+            });
+        }
+        if (editableSubtitle) {
+            editableSubtitle.addEventListener('blur', (e) => {
+                appSubtitle = e.target.textContent.trim();
+                saveHeader();
+            });
+        }
+    }
+    
+    if (!editMode) {
+        setTimeout(() => initDrawerSwipe(), 100);
     }
 }
+
 function populateGuideDropdown() {
-    database.ref('guides').once('value', (snapshot) => {
-        const guides = snapshot.val() || {};
+    if (!currentUser) return;
+    
+    Promise.all([
+        get(ref(database, `users/${currentUser.uid}/guides`)),
+        get(ref(database, `users/${currentUser.uid}/guideOrder`))
+    ]).then(([guidesSnapshot, orderSnapshot]) => {
+        const guides = guidesSnapshot.val() || {};
+        const savedOrder = orderSnapshot.val() || [];
         const dropdown = document.getElementById('guideDropdown');
         
         // Keep header, clear only list
@@ -1220,7 +1858,26 @@ function populateGuideDropdown() {
         dropdown.innerHTML = '';
         if (header) dropdown.appendChild(header);
         
-        for (let id in guides) {
+        // Create ordered list of guide IDs
+        const guideIds = Object.keys(guides);
+        const orderedIds = [];
+        
+        // First add guides that are in saved order
+        savedOrder.forEach(id => {
+            if (guideIds.includes(id)) {
+                orderedIds.push(id);
+            }
+        });
+        
+        // Then add any new guides that aren't in saved order
+        guideIds.forEach(id => {
+            if (!orderedIds.includes(id)) {
+                orderedIds.push(id);
+            }
+        });
+        
+        // Render guides in order
+        orderedIds.forEach(id => {
             const guide = guides[id];
             const title = guide.appTitle || id;
             const icon = guide.appIcon || '📄';
@@ -1234,16 +1891,16 @@ function populateGuideDropdown() {
             btn.style.display = 'flex';
             btn.style.alignItems = 'center';
             btn.style.justifyContent = 'space-between';
-            btn.style.margin = '4px 0';
-            btn.style.padding = '8px 12px';
+            btn.style.margin = '2px 0';
+            btn.style.padding = '8px 12px 8px 20px';
             
             const nameSpan = document.createElement('span');
             if (icon.startsWith('svg:')) {
-			    const iconData = JSON.parse(icon.substring(4));
-			    nameSpan.innerHTML = `<span style="display: inline-flex; width: 18px; height: 18px; background: ${iconData.bg}; border-radius: 3px; align-items: center; justify-content: center; margin-right: 8px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span> ${title}`;
-			} else {
-			    nameSpan.textContent = `${icon} ${title}`;
-			}
+                const iconData = JSON.parse(icon.substring(4));
+                nameSpan.innerHTML = `<span style="display: inline-flex; width: 18px; height: 18px; background: ${iconData.bg}; border-radius: 3px; align-items: center; justify-content: center; margin-right: 8px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span> ${title}`;
+            } else {
+                nameSpan.textContent = `${icon} ${title}`;
+            }
             btn.appendChild(nameSpan);
             
             if (editMode && id !== 'defaultGuide') {
@@ -1255,89 +1912,72 @@ function populateGuideDropdown() {
                 delBtn.style.borderRadius = '6px';
                 delBtn.style.fontSize = '12px';
                 delBtn.style.fontWeight = 'bold';
-                delBtn.onclick = (e) => {
+                delBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (confirm(`Delete guide "${title}"? This cannot be undone.`)) {
-                        database.ref(`guides/${id}`).remove();
+                        remove(ref(database, `users/${currentUser.uid}/guides/${id}`));
                         if (currentGuideId === id) {
                             currentGuideId = 'defaultGuide';
-                            loadFromFirebase();
+                            loadUserData(currentUser.uid);
                         } else {
                             populateGuideDropdown();
                         }
                     }
-                };
+                });
                 btn.appendChild(delBtn);
             }
             
-            btn.onclick = (e) => {
+            btn.addEventListener('click', (e) => {
                 if (!e.target.textContent.includes('del')) {
                     switchGuide(id);
                     closeDrawer();
                 }
-            };
+            });
             
             if (id === currentGuideId) {
-			    btn.classList.add('current-guide');
-			    const isLight = isLightColor(guideTheme);
-			    btn.style.color = isLight ? 'var(--secondary-color)' : guideTheme;
-			    btn.style.fontWeight = '700';
-			    btn.style.fontSize = '15px';
-				btn.style.background = `linear-gradient(90deg, ${guideTheme}35 0%, transparent 100%)`;
-			    // Make icon larger
-			    const iconElement = nameSpan.querySelector('span') || nameSpan.childNodes[0];
-			    if (iconElement) {
-			        if (icon.startsWith('svg:')) {
-			            iconElement.style.transform = 'scale(1.15)';
-			        } else {
-			            nameSpan.style.fontSize = '16px';
-			        }
-			    }
-			}
-
-            // Enable drag-and-drop in edit mode
-            if (editMode) {
-                btn.draggable = true;
-                btn.style.cursor = 'grab';
-                btn.addEventListener('dragstart', handleDragStart);
-                btn.addEventListener('dragend', handleDragEnd);
-                btn.addEventListener('dragenter', handleDragEnter);
-                btn.addEventListener('dragover', handleDragOver);
-                btn.addEventListener('drop', handleDrop);
-                btn.addEventListener('dragleave', handleDragLeave);
+                btn.classList.add('current-guide');
+                const isLight = isLightColor(guideTheme);
+                btn.style.color = isLight ? 'var(--secondary-color)' : guideTheme;
+                btn.style.fontWeight = '700';
+                btn.style.fontSize = '15px';
+                btn.style.background = `linear-gradient(90deg, ${guideTheme}35 0%, transparent 100%)`;
+                const iconElement = nameSpan.querySelector('span') || nameSpan.childNodes[0];
+                if (iconElement) {
+                    if (icon.startsWith('svg:')) {
+                        iconElement.style.transform = 'scale(1.15)';
+                    } else {
+                        nameSpan.style.fontSize = '16px';
+                    }
+                }
             }
 
-            dropdown.appendChild(btn);
-        }
-        
-        // Add create button (only when not editing)
-        if (!editMode) {
-            const createBtn = document.createElement('button');
-            createBtn.textContent = '+ Create new guide';
-            createBtn.style.borderLeft = '4px solid #3498db';
-            createBtn.style.borderRight = '2px solid #3498db';
-            createBtn.style.borderTop = 'none';
-            createBtn.style.borderBottom = '1px solid #f0f0f0';
-            createBtn.style.background = 'transparent';
-            createBtn.style.color = '#3498db';
-            createBtn.style.fontWeight = '600';
-            createBtn.style.borderRadius = '0';
-            createBtn.style.margin = '0';
-            createBtn.onclick = () => {
-                createNewGuide();
-                closeDrawer();
-            };
-            dropdown.appendChild(createBtn);
-        }
+            // Enable drag-and-drop when NOT in edit mode
+            if (!editMode) {
+                btn.draggable = true;
+                btn.style.cursor = 'grab';
+                btn.addEventListener('dragstart', handleDragStart.bind(btn));
+                btn.addEventListener('dragend', handleDragEnd.bind(btn));
+                btn.addEventListener('dragenter', handleDragEnter.bind(btn));
+                btn.addEventListener('dragover', handleDragOver.bind(btn));
+                btn.addEventListener('drop', handleDrop.bind(btn));
+                btn.addEventListener('dragleave', handleDragLeave.bind(btn));
+            }
+
+           dropdown.appendChild(btn);
+        });
     });
 }
+	
+// Drag and drop for category tabs
+let draggedTab = null;
+let draggedTabIndex = null;
 
-
+// Reuse these same handlers for drawer items
 function handleDragStart(e) {
     draggedElement = this;
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', this.dataset.guideId);
+    e.dataTransfer.setData('text/plain', this.dataset.guideId || this.dataset.catIndex);
 
     // Create and insert a placeholder element
     placeholder = document.createElement('div');
@@ -1379,12 +2019,12 @@ function handleDragEnter(e) {
 }
 
 function handleDragOver(e) {
-    e.preventDefault(); // Needed to allow drop
+    e.preventDefault();
 }
 
 function handleDrop(e) {
     e.stopPropagation();
-    if (!placeholder || !draggedElement) return false;
+    if (!placeholder || !draggedElement || !currentUser) return false;
 
     const parent = placeholder.parentNode;
     parent.insertBefore(draggedElement, placeholder);
@@ -1393,8 +2033,7 @@ function handleDrop(e) {
     // Save new order to Firebase
     const newOrder = Array.from(parent.querySelectorAll('.guide-item'))
         .map(item => item.dataset.guideId);
-    database.ref('guideOrder').set(newOrder).then(() => {
-        // Don't re-render, order is already visually correct
+    set(ref(database, `users/${currentUser.uid}/guideOrder`), newOrder).then(() => {
         console.log('Guide order saved');
     });
 
@@ -1404,7 +2043,6 @@ function handleDrop(e) {
 
     return false;
 }
-
 
 function handleDragLeave(e) {
     this.classList.remove('drag-over');
@@ -1545,20 +2183,20 @@ function showEmojiPicker(target, callback) {
         
         iconBtn.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="${icon.path}"/></svg>`;
         
-        iconBtn.onmouseover = () => {
+        iconBtn.addEventListener('mouseover', () => {
             iconBtn.style.transform = 'scale(1.1)';
             iconBtn.style.borderColor = '#3498db';
-        };
-        iconBtn.onmouseout = () => {
+        });
+        iconBtn.addEventListener('mouseout', () => {
             iconBtn.style.transform = 'scale(1)';
             iconBtn.style.borderColor = 'transparent';
-        };
+        });
         
-        iconBtn.onclick = () => {
+        iconBtn.addEventListener('click', () => {
             // Store as SVG data
             callback(`svg:${JSON.stringify({name: icon.name, bg: icon.bg, path: icon.path})}`);
             inputWrapper.remove();
-        };
+        });
         
         iconGrid.appendChild(iconBtn);
     });
@@ -1569,7 +2207,7 @@ function showEmojiPicker(target, callback) {
     inputWrapper.appendChild(iconContent);
     
     // Tab switching
-    emojiTab.onclick = () => {
+    emojiTab.addEventListener('click', () => {
         emojiTab.style.borderBottom = '3px solid #3498db';
         emojiTab.style.fontWeight = 'bold';
         emojiTab.style.color = '#3498db';
@@ -1578,9 +2216,9 @@ function showEmojiPicker(target, callback) {
         iconTab.style.color = '#666';
         emojiContent.style.display = 'block';
         iconContent.style.display = 'none';
-    };
+    });
     
-    iconTab.onclick = () => {
+    iconTab.addEventListener('click', () => {
         iconTab.style.borderBottom = '3px solid #3498db';
         iconTab.style.fontWeight = 'bold';
         iconTab.style.color = '#3498db';
@@ -1589,7 +2227,7 @@ function showEmojiPicker(target, callback) {
         emojiTab.style.color = '#666';
         iconContent.style.display = 'block';
         emojiContent.style.display = 'none';
-    };
+    });
     
     // Buttons
     const buttonContainer = document.createElement('div');
@@ -1606,12 +2244,12 @@ function showEmojiPicker(target, callback) {
     confirmBtn.style.border = 'none';
     confirmBtn.style.borderRadius = '6px';
     confirmBtn.style.cursor = 'pointer';
-    confirmBtn.onclick = () => {
+    confirmBtn.addEventListener('click', () => {
         if (input.value) {
             callback(input.value);
         }
         inputWrapper.remove();
-    };
+    });
     buttonContainer.appendChild(confirmBtn);
     
     const cancelBtn = document.createElement('button');
@@ -1623,7 +2261,7 @@ function showEmojiPicker(target, callback) {
     cancelBtn.style.border = 'none';
     cancelBtn.style.borderRadius = '6px';
     cancelBtn.style.cursor = 'pointer';
-    cancelBtn.onclick = () => inputWrapper.remove();
+    cancelBtn.addEventListener('click', () => inputWrapper.remove());
     buttonContainer.appendChild(cancelBtn);
     
     emojiContent.appendChild(buttonContainer);
@@ -1640,24 +2278,27 @@ function showEmojiPicker(target, callback) {
         });
     }, 100);
 }
-// Save categories to Firebase
-function saveCategories() {
-    database.ref(`guides/${currentGuideId}/categories`).set(categories);
-}
 
+	
+function saveCategories() {
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/categories`), categories);
+}
 // Save checked items to Firebase
 function saveCheckedItems() {
-   database.ref(`guides/${currentGuideId}/checkedItems`).set(checkedItems)
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/checkedItems`), checkedItems);
 }
 
 // Save auto-refresh settings to Firebase
 function saveAutoRefreshSettings() {
-    database.ref(`guides/${currentGuideId}/autoRefreshEnabled`).set(autoRefreshEnabled);
-    database.ref(`guides/${currentGuideId}/autoRefreshTime`).set(autoRefreshTime);
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/autoRefreshEnabled`), autoRefreshEnabled);
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/autoRefreshTime`), autoRefreshTime);
 }
 
-		function checkAndAutoRefresh(lastRefreshDate) {
-    if (!autoRefreshEnabled) return;
+function checkAndAutoRefresh(lastRefreshDate) {
+    if (!autoRefreshEnabled || !currentUser) return;
     
     const now = new Date();
     const today = now.toDateString();
@@ -1677,7 +2318,7 @@ function saveAutoRefreshSettings() {
         saveCheckedItems();
         
         // Mark that we refreshed today
-        database.ref(`guides/${currentGuideId}/lastRefreshDate`).set(today);
+        set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/lastRefreshDate`), today);
         
         // Re-render to show unchecked items
         renderContent();
@@ -1689,7 +2330,7 @@ function clearAllChecks() {
         checkedItems = {};
         saveCheckedItems();
         const today = new Date().toDateString();
-        database.ref(`guides/${currentGuideId}/lastRefreshDate`).set(today);
+        set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/lastRefreshDate`), today);
         renderContent();
     }
 }
@@ -1718,6 +2359,7 @@ function toggleAutoRefresh() {
         renderHeader(); // Update menu display
     }
 }
+
 function renderTabs() { 
     const navTabs = document.getElementById('navTabs'); 
     navTabs.innerHTML = ''; 
@@ -1730,7 +2372,7 @@ function renderTabs() {
         tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
 
 		// Make tabs draggable in edit mode
-		if (editMode) {
+		if (!editMode) {
 		    tab.draggable = true;
 		    tab.dataset.catIndex = i;
 		    tab.style.cursor = 'grab';
@@ -1751,43 +2393,133 @@ function renderTabs() {
 			    tabIconToShow = "+";
 			}
 
-tab.innerHTML = `
-    <span class="editable-icon" onclick="event.stopPropagation(); editCategoryIcon(${i}, this)" style="display: inline-block; position: relative;">
-        <span class="tab-icon" style="opacity: ${hasTabIcon ? '1' : '0.3'};">${tabIconToShow}</span>
-        ${hasTabIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${i}].icon = '​'; saveCategories(); renderTabs(); renderContent();">×</span>` : ''}
-    </span>
-    <span class="tab-name editable" contenteditable="true" onclick="event.stopPropagation()">${cat.name}</span>
-`;
+			tab.innerHTML = `
+			    <span class="editable-icon" style="display: inline-block; position: relative;">
+			        <span class="tab-icon" data-cat-index="${i}" style="opacity: ${hasTabIcon ? '1' : '0.3'};">${tabIconToShow}</span>
+			        ${hasTabIcon ? `<span class="emoji-remove-btn" data-cat-index="${i}">×</span>` : ''}
+			    </span>
+			    <span class="tab-name editable" contenteditable="true">${cat.name}</span>
+			`;
             
-            // Save name when editing
+            // Add event listeners for edit mode
+			const tabIcon = tab.querySelector('.tab-icon');
+			if (tabIcon) {
+			    tabIcon.addEventListener('click', (e) => {
+			        e.stopPropagation();
+			        const catIndex = parseInt(tabIcon.dataset.catIndex);
+			        editCategoryIcon(catIndex, tabIcon);
+			    });
+			}
+            
+            const removeIconBtn = tab.querySelector('.emoji-remove-btn');
+            if (removeIconBtn) {
+                removeIconBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const catIndex = parseInt(e.target.dataset.catIndex);
+                    categories[catIndex].icon = '';
+                    saveCategories();
+                    renderTabs();
+                    renderContent();
+                });
+            }
+            
             const nameSpan = tab.querySelector('.tab-name');
-            nameSpan.addEventListener('blur', (e) => {
-                categories[i].name = e.target.textContent.trim();
-                saveCategories();
-            });
-            nameSpan.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.target.blur();
-                }
-            });
+if (nameSpan) {
+    // Enable text selection for editing
+    nameSpan.style.userSelect = 'text';
+    nameSpan.style.webkitUserSelect = 'text';
+    nameSpan.style.cursor = 'text';
+    
+    nameSpan.addEventListener('blur', (e) => {
+        categories[i].name = e.target.textContent.trim();
+        saveCategories();
+    });
+    nameSpan.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.target.blur();
+        }
+    });
+    nameSpan.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    nameSpan.addEventListener('focus', (e) => {
+        e.stopPropagation();
+    });
+}
             
-            // Click to switch tabs (but not when editing text)
             tab.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('editable') && !e.target.classList.contains('editable-icon')) {
                     switchTab(i);
                 }
             });
         } else {
-		    // Need to render SVG icons properly
-		    let displayIcon = cat.icon;
-		    if (cat.icon && cat.icon.startsWith('svg:')) {
-		        const iconData = JSON.parse(cat.icon.substring(4));
-		        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-		    }
-		    tab.innerHTML = `${displayIcon} ${cat.name}`;
-		    tab.onclick = () => switchTab(i);
-		}
+    // Need to render SVG icons properly
+    let displayIcon = cat.icon;
+    if (cat.icon && cat.icon.startsWith('svg:')) {
+        const iconData = JSON.parse(cat.icon.substring(4));
+        displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+    }
+    tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
+    
+    const nameSpan = tab.querySelector('.tab-name-display');
+    
+    // Use a timeout to distinguish single click from double click
+    let clickTimer = null;
+    let clickCount = 0;
+    let isEditing = false;
+    
+    tab.addEventListener('click', function(e) {
+        // Ignore clicks while editing
+        if (isEditing) {
+            return;
+        }
+        
+        // Ignore clicks on the icon
+        if (e.target.closest('.tab-icon-display')) {
+            return;
+        }
+        
+        clickCount++;
+        
+        if (clickCount === 1) {
+            clickTimer = setTimeout(() => {
+                // Single click - switch tab
+                if (!isEditing) {
+                    switchTab(i);
+                }
+                clickCount = 0;
+            }, 250);
+        } else if (clickCount === 2) {
+            // Double click - edit
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            e.stopPropagation();
+            e.preventDefault();
+            if (nameSpan) {
+                isEditing = true;
+                enableQuickEdit(nameSpan, i, null, null);
+                
+                // Monitor when editing ends
+                const observer = new MutationObserver(() => {
+                    if (nameSpan.contentEditable === 'false') {
+                        isEditing = false;
+                        observer.disconnect();
+                    }
+                });
+                observer.observe(nameSpan, { attributes: true, attributeFilter: ['contenteditable'] });
+                
+                // Backup: also check on blur
+                nameSpan.addEventListener('blur', function resetEditing() {
+                    setTimeout(() => {
+                        isEditing = false;
+                    }, 100);
+                    nameSpan.removeEventListener('blur', resetEditing);
+                }, { once: true });
+            }
+        }
+    });
+}
         
         tabWrapper.appendChild(tab);
         
@@ -1795,10 +2527,10 @@ tab.innerHTML = `
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-tab-btn';
             deleteBtn.textContent = '×';
-            deleteBtn.onclick = (e) => {
+            deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteCategory(i);
-            };
+            });
             tabWrapper.appendChild(deleteBtn);
         }
         
@@ -1809,7 +2541,7 @@ tab.innerHTML = `
         const addCategoryBtn = document.createElement('button');
         addCategoryBtn.className = 'nav-tab add-category-tab';
         addCategoryBtn.textContent = '+';
-        addCategoryBtn.onclick = addCategory;
+        addCategoryBtn.addEventListener('click', addCategory);
         navTabs.appendChild(addCategoryBtn);
     }
 	// Preserve Done button state if in edit mode
@@ -1845,168 +2577,244 @@ function duplicateSkill(catIndex, skillIndex) {
 }
 		
 function renderContent() { 
-	    const contentArea = document.getElementById('contentArea'); 
-	    contentArea.innerHTML = ''; 
-	    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
+    const contentArea = document.getElementById('contentArea'); 
+    contentArea.innerHTML = ''; 
+    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
     
     categories.forEach((cat, catIndex) => { 
-       const catDiv = document.createElement('div'); 
+        const catDiv = document.createElement('div'); 
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
         
         const grid = document.createElement('div'); 
-        grid.className = 'skill-grid' + 
-            (layoutMode === 'horizontal' ? ' horizontal' : '') + 
-            (layoutMode === 'headings' ? ' headings' : ''); 
+        grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : ''); 
         
         cat.skills.forEach((skill, skillIndex) => { 
             const card = document.createElement('div'); 
-			card.className = 'skill-card';
-			// Set border color based on theme
-			const isLight = isLightColor(themeColor);
-			card.style.borderLeftColor = isLight ? 'var(--secondary-color)' : 'var(--primary-color)';
+            card.className = 'skill-card';
+            // Set border color based on theme
+            const isLight = isLightColor(themeColor);
+            card.style.borderLeftColor = isLight ? 'var(--secondary-color)' : 'var(--primary-color)';
             card.dataset.catIndex = catIndex;
             card.dataset.skillIndex = skillIndex; 
             
             const titleDiv = document.createElement('div'); 
-			titleDiv.className = 'skill-title';
-			titleDiv.style.display = 'flex';
-			titleDiv.style.alignItems = 'center';
-			
-			// Add drag handle in edit mode and headings view
-			if (editMode && layoutMode === 'headings') {
-			    const dragHandle = document.createElement('span');
-				dragHandle.className = 'drag-handle';
-				dragHandle.innerHTML = '⋮⋮⋮';
-				dragHandle.draggable = false;
-				card.classList.add('draggable');
-				titleDiv.appendChild(dragHandle);
-			    
-			    card.draggable = true;
-			    card.style.cursor = 'grab';
-			}
-			
-			const hasIcon = skill.icon && skill.icon !== "​";
-			let iconToShow;
-			if (hasIcon) {
-			    if (skill.icon.startsWith('svg:')) {
-			        const iconData = JSON.parse(skill.icon.substring(4));
-			        iconToShow = `<span style="display: inline-flex; width: 24px; height: 24px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-			    } else {
-			        iconToShow = skill.icon;
-			    }
-			} else {
-			    iconToShow = editMode ? "+" : "​";
-			}
-			
-			titleDiv.innerHTML += `
-			   <span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
-			       <span class="icon" ${editMode ? `onclick="editSkillIcon(${catIndex}, ${skillIndex}, this)"` : ''} style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
-			       ${editMode && hasIcon ? `<span class="emoji-remove-btn" onclick="event.stopPropagation(); categories[${catIndex}].skills[${skillIndex}].icon = '​'; saveCategories(); renderContent();">×</span>` : ''}
-			   </span>
-			   <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
-			`;
-			// Add collapse button for headings mode
-				// Add collapse button for headings mode
-				if (layoutMode === 'headings' && !editMode) {
-				    const collapseBtn = document.createElement('button');
-				    collapseBtn.className = 'collapse-btn';
-				    collapseBtn.innerHTML = `
-				        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				            <polyline points="4 14 10 14 10 20"></polyline>
-				            <polyline points="20 10 14 10 14 4"></polyline>
-				            <line x1="14" y1="10" x2="21" y2="3"></line>
-				            <line x1="3" y1="21" x2="10" y2="14"></line>
-				        </svg>
-				    `;
-				    collapseBtn.onclick = (e) => {
-				        e.stopPropagation();
-				        card.classList.remove('expanded');
-				        const cardId = `${catIndex}-${skillIndex}`;
-				        delete expandedCards[cardId];
-				        saveExpandedCards();
-				    };
-				    titleDiv.appendChild(collapseBtn);
-				}
+            titleDiv.className = 'skill-title';
             
-            if (editMode) { 
-                const deleteSkillBtn = document.createElement('button');
-                deleteSkillBtn.className = 'delete-btn';
-                deleteSkillBtn.textContent = '×';
-                deleteSkillBtn.onclick = () => deleteSkill(catIndex, skillIndex);
-                titleDiv.appendChild(deleteSkillBtn);
+            // Add double-click to edit (only when not in edit mode)
+            if (!editMode) {
+                titleDiv.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    // Find the text span (last child that's not an icon)
+                    const spans = titleDiv.querySelectorAll('span');
+                    const titleSpan = spans[spans.length - 1]; // Get last span (the text)
+                    if (titleSpan && !titleSpan.classList.contains('editable-icon') && !titleSpan.classList.contains('icon')) {
+                        enableQuickEdit(titleSpan, catIndex, skillIndex);
+                    }
+                });
+            }
+            titleDiv.style.display = 'flex';
+            titleDiv.style.alignItems = 'center';
+            
+            const hasIcon = skill.icon && skill.icon !== "​";
+            let iconToShow;
+            if (hasIcon) {
+                if (skill.icon.startsWith('svg:')) {
+                    const iconData = JSON.parse(skill.icon.substring(4));
+                    iconToShow = `<span style="display: inline-flex; width: 24px; height: 24px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+                } else {
+                    iconToShow = skill.icon;
+                }
+            } else {
+                iconToShow = editMode ? "+" : "​";
+            }
+            
+            titleDiv.innerHTML += `
+                <span class="editable-icon" style="display: inline-block; position: relative; margin-right: 8px;">
+                    <span class="icon" data-cat-index="${catIndex}" data-skill-index="${skillIndex}" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${hasIcon ? '1' : '0.3'};">${iconToShow}</span>
+                    ${editMode && hasIcon ? `<span class="emoji-remove-btn" data-cat-index="${catIndex}" data-skill-index="${skillIndex}">×</span>` : ''}
+                </span>
+                <span class="${editMode ? 'editable' : ''}" contenteditable="${editMode}">${skill.title}</span>
+            `;
+
+            // Add event listeners after creating the titleDiv
+            if (editMode) {
+                const iconSpan = titleDiv.querySelector('.icon');
+                if (iconSpan) {
+                    iconSpan.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const catIdx = parseInt(e.target.dataset.catIndex);
+                        const skillIdx = parseInt(e.target.dataset.skillIndex);
+                        editSkillIcon(catIdx, skillIdx, e.target);
+                    });
+                    iconSpan.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                    });
+                }
                 
-                titleDiv.querySelector('.editable').addEventListener('blur', (e) => { 
-                    categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
-                    saveCategories();
-                }); 
-            } 
+                const removeIconBtn = titleDiv.querySelector('.emoji-remove-btn');
+                if (removeIconBtn) {
+                    removeIconBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const catIdx = parseInt(e.target.dataset.catIndex);
+                        const skillIdx = parseInt(e.target.dataset.skillIndex);
+                        categories[catIdx].skills[skillIdx].icon = '​';
+                        saveCategories();
+                        renderContent();
+                    });
+                }
+            }                                     
+                          
+            if (editMode) {
+                const editableSpan = titleDiv.querySelector('.editable');
+                if (editableSpan) {
+                    editableSpan.addEventListener('blur', (e) => { 
+                        categories[catIndex].skills[skillIndex].title = e.target.textContent.trim(); 
+                        saveCategories();
+                    }); 
+                }
+            }
             
             card.appendChild(titleDiv);
-
-			card.appendChild(titleDiv);
-
-			// Add bullet toggle button (only in edit mode)
-			if (editMode) {
-			    const bulletStyle = skill.bulletStyle || 'checkbox';
-			    const bulletIcons = {
-			        'checkbox': '☑',
-			        'number': '123',
-			        'square': '■',
-			        'circle': '●',
-			        'none': '—'
-			    };
-			    const toggleBtn = document.createElement('button');
-			    toggleBtn.className = 'bullet-toggle-btn';
-			    toggleBtn.textContent = bulletIcons[bulletStyle];
-			    toggleBtn.title = 'Change bullet style';
-			    toggleBtn.onclick = (e) => {
-			        e.stopPropagation();
-			        toggleBulletStyle(catIndex, skillIndex);
-			    };
-			    card.appendChild(toggleBtn);
-			}
-            // Add duplicate button (only in edit mode)
-			if (editMode) {
-			    const duplicateBtn = document.createElement('button');
-			    duplicateBtn.className = 'bullet-toggle-btn';
-			    duplicateBtn.style.right = '78px'; // Position to the left of bullet toggle
-			    duplicateBtn.textContent = '⎘';
-			    duplicateBtn.title = 'Duplicate card';
-			    duplicateBtn.onclick = (e) => {
-			        e.stopPropagation();
-			        duplicateSkill(catIndex, skillIndex);
-			    };
-			    card.appendChild(duplicateBtn);
-			}
+            
+            // Add control buttons (available always, shown on double-tap or in edit mode)
+            const controlsContainer = document.createElement('div');
+            controlsContainer.className = 'skill-card-controls';
+            
+            // Bullet toggle button
+            const bulletStyle = skill.bulletStyle || 'checkbox';
+            const bulletIcons = {
+                'checkbox': '☑',
+                'number': '#',
+                'square': '■',
+                'circle': '●',
+                'none': '—'
+            };
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'skill-control-btn';
+            toggleBtn.textContent = bulletIcons[bulletStyle];
+            toggleBtn.title = 'Change bullet style';
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleBulletStyle(catIndex, skillIndex);
+            });
+            
+            // Duplicate button
+            const duplicateBtn = document.createElement('button');
+            duplicateBtn.className = 'skill-control-btn';
+            duplicateBtn.innerHTML = '⧉';
+            duplicateBtn.style.fontSize = '13px';
+            duplicateBtn.title = 'Duplicate card';
+            duplicateBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                duplicateSkill(catIndex, skillIndex);
+            });
+            
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'skill-control-btn delete-control';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.title = 'Delete card';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteSkill(catIndex, skillIndex);
+            });
+            
+            // Add in order: bullet, duplicate, delete (left to right)
+            controlsContainer.appendChild(toggleBtn);
+            controlsContainer.appendChild(duplicateBtn);
+            controlsContainer.appendChild(deleteBtn);
+            
+            card.appendChild(controlsContainer);
+            
+            // Add double-tap to reveal controls when not in edit mode
+            if (!editMode) {
+                let lastTap = 0;
+                const topRightArea = document.createElement('div');
+                topRightArea.style.position = 'absolute';
+                topRightArea.style.top = '0';
+                topRightArea.style.right = '0';
+                topRightArea.style.width = '80px';
+                topRightArea.style.height = '40px';
+                topRightArea.style.cursor = 'pointer';
+                topRightArea.style.zIndex = '5';
+                
+                topRightArea.addEventListener('touchend', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapGap = currentTime - lastTap;
+                    
+                    if (tapGap < 300 && tapGap > 0) {
+                        // Double tap detected
+                        e.preventDefault();
+                        const controls = card.querySelector('.skill-card-controls');
+                        if (controls) {
+                            controls.classList.toggle('show');
+                            
+                            // Auto-hide after 5 seconds
+                            if (controls.classList.contains('show')) {
+                                setTimeout(() => {
+                                    controls.classList.remove('show');
+                                }, 5000);
+                            }
+                        }
+                    }
+                    lastTap = currentTime;
+                });
+                
+                card.appendChild(topRightArea);
+            }
+            
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
-                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : ''); 
-                if (!editMode) checkItem.onclick = () => toggleCheck(itemId); 
+                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : '');
+                checkItem.dataset.catIndex = catIndex;
+                checkItem.dataset.skillIndex = skillIndex;
+                checkItem.dataset.itemIndex = itemIndex;
+                
+                // Make draggable in edit mode
+                if (!editMode) {
+                    checkItem.draggable = true;
+                    checkItem.dataset.catIndex = catIndex;
+                    checkItem.dataset.skillIndex = skillIndex;
+                    checkItem.dataset.itemIndex = itemIndex;
+                    checkItem.style.cursor = 'grab';
+                }
                 
                 // Render appropriate bullet based on style
-				const bulletStyle = skill.bulletStyle || 'checkbox';
-				let bulletElement;
-				
-				if (bulletStyle === 'checkbox') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'checkbox';
-				} else if (bulletStyle === 'number') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'bullet-number';
-				    bulletElement.textContent = itemIndex + 1;
-				} else if (bulletStyle === 'square') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'bullet-square';
-				} else if (bulletStyle === 'circle') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'bullet-circle';
-				} else if (bulletStyle === 'none') {
-				    bulletElement = document.createElement('div');
-				    bulletElement.className = 'bullet-none';
-				}
-				
-				checkItem.appendChild(bulletElement);
+                const bulletStyle = skill.bulletStyle || 'checkbox';
+                let bulletElement;
+                
+                if (bulletStyle === 'checkbox') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'checkbox';
+                } else if (bulletStyle === 'number') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'bullet-number';
+                    bulletElement.textContent = itemIndex + 1;
+                } else if (bulletStyle === 'square') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'bullet-square';
+                    bulletElement.textContent = '■';
+                } else if (bulletStyle === 'circle') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'bullet-circle';
+                    bulletElement.textContent = '●';
+                } else if (bulletStyle === 'none') {
+                    bulletElement = document.createElement('div');
+                    bulletElement.className = 'bullet-none';
+                }
+                
+                checkItem.appendChild(bulletElement);
+                
+                // Only checkbox/bullet triggers the check, not the whole item
+                if (!editMode) {
+                    bulletElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleCheck(itemId);
+                    });
+                    bulletElement.style.cursor = 'pointer';
+                }
                 
                 const textDiv = document.createElement('div');
                 textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
@@ -2014,15 +2822,28 @@ function renderContent() {
                 textDiv.textContent = item;
                 checkItem.appendChild(textDiv);
                 
+                // Add double-click to edit (only when not in edit mode)
+                if (!editMode) {
+                    textDiv.addEventListener('dblclick', function(e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const parent = this.closest('.checklist-item');
+                        if (parent && parent.onclick) {
+                            parent.onclick = null; // Temporarily disable click
+                        }
+                        enableQuickEdit(this, catIndex, skillIndex, itemIndex);
+                    });
+                }
+                
                 if (editMode) {
-				    const deleteItemBtn = document.createElement('button');
-				    deleteItemBtn.className = 'delete-btn';
-				    deleteItemBtn.textContent = '×';
-				    deleteItemBtn.onclick = (e) => {
-				        e.stopPropagation();
-				        deleteItem(catIndex, skillIndex, itemIndex);
-				    };
-				    checkItem.appendChild(deleteItemBtn);
+                    const deleteItemBtn = document.createElement('button');
+                    deleteItemBtn.className = 'delete-btn';
+                    deleteItemBtn.textContent = '×';
+                    deleteItemBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteItem(catIndex, skillIndex, itemIndex);
+                    });
+                    checkItem.appendChild(deleteItemBtn);
                     
                     textDiv.addEventListener('blur', (e) => { 
                         categories[catIndex].skills[skillIndex].items[itemIndex] = e.target.textContent.trim(); 
@@ -2036,33 +2857,10 @@ function renderContent() {
             const addItemBtn = document.createElement('button'); 
             addItemBtn.className = 'add-item-btn'; 
             addItemBtn.textContent = '+ Add Item'; 
-            addItemBtn.onclick = () => addItem(catIndex, skillIndex); 
+            addItemBtn.addEventListener('click', () => addItem(catIndex, skillIndex));
             card.appendChild(addItemBtn); 
             
             grid.appendChild(card); 
-			// Add click handler for headings mode
-            // Add click handler for headings mode
-			if (layoutMode === 'headings' && !editMode) {
-			    const cardId = `${catIndex}-${skillIndex}`;
-			    
-			    // Restore expanded state if it was expanded before
-			    if (expandedCards[cardId]) {
-			        card.classList.add('expanded');
-			    }
-			    
-			    card.addEventListener('click', function(e) {
-			        // Don't toggle if clicking on checkbox or editable content
-			        if (e.target.classList.contains('checkbox') || 
-			            e.target.classList.contains('editable') ||
-			            e.target.classList.contains('delete-btn')) {
-			            return;
-			        }
-			        // Only expand, never collapse
-			        this.classList.add('expanded');
-			        expandedCards[cardId] = true;
-			        saveExpandedCards();
-			    });
-			}
         }); 
         
         catDiv.appendChild(grid); 
@@ -2070,20 +2868,22 @@ function renderContent() {
         const addSkillBtn = document.createElement('button'); 
         addSkillBtn.className = 'add-skill-btn'; 
         addSkillBtn.textContent = '+ Add New Card'; 
-        addSkillBtn.onclick = () => addSkill(catIndex); 
+        addSkillBtn.addEventListener('click', () => addSkill(catIndex));
         catDiv.appendChild(addSkillBtn); 
         
         contentArea.appendChild(catDiv); 
     }); 
-	// Preserve Done button state if in edit mode
-if (editMode) {
-    setTimeout(() => {
-        const saveBtn = document.getElementById('saveBtn');
-        const menuBtn = document.getElementById('menuBtn');
-        if (saveBtn) saveBtn.style.display = 'block';
-        if (menuBtn) menuBtn.style.display = 'none';
-    }, 0);
-}
+    
+    // Preserve Done button state if in edit mode
+    if (editMode) {
+        setTimeout(() => {
+            const saveBtn = document.getElementById('saveBtn');
+            const menuBtn = document.getElementById('menuBtn');
+            if (saveBtn) saveBtn.style.display = 'block';
+            if (menuBtn) menuBtn.style.display = 'none';
+        }, 0);
+    }
+   
 }
 
 function switchTab(index) { 
@@ -2153,16 +2953,146 @@ function toggleEditMode() {
     }
 }
 
+function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
+    if (editMode) return;
+    
+    const originalText = element.textContent.trim();
+    const parentItem = element.closest('.checklist-item');
+    
+    // Prevent checkbox toggle during editing
+    if (parentItem) {
+        parentItem.style.pointerEvents = 'none';
+    }
+    
+    element.contentEditable = true;
+    element.style.background = 'white';
+    element.style.outline = '2px solid var(--primary-color)';
+    element.style.borderRadius = '4px';
+    element.style.padding = '4px 8px';
+    element.style.userSelect = 'text';
+    element.style.webkitUserSelect = 'text';
+    
+    // Focus and select all text
+    setTimeout(() => {
+        element.focus();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }, 10);
+    
+    function saveEdit() {
+        const newText = element.textContent.trim();
+        element.contentEditable = false;
+        element.style.background = '';
+        element.style.outline = '';
+        element.style.padding = '';
+        element.style.userSelect = '';
+        element.style.webkitUserSelect = '';
+        
+        if (parentItem) {
+            parentItem.style.pointerEvents = '';
+        }
+        
+        if (newText && newText !== originalText) {
+            if (itemIndex !== null) {
+                categories[catIndex].skills[skillIndex].items[itemIndex] = newText;
+            } else if (skillIndex !== null) {
+                categories[catIndex].skills[skillIndex].title = newText;
+            } else {
+                categories[catIndex].name = newText;
+            }
+            saveCategories();
+            setTimeout(() => {
+                renderTabs();
+                renderContent();
+            }, 0);
+        } else if (!newText) {
+            element.textContent = originalText;
+        }
+        
+        element.removeEventListener('blur', saveEdit);
+        element.removeEventListener('keydown', keyHandler);
+    }
+    
+    const keyHandler = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        } else if (e.key === 'Escape') {
+            element.textContent = originalText;
+            element.blur();
+        }
+    };
+    
+    element.addEventListener('blur', saveEdit);
+    element.addEventListener('keydown', keyHandler);
+}
+
+function enableQuickEditHeader(element, type) {
+    if (editMode) return;
+    
+    const originalText = element.textContent.trim();
+    
+    element.contentEditable = true;
+    element.style.outline = '2px solid white';
+    element.style.borderRadius = '4px';
+    element.style.padding = '4px 8px';
+    element.style.background = 'rgba(255, 255, 255, 0.2)';
+    
+    setTimeout(() => {
+        element.focus();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }, 10);
+    
+    function saveEdit() {
+        const newText = element.textContent.trim();
+        element.contentEditable = false;
+        element.style.outline = '';
+        element.style.padding = '';
+        element.style.background = '';
+        
+        if (newText && newText !== originalText) {
+            if (type === 'title') {
+                appTitle = newText;
+            } else {
+                appSubtitle = newText;
+            }
+            saveHeader();
+        } else if (!newText) {
+            element.textContent = originalText;
+        }
+        
+        element.removeEventListener('blur', saveEdit);
+        element.removeEventListener('keydown', keyHandler);
+    }
+    
+    const keyHandler = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        } else if (e.key === 'Escape') {
+            element.textContent = originalText;
+            element.blur();
+        }
+    };
+    
+    element.addEventListener('blur', saveEdit);
+    element.addEventListener('keydown', keyHandler);
+}
+
 function editAppIcon(el) {
     showEmojiPicker(el, (emoji) => {
         appIcon = emoji;
         saveHeader();
     });
 }
-		// Save expanded cards to Firebase
-function saveExpandedCards() {
-    database.ref(`guides/${currentGuideId}/expandedCards`).set(expandedCards);
-}
+
 function addSkill(catIndex) { 
     categories[catIndex].skills.push({ 
         title: "New Skill", 
@@ -2172,6 +3102,7 @@ function addSkill(catIndex) {
     saveCategories();
     renderContent(); 
 }
+
 function editSkillIcon(catIndex, skillIndex, el) {
     showEmojiPicker(el, (emoji) => {
         categories[catIndex].skills[skillIndex].icon = emoji;
@@ -2226,15 +3157,15 @@ function editCategoryIcon(catIndex, el) {
         renderContent();
     });
 }
+	
 function toggleLayout() {
+    if (!currentUser) return;
     if (layoutMode === 'vertical') {
         layoutMode = 'horizontal';
-    } else if (layoutMode === 'horizontal') {
-        layoutMode = 'headings';
     } else {
         layoutMode = 'vertical';
     }
-    database.ref(`guides/${currentGuideId}/layoutMode`).set(layoutMode);
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/layoutMode`), layoutMode);
     renderContent();
     updateLayoutButton();
 }
@@ -2242,23 +3173,17 @@ function toggleLayout() {
 function updateLayoutButton() {
     const btn = document.getElementById('layoutBtn');
     if (btn) {
-        // Show icon for NEXT layout (what it will change TO)
         if (layoutMode === 'vertical') {
-            // Next: horizontal (show side-by-side icon)
             btn.innerHTML = '<div style="display: flex; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
             btn.title = 'Switch to horizontal scrolling';
-        } else if (layoutMode === 'horizontal') {
-            // Next: headings (show stacked rectangles with rounded edges)
-            btn.innerHTML = '<div style="display: flex; flex-direction: column; gap: 2px;"><div style="width: 16px; height: 5px; background: white; border-radius: 2px;"></div><div style="width: 16px; height: 5px; background: white; border-radius: 2px;"></div></div>';
-            btn.title = 'Switch to headings only';
         } else {
-            // Next: vertical (show stacked rounded squares)
             btn.innerHTML = '<div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div><div style="width: 12px; height: 12px; background: white; border-radius: 3px;"></div></div>';
             btn.title = 'Switch to vertical grid';
         }
-        btn.style.opacity = '0.2'; // Make visible after content is set
+        btn.style.opacity = '0.2';
     }
 }
+
 function deleteCategory(catIndex) {
     if (confirm('Delete this entire category?')) {
         categories.splice(catIndex, 1);
@@ -2270,24 +3195,35 @@ function deleteCategory(catIndex) {
         renderContent();
     }
 }
-// Close menus when clicking outside
-document.addEventListener('click', (e) => {
-    const menu = document.getElementById('dropdownMenu');
-    const colorMenu = document.getElementById('colorPickerMenu');
-    const floatingBtn = document.getElementById('layoutBtn');
-    
-    // Don't close dropdown if clicking inside color picker
-    if (colorMenu && colorMenu.contains(e.target)) {
-        return; // Keep everything open when interacting with color picker
-    }
+
+	// Close menus when clicking outside
+	document.addEventListener('click', (e) => {
+	    const menu = document.getElementById('dropdownMenu');
+	    const colorMenu = document.getElementById('colorPickerMenu');
+	    const floatingBtn = document.getElementById('layoutBtn');
+	    
+	    // Don't close dropdown if clicking inside color picker
+	    if (colorMenu && colorMenu.contains(e.target)) {
+	        return; // Keep everything open when interacting with color picker
+	    }
+
+	// Close checkbox menu if clicking outside
+		const checkboxMenu = document.getElementById('checkboxMenu');
+		const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
+		if (checkboxMenu && !checkboxMenu.contains(e.target) && !checkboxOptionsBtn?.contains(e.target)) {
+		    checkboxMenu.classList.remove('show');
+		}
     
     // Close dropdown menu if clicking outside
-    if (menu && !menu.contains(e.target)) {
-        menu.classList.remove('show');
-        if (colorMenu) colorMenu.classList.remove('show');
-        // Show floating button when menu closes
-        if (floatingBtn) floatingBtn.style.display = 'flex';
-    }
+	if (menu && !menu.contains(e.target)) {
+	    menu.classList.remove('show');
+	    if (colorMenu) colorMenu.classList.remove('show');
+	    // Only show floating button if drawer is also closed
+	    const guideMenu = document.getElementById('guideDropdown');
+	    if (floatingBtn && !guideMenu.classList.contains('show')) {
+	        floatingBtn.style.display = 'flex';
+	    }
+	}
     
     const guideMenu = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
@@ -2298,12 +3234,17 @@ document.addEventListener('click', (e) => {
             closeDrawer();
         }
     }
+	// Close logout menu if clicking outside
+    const logoutMenu = document.getElementById('logoutMenu');
+    if (logoutMenu && !logoutMenu.contains(e.target) && !e.target.closest('#logoutBtn')) {
+        logoutMenu.classList.remove('show');
+    }
 });
 
-		// Check for auto-refresh when page becomes visible
+// Check for auto-refresh when page becomes visible
 document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-        database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value', (snapshot) => {
+    if (!document.hidden && currentUser) {
+        get(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/lastRefreshDate`)).then((snapshot) => {
             checkAndAutoRefresh(snapshot.val());
         });
     }
@@ -2311,39 +3252,106 @@ document.addEventListener('visibilitychange', () => {
 
 // Also check every hour while page is open
 setInterval(() => {
-    database.ref(`guides/${currentGuideId}/lastRefreshDate`).once('value', (snapshot) => {
-        checkAndAutoRefresh(snapshot.val());
-    });
-}, 60 * 60 * 1000); // Check every hour
+    if (currentUser) {
+        get(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/lastRefreshDate`)).then((snapshot) => {
+            checkAndAutoRefresh(snapshot.val());
+        });
+    }
+}, 60 * 60 * 1000);
 
-		
-// Load data when page loads
-loadFromFirebase();
-
-    </script>
+// Wait for DOM to load before attaching login screen listeners
+window.addEventListener('DOMContentLoaded', () => {
+    const loginBtn = document.getElementById('loginBtn');
+    const googleBtn = document.getElementById('googleBtn');
+    const signupBtn = document.getElementById('signupBtn');
+    const loginPassword = document.getElementById('loginPassword');
+    const layoutBtn = document.getElementById('layoutBtn');
+    
+    // NEW: Sign-up screen listeners
+    const signupSubmitBtn = document.getElementById('signupSubmitBtn');
+    const googleSignupBtn = document.getElementById('googleSignupBtn');
+    const backToLoginBtn = document.getElementById('backToLoginBtn');
+    const signupPassword = document.getElementById('signupPassword');
+    const signupPasswordConfirm = document.getElementById('signupPasswordConfirm');
+    
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            login(email, password);
+        });
+    }
+    
+    if (googleBtn) {
+        googleBtn.addEventListener('click', () => {
+            loginWithGoogle();
+        });
+    }
+    
+    if (signupBtn) {
+        signupBtn.addEventListener('click', () => {
+            showSignup();
+        });
+    }
+    
+    // NEW: Sign-up button handlers
+    if (signupSubmitBtn) {
+        signupSubmitBtn.addEventListener('click', processSignup);
+    }
+    
+    if (googleSignupBtn) {
+        googleSignupBtn.addEventListener('click', loginWithGoogle);
+    }
+    
+    if (backToLoginBtn) {
+        backToLoginBtn.addEventListener('click', backToLogin);
+    }
+    
+    if (loginPassword) {
+        loginPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                login(email, password);
+            }
+        });
+    }
+    
+    // NEW: Enter key support for sign-up
+    if (signupPasswordConfirm) {
+        signupPasswordConfirm.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                processSignup();
+            }
+        });
+    }
+    
+    if (layoutBtn) {
+        layoutBtn.addEventListener('click', toggleLayout);
+    }
+});
+</script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
-
-
+	<div class="bottom-nav">
+    <div class="bottom-nav-item active">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+    </div>
+    <div class="bottom-nav-item">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <span>Menu</span>
+    </div>
+    <div class="bottom-nav-item">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+    </div>
+    <div class="bottom-nav-item">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Settings</span>
+    </div>
+</div>
 </body>
 </html>
-
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
