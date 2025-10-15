@@ -1162,14 +1162,15 @@ function applyHeaderImage() {
         
         // Detect image brightness and set text color
         detectImageBrightness(headerImage, (isLight) => {
+            console.log('Image is', isLight ? 'LIGHT' : 'DARK');
             const textColor = isLight ? '#2c3e50' : 'white';
-            const scrimColor = isLight ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)';
+            const scrimColor = isLight ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.7)';
             
             // Add scrim behind text only
             const h1 = header.querySelector('h1');
             const p = header.querySelector('p');
             
-            if (h1 || p) {
+            if (h1 && p) {
                 const scrim = document.createElement('div');
                 scrim.className = 'header-text-scrim';
                 scrim.style.cssText = `
@@ -1178,41 +1179,46 @@ function applyHeaderImage() {
                     left: 50%;
                     transform: translate(-50%, -50%);
                     background: ${scrimColor};
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    padding: 20px 30px;
-                    border-radius: 12px;
+                    backdrop-filter: blur(15px);
+                    -webkit-backdrop-filter: blur(15px);
+                    padding: 25px 40px;
+                    border-radius: 16px;
                     z-index: 0;
                     pointer-events: none;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
                 `;
                 header.style.position = 'relative';
                 
-                // Insert scrim before text elements
-                if (h1) {
-                    header.insertBefore(scrim, h1);
-                    h1.style.position = 'relative';
-                    h1.style.zIndex = '1';
-                    h1.style.color = textColor;
-                }
-                if (p) {
-                    p.style.position = 'relative';
-                    p.style.zIndex = '1';
-                    p.style.color = textColor;
-                }
+                // Insert scrim before the first child
+                header.insertBefore(scrim, header.firstChild);
+                
+                // Style text elements
+                h1.style.position = 'relative';
+                h1.style.zIndex = '1';
+                h1.style.color = textColor;
+                
+                p.style.position = 'relative';
+                p.style.zIndex = '1';
+                p.style.color = textColor;
             }
             
-            // Keep buttons visible
+            // Keep buttons visible and in correct position
             const menuBtn = header.querySelector('.edit-btn, #menuBtn');
             const guideMenuBtn = header.querySelector('.guide-menu-btn');
             const saveBtn = header.querySelector('.save-btn');
             
-            [menuBtn, guideMenuBtn, saveBtn].forEach(btn => {
-                if (btn) {
-                    btn.style.color = textColor;
-                    btn.style.position = 'relative';
-                    btn.style.zIndex = '10';
-                }
-            });
+            if (menuBtn) {
+                menuBtn.style.color = textColor;
+                menuBtn.style.zIndex = '10';
+            }
+            if (guideMenuBtn) {
+                guideMenuBtn.style.color = textColor;
+                guideMenuBtn.style.zIndex = '10';
+            }
+            if (saveBtn) {
+                saveBtn.style.color = textColor;
+                saveBtn.style.zIndex = '10';
+            }
         });
     } else {
         console.log('Removing header image, reverting to theme');
@@ -1225,8 +1231,16 @@ function applyHeaderImage() {
         // Reset text colors
         const h1 = header.querySelector('h1');
         const p = header.querySelector('p');
-        if (h1) h1.style.color = '';
-        if (p) p.style.color = '';
+        if (h1) {
+            h1.style.color = '';
+            h1.style.position = '';
+            h1.style.zIndex = '';
+        }
+        if (p) {
+            p.style.color = '';
+            p.style.position = '';
+            p.style.zIndex = '';
+        }
         
         // Reapply theme gradient
         applyTheme();
@@ -1263,6 +1277,7 @@ function detectImageBrightness(imageSrc, callback) {
         }
         
         brightness = brightness / (data.length / 4);
+        console.log('Detected brightness:', brightness);
         
         // If brightness > 128, image is light, use dark text
         const isLight = brightness > 128;
@@ -1270,11 +1285,12 @@ function detectImageBrightness(imageSrc, callback) {
     };
     
     img.onerror = function() {
+        console.log('Image failed to load for brightness detection');
         // If image fails to load, default to dark text
         callback(true);
     };
 }
-	
+
 function createNewGuide() {
     if (!currentUser) return;
     const name = prompt("Enter a name for this new guide:");
@@ -3659,6 +3675,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
