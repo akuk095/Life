@@ -108,7 +108,7 @@
 		.header-wrapper { position: sticky; top: 0; z-index: 100; background: transparent; padding-bottom: 8px; }
 		.nav-tab { padding: 12px 20px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #5f6368; transition: all 0.3s ease; white-space: nowrap; border-radius: 12px 12px 0 0; flex-shrink: 0; position: relative; margin: 0 4px; -webkit-tap-highlight-color: transparent; }
 		.nav-tab:hover { color: var(--primary-color); background: rgba(52, 152, 219, 0.1); }
-		.nav-tab.active { color: var(--tab-active-color, var(--primary-color)); background: white; font-weight: 600; box-shadow: 0 -4px 12px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06); z-index: 10; }
+		.nav-tab.active { color: var(--tab-active-color, var(--primary-color)); background: white; font-weight: 600; box-shadow: 0 -8px 24px rgba(0,0,0,0.2), 0 6px 16px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.08); z-index: 10; }
 		/* Only disable pointer events when NOT in edit mode */
 		body:not(.edit-mode-active) .nav-tab * { pointer-events: none; }
 		body:not(.edit-mode-active) .nav-tab { pointer-events: auto; }
@@ -786,7 +786,7 @@ document.addEventListener('drop', (e) => {
 });
 
 		
-function loadUserData(userId) {
+async function loadUserData(userId) {
     // Hide container initially
     document.querySelector('.container').classList.remove('loaded');
     
@@ -4232,6 +4232,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
