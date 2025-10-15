@@ -10,13 +10,21 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-select: none; }
+		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0 0 60px 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-select: none; }
 		.add-category-tab { background: #f59e0b !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
 		.add-category-tab:hover { background: #d97706 !important; }
 		.add-item-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 13px; font-weight: 500; display: none; width: 100%; transition: all 0.2s ease; }
 		.add-item-btn:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
 		.add-skill-btn { background: #8b5cf6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; width: auto; margin: 20px auto; transition: all 0.2s ease; display: none; }
 		.add-skill-btn:hover { background: #7c3aed; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3); }
+		/* Bottom Navigation Bar */
+		.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: white; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 12px rgba(0,0,0,0.1); z-index: 1000; padding-bottom: max(env(safe-area-inset-bottom), 0); }
+		.bottom-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 8px 20px; transition: all 0.2s ease; flex: 1; -webkit-tap-highlight-color: transparent; }
+		.bottom-nav-item:active { transform: scale(0.95); }
+		.bottom-nav-item svg { width: 24px; height: 24px; stroke: #95a5a6; stroke-width: 2; fill: none; transition: stroke 0.2s ease; margin-bottom: 4px; }
+		.bottom-nav-item span { font-size: 11px; color: #95a5a6; font-weight: 500; transition: color 0.2s ease; }
+		.bottom-nav-item.active svg { stroke: var(--primary-color); }
+		.bottom-nav-item.active span { color: var(--primary-color); font-weight: 600; }
 		.category { display: none; }
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
@@ -49,7 +57,7 @@
 		.hue-indicator { position: absolute; width: 8px; height: 24px; background: white; border: 2px solid #2c3e50; border-radius: 4px; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
 		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: #f0f2f5; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; min-height: 100vh; }
 		.container.loaded { opacity: 1; }
-		.content-area { padding: 0 12px 80px; background: transparent; min-height: calc(100vh - 250px); }
+		.content-area { padding: 0 12px 140px; background: transparent; min-height: calc(100vh - 250px); }
 		.delete-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: transparent; color: #6b7280; border: none; border-radius: 6px; font-size: 18px; font-weight: normal; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; padding: 0; }
 		.delete-btn:hover { background: rgba(220, 38, 38, 0.1); color: #dc2626; transform: scale(1.1); }
 		.delete-tab-btn { width: 22px; height: 22px; background: transparent; color: #9ca3af; border: none; border-radius: 50%; font-size: 18px; font-weight: 600; margin-left: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; padding: 0; }
@@ -3281,5 +3289,24 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
+	<div class="bottom-nav">
+    <div class="bottom-nav-item active">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+    </div>
+    <div class="bottom-nav-item">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <span>Menu</span>
+    </div>
+    <div class="bottom-nav-item">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+    </div>
+    <div class="bottom-nav-item">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Settings</span>
+    </div>
+</div>
 </body>
 </html>
+
