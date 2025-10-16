@@ -1526,32 +1526,39 @@ function applyWallpaper() {
         return;
     }
       
-    if (wallpaperUrl) {
-        console.log('Applying wallpaper');
-        contentArea.classList.add('has-background');
-        
-        // Apply wallpaper through style tag
-        let styleTag = document.getElementById('dynamic-bg-style');
-        if (!styleTag) {
-            styleTag = document.createElement('style');
-            styleTag.id = 'dynamic-bg-style';
-            document.head.appendChild(styleTag);
-        }
-        styleTag.textContent = `.content-area::before { background-image: url("${wallpaperUrl}"); }`;
-        
-        // Create overlay if it doesn't exist
-        let overlay = document.querySelector('.content-area-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'content-area-overlay';
-            document.body.appendChild(overlay);
-        }
-    } else {
-        console.log('Removing wallpaper');
-        contentArea.classList.remove('has-background');
-        const styleTag = document.getElementById('dynamic-bg-style');
-        if (styleTag) styleTag.textContent = '';
+if (wallpaperUrl) {
+    console.log('Applying wallpaper');
+    contentArea.classList.add('has-background');
+    
+    // Apply wallpaper through style tag
+    let styleTag = document.getElementById('dynamic-bg-style');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'dynamic-bg-style';
+        document.head.appendChild(styleTag);
     }
+    styleTag.textContent = `.content-area::before { background-image: url("${wallpaperUrl}"); }`;
+    
+    // Hide overlay when wallpaper is active
+    let overlay = document.querySelector('.content-area-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'content-area-overlay';
+        document.body.appendChild(overlay);
+    }
+    overlay.style.opacity = '0';
+} else {
+    console.log('Removing wallpaper');
+    contentArea.classList.remove('has-background');
+    const styleTag = document.getElementById('dynamic-bg-style');
+    if (styleTag) styleTag.textContent = '';
+    
+    // Show overlay when wallpaper is removed
+    const overlay = document.querySelector('.content-area-overlay');
+    if (overlay) {
+        overlay.style.opacity = '1';
+    }
+}
 }
 		
 function closeDrawer() {
@@ -4645,6 +4652,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
