@@ -32,11 +32,12 @@
 		.category.active { display: block; }
 		.checkbox { width: 20px; height: 20px; border: 2px solid #d0d7de; border-radius: 5px; flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s ease; background: white; }
 		.checkbox:hover { border-color: var(--primary-color, #3498db); }
-		.checkbox-menu { display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1001; margin-top: 4px; }
-		.checkbox-menu button { width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
-		.checkbox-menu button:last-child { border-bottom: none; }
-		.checkbox-menu button:hover { background: #f8f9fa; }
-		.checkbox-menu.show { display: block; }.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
+		.checkbox-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
+		.checkbox-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
+		.checkbox-menu button { width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500; text-align: center; }
+		.checkbox-menu button:last-child { margin-bottom: 0; }
+		.checkbox-menu button:hover { background: #2980b9; }
+		.checkbox-menu.show { display: block; }
 		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
@@ -200,6 +201,9 @@
 		.header-image-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
 		.header-image-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
 		.header-image-menu.show { display: block; }
+		.wallpaper-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
+		.wallpaper-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
+		.wallpaper-menu.show { display: block; }
 		/* Custom Dialog Overlay */ 
 		.custom-dialog-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 20px; }
 		.custom-dialog-overlay.show { opacity: 1; }
@@ -2314,86 +2318,87 @@ async function renderHeader() {
 	        <button id="editModeMenuBtn">Edit</button>
 	        <button id="duplicateGuideBtn">Duplicate</button>
 	        <button id="deleteGuideBtn">Delete</button>
-	        <button id="headerImageBtn">Header Image</button>
+			
+			// Header Image button //
+			<button id="headerImageBtn">Header Image</button>
+			<div class="header-image-menu" id="headerImageMenu">
+				    <h3>Header Background</h3>
+				    <input type="file" id="headerImageInput" accept="image/*" style="display: none;">
+				    <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px;">Upload Image</button>
+				    <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer;">Remove Image</button>
+				</div>
+
+			// Wallpaper button //
 			<button id="wallpaperBtn">Wallpaper</button>
-	        <button id="toggleColorBtn">Theme</button>
-	        <button id="checkboxOptionsBtn">Checkbox Options</button>
-	    </div>
-	    
-	    <!-- Color Picker Menu -->
-	    <div class="color-picker-menu" id="colorPickerMenu">
-	        <h3>Preset Themes</h3>
-	        <div class="color-options" id="colorOptionsContainer" style="margin-bottom: 15px;">
-	            ${colorOptionsHTML}
+			<div class="wallpaper-menu" id="wallpaperMenu">
+				<h3>Wallpaper</h3>
+				<input type="file" id="wallpaperInput" accept="image/*" style="display: none;">
+				<button id="uploadWallpaperBtn" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500;">Upload Image</button>
+				<button id="removeWallpaperBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Remove Image</button>
+			</div>
+
+			// Checkbox options button //
+			<button id="checkboxOptionsBtn">Checkbox Options</button>
+				<div class="checkbox-menu" id="checkboxMenu">
+				    <h3>Checkbox Actions</h3>
+				    <button id="clearChecksBtn">Clear All Checks</button>
+				    <button id="autoRefreshBtn">
+				        ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh Daily'}
+				    </button>
+					</div>
+				</div>
+
+			<!-- Color Picker Menu -->
+			<button id="toggleColorBtn">Theme</button>
+	        <div class="color-picker-menu" id="colorPickerMenu">
+	            <h3>Preset Themes</h3>
+	            <div class="color-options" id="colorOptionsContainer" style="margin-bottom: 15px;">
+	                ${colorOptionsHTML}
+	            </div>
+	            <h3>Custom Color</h3>
+	            <div style="margin-bottom: 15px;">
+	                <div id="colorCanvas" class="color-picker-canvas" style="background-color: hsl(0, 100%, 50%);">
+	                    <div class="picker-indicator" id="canvasIndicator" style="left: 100%; top: 0%;"></div>
+	                </div>
+	                <div class="hue-slider" id="hueSlider">
+	                    <div class="hue-indicator" id="hueIndicator" style="left: 0%;"></div>
+	                </div>
+	                <div style="display: flex; align-items: center; gap: 10px;">
+	                    <div style="width: 32px; height: 32px; border-radius: 6px; border: 2px solid #dee2e6; background-color: ${themeColor}; flex-shrink: 0;" id="colorPreview"></div>
+	                    <input type="text" id="hexInput" value="${themeColor}" 
+	                           style="flex: 1; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;"
+	                           maxlength="7" placeholder="#FF0000">
+	                    <button id="applyColorBtn" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">Done</button>
+	                </div>
+	            </div>
 	        </div>
-	        <h3>Custom Color</h3>
-	        <div style="margin-bottom: 15px;">
-	            <div id="colorCanvas" class="color-picker-canvas" style="background-color: hsl(0, 100%, 50%);">
-	                <div class="picker-indicator" id="canvasIndicator" style="left: 100%; top: 0%;"></div>
-	            </div>
-	            <div class="hue-slider" id="hueSlider">
-	                <div class="hue-indicator" id="hueIndicator" style="left: 0%;"></div>
-	            </div>
-	            <div style="display: flex; align-items: center; gap: 10px;">
-	                <div style="width: 32px; height: 32px; border-radius: 6px; border: 2px solid #dee2e6; background-color: ${themeColor}; flex-shrink: 0;" id="colorPreview"></div>
-	                <input type="text" id="hexInput" value="${themeColor}" 
-	                       style="flex: 1; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;"
-	                       maxlength="7" placeholder="#FF0000">
-	                <button id="applyColorBtn" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">Done</button>
-	            </div>
-	        </div>
-	    </div>
-	    
-	    <!-- Header Image Menu -->
-	    <div class="header-image-menu" id="headerImageMenu">
-	        <h3>Header Background</h3>
-	        <input type="file" id="headerImageInput" accept="image/*" style="display: none;">
-	        <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500;">Upload Image</button>
-	        <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Remove Image</button>
-	    </div>
-	    
-	    <!-- Wallpaper Menu -->
-		<div class="wallpaper-menu" id="wallpaperMenu">
-		    <h3>Wallpaper</h3>
-		    <input type="file" id="wallpaperInput" accept="image/*" style="display: none;">
-		    <button id="uploadWallpaperBtn" style="width: 100%; padding: 10px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500;">Upload Image</button>
-		    <button id="removeWallpaperBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Remove Image</button>
-		</div>
-	    
-	    <!-- Checkbox Menu -->
-	    <div class="checkbox-menu" id="checkboxMenu">
-	        <button id="clearChecksBtn">Clear All Checks</button>
-	        <button id="autoRefreshBtn">
-	            ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh Daily'}
-	        </button>
-	    </div>
-	</div>
-	<h1>
-	    <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
-	        <span class="icon" id="appIconSpan" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
-	            (() => {
-	                const hasIconContent = appIcon && appIcon !== "​";
-	                if (hasIconContent) {
-	                    if (appIcon.startsWith('svg:')) {
-	                        const iconData = JSON.parse(appIcon.substring(4));
-	                        return `<span style="display: inline-flex; width: 28px; height: 28px; background: ${iconData.bg}; border-radius: 6px; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-	                    } else {
-	                        return appIcon;
-	                    }
-	                } else {
-	                    return editMode ? "+" : "​";
-	                }
-	            })()
-	        }</span>
-	        ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" id="removeAppIconBtn">×</span>' : ''}
-	    </span>
-	    <span class="${editMode ? 'editable' : ''}" id="appTitleSpan" contenteditable="${editMode}">
-	        ${appTitle}
-	    </span>
-	</h1>
-	<p class="${editMode ? 'editable' : ''}" id="appSubtitleSpan" contenteditable="${editMode}">${appSubtitle}</p>
-`;
-	
+
+				 <h1>
+			    <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
+			        <span class="icon" id="appIconSpan" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
+			            (() => {
+			                const hasIconContent = appIcon && appIcon !== "​";
+			                if (hasIconContent) {
+			                    if (appIcon.startsWith('svg:')) {
+			                        const iconData = JSON.parse(appIcon.substring(4));
+			                        return `<span style="display: inline-flex; width: 28px; height: 28px; background: ${iconData.bg}; border-radius: 6px; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+			                    } else {
+			                        return appIcon;
+			                    }
+			                } else {
+			                    return editMode ? "+" : "​";
+			                }
+			            })()
+			        }</span>
+			        ${editMode && appIcon && appIcon !== "​" ? '<span class="emoji-remove-btn" id="removeAppIconBtn">×</span>' : ''}
+			    </span>
+			    <span class="${editMode ? 'editable' : ''}" id="appTitleSpan" contenteditable="${editMode}">
+			        ${appTitle}
+			    </span>
+			</h1>
+			<p class="${editMode ? 'editable' : ''}" id="appSubtitleSpan" contenteditable="${editMode}">${appSubtitle}</p>
+			    `;
+			
     // ============================================
     // GET ALL ELEMENTS (Const Declarations)
     // ============================================
@@ -4662,6 +4667,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
