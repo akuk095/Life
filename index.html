@@ -4353,105 +4353,47 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 	// Guides List Page Functionality
-function initGuidesPage() {
+async function initGuidesPage() {
+    if (!currentUser) return;
+    
+    // Fetch user's guides from Firebase
+    const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
+    const guides = guidesSnapshot.val() || {};
+    
+    // Convert guides object to array
+    const guidesArray = Object.keys(guides).map(id => ({
+        id: id,
+        title: guides[id].appTitle || 'Untitled Guide',
+        subtitle: guides[id].appSubtitle || 'No description',
+        icon: guides[id].appIcon || '📄',
+        color: guides[id].themeColor || '#3498db',
+        categories: guides[id].categories || [],
+        updated: 'Recently' // You can add lastUpdated timestamp to Firebase if needed
+    }));
+    
+    // Calculate total items for each guide
+    guidesArray.forEach(guide => {
+        let totalItems = 0;
+        if (guide.categories) {
+            guide.categories.forEach(cat => {
+                if (cat.skills) {
+                    cat.skills.forEach(skill => {
+                        if (skill.items) {
+                            totalItems += skill.items.length;
+                        }
+                    });
+                }
+            });
+        }
+        guide.itemCount = totalItems;
+    });
+
+    // For now, use empty favorites (you can add favorites functionality later)
     const favorites = [
         { name: 'Daily', icon: '☀️', color: '#f59e0b' },
         { name: 'Work', icon: '💼', color: '#8b5cf6' },
         { name: 'Health', icon: '💪', color: '#10b981' },
         { name: 'Learn', icon: '📚', color: '#3b82f6' }
-    ];
-
-    const guides = [
-        {
-            title: 'Morning Routine Excellence',
-            preview: 'Start your day with intention and energy. Build powerful morning habits.',
-            color: '#ef4444',
-            icon: '🌅',
-            items: 12,
-            updated: '2d ago',
-            badge: 'Daily'
-        },
-        {
-            title: 'Healthy Meal Planning',
-            preview: 'Weekly meal prep guide with nutritious, delicious recipes.',
-            color: '#14b8a6',
-            icon: '🥗',
-            items: 24,
-            updated: '1w ago',
-            badge: 'Health'
-        },
-        {
-            title: 'Complete Fitness Journey',
-            preview: 'Full body workout routines with progress tracking and goals.',
-            color: '#06b6d4',
-            icon: '🏋️',
-            items: 18,
-            updated: '3d ago',
-            badge: 'Active'
-        },
-        {
-            title: 'Project Management Pro',
-            preview: 'Track tasks, deadlines, and collaborate with your team effectively.',
-            color: '#f97316',
-            icon: '📊',
-            items: 32,
-            updated: 'Today',
-            badge: 'Work'
-        },
-        {
-            title: 'Master Python Programming',
-            preview: 'Step-by-step tutorials, exercises, and real-world projects.',
-            color: '#8b5cf6',
-            icon: '🐍',
-            items: 45,
-            updated: '5d ago',
-            badge: 'Learning'
-        },
-        {
-            title: 'Dream Travel Planner',
-            preview: 'Complete checklist for your next adventure around the world.',
-            color: '#ec4899',
-            icon: '✈️',
-            items: 28,
-            updated: '1mo ago',
-            badge: 'Travel'
-        },
-        {
-            title: 'Home Care Schedule',
-            preview: 'Organized weekly and monthly cleaning tasks for a spotless home.',
-            color: '#6366f1',
-            icon: '🧹',
-            items: 15,
-            updated: 'Yesterday',
-            badge: 'Home'
-        },
-        {
-            title: 'Personal Finance Master',
-            preview: 'Budget tracking, savings goals, and investment strategies.',
-            color: '#eab308',
-            icon: '💰',
-            items: 20,
-            updated: '1w ago',
-            badge: 'Money'
-        },
-        {
-            title: 'Reading List 2024',
-            preview: 'Curated book list with notes, reviews, and reading goals.',
-            color: '#7c3aed',
-            icon: '📖',
-            items: 36,
-            updated: '2w ago',
-            badge: 'Reading'
-        },
-        {
-            title: 'Creative Writing Studio',
-            preview: 'Story ideas, character development, and writing prompts.',
-            color: '#f43f5e',
-            icon: '✏️',
-            items: 42,
-            updated: '4d ago',
-            badge: 'Creative'
-        }
     ];
 
     // Render favorites
@@ -4469,6 +4411,7 @@ function initGuidesPage() {
         `;
         card.addEventListener('click', () => {
             console.log('Favorite clicked:', fav.name);
+            // You can add favorite filtering functionality here
         });
         favoritesGrid.appendChild(card);
     });
@@ -4476,30 +4419,59 @@ function initGuidesPage() {
     // Render guides
     const guidesList = document.getElementById('guidesListContainer');
     guidesList.innerHTML = '';
-    guides.forEach((guide, index) => {
+    
+    if (guidesArray.length === 0) {
+        // Show empty state
+        guidesList.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                <div style="font-size: 64px; margin-bottom: 16px;">📚</div>
+                <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No guides yet</div>
+                <div style="font-size: 14px;">Create your first guide to get started</div>
+            </div>
+        `;
+        return;
+    }
+    
+    guidesArray.forEach((guide, index) => {
         const card = document.createElement('div');
         card.className = 'guide-list-card entering';
         card.style.animationDelay = `${index * 0.08}s`;
         
+        // Extract icon display
+        let iconDisplay = guide.icon;
+        if (guide.icon && guide.icon.startsWith('svg:')) {
+            try {
+                const iconData = JSON.parse(guide.icon.substring(4));
+                iconDisplay = `<span style="display: inline-flex; width: 48px; height: 48px; background: ${iconData.bg}; border-radius: 12px; align-items: center; justify-content: center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+            } catch (e) {
+                iconDisplay = guide.icon;
+            }
+        }
+        
         card.innerHTML = `
             <div class="guide-list-card-inner">
                 <div class="guide-list-thumbnail" style="background: linear-gradient(135deg, ${guide.color}dd, ${guide.color})">
-                    <span>${guide.icon}</span>
+                    <span>${iconDisplay}</span>
                 </div>
                 <div class="guide-list-content">
                     <div class="guide-list-title">${guide.title}</div>
-                    <div class="guide-list-preview">${guide.preview}</div>
+                    <div class="guide-list-preview">${guide.subtitle}</div>
                     <div class="guide-list-meta">
-                        <div>📝 ${guide.items}</div>
+                        <div>📝 ${guide.itemCount}</div>
                         <div>🕒 ${guide.updated}</div>
-                        <span class="guide-list-badge">${guide.badge}</span>
                     </div>
                 </div>
             </div>
         `;
         
         card.addEventListener('click', () => {
-            console.log('Guide clicked:', guide.title);
+            // Switch to this guide and hide guides page
+            switchGuide(guide.id);
+            document.getElementById('guidesPage').classList.remove('active');
+            document.querySelector('.container').style.display = 'block';
+            // Update bottom nav
+            document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-item')[1].classList.add('active'); // Menu tab
         });
         
         guidesList.appendChild(card);
@@ -4597,7 +4569,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index === 0) {
                 guidesPage.classList.add('active');
                 mainContainer.style.display = 'none';
-                initGuidesPage();
+                initGuidesPage(); // Reload guides each time
             } else {
                 guidesPage.classList.remove('active');
                 mainContainer.style.display = 'block';
@@ -4658,6 +4630,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
