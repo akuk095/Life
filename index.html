@@ -1537,7 +1537,7 @@ function applyWallpaper() {
             styleTag.id = 'dynamic-bg-style';
             document.head.appendChild(styleTag);
         }
-        styleTag.textContent = `.content-area::before { background-image: url(${wallpaperUrl}); }`;
+        styleTag.textContent = `.content-area::before { background-image: url("${wallpaperUrl}"); }`;
         
         // Create overlay if it doesn't exist
         let overlay = document.querySelector('.content-area-overlay');
@@ -4645,6 +4645,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
