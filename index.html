@@ -1373,7 +1373,7 @@ function applyHeaderImage() {
     if (headerImage) {
         console.log('Applying header image');
         // Apply image as background (replaces theme gradient)
-        header.style.wallpaper = `url("${headerImage}")`;
+        header.style.backgroundImage = `url("${headerImage}")`;
         header.style.backgroundSize = 'cover';
         header.style.backgroundPosition = 'center';
         header.style.backgroundRepeat = 'no-repeat';
@@ -1451,7 +1451,7 @@ function applyHeaderImage() {
     } else {
         console.log('Removing header image, reverting to theme');
         // Remove image background and revert to theme gradient
-        header.style.wallpaper = '';
+        header.style.backgroundImage = '';
         header.style.backgroundSize = '';
         header.style.backgroundPosition = '';
         header.style.backgroundRepeat = '';
@@ -2409,6 +2409,9 @@ async function renderHeader() {
 	const uploadWallpaperBtn = document.getElementById('uploadWallpaperBtn');
 	const removeWallpaperBtn = document.getElementById('removeWallpaperBtn');
 	const wallpaperInput = document.getElementById('wallpaperInput');
+	const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
+	const clearChecksBtn = document.getElementById('clearChecksBtn');
+	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
 	
     if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
@@ -2564,6 +2567,25 @@ if (wallpaperBtn) {
 if (uploadWallpaperBtn) {
     uploadWallpaperBtn.addEventListener('click', () => {
         wallpaperInput.click();
+    });
+}
+
+if (wallpaperInput) {
+    wallpaperInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            console.log('Wallpaper file selected:', file.name);
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                wallpaperUrl = event.target.result;
+                console.log('Wallpaper loaded, length:', wallpaperUrl.length);
+                saveWallpaper();
+                applyWallpaper();
+                document.getElementById('wallpaperMenu').classList.remove('show');
+                document.getElementById('dropdownMenu').classList.remove('show');
+            };
+            reader.readAsDataURL(file);
+        }
     });
 }
 
@@ -4623,6 +4645,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
