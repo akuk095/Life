@@ -2306,67 +2306,68 @@ async function renderHeader() {
 	            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
 	        </svg>
 	    </button>
-	</div><div class="edit-toggle">
-    <button class="save-btn" id="saveBtn" style="display: none;">Done</button>
-    <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
-    <div class="dropdown-menu" id="dropdownMenu">
-        <button id="editModeMenuBtn">Edit</button>
-        <button id="duplicateGuideBtn">Duplicate</button>
-        <button id="deleteGuideBtn">Delete</button>
-        <button id="headerImageBtn">Header Image</button>
-		<button id="wallpaperBtn">Wallpaper</button>
-        <button id="toggleColorBtn">Theme</button>
-        <button id="checkboxOptionsBtn">Checkbox Options</button>
-    </div>
-    
-    <!-- Color Picker Menu -->
-    <div class="color-picker-menu" id="colorPickerMenu">
-        <h3>Preset Themes</h3>
-        <div class="color-options" id="colorOptionsContainer" style="margin-bottom: 15px;">
-            ${colorOptionsHTML}
-        </div>
-        <h3>Custom Color</h3>
-        <div style="margin-bottom: 15px;">
-            <div id="colorCanvas" class="color-picker-canvas" style="background-color: hsl(0, 100%, 50%);">
-                <div class="picker-indicator" id="canvasIndicator" style="left: 100%; top: 0%;"></div>
-            </div>
-            <div class="hue-slider" id="hueSlider">
-                <div class="hue-indicator" id="hueIndicator" style="left: 0%;"></div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 32px; height: 32px; border-radius: 6px; border: 2px solid #dee2e6; background-color: ${themeColor}; flex-shrink: 0;" id="colorPreview"></div>
-                <input type="text" id="hexInput" value="${themeColor}" 
-                       style="flex: 1; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;"
-                       maxlength="7" placeholder="#FF0000">
-                <button id="applyColorBtn" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">Done</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Header Image Menu -->
-    <div class="header-image-menu" id="headerImageMenu">
-        <h3>Header Background</h3>
-        <input type="file" id="headerImageInput" accept="image/*" style="display: none;">
-        <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500;">Upload Image</button>
-        <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Remove Image</button>
-    </div>
-    
-    <!-- Wallpaper Menu -->
-	<div class="wallpaper-menu" id="wallpaperMenu">
-	    <h3>Wallpaper</h3>
-	    <input type="file" id="wallpaperInput" accept="image/*" style="display: none;">
-	    <button id="uploadWallpaperBtn" style="width: 100%; padding: 10px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500;">Upload Image</button>
-	    <button id="removeWallpaperBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Remove Image</button>
 	</div>
-    
-    <!-- Checkbox Menu -->
-    <div class="checkbox-menu" id="checkboxMenu">
-        <button id="clearChecksBtn">Clear All Checks</button>
-        <button id="autoRefreshBtn">
-            ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh Daily'}
-        </button>
-    </div>
-</div>
+	<div class="edit-toggle">
+	    <button class="save-btn" id="saveBtn" style="display: none;">Done</button>
+	    <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
+	    <div class="dropdown-menu" id="dropdownMenu">
+	        <button id="editModeMenuBtn">Edit</button>
+	        <button id="duplicateGuideBtn">Duplicate</button>
+	        <button id="deleteGuideBtn">Delete</button>
+	        <button id="headerImageBtn">Header Image</button>
+			<button id="wallpaperBtn">Wallpaper</button>
+	        <button id="toggleColorBtn">Theme</button>
+	        <button id="checkboxOptionsBtn">Checkbox Options</button>
+	    </div>
+	    
+	    <!-- Color Picker Menu -->
+	    <div class="color-picker-menu" id="colorPickerMenu">
+	        <h3>Preset Themes</h3>
+	        <div class="color-options" id="colorOptionsContainer" style="margin-bottom: 15px;">
+	            ${colorOptionsHTML}
+	        </div>
+	        <h3>Custom Color</h3>
+	        <div style="margin-bottom: 15px;">
+	            <div id="colorCanvas" class="color-picker-canvas" style="background-color: hsl(0, 100%, 50%);">
+	                <div class="picker-indicator" id="canvasIndicator" style="left: 100%; top: 0%;"></div>
+	            </div>
+	            <div class="hue-slider" id="hueSlider">
+	                <div class="hue-indicator" id="hueIndicator" style="left: 0%;"></div>
+	            </div>
+	            <div style="display: flex; align-items: center; gap: 10px;">
+	                <div style="width: 32px; height: 32px; border-radius: 6px; border: 2px solid #dee2e6; background-color: ${themeColor}; flex-shrink: 0;" id="colorPreview"></div>
+	                <input type="text" id="hexInput" value="${themeColor}" 
+	                       style="flex: 1; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;"
+	                       maxlength="7" placeholder="#FF0000">
+	                <button id="applyColorBtn" style="padding: 6px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">Done</button>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <!-- Header Image Menu -->
+	    <div class="header-image-menu" id="headerImageMenu">
+	        <h3>Header Background</h3>
+	        <input type="file" id="headerImageInput" accept="image/*" style="display: none;">
+	        <button id="uploadHeaderImageBtn" style="width: 100%; padding: 10px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500;">Upload Image</button>
+	        <button id="removeHeaderImageBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Remove Image</button>
+	    </div>
+	    
+	    <!-- Wallpaper Menu -->
+		<div class="wallpaper-menu" id="wallpaperMenu">
+		    <h3>Wallpaper</h3>
+		    <input type="file" id="wallpaperInput" accept="image/*" style="display: none;">
+		    <button id="uploadWallpaperBtn" style="width: 100%; padding: 10px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: 500;">Upload Image</button>
+		    <button id="removeWallpaperBtn" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Remove Image</button>
+		</div>
+	    
+	    <!-- Checkbox Menu -->
+	    <div class="checkbox-menu" id="checkboxMenu">
+	        <button id="clearChecksBtn">Clear All Checks</button>
+	        <button id="autoRefreshBtn">
+	            ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh Daily'}
+	        </button>
+	    </div>
+	</div>
 	<h1>
 	    <span class="editable-icon" id="appIconContainer" style="display: inline-block; position: relative; margin-right: 8px;">
 	        <span class="icon" id="appIconSpan" style="cursor: ${editMode ? 'pointer' : 'default'}; opacity: ${appIcon && appIcon !== "​" ? '1' : '0.3'};">${
@@ -2393,21 +2394,39 @@ async function renderHeader() {
 	<p class="${editMode ? 'editable' : ''}" id="appSubtitleSpan" contenteditable="${editMode}">${appSubtitle}</p>
 `;
 	
-    // Add event listeners after HTML is rendered
+    // ============================================
+    // GET ALL ELEMENTS (Const Declarations)
+    // ============================================
     const guideMenuBtn = document.getElementById('guideMenuBtn');
     const drawerBackdrop = document.getElementById('drawerBackdrop');
     const createGuideBtn = document.getElementById('createGuideBtn');
     const logoutBtn = document.getElementById('logoutBtn');
+    const logoutOptionBtn = document.getElementById('logoutOptionBtn');
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
     const saveBtn = document.getElementById('saveBtn');
     const menuBtn = document.getElementById('menuBtn');
     const editModeMenuBtn = document.getElementById('editModeMenuBtn');
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
-	const applyColorBtn = document.getElementById('applyColorBtn');
+    const headerImageBtn = document.getElementById('headerImageBtn');
+    const wallpaperBtn = document.getElementById('wallpaperBtn');
+    const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
+    const clearChecksBtn = document.getElementById('clearChecksBtn');
+    const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+    const applyColorBtn = document.getElementById('applyColorBtn');
+    const uploadHeaderImageBtn = document.getElementById('uploadHeaderImageBtn');
+    const removeHeaderImageBtn = document.getElementById('removeHeaderImageBtn');
+    const headerImageInput = document.getElementById('headerImageInput');
+    const uploadWallpaperBtn = document.getElementById('uploadWallpaperBtn');
+    const removeWallpaperBtn = document.getElementById('removeWallpaperBtn');
+    const wallpaperInput = document.getElementById('wallpaperInput');
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
     
+    // ============================================
+    // EVENT LISTENERS - Drawer/Navigation
+    // ============================================
     if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
     if (createGuideBtn) {
@@ -2416,184 +2435,225 @@ async function renderHeader() {
             closeDrawer();
         });
     }
+    
+    // ============================================
+    // EVENT LISTENERS - Logout Menu
+    // ============================================
     if (logoutBtn) {
-	    logoutBtn.addEventListener('click', (e) => {
-	        e.stopPropagation();
-	        const logoutMenu = document.getElementById('logoutMenu');
-	        logoutMenu.classList.toggle('show');
-	    });
-	}
-
-	const logoutOptionBtn = document.getElementById('logoutOptionBtn');
-	const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-	
-	if (logoutOptionBtn) {
-	    logoutOptionBtn.addEventListener('click', async () => {
-	        if (await customConfirm('Are you sure you want to log out?')) {
-	            logout();
-	            closeDrawer();
-	        }
-	        document.getElementById('logoutMenu').classList.remove('show');
-	    });
-	}
-	
-	if (deleteAccountBtn) {
-	    deleteAccountBtn.addEventListener('click', async () => {
-	        if (await customConfirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!\n\nType "DELETE" to confirm.') === true) {
-	            const confirmation = await customAlert('Type "DELETE" to confirm account deletion:');
-	            if (confirmation === 'DELETE') {
-	                deleteAccount();
-	            }
-	        }
-	        document.getElementById('logoutMenu').classList.remove('show');
-	    });
-	}
+        logoutBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const logoutMenu = document.getElementById('logoutMenu');
+            logoutMenu.classList.toggle('show');
+        });
+    }
+    
+    if (logoutOptionBtn) {
+        logoutOptionBtn.addEventListener('click', async () => {
+            if (await customConfirm('Are you sure you want to log out?')) {
+                logout();
+                closeDrawer();
+            }
+            document.getElementById('logoutMenu').classList.remove('show');
+        });
+    }
+    
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', async () => {
+            if (await customConfirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!\n\nAre you absolutely sure?')) {
+                deleteAccount();
+            }
+            document.getElementById('logoutMenu').classList.remove('show');
+        });
+    }
+    
+    // ============================================
+    // EVENT LISTENERS - Main Menu Buttons
+    // ============================================
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
-	if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
-	if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
-	if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
-	if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
-	if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
-	if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
-	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
-	if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
-	if (headerImageBtn) headerImageBtn.addEventListener('click', toggleHeaderImageMenu);
-	if (checkboxOptionsBtn) checkboxOptionsBtn.addEventListener('click', toggleCheckboxMenu);
-	
-	    // Header image event listeners
-    const headerImageBtn = document.getElementById('headerImageBtn');
-    const uploadHeaderImageBtn = document.getElementById('uploadHeaderImageBtn');
-    const removeHeaderImageBtn = document.getElementById('removeHeaderImageBtn');
-    const headerImageInput = document.getElementById('headerImageInput');
-	const wallpaperBtn = document.getElementById('wallpaperBtn');
-	const uploadWallpaperBtn = document.getElementById('uploadWallpaperBtn');
-	const removeWallpaperBtn = document.getElementById('removeWallpaperBtn');
-	const wallpaperInput = document.getElementById('wallpaperInput');
-	
+    if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+    if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
+    if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
+    if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
+    if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
+    if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
+    
+    // ============================================
+    // EVENT LISTENERS - Header Image
+    // ============================================
     if (headerImageBtn) {
-	    headerImageBtn.addEventListener('click', (e) => {
-	        e.stopPropagation();
-	        const imageMenu = document.getElementById('headerImageMenu');
-	        const colorMenu = document.getElementById('colorPickerMenu');
-	        const checkboxMenu = document.getElementById('checkboxMenu');
-	        const uploadBtn = document.getElementById('uploadHeaderImageBtn');
-	        const removeBtn = document.getElementById('removeHeaderImageBtn');
-	        
-	        if (colorMenu) colorMenu.classList.remove('show');
-	        if (checkboxMenu) checkboxMenu.classList.remove('show');
-	        
-	        // Update button visibility based on current state
-	        if (headerImage) {
-	            if (uploadBtn) uploadBtn.style.display = 'none';
-	            if (removeBtn) removeBtn.style.display = 'block';
-	        } else {
-	            if (uploadBtn) uploadBtn.style.display = 'block';
-	            if (removeBtn) removeBtn.style.display = 'none';
-	        }
-	        
-	        if (imageMenu) {
-	            imageMenu.classList.toggle('show');
-	        }
-	    });
-	}
-
+        headerImageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const imageMenu = document.getElementById('headerImageMenu');
+            const colorMenu = document.getElementById('colorPickerMenu');
+            const checkboxMenu = document.getElementById('checkboxMenu');
+            const wallpaperMenu = document.getElementById('wallpaperMenu');
+            
+            if (colorMenu) colorMenu.classList.remove('show');
+            if (checkboxMenu) checkboxMenu.classList.remove('show');
+            if (wallpaperMenu) wallpaperMenu.classList.remove('show');
+            
+            // Update button visibility based on current state
+            if (headerImage) {
+                if (uploadHeaderImageBtn) uploadHeaderImageBtn.style.display = 'none';
+                if (removeHeaderImageBtn) removeHeaderImageBtn.style.display = 'block';
+            } else {
+                if (uploadHeaderImageBtn) uploadHeaderImageBtn.style.display = 'block';
+                if (removeHeaderImageBtn) removeHeaderImageBtn.style.display = 'none';
+            }
+            
+            if (imageMenu) {
+                imageMenu.classList.toggle('show');
+            }
+        });
+    }
+    
     if (uploadHeaderImageBtn) {
         uploadHeaderImageBtn.addEventListener('click', () => {
             headerImageInput.click();
         });
     }
-
+    
     if (headerImageInput) {
-	    headerImageInput.addEventListener('change', (e) => {
-	        const file = e.target.files[0];
-	        if (file) {
-	            console.log('File selected:', file.name);
-	            const reader = new FileReader();
-	            reader.onload = (event) => {
-	                headerImage = event.target.result;
-	                console.log('Image loaded, length:', headerImage.length);
-	                saveHeaderImage();
-	                console.log('Save called');
-	                renderHeader();
-	                setTimeout(() => applyHeaderImage(), 100); // Give header time to render
-	                document.getElementById('headerImageMenu').classList.remove('show');
-	                document.getElementById('dropdownMenu').classList.remove('show');
-	            };
-	            reader.readAsDataURL(file);
-	        }
-	    });
-	}
-
+        headerImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('File selected:', file.name);
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    headerImage = event.target.result;
+                    console.log('Image loaded, length:', headerImage.length);
+                    saveHeaderImage();
+                    console.log('Save called');
+                    renderHeader();
+                    setTimeout(() => applyHeaderImage(), 100);
+                    document.getElementById('headerImageMenu').classList.remove('show');
+                    document.getElementById('dropdownMenu').classList.remove('show');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
     if (removeHeaderImageBtn) {
-	    removeHeaderImageBtn.addEventListener('click', async () => {
-	        if (await customConfirm('Remove header background image?')) {
-	            headerImage = null;
-	            saveHeaderImage();
-	            applyHeaderImage();
-	            document.getElementById('headerImageMenu').classList.remove('show');
-	            document.getElementById('dropdownMenu').classList.remove('show');
-	            renderHeader(); 
-	        }
-	    });
-	}
-
-
-// Wallpaper button click handler
-if (wallpaperBtn) {
-    wallpaperBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const wallpaperMenu = document.getElementById('wallpaperMenu');
-        const colorMenu = document.getElementById('colorPickerMenu');
-        const checkboxMenu = document.getElementById('checkboxMenu');
-        const headerImageMenu = document.getElementById('headerImageMenu');
-        const uploadBtn = document.getElementById('uploadWallpaperBtn');
-        const removeBtn = document.getElementById('removeWallpaperBtn');
-        
-        if (colorMenu) colorMenu.classList.remove('show');
-        if (checkboxMenu) checkboxMenu.classList.remove('show');
-        if (headerImageMenu) headerImageMenu.classList.remove('show');
-        
-        // Update button visibility based on current state
-        if (wallpaperUrl) {
-            if (uploadBtn) uploadBtn.style.display = 'none';
-            if (removeBtn) removeBtn.style.display = 'block';
-        } else {
-            if (uploadBtn) uploadBtn.style.display = 'block';
-            if (removeBtn) removeBtn.style.display = 'none';
-        }
-        
-        if (wallpaperMenu) {
-            wallpaperMenu.classList.toggle('show');
-        }
-    });
-}
-
-if (uploadWallpaperBtn) {
-    uploadWallpaperBtn.addEventListener('click', () => {
-        wallpaperInput.click();
-    });
-}
-
-
-if (removeWallpaperBtn) {
-    removeWallpaperBtn.addEventListener('click', async () => {
-        if (await customConfirm('Remove wallpaper?')) {
-            wallpaperUrl = '';
-            saveWallpaper();
-            applyWallpaper();
-            document.getElementById('wallpaperMenu').classList.remove('show');
-            document.getElementById('dropdownMenu').classList.remove('show');
-        }
-    });
-}
-	
-    // App icon editing
+        removeHeaderImageBtn.addEventListener('click', async () => {
+            if (await customConfirm('Remove header background image?')) {
+                headerImage = null;
+                saveHeaderImage();
+                applyHeaderImage();
+                document.getElementById('headerImageMenu').classList.remove('show');
+                document.getElementById('dropdownMenu').classList.remove('show');
+                renderHeader();
+            }
+        });
+    }
+    
+    // ============================================
+    // EVENT LISTENERS - Wallpaper
+    // ============================================
+    if (wallpaperBtn) {
+        wallpaperBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wallpaperMenu = document.getElementById('wallpaperMenu');
+            const colorMenu = document.getElementById('colorPickerMenu');
+            const checkboxMenu = document.getElementById('checkboxMenu');
+            const headerImageMenu = document.getElementById('headerImageMenu');
+            
+            if (colorMenu) colorMenu.classList.remove('show');
+            if (checkboxMenu) checkboxMenu.classList.remove('show');
+            if (headerImageMenu) headerImageMenu.classList.remove('show');
+            
+            // Update button visibility based on current state
+            if (wallpaperUrl) {
+                if (uploadWallpaperBtn) uploadWallpaperBtn.style.display = 'none';
+                if (removeWallpaperBtn) removeWallpaperBtn.style.display = 'block';
+            } else {
+                if (uploadWallpaperBtn) uploadWallpaperBtn.style.display = 'block';
+                if (removeWallpaperBtn) removeWallpaperBtn.style.display = 'none';
+            }
+            
+            if (wallpaperMenu) {
+                wallpaperMenu.classList.toggle('show');
+            }
+        });
+    }
+    
+    if (uploadWallpaperBtn) {
+        uploadWallpaperBtn.addEventListener('click', () => {
+            wallpaperInput.click();
+        });
+    }
+    
+    if (wallpaperInput) {
+        wallpaperInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Wallpaper file selected:', file.name);
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    wallpaperUrl = event.target.result;
+                    console.log('Wallpaper loaded, length:', wallpaperUrl.length);
+                    saveWallpaper();
+                    console.log('Wallpaper save called');
+                    applyWallpaper();
+                    document.getElementById('wallpaperMenu').classList.remove('show');
+                    document.getElementById('dropdownMenu').classList.remove('show');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    if (removeWallpaperBtn) {
+        removeWallpaperBtn.addEventListener('click', async () => {
+            if (await customConfirm('Remove wallpaper?')) {
+                wallpaperUrl = '';
+                saveWallpaper();
+                applyWallpaper();
+                document.getElementById('wallpaperMenu').classList.remove('show');
+                document.getElementById('dropdownMenu').classList.remove('show');
+            }
+        });
+    }
+    
+    // ============================================
+    // EVENT LISTENERS - Checkbox Options
+    // ============================================
+    if (checkboxOptionsBtn) {
+        checkboxOptionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const checkboxMenu = document.getElementById('checkboxMenu');
+            const colorMenu = document.getElementById('colorPickerMenu');
+            const headerImageMenu = document.getElementById('headerImageMenu');
+            const wallpaperMenu = document.getElementById('wallpaperMenu');
+            
+            if (colorMenu) colorMenu.classList.remove('show');
+            if (headerImageMenu) headerImageMenu.classList.remove('show');
+            if (wallpaperMenu) wallpaperMenu.classList.remove('show');
+            
+            if (checkboxMenu) {
+                checkboxMenu.classList.toggle('show');
+            }
+        });
+    }
+    
+    if (clearChecksBtn) {
+        clearChecksBtn.addEventListener('click', clearAllChecks);
+    }
+    
+    if (autoRefreshBtn) {
+        autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
+    }
+    
+    // ============================================
+    // EVENT LISTENERS - App Icon
+    // ============================================
     if (editMode && appIconSpan) {
         appIconSpan.addEventListener('click', (e) => {
             e.stopPropagation();
             editAppIcon(appIconSpan);
         });
     }
+    
     if (removeAppIconBtn) {
         removeAppIconBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -2602,82 +2662,40 @@ if (removeWallpaperBtn) {
         });
     }
     
-    // Color option clicks
+    // ============================================
+    // EVENT LISTENERS - Color Options
+    // ============================================
     const colorOptions = document.querySelectorAll('.color-option');
     colorOptions.forEach(option => {
         option.addEventListener('click', () => {
             selectColor(option.dataset.color);
         });
     });
-
-	// Checkbox options button and menu
-if (checkboxOptionsBtn) {
-    checkboxOptionsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const checkboxMenu = document.getElementById('checkboxMenu');
-        const colorMenu = document.getElementById('colorPickerMenu');
-        
-        // Close color picker if open
-        if (colorMenu) colorMenu.classList.remove('show');
-        
-        if (checkboxMenu) {
-            checkboxMenu.classList.toggle('show');
-        }
-    });
-}
-
-// Clear checks button
-if (clearChecksBtn) {
-    clearChecksBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        clearAllChecks();
-        const checkboxMenu = document.getElementById('checkboxMenu');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        if (checkboxMenu) checkboxMenu.classList.remove('show');
-        if (dropdownMenu) dropdownMenu.classList.remove('show');
-    });
-}
-
-// Auto-refresh button
-if (autoRefreshBtn) {
-    autoRefreshBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleAutoRefresh();
-        const checkboxMenu = document.getElementById('checkboxMenu');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        if (checkboxMenu) checkboxMenu.classList.remove('show');
-        if (dropdownMenu) dropdownMenu.classList.remove('show');
-    });
-}
     
-	// Dynamic styles and theme application...
-	    const isLight = isLightColor(themeColor);
-	    if (isLight) {
-	        const style = document.createElement('style');
-	        style.id = 'dynamic-header-style';
-	        const existingStyle = document.getElementById('dynamic-header-style');
-	        if (existingStyle) existingStyle.remove();
-	        
-	        style.textContent = `
-	            .header .editable:focus { 
-	                outline: 2px solid #2c3e50 !important; 
-	                background: rgba(255, 255, 255, 0.5) !important; 
-	                color: #2c3e50 !important; 
-	            }
-	            .header .editable:hover { 
-	                background: rgba(0, 0, 0, 0.1) !important; 
-	            }
-	        `;
-	        document.head.appendChild(style);
-	    } else {
-	        const existingStyle = document.getElementById('dynamic-header-style');
-	        if (existingStyle) existingStyle.remove();
-	    }
-
-    applyTheme();
-    populateGuideDropdown();
-
-    // Add double-click edit for header (only when not in edit mode)
+    // ============================================
+    // EDIT MODE - Header Title/Subtitle
+    // ============================================
+    if (editMode) {
+        const editableTitle = header.querySelector('#appTitleSpan');
+        const editableSubtitle = header.querySelector('#appSubtitleSpan');
+        
+        if (editableTitle) {
+            editableTitle.addEventListener('blur', (e) => {
+                appTitle = e.target.textContent.trim();
+                saveHeader();
+            });
+        }
+        if (editableSubtitle) {
+            editableSubtitle.addEventListener('blur', (e) => {
+                appSubtitle = e.target.textContent.trim();
+                saveHeader();
+            });
+        }
+    }
+    
+    // ============================================
+    // DOUBLE-CLICK EDIT (Non-Edit Mode)
+    // ============================================
     if (!editMode) {
         const h1 = header.querySelector('h1');
         const spans = h1 ? h1.querySelectorAll('span') : [];
@@ -2700,34 +2718,48 @@ if (autoRefreshBtn) {
             });
         }
     }
-
+    
+    // ============================================
+    // DYNAMIC STYLES FOR LIGHT THEME
+    // ============================================
+    const isLight = isLightColor(themeColor);
+    if (isLight) {
+        const style = document.createElement('style');
+        style.id = 'dynamic-header-style';
+        const existingStyle = document.getElementById('dynamic-header-style');
+        if (existingStyle) existingStyle.remove();
+        
+        style.textContent = `
+            .header .editable:focus { 
+                outline: 2px solid #2c3e50 !important; 
+                background: rgba(255, 255, 255, 0.5) !important; 
+                color: #2c3e50 !important; 
+            }
+            .header .editable:hover { 
+                background: rgba(0, 0, 0, 0.1) !important; 
+            }
+        `;
+        document.head.appendChild(style);
+    } else {
+        const existingStyle = document.getElementById('dynamic-header-style');
+        if (existingStyle) existingStyle.remove();
+    }
+    
+    // ============================================
+    // FINALIZATION
+    // ============================================
+    applyTheme();
+    populateGuideDropdown();
+    
+    // Show/hide buttons based on edit mode
     if (editMode) {
         setTimeout(() => {
-            const saveBtn = document.getElementById('saveBtn');
-            const menuBtn = document.getElementById('menuBtn');
             if (saveBtn) saveBtn.style.display = 'block';
             if (menuBtn) menuBtn.style.display = 'none';
         }, 0);
     }
     
-    if (editMode) {
-        const editableTitle = header.querySelector('#appTitleSpan');
-        const editableSubtitle = header.querySelector('#appSubtitleSpan');
-        
-        if (editableTitle) {
-            editableTitle.addEventListener('blur', (e) => {
-                appTitle = e.target.textContent.trim();
-                saveHeader();
-            });
-        }
-        if (editableSubtitle) {
-            editableSubtitle.addEventListener('blur', (e) => {
-                appSubtitle = e.target.textContent.trim();
-                saveHeader();
-            });
-        }
-    }
-    
+    // Initialize drawer swipe (only in non-edit mode)
     if (!editMode) {
         setTimeout(() => initDrawerSwipe(), 100);
     }
@@ -4630,6 +4662,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
