@@ -2401,7 +2401,15 @@ async function renderHeader() {
 	const applyColorBtn = document.getElementById('applyColorBtn');
     const appIconSpan = document.getElementById('appIconSpan');
     const removeAppIconBtn = document.getElementById('removeAppIconBtn');
-    
+    const headerImageBtn = document.getElementById('headerImageBtn');
+    const uploadHeaderImageBtn = document.getElementById('uploadHeaderImageBtn');
+    const removeHeaderImageBtn = document.getElementById('removeHeaderImageBtn');
+    const headerImageInput = document.getElementById('headerImageInput');
+	const wallpaperBtn = document.getElementById('wallpaperBtn');
+	const uploadWallpaperBtn = document.getElementById('uploadWallpaperBtn');
+	const removeWallpaperBtn = document.getElementById('removeWallpaperBtn');
+	const wallpaperInput = document.getElementById('wallpaperInput');
+	
     if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
     if (createGuideBtn) {
@@ -2451,18 +2459,9 @@ async function renderHeader() {
 	if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
 	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
 	if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
-	if (headerImageBtn) headerImageBtn.addEventListener('click', toggleHeaderImageMenu);
-	if (checkboxOptionsBtn) checkboxOptionsBtn.addEventListener('click', toggleCheckboxMenu);
 	
 	    // Header image event listeners
-    const headerImageBtn = document.getElementById('headerImageBtn');
-    const uploadHeaderImageBtn = document.getElementById('uploadHeaderImageBtn');
-    const removeHeaderImageBtn = document.getElementById('removeHeaderImageBtn');
-    const headerImageInput = document.getElementById('headerImageInput');
-	const wallpaperBtn = document.getElementById('wallpaperBtn');
-	const uploadWallpaperBtn = document.getElementById('uploadWallpaperBtn');
-	const removeWallpaperBtn = document.getElementById('removeWallpaperBtn');
-	const wallpaperInput = document.getElementById('wallpaperInput');
+
 	
     if (headerImageBtn) {
 	    headerImageBtn.addEventListener('click', (e) => {
@@ -4624,5 +4623,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
