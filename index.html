@@ -1514,42 +1514,23 @@ function detectImageBrightness(imageSrc, callback) {
     };
 }
 // Wallpaper Management
-
-function toggleWallpaperMenu() {
-    const menu = document.getElementById('wallpaperMenu');
-    const colorMenu = document.getElementById('colorPickerMenu');
-    const headerImageMenu = document.getElementById('headerImageMenu');
-    const checkboxMenu = document.getElementById('checkboxMenu');
-    
-    // Close other menus
-    if (colorMenu) colorMenu.classList.remove('show');
-    if (headerImageMenu) headerImageMenu.classList.remove('show');
-    if (checkboxMenu) checkboxMenu.classList.remove('show');
-    
-    // Toggle wallpaper menu
-    menu.classList.toggle('show');
-}
-
-function uploadWallpaper() {
-    const input = document.getElementById('wallpaperInput');
-    input.click();
-}
-
-function removeWallpaper() {
-    wallpaperUrl = '';
-    applyWallpaper();
-    saveWallpaper();
-    const menu = document.getElementById('wallpaperMenu');
-    if (menu) menu.classList.remove('show');
+function saveWallpaper() {
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/wallpaper`), wallpaperUrl);
 }
 
 function applyWallpaper() {
     const contentArea = document.querySelector('.content-area');
-    
+    if (!contentArea) {
+        console.log('Content area not found, cannot apply wallpaper');
+        return;
+    }
+      
     if (wallpaperUrl) {
+        console.log('Applying wallpaper');
         contentArea.classList.add('has-background');
         
-        // Apply to pseudo-element through a style tag
+        // Apply wallpaper through style tag
         let styleTag = document.getElementById('dynamic-bg-style');
         if (!styleTag) {
             styleTag = document.createElement('style');
@@ -1566,45 +1547,12 @@ function applyWallpaper() {
             document.body.appendChild(overlay);
         }
     } else {
+        console.log('Removing wallpaper');
         contentArea.classList.remove('has-background');
         const styleTag = document.getElementById('dynamic-bg-style');
         if (styleTag) styleTag.textContent = '';
     }
 }
-
-function saveWallpaper() {
-    if (!currentUser) return;
-    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/wallpaper`), wallpaperUrl);
-}
-	
-async function createNewGuide() {
-    if (!currentUser) return;
-    const name = await customPrompt("Enter a name for this new guide:", "My New Guide", "Create Guide");
-    if (!name) return;
-    const id = `guide_${Date.now()}`;
-    const newGuide = {
-        appTitle: name,
-        appSubtitle: "Click to edit subtitle",
-        appIcon: "📘",
-        categories: [
-            {
-                name: "New Category",
-                icon: "📌",
-                skills: [
-                    { title: "New Skill", icon: "✨", items: ["New item - click to edit"] }
-                ]
-            }
-        ],
-        checkedItems: {},
-        themeColor: themeColor
-    };
-    set(ref(database, `users/${currentUser.uid}/guides/${id}`), newGuide).then(() => {
-        currentGuideId = id;
-        localStorage.setItem('currentGuideId', id);
-        loadUserData(currentUser.uid);
-    });
-}
-
 		
 function closeDrawer() {
     const dropdown = document.getElementById('guideDropdown');
@@ -2506,11 +2454,12 @@ async function renderHeader() {
 	if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
 	if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
 	if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
-	if (wallpaperBtn) wallpaperBtn.addEventListener('click', toggleWallpaperMenu);
 	if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
 	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
 	if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
-
+	if (headerImageBtn) headerImageBtn.addEventListener('click', toggleHeaderImageMenu);
+	if (checkboxOptionsBtn) checkboxOptionsBtn.addEventListener('click', toggleCheckboxMenu);
+	
 	    // Header image event listeners
     const headerImageBtn = document.getElementById('headerImageBtn');
     const uploadHeaderImageBtn = document.getElementById('uploadHeaderImageBtn');
@@ -2587,22 +2536,53 @@ async function renderHeader() {
 	        }
 	    });
 	}
-	if (wallpaperBtn) wallpaperBtn.addEventListener('click', toggleWallpaperMenu);
-if (uploadWallpaperBtn) uploadWallpaperBtn.addEventListener('click', uploadWallpaper);
-if (removeWallpaperBtn) removeWallpaperBtn.addEventListener('click', removeWallpaper);
 
-// Wallpaper file input handler
-if (wallpaperInput) {
-    wallpaperInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                wallpaperUrl = event.target.result;
-                applyWallpaper();
-                saveWallpaper();
-            };
-            reader.readAsDataURL(file);
+
+// Wallpaper button click handler
+if (wallpaperBtn) {
+    wallpaperBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wallpaperMenu = document.getElementById('wallpaperMenu');
+        const colorMenu = document.getElementById('colorPickerMenu');
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        const headerImageMenu = document.getElementById('headerImageMenu');
+        const uploadBtn = document.getElementById('uploadWallpaperBtn');
+        const removeBtn = document.getElementById('removeWallpaperBtn');
+        
+        if (colorMenu) colorMenu.classList.remove('show');
+        if (checkboxMenu) checkboxMenu.classList.remove('show');
+        if (headerImageMenu) headerImageMenu.classList.remove('show');
+        
+        // Update button visibility based on current state
+        if (wallpaperUrl) {
+            if (uploadBtn) uploadBtn.style.display = 'none';
+            if (removeBtn) removeBtn.style.display = 'block';
+        } else {
+            if (uploadBtn) uploadBtn.style.display = 'block';
+            if (removeBtn) removeBtn.style.display = 'none';
+        }
+        
+        if (wallpaperMenu) {
+            wallpaperMenu.classList.toggle('show');
+        }
+    });
+}
+
+if (uploadWallpaperBtn) {
+    uploadWallpaperBtn.addEventListener('click', () => {
+        wallpaperInput.click();
+    });
+}
+
+
+if (removeWallpaperBtn) {
+    removeWallpaperBtn.addEventListener('click', async () => {
+        if (await customConfirm('Remove wallpaper?')) {
+            wallpaperUrl = '';
+            saveWallpaper();
+            applyWallpaper();
+            document.getElementById('wallpaperMenu').classList.remove('show');
+            document.getElementById('dropdownMenu').classList.remove('show');
         }
     });
 }
@@ -4678,6 +4658,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
