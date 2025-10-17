@@ -1539,26 +1539,25 @@ if (wallpaperUrl) {
     }
     styleTag.textContent = `.content-area::before { background-image: url("${wallpaperUrl}"); }`;
     
-    // Hide overlay when wallpaper is active
-    let overlay = document.querySelector('.content-area-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'content-area-overlay';
-        document.body.appendChild(overlay);
+    // Remove overlay completely when wallpaper is active
+    const overlay = document.querySelector('.content-area-overlay');
+    if (overlay) {
+        overlay.remove();
     }
-    overlay.style.opacity = '0';
 } else {
     console.log('Removing wallpaper');
     contentArea.classList.remove('has-background');
     const styleTag = document.getElementById('dynamic-bg-style');
     if (styleTag) styleTag.textContent = '';
     
-    // Show overlay when wallpaper is removed
-    const overlay = document.querySelector('.content-area-overlay');
-    if (overlay) {
-        overlay.style.opacity = '1';
+    // Create overlay when wallpaper is removed
+    let overlay = document.querySelector('.content-area-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'content-area-overlay';
+        document.body.appendChild(overlay);
     }
-}
+ }
 }
 		
 function closeDrawer() {
@@ -4652,6 +4651,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
