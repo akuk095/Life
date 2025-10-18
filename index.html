@@ -133,8 +133,8 @@
 		.skill-card:has(> .skill-title .delete-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
 		.tab-wrapper:has(.delete-tab-btn:hover) .nav-tab { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fca5a5 !important; }
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-		.refresh-spinner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10001; display: none; }
-		.refresh-spinner.show { display: block; }
+		.refresh-spinner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20000; display: none; background: rgba(255, 255, 255, 0.9); width: 80px; height: 80px; border-radius: 16px; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+		.refresh-spinner.show { display: flex; }
 		.refresh-spinner svg { width: 48px; height: 48px; animation: spin 1s linear infinite; }
 		@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
@@ -1035,9 +1035,10 @@ async function loadUserData(userId) {
 		    document.querySelector('.container').style.opacity = '1';
 		}, 100);
 			
-        // Hide spinner
+        // Hide spinner and restore page state
 		const spinner = document.getElementById('refreshSpinner');
 		if (spinner) spinner.classList.remove('show');
+		restorePageState();
     	}).catch(async (error) => {
     	console.error('Error loading user data:', error);
         
@@ -1055,6 +1056,73 @@ async function loadUserData(userId) {
     });
 }
 
+
+function savePageState() {
+    const homePage = document.getElementById('homePage');
+    const profilePage = document.getElementById('profilePage');
+    const mainContainer = document.querySelector('.container');
+    
+    let currentPage = 'main';
+    
+    if (homePage && homePage.classList.contains('active')) {
+        currentPage = 'home';
+    } else if (profilePage && profilePage.classList.contains('active')) {
+        currentPage = 'profile';
+    } else if (mainContainer && mainContainer.style.display !== 'none') {
+        currentPage = 'main';
+        localStorage.setItem('activeTabIndex', activeTabIndex);
+    }
+    
+    localStorage.setItem('currentPage', currentPage);
+}
+
+function restorePageState() {
+    const savedPage = localStorage.getItem('currentPage') || 'main';
+    const savedTabIndex = parseInt(localStorage.getItem('activeTabIndex')) || 0;
+    
+    const homePage = document.getElementById('homePage');
+    const profilePage = document.getElementById('profilePage');
+    const mainContainer = document.querySelector('.container');
+    const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+    
+    // Hide all pages first
+    if (homePage) homePage.classList.remove('active');
+    if (profilePage) profilePage.classList.remove('active');
+    if (mainContainer) mainContainer.style.display = 'none';
+    
+    // Remove all active nav items
+    bottomNavItems.forEach(nav => nav.classList.remove('active'));
+    
+    // Restore the correct page
+    if (savedPage === 'home') {
+        if (homePage) {
+            homePage.classList.add('active');
+            populateHomePage();
+        }
+        const homeNav = document.querySelector('.bottom-nav-item[data-page="guides"]');
+        if (homeNav) homeNav.classList.add('active');
+    } else if (savedPage === 'profile') {
+        if (profilePage) {
+            profilePage.classList.add('active');
+            const profileEmail = document.getElementById('profileEmail');
+            if (profileEmail && currentUser) profileEmail.textContent = currentUser.email;
+        }
+        const profileNav = document.querySelector('.bottom-nav-item[data-page="profile"]');
+        if (profileNav) profileNav.classList.add('active');
+    } else {
+        if (mainContainer) mainContainer.style.display = 'block';
+        
+        if (savedTabIndex !== undefined && categories[savedTabIndex]) {
+            activeTabIndex = savedTabIndex;
+            renderTabs();
+            renderContent();
+        }
+        
+        const mainNav = document.querySelector('.bottom-nav-item[data-page="main"]');
+        if (mainNav) mainNav.classList.add('active');
+    }
+}
+	
 function switchGuide(id) {
     currentGuideId = id;
     localStorage.setItem('currentGuideId', id);
@@ -4148,6 +4216,9 @@ function renderContent() {
 function switchTab(index) { 
     activeTabIndex = index; 
     renderTabs();
+    renderContent();
+    savePageState();
+    
     const cats = document.querySelectorAll('.category'); 
     cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); 
     
@@ -4625,18 +4696,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContainer = document.querySelector('.container');
     
     // Home page event listeners
-        
-   const homeCreateFolderBtn = document.getElementById('homeCreateFolderBtn');
+    const homeCreateFolderBtn = document.getElementById('homeCreateFolderBtn');
 
-if (homeCreateFolderBtn) {
-    homeCreateFolderBtn.addEventListener('click', async () => {
-        const folderName = await customPrompt('Enter folder name:', 'New Folder', 'Create Folder');
-        if (folderName) {
-            createNewFolder(folderName);
-        }
-    });
-}
-      
+    if (homeCreateFolderBtn) {
+        homeCreateFolderBtn.addEventListener('click', async () => {
+            const folderName = await customPrompt('Enter folder name:', 'New Folder', 'Create Folder');
+            if (folderName) {
+                createNewFolder(folderName);
+            }
+        });
+    }
     
     // Profile page event listeners
     const profileLogoutBtn = document.getElementById('profileLogoutBtn');
@@ -4694,18 +4763,11 @@ if (homeCreateFolderBtn) {
                 }
                 closeDrawer();
             }
+            
+            // Save page state after switching
+            setTimeout(() => savePageState(), 100);
         });
     });
-});
-
-	// Floating button handler for home page
-document.addEventListener('click', (e) => {
-    if (e.target.closest('.floating-layout-btn')) {
-        const homePage = document.getElementById('homePage');
-        if (homePage && homePage.classList.contains('active')) {
-            createNewGuide();
-        }
-    }
 });
 
 function createNewFolder(name) {
@@ -4921,6 +4983,7 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
 </div>
 </body>
 </html>
+
 
 
 
