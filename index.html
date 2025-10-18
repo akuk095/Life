@@ -95,7 +95,7 @@
 		.floating-layout-btn { position: fixed; bottom: calc(60px + max(env(safe-area-inset-bottom), 24px)); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 999; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
 		.floating-layout-btn:active { transform: scale(0.9); }
 		.floating-layout-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 1; }
-		.guide-dropdown { position: fixed; top: 0; left: 0; height: calc(100vh - 60px); width: 85%; max-width: 320px; background: rgba(237, 239, 240, 1); box-shadow: 2px 0 20px rgba(0,0,0,0.2); z-index: 2000; max-height: 100vh; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: 140px; scrollbar-width: none; -ms-overflow-style: none; will-change: transform; }
+		.guide-dropdown { position: fixed; top: 0; left: 0; height: calc(100vh - 60px); width: 100%; background: #f0f2f5; box-shadow: none; z-index: 2000; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); padding-top: max(env(safe-area-inset-top), 0); padding-bottom: 80px; scrollbar-width: none; -ms-overflow-style: none; will-change: transform; }
 		.guide-dropdown::-webkit-scrollbar { display: none; }
 		.guide-dropdown button { width: 100%; padding: 12px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.guide-dropdown button:hover { background: #f8f9fa; }
@@ -225,45 +225,20 @@
 		.custom-dialog-button.danger:hover, .custom-dialog-button.destructive:hover { background: #dc2626; }
 		.custom-dialog-buttons.single-button { display: flex; justify-content: center; }
 		.custom-dialog-buttons.single-button .custom-dialog-button { max-width: 200px; }
-		.guides-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: var(--bg-primary, #f0f2f5); z-index: 99; overflow-y: auto; color: var(--text-primary, #f8fafc); }
-		.guides-page.active { display: block; }
-		.guides-page :root { --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #1e293b; --text-primary: #f8fafc; --text-secondary: #cbd5e1; --text-muted: #64748b; --accent: #3b82f6; --accent-hover: #2563eb; --border: rgba(148, 163, 184, 0.1); --shadow: rgba(0, 0, 0, 0.3); }
-		.guides-container { max-width: 680px; margin: 0 auto; padding: 24px 20px 40px; }
-		.guides-header { margin-bottom: 32px; animation: fadeInDown 0.6s ease-out; }
-		.guides-logo { font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.5px; margin-bottom: 16px; }
-		.guides-search-container { position: relative; margin-bottom: 32px; animation: fadeInDown 0.6s ease-out 0.1s backwards; }
-		.guides-search-wrapper { position: relative; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: all 0.3s ease; }
-		.guides-search-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
-		.guides-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 20px; pointer-events: none; }
-		.guides-search-input { width: 100%; padding: 16px 18px 16px 52px; border: none; background: transparent; color: var(--text-primary); font-size: 16px; outline: none; font-family: inherit; }
-		.guides-search-input::placeholder { color: var(--text-muted); }
-		.guides-favorites-section { margin-bottom: 40px; animation: fadeInUp 0.6s ease-out 0.2s backwards; }
-		.guides-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 0 4px; }
-		.guides-section-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-		.guides-favorites-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-		.guides-favorite-card { aspect-ratio: 1; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
-		.guides-favorite-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 0%, rgba(59, 130, 246, 0.1) 100%); opacity: 0; transition: opacity 0.4s ease; }
-		.guides-favorite-card:hover::before { opacity: 1; }
-		.guides-favorite-card:hover { transform: translateY(-4px) scale(1.02); border-color: var(--accent); box-shadow: 0 12px 24px var(--shadow); }
-		.guides-favorite-icon { font-size: 36px; margin-bottom: 8px; transition: transform 0.4s ease; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)); }
-		.guides-favorite-card:hover .guides-favorite-icon { transform: scale(1.1) rotate(-5deg); }
-		.guides-favorite-name { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-align: center; }
-		.guides-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 40px 0; }
-		.guides-list-section { position: relative; animation: fadeInUp 0.6s ease-out 0.3s backwards; }
-		.guides-list { position: relative; perspective: 1500px; }
-		.guide-list-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 12px; overflow: hidden; cursor: pointer; transform-origin: top center; position: sticky; will-change: transform, opacity; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(10px); }
-		.guide-list-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%); opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
-		.guide-list-card:hover::before { opacity: 1; }
-		.guide-list-card:hover { border-color: var(--accent); box-shadow: 0 20px 40px var(--shadow); }
-		.guide-list-card-inner { display: flex; padding: 0; gap: 0; min-height: 130px; }
-		.guide-list-thumbnail { width: 130px; min-width: 130px; display: flex; align-items: center; justify-content: center; font-size: 48px; position: relative; overflow: hidden; border-radius: 20px 0 0 20px; }
-		.guide-list-thumbnail::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%); }
-		.guide-list-thumbnail span { position: relative; z-index: 1; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)); }
-		.guide-list-content { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 20px; overflow: hidden; }
-		.guide-list-title { font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; letter-spacing: -0.3px; }
-		.guide-list-preview { font-size: 14px; color: var(--text-muted); line-height: 1.5; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-		.guide-list-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-		.guide-list-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; font-size: 11px; font-weight: 600; color: var(--accent); }
+		.profile-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: #f0f2f5; z-index: 99; overflow-y: auto; }
+		.profile-page.active { display: block; }
+		.profile-container { max-width: 600px; margin: 0 auto; padding: 24px 20px; }
+		.profile-header { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+		.profile-email-label { font-size: 13px; color: #6b7280; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+		.profile-email { font-size: 16px; color: #2c3e50; font-weight: 600; }
+		.profile-divider { height: 1px; background: #e5e7eb; margin: 20px 0; }
+		.profile-options { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+		.profile-option-btn { width: 100%; padding: 16px 20px; border: none; background: white; text-align: left; cursor: pointer; font-size: 15px; color: #2c3e50; transition: background 0.2s; font-weight: 500; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f0f0; }
+		.profile-option-btn:last-child { border-bottom: none; }
+		.profile-option-btn:hover { background: #f8f9fa; }
+		.profile-option-btn.danger { color: #dc2626; }
+		.profile-option-btn.danger:hover { background: #fee2e2; }
+		.profile-option-icon { width: 20px; height: 20px; }
 		@keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 		@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 		@keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
@@ -2316,30 +2291,12 @@ async function renderHeader() {
     });
     
         header.innerHTML = `
-	<button class="guide-menu-btn" id="guideMenuBtn">☰</button>
+	
 	<div id="drawerBackdrop" class="drawer-backdrop"></div>
 	<div class="guide-dropdown" id="guideDropdown">
 	    <div class="drawer-header">My Notebook ⊞</div>
 	</div>
-	<div class="drawer-footer" id="drawerFooter">
-	    <button id="logoutBtn" style="background: none; border: none; cursor: pointer; padding: 0; margin-right: auto; opacity: 0.5; transition: opacity 0.2s;">
-		    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-		        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-		        <polyline points="16 17 21 12 16 7"></polyline>
-		        <line x1="21" y1="12" x2="9" y2="12"></line>
-		    </svg>
-		</button>
-		<div class="logout-menu" id="logoutMenu">
-		    <button id="logoutOptionBtn">Logout</button>
-		    <button id="deleteAccountBtn" class="danger">Delete Account</button>
-		</div>
-	    <button class="drawer-create-icon" id="createGuideBtn">
-	        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-	            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-	            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-	        </svg>
-	    </button>
-	</div>
+	
 	<div class="edit-toggle">
 	    <button class="save-btn" id="saveBtn" style="display: none;">Done</button>
 	    <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
@@ -2446,46 +2403,7 @@ async function renderHeader() {
 	const clearChecksBtn = document.getElementById('clearChecksBtn');
 	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
 	
-    if (guideMenuBtn) guideMenuBtn.addEventListener('click', toggleGuideMenu);
-    if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
-    if (createGuideBtn) {
-        createGuideBtn.addEventListener('click', () => {
-            createNewGuide();
-            closeDrawer();
-        });
-    }
-    if (logoutBtn) {
-	    logoutBtn.addEventListener('click', (e) => {
-	        e.stopPropagation();
-	        const logoutMenu = document.getElementById('logoutMenu');
-	        logoutMenu.classList.toggle('show');
-	    });
-	}
-
-	const logoutOptionBtn = document.getElementById('logoutOptionBtn');
-	const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-	
-	if (logoutOptionBtn) {
-	    logoutOptionBtn.addEventListener('click', async () => {
-	        if (await customConfirm('Are you sure you want to log out?')) {
-	            logout();
-	            closeDrawer();
-	        }
-	        document.getElementById('logoutMenu').classList.remove('show');
-	    });
-	}
-	
-	if (deleteAccountBtn) {
-	    deleteAccountBtn.addEventListener('click', async () => {
-	        if (await customConfirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!\n\nType "DELETE" to confirm.') === true) {
-	            const confirmation = await customAlert('Type "DELETE" to confirm account deletion:');
-	            if (confirmation === 'DELETE') {
-	                deleteAccount();
-	            }
-	        }
-	        document.getElementById('logoutMenu').classList.remove('show');
-	    });
-	}
+  	if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
 	if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
 	if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
@@ -2496,9 +2414,7 @@ async function renderHeader() {
 	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
 	if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
 	
-	    // Header image event listeners
-
-	
+    // Header image event listeners
     if (headerImageBtn) {
 	    headerImageBtn.addEventListener('click', (e) => {
 	        e.stopPropagation();
@@ -4725,12 +4641,71 @@ async function initGuidesPage() {
 document.addEventListener('DOMContentLoaded', () => {
     const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
     const guidesPage = document.getElementById('guidesPage');
+    const profilePage = document.getElementById('profilePage');
     const mainContainer = document.querySelector('.container');
     
-    bottomNavItems.forEach((item, index) => {
+    // Set up profile page email
+    if (currentUser && profilePage) {
+        const profileEmail = document.getElementById('profileEmail');
+        if (profileEmail) profileEmail.textContent = currentUser.email;
+    }
+    
+    // Profile page event listeners
+    const profileLogoutBtn = document.getElementById('profileLogoutBtn');
+    const profileDeleteAccountBtn = document.getElementById('profileDeleteAccountBtn');
+    
+    if (profileLogoutBtn) {
+        profileLogoutBtn.addEventListener('click', async () => {
+            if (await customConfirm('Are you sure you want to log out?', 'Logout')) {
+                logout();
+            }
+        });
+    }
+    
+    if (profileDeleteAccountBtn) {
+        profileDeleteAccountBtn.addEventListener('click', async () => {
+            if (await customConfirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!', 'Delete Account')) {
+                const confirmation = await customPrompt('Type "DELETE" to confirm:', '', 'Confirm Deletion');
+                if (confirmation === 'DELETE') {
+                    deleteAccount();
+                }
+            }
+        });
+    }
+    
+    bottomNavItems.forEach((item) => {
         item.addEventListener('click', () => {
+            const page = item.dataset.page;
+            
             // Remove active class from all items
             bottomNavItems.forEach(nav => nav.classList.remove('active'));
+            // Add active class to clicked item
+            item.classList.add('active');
+            
+            if (page === 'guides') {
+                // Show guides/drawer (full page)
+                toggleGuideMenu();
+            } else if (page === 'main') {
+                // Show main container, hide everything else
+                mainContainer.style.display = 'block';
+                if (guidesPage) guidesPage.classList.remove('active');
+                if (profilePage) profilePage.classList.remove('active');
+                closeDrawer();
+            } else if (page === 'profile') {
+                // Show profile page
+                mainContainer.style.display = 'none';
+                if (guidesPage) guidesPage.classList.remove('active');
+                if (profilePage) {
+                    profilePage.classList.add('active');
+                    // Update email
+                    const profileEmail = document.getElementById('profileEmail');
+                    if (profileEmail && currentUser) profileEmail.textContent = currentUser.email;
+                }
+                closeDrawer();
+            }
+        });
+    });
+});
             // Add active class to clicked item
             item.classList.add('active');
             
@@ -4748,50 +4723,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
-	<!-- Guides List Page -->
-<div class="guides-page" id="guidesPage">
-    <div class="guides-container">
-        <div class="guides-header">
-            <div class="guides-logo">Guides</div>
+	<div class="profile-page" id="profilePage">
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-email-label">Email</div>
+            <div class="profile-email" id="profileEmail">user@example.com</div>
         </div>
-
-        <div class="guides-search-container">
-            <div class="guides-search-wrapper">
-                <div class="guides-search-icon">🔍</div>
-                <input type="text" class="guides-search-input" id="guidesSearchInput" placeholder="Search your guides...">
-            </div>
-        </div>
-
-        <div class="guides-favorites-section">
-            <div class="guides-section-header">
-                <div class="guides-section-title">⭐ Favorites</div>
-            </div>
-            <div class="guides-favorites-grid" id="guidesFavoritesGrid"></div>
-        </div>
-
-        <div class="guides-divider"></div>
-
-        <div class="guides-list-section">
-            <div class="guides-section-header">
-                <div class="guides-section-title">All Guides</div>
-            </div>
-            <div class="guides-list" id="guidesListContainer"></div>
+        <div class="profile-divider"></div>
+        <div class="profile-options">
+            <button class="profile-option-btn" id="profileLogoutBtn">
+                <svg class="profile-option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Logout
+            </button>
+            <button class="profile-option-btn danger" id="profileDeleteAccountBtn">
+                <svg class="profile-option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete Account
+            </button>
         </div>
     </div>
 </div>
+
 	<div class="bottom-nav">
-    <div class="bottom-nav-item active">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>Home</span>
-    </div>
-    <div class="bottom-nav-item">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        <span>Menu</span>
-    </div>
-    <div class="bottom-nav-item">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Profile</span>
-    </div>
+    <div class="bottom-nav-item" data-page="guides">
+	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+	    <span>Home</span>
+	</div>
+	<div class="bottom-nav-item active" data-page="main">
+	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+	    <span>Create</span>
+	</div>
+	<div class="bottom-nav-item" data-page="profile">
+	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+	    <span>Profile</span>
+	</div>
     <div class="bottom-nav-item">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         <span>Settings</span>
@@ -4799,6 +4770,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
