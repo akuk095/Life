@@ -10,7 +10,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 0 0 60px 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-select: none; }
+		body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: transparent; min-height: 100vh; padding: 0 0 60px 0; margin: 0; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-select: none; }
 		.add-category-tab { background: #f59e0b !important; color: white !important; font-weight: bold; border-bottom: none !important; padding: 15px 20px !important; font-size: 18px !important; }
 		.add-category-tab:hover { background: #d97706 !important; }
 		.add-item-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 13px; font-weight: 500; display: none; width: 100%; transition: all 0.2s ease; }
@@ -58,8 +58,7 @@
 		.hue-slider { width: 100%; height: 20px; border-radius: 10px; background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%); cursor: pointer; position: relative; margin-bottom: 15px; }
 		.picker-indicator { position: absolute; width: 16px; height: 16px; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.5); pointer-events: none; transform: translate(-50%, -50%); }
 		.hue-indicator { position: absolute; width: 8px; height: 24px; background: white; border: 2px solid #2c3e50; border-radius: 4px; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: transparent; border-radius: 0; box-shadow: none; overflow: visible; opacity: 0; transition: opacity 0.3s ease-in-out; min-height: 100vh; }
-		.container.loaded { opacity: 1; }
+		.container { max-width: 100%; width: 100%; margin: 0; padding: 0; background: transparent; border-radius: 0; box-shadow: none; overflow: visible; opacity: 1; min-height: 100vh; }
 		.content-area { padding: 0 12px 140px; background: transparent; min-height: calc(100vh - 250px); position: relative; }
 		.content-area::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; z-index: -1; opacity: 0; transition: opacity 0.3s ease; }
 		.content-area.has-background::before { opacity: 1; }
@@ -143,6 +142,11 @@
 		.skill-card:has(> .skill-title .delete-btn:hover) { background: #fee2e2 !important; border-left-color: #dc2626 !important; }
 		.tab-wrapper:has(.delete-tab-btn:hover) .nav-tab { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fca5a5 !important; }
 		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+		@keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+		.refresh-spinner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10001; display: none; }
+		.refresh-spinner.show { display: block; }
+		.refresh-spinner svg { width: 48px; height: 48px; animation: spin 1s linear infinite; }
+		@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 		@media (max-width: 768px) { .skill-grid { grid-template-columns: 1fr; } }
 		@supports (-webkit-touch-callout: none) { /* iOS specific - use native emoji keyboard */ input[type="text"].emoji-input {  font-size: 32px; } }
     	@supports (-webkit-overflow-scrolling: touch) { body { overscroll-behavior-y: contain; } }
@@ -265,6 +269,12 @@
 	</style>
     </head>
 <body>
+	<body>
+	<div id="refreshSpinner" class="refresh-spinner show">
+	    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+	        <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round"/>
+	    </svg>
+	</div>
     <div id="loginScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; z-index: 9999;">
     <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
         <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Welcome Back</h2>
@@ -950,8 +960,9 @@ async function loadUserData(userId) {
 		// Apply wallpaper AFTER content area is rendered
 		setTimeout(() => applyWallpaper(), 50);
 					
-        // Show container with fade-in effect
-        document.querySelector('.container').classList.add('loaded');
+        // Hide spinner
+		const spinner = document.getElementById('refreshSpinner');
+		if (spinner) spinner.classList.remove('show');
     	}).catch(async (error) => {
     	console.error('Error loading user data:', error);
         
@@ -3911,6 +3922,26 @@ function switchTab(index) {
     renderTabs();
     const cats = document.querySelectorAll('.category'); 
     cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); 
+    
+    // Scroll the active tab to center
+    setTimeout(() => {
+        const activeTab = document.querySelector('.nav-tab.active');
+        const navTabs = document.getElementById('navTabs');
+        
+        if (activeTab && navTabs) {
+            const tabRect = activeTab.getBoundingClientRect();
+            const navRect = navTabs.getBoundingClientRect();
+            
+            // Calculate the scroll position to center the tab
+            const scrollLeft = activeTab.offsetLeft - (navRect.width / 2) + (tabRect.width / 2);
+            
+            // Smooth scroll to center
+            navTabs.scrollTo({
+                left: scrollLeft,
+                behavior: 'smooth'
+            });
+        }
+    }, 50); // Small delay to ensure tab is rendered
 }
 
 function toggleCheck(itemId) { 
@@ -4632,6 +4663,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
