@@ -63,7 +63,6 @@
 		.content-area { padding: 0 12px 140px; background: transparent; min-height: calc(100vh - 250px); position: relative; }
 		.content-area::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; z-index: -1; opacity: 0; transition: opacity 0.3s ease; }
 		.content-area.has-background::before { opacity: 1; }
-		.content-area-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: -1; opacity: 0; transition: opacity 0.3s ease; }
 		.delete-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: transparent; color: #6b7280; border: none; border-radius: 6px; font-size: 18px; font-weight: normal; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; padding: 0; }
 		.delete-btn:hover { background: rgba(220, 38, 38, 0.1); color: #dc2626; transform: scale(1.1); }
 		.delete-tab-btn { width: 22px; height: 22px; background: transparent; color: #9ca3af; border: none; border-radius: 50%; font-size: 18px; font-weight: 600; margin-left: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; padding: 0; }
@@ -869,11 +868,7 @@ async function loadUserData(userId) {
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/wallpaper`)),
 	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap]) => {
 
-			// Wallpaper
-			if (wallpaperSnap.exists()) {
-		    wallpaperUrl = wallpaperSnap.val();
-		    applyWallpaper();
-		}
+			
 		// Load categories
         if (categoriesSnap.val()) {
             categories = categoriesSnap.val();
@@ -4667,6 +4662,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
