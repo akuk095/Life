@@ -3456,16 +3456,69 @@ function renderTabs() {
     }
     
     // Preserve Done button state if in edit mode
-    if (editMode) {
-        setTimeout(() => {
-            const saveBtn = document.getElementById('saveBtn');
-            const menuBtn = document.getElementById('menuBtn');
-            if (saveBtn) saveBtn.style.display = 'block';
-            if (menuBtn) menuBtn.style.display = 'none';
-        }, 0);
-    }
-	
+	if (editMode) {
+	    setTimeout(() => {
+	        const saveBtn = document.getElementById('saveBtn');
+	        const menuBtn = document.getElementById('menuBtn');
+	        if (saveBtn) saveBtn.style.display = 'block';
+	        if (menuBtn) menuBtn.style.display = 'none';
+	    }, 0);
+	} else {
+	    // Setup continuous scroll when not in edit mode
+	    setTimeout(() => setupContinuousScroll(), 100);
+	}
+
+// Continuous scrolling setup 
+if (typeof setupContinuousScroll === 'undefined') {
+    window.setupContinuousScroll = function() {
+        const navTabs = document.getElementById('navTabs');
+        if (!navTabs || categories.length <= 1) return;
+        
+        // Clone first and last tabs for infinite scroll
+        const allTabs = Array.from(navTabs.querySelectorAll('.tab-wrapper'));
+        if (allTabs.length < 2) return;
+        
+        const firstTab = allTabs[0].cloneNode(true);
+        const lastTab = allTabs[allTabs.length - 1].cloneNode(true);
+        
+        firstTab.dataset.isClone = 'true';
+        lastTab.dataset.isClone = 'true';
+        
+        navTabs.insertBefore(lastTab, navTabs.firstChild);
+        navTabs.appendChild(firstTab);
+        
+        // Setup scroll handler
+        let isAdjusting = false;
+        const handleScroll = () => {
+            if (isAdjusting) return;
+            
+            const tabs = Array.from(navTabs.querySelectorAll('.tab-wrapper:not([data-is-clone])'));
+            const scrollLeft = navTabs.scrollLeft;
+            const firstTabWidth = tabs[0].offsetWidth;
+            const totalRealWidth = tabs.reduce((sum, tab) => sum + tab.offsetWidth, 0);
+            
+            // Scrolled past end clone - jump to start
+            if (scrollLeft >= firstTabWidth + totalRealWidth) {
+                isAdjusting = true;
+                navTabs.scrollLeft = firstTabWidth;
+                setTimeout(() => isAdjusting = false, 50);
+            }
+            // Scrolled before start clone - jump to end
+            else if (scrollLeft <= 0) {
+                isAdjusting = true;
+                navTabs.scrollLeft = totalRealWidth;
+                setTimeout(() => isAdjusting = false, 50);
+            }
+        };
+        
+        navTabs.addEventListener('scroll', handleScroll);
+    };
 }
+
+// Call it at the end of renderTabs
+setTimeout(() => {
+    if (!editMode) setupContinuousScroll();
+}, 100);
 		
 function toggleBulletStyle(catIndex, skillIndex) {
     const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
@@ -4670,6 +4723,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
