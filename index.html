@@ -246,39 +246,42 @@
 		.reminder-time-picker .cancel-reminder:hover { background: #d1d5db; }
 		.reminder-time-picker .delete-reminder { background: #ef4444; color: white; margin-top: 8px; width: 100%; }
 		.reminder-time-picker .delete-reminder:hover { background: #dc2626; }
-		.home-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: #f0f2f5; z-index: 99; overflow-y: auto; }
+		.home-page { position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: white; display: none; overflow-y: auto; z-index: 100; }
 		.home-page.active { display: block; }
-		.home-container { max-width: 600px; margin: 0 auto; padding: 0; }
-		.home-header { background: white; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-		.home-title { font-size: 28px; font-weight: 700; color: #2c3e50; margin: 0; letter-spacing: -0.5px; }
-		.home-divider { height: 1px; background: #e5e7eb; }
-		.home-search-bar { padding: 16px 20px; background: white; }
-		.home-search-wrapper { position: relative; }
-		.home-search-input { width: 100%; padding: 12px 16px 12px 44px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; transition: all 0.2s ease; background: #f8f9fa; }
-		.home-search-input:focus { outline: none; border-color: var(--primary-color, #3498db); background: white; }
-		.home-search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
-		.home-actions { padding: 12px 20px; background: white; border-bottom: 1px solid #e5e7eb; }
-		.home-action-btn { flex: 1; padding: 12px 16px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
-		.home-create-btn { background: var(--primary-color, #3498db); color: white; }
-		.home-create-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-		.home-folder-btn { background: #f3f4f6; color: #6b7280; }
-		.home-folder-btn:hover { background: #e5e7eb; }
-		.home-guides-list { padding: 12px 20px 80px; }
-		.home-guide-item { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease; border: 2px solid transparent; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-		.home-guide-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-		.home-guide-item.current { border-color: var(--primary-color, #3498db); background: rgba(52, 152, 219, 0.05); }
-		.home-guide-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
-		.home-guide-info { flex: 1; min-width: 0; }
-		.home-guide-title { font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-		.home-guide-meta { font-size: 13px; color: #9ca3af; }
-		.home-guide-arrow { color: #d1d5db; transition: transform 0.2s ease; }
-		.home-guide-item:hover .home-guide-arrow { transform: translateX(4px); color: var(--primary-color, #3498db); }
-		.home-empty { text-align: center; padding: 80px 20px; color: #9ca3af; }
-		.home-empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
-		.home-empty-text { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #6b7280; }
-		.home-empty-subtext { font-size: 14px; color: #9ca3af; }
-		.home-create-folder-btn { width: 100%; padding: 12px 16px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; background: #f3f4f6; color: #6b7280; }
-		.home-create-folder-btn:hover { background: #e5e7eb; }
+		.home-container { padding-bottom: 80px; }
+		.home-header { padding: max(env(safe-area-inset-top), 20px) 20px 20px; display: flex; align-items: center; justify-content: space-between; }
+		.home-title { font-size: 28px; font-weight: 700; color: #2c3e50; }
+		.home-header-actions { display: flex; align-items: center; gap: 12px; }
+		.home-header-icon-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: #f3f4f6; color: #6b7280; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; }
+		.home-header-icon-btn:hover { background: #e5e7eb; }
+		.home-header-icon-btn:active { transform: scale(0.95); }
+		.home-divider { height: 1px; background: #e5e7eb; margin: 0 20px; }
+		.home-presets { padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+		.home-preset-item { display: flex; align-items: center; gap: 12px; padding: 0; background: none; border: none; cursor: pointer; color: #2c3e50; font-size: 15px; font-weight: 500; transition: all 0.2s ease; }
+		.home-preset-item:hover { color: var(--primary-color, #3498db); }
+		.home-preset-item:active { transform: scale(0.98); }
+		.home-preset-icon { flex-shrink: 0; color: #9ca3af; transition: color 0.2s ease; }
+		.home-preset-item:hover .home-preset-icon { color: var(--primary-color, #3498db); }
+		.home-filter-nav { padding: 16px 20px; display: flex; gap: 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+		.home-filter-nav::-webkit-scrollbar { display: none; }
+		.home-filter-item { font-size: 14px; font-weight: 500; color: #6b7280; cursor: pointer; padding: 6px 0; border-bottom: 2px solid transparent; transition: all 0.2s ease; flex-shrink: 0; }
+		.home-filter-item:hover { color: #2c3e50; }
+		.home-filter-item.active { color: var(--primary-color, #3498db); border-bottom-color: var(--primary-color, #3498db); }
+		.home-guides-list { padding: 0 20px 20px; }
+		.home-guide-item { background: transparent; border-radius: 0; padding: 16px 0; margin-bottom: 0; cursor: pointer; transition: all 0.2s ease; border: none; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 12px; box-shadow: none; }
+		.home-guide-item:hover { background: #f9fafb; }
+		.home-guide-item:last-child { border-bottom: none; }
+		.home-guide-item.current { background: transparent; border-bottom-color: #f3f4f6; }
+		.home-guide-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+		.home-guide-title { font-size: 15px; font-weight: 500; color: #2c3e50; margin-bottom: 2px; }
+		.home-guide-meta { font-size: 12px; color: #9ca3af; }
+		.home-search-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 1000; display: none; }
+		.home-search-overlay.show { display: block; }
+		.home-search-container { height: 100%; display: flex; flex-direction: column; }
+		.home-search-header { padding: max(env(safe-area-inset-top), 20px) 20px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e5e7eb; }
+		.home-search-input-full { flex: 1; border: none; font-size: 16px; color: #2c3e50; outline: none; }
+		.home-search-close { width: 36px; height: 36px; border-radius: 8px; border: none; background: #f3f4f6; color: #6b7280; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+		.home-search-results { flex: 1; overflow-y: auto; padding: 20px; }
 		.home-folder { background: white; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
 		.home-folder-header { padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s ease; }
 		.home-folder-header:hover { background: #f8f9fa; }
@@ -296,8 +299,6 @@
 		.home-folder-guide-item:last-child { margin-bottom: 0; }
 		.home-folder-guide-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 		.home-folder-guide-title { font-size: 14px; font-weight: 500; color: #2c3e50; flex: 1; }
-		.home-header-actions { display: flex; align-items: center; justify-content: space-between; width: 100%; position: relative; }
-		.home-guide-item { position: relative; }
 		.home-guide-checkbox { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border: 2px solid #d1d5db; border-radius: 6px; background: white; display: none; cursor: pointer; transition: all 0.2s ease; z-index: 2; }
 		.home-guide-checkbox.show { display: flex; align-items: center; justify-content: center; }
 		.home-guide-checkbox.checked { background: var(--primary-color, #3498db); border-color: var(--primary-color, #3498db); }
@@ -315,13 +316,10 @@
 		.home-action-move:hover { opacity: 0.9; }
 		.home-action-delete { background: #fee2e2; color: #dc2626; }
 		.home-action-delete:hover { background: #fecaca; }
-		.home-menu-btn { background: none; border: none; padding: 8px; cursor: pointer; color: #6b7280; transition: color 0.2s ease; font-size: 24px; line-height: 1; }
-		.home-menu-btn:hover { color: var(--primary-color, #3498db); }
-		.home-dropdown-menu { display: none; position: absolute; top: 100%; right: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 180px; z-index: 1000; overflow: hidden; border: 1px solid #e8eaed; margin-top: 8px; }
-		.home-dropdown-menu.show { display: block; }
-		.home-dropdown-menu button { width: 100%; padding: 14px 20px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; color: #1f2937; transition: background 0.2s; font-weight: 500; display: flex; align-items: center; gap: 12px; }
-		.home-dropdown-menu button:hover { background: #f3f4f6; }
-		.home-dropdown-menu button svg { width: 18px; height: 18px; flex-shrink: 0; }
+		.home-empty { text-align: center; padding: 80px 20px; color: #9ca3af; }
+		.home-empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+		.home-empty-text { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #6b7280; }
+		.home-empty-subtext { font-size: 14px; color: #9ca3af; }
 		
 	</style>
     </head>
@@ -607,6 +605,43 @@ onAuthStateChanged(auth, (user) => {
         }, 300);
         
         loadUserData(user.uid);
+        
+        // Restore last active page from localStorage, default to home
+        const lastPage = localStorage.getItem('currentPage') || 'guides';
+        const homePage = document.getElementById('homePage');
+        const profilePage = document.getElementById('profilePage');
+        const mainContainer = document.querySelector('.container');
+        const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+        
+        // Remove all active states
+        bottomNavItems.forEach(nav => nav.classList.remove('active'));
+        
+        if (lastPage === 'guides') {
+            mainContainer.style.display = 'none';
+            if (profilePage) profilePage.classList.remove('active');
+            if (homePage) {
+                homePage.classList.add('active');
+                populateHomePage();
+            }
+            bottomNavItems[0]?.classList.add('active');
+        } else if (lastPage === 'profile') {
+            mainContainer.style.display = 'none';
+            if (homePage) homePage.classList.remove('active');
+            if (profilePage) {
+                profilePage.classList.add('active');
+                const profileEmail = document.getElementById('profileEmail');
+                if (profileEmail && currentUser) {
+                    profileEmail.textContent = currentUser.email;
+                }
+            }
+            bottomNavItems[2]?.classList.add('active');
+        } else {
+            // Default to main/create page
+            if (homePage) homePage.classList.remove('active');
+            if (profilePage) profilePage.classList.remove('active');
+            mainContainer.style.display = 'block';
+            bottomNavItems[1]?.classList.add('active');
+        }
     } else {
         currentUser = null;
         appContainer.classList.remove('show');
@@ -2071,6 +2106,7 @@ function createNewGuide() {
     set(ref(database, `users/${currentUser.uid}/guides/${newId}`), newGuideData).then(() => {
         currentGuideId = newId;
         localStorage.setItem('currentGuideId', newId);
+        localStorage.setItem('currentPage', 'main');
         loadUserData(currentUser.uid);
         
         // Switch to main view
@@ -2955,6 +2991,7 @@ function createGuideElement(guide, isInFolder) {
             toggleGuideSelection(guide.id, checkbox);
         } else {
             switchGuide(guide.id);
+            localStorage.setItem('currentPage', 'main');
             document.getElementById('homePage').classList.remove('active');
             document.querySelector('.container').style.display = 'block';
             document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
@@ -4665,6 +4702,9 @@ if (homeCreateFolderBtn) {
         item.addEventListener('click', () => {
             const page = item.dataset.page;
             
+            // Save current page to localStorage
+            localStorage.setItem('currentPage', page);
+            
             // Remove active class from all items
             bottomNavItems.forEach(nav => nav.classList.remove('active'));
             // Add active class to clicked item
@@ -4821,42 +4861,102 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
 <div class="home-page" id="homePage">
     <div class="home-container">
         <div class="home-header">
+            <h1 class="home-title">Notebook</h1>
             <div class="home-header-actions">
-                <h1 class="home-title">Notebook</h1>
-                <button class="home-menu-btn" id="homeMenuBtn">⋮</button>
-                <div class="home-dropdown-menu" id="homeDropdownMenu">
-                    <button id="homeSelectMenuBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 11l3 3L22 4"></path>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                        Select
-                    </button>
-                    <button id="homeCreateFolderMenuBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                            <line x1="12" y1="11" x2="12" y2="17"></line>
-                            <line x1="9" y1="14" x2="15" y2="14"></line>
-                        </svg>
-                        Create Folder
-                    </button>
-                </div>
+                <button class="home-header-icon-btn" id="homeSearchBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+                <button class="home-header-icon-btn" id="homeCreateBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button class="home-header-icon-btn" id="homeMenuBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
             </div>
         </div>
+        
         <div class="home-divider"></div>
-        <div class="home-search-bar">
-            <div class="home-search-wrapper">
-                <svg class="home-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
+        
+        <div class="home-presets">
+            <div class="home-preset-item" data-preset="short-notes">
+                <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
                 </svg>
-                <input type="text" class="home-search-input" id="homeSearchInput" placeholder="Search guides...">
+                <span>Short notes</span>
+            </div>
+            <div class="home-preset-item" data-preset="reminders">
+                <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span>Reminders</span>
+            </div>
+            <div class="home-preset-item" data-preset="trackers">
+                <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Trackers</span>
+            </div>
+            <div class="home-preset-item" data-preset="routines">
+                <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 12a11.05 11.05 0 0 0-22 0zm-5 7a3 3 0 0 1-6 0v-7"></path>
+                </svg>
+                <span>Routines</span>
+            </div>
+            <div class="home-preset-item" data-preset="journals">
+                <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <span>Journals</span>
             </div>
         </div>
+        
+        <div class="home-divider"></div>
+        
+        <div class="home-filter-nav">
+            <div class="home-filter-item active" data-filter="all">All files</div>
+            <div class="home-filter-item" data-filter="short-notes">Short notes</div>
+            <div class="home-filter-item" data-filter="reminders">Reminders</div>
+            <div class="home-filter-item" data-filter="routines">Routines</div>
+            <div class="home-filter-item" data-filter="trackers">Trackers</div>
+            <div class="home-filter-item" data-filter="journals">Journals</div>
+        </div>
+        
         <div class="home-guides-list" id="homeGuidesList">
-            <!-- Guides and folders will be populated here -->
+            <!-- Guides will be populated here -->
         </div>
     </div>
+    
+    <div class="home-search-overlay" id="homeSearchOverlay">
+        <div class="home-search-container">
+            <div class="home-search-header">
+                <input type="text" class="home-search-input-full" id="homeSearchInputFull" placeholder="Search guides..." autofocus>
+                <button class="home-search-close" id="homeSearchClose">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="home-search-results" id="homeSearchResults">
+                <!-- Search results will appear here -->
+            </div>
+        </div>
+    </div>
+    
     <div class="home-actions-bar" id="homeActionsBar">
         <button class="home-action-move" id="homeMoveBtn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -4902,11 +5002,11 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
 </div>
 
 <div class="bottom-nav">
-    <div class="bottom-nav-item" data-page="guides">
+    <div class="bottom-nav-item active" data-page="guides">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
         <span>Home</span>
     </div>
-    <div class="bottom-nav-item active" data-page="main">
+    <div class="bottom-nav-item" data-page="main">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         <span>Create</span>
     </div>
@@ -4921,4 +5021,5 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
 </div>
 </body>
 </html>
+
 
