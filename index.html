@@ -3651,7 +3651,7 @@ function renderContent() {
                 menuBtn.style.right = '8px';
                 menuBtn.style.opacity = '0.3';
                 menuBtn.style.fontSize = '24px';
-                menuBtn.style.zIndex = '10';
+                menuBtn.style.zIndex = '5';
                 menuBtn.style.background = 'white';
                 menuBtn.style.borderRadius = '4px';
                 menuBtn.style.padding = '6px 10px';
@@ -4155,7 +4155,7 @@ function addSkill(catIndex) {
     }); 
     saveCategories();
     renderContent();
-    setTimeout(() => applyWallpaper(), 50);
+    
 }
 
 function editSkillIcon(catIndex, skillIndex, el) {
@@ -4171,7 +4171,7 @@ async function deleteSkill(catIndex, skillIndex) {
         categories[catIndex].skills.splice(skillIndex, 1); 
         saveCategories();
         renderContent();
-        setTimeout(() => applyWallpaper(), 50);
+        
     } 
 }
 
@@ -4180,7 +4180,7 @@ async function deleteItem(catIndex, skillIndex, itemIndex) {
         categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
         saveCategories();
         renderContent();
-        setTimeout(() => applyWallpaper(), 50);
+        
     }
 }
 
@@ -4227,7 +4227,7 @@ function toggleLayout() {
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/layoutMode`), layoutMode);
     renderContent();
     updateLayoutButton();
-    setTimeout(() => applyWallpaper(), 50);
+    
 }
 
 function updateLayoutButton() {
@@ -4670,6 +4670,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
