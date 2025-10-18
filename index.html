@@ -927,22 +927,34 @@ async function loadUserData(userId) {
 		    headerImage = null;
 		    console.log('No header image in Firebase');
 		}
-        
-        // Check if we need to auto-refresh
-        checkAndAutoRefresh(lastRefreshSnap.val());
-        
-        // Apply theme (now knows if headerImage exists)
-        applyTheme();
-        
-        // Render everything
-        renderHeader();
-        renderTabs();
-        renderContent();
-        updateLayoutButton();
-        
-        // Apply header image AFTER header is rendered
-        setTimeout(() => applyHeaderImage(), 50);
-        
+		
+		// Load wallpaper BEFORE applying theme
+		if (wallpaperSnap.exists()) {
+		    wallpaperUrl = wallpaperSnap.val();
+		    console.log('Wallpaper loaded from Firebase, length:', wallpaperUrl.length);
+		} else {
+		    wallpaperUrl = '';
+		    console.log('No wallpaper in Firebase');
+		}
+		
+		// Check if we need to auto-refresh
+		checkAndAutoRefresh(lastRefreshSnap.val());
+		
+		// Apply theme (now knows if headerImage and wallpaper exist)
+		applyTheme();
+		
+		// Render everything
+		renderHeader();
+		renderTabs();
+		renderContent();
+		updateLayoutButton();
+		
+		// Apply header image AFTER header is rendered
+		setTimeout(() => applyHeaderImage(), 50);
+		
+		// Apply wallpaper AFTER content area is rendered
+		setTimeout(() => applyWallpaper(), 50);
+					
         // Show container with fade-in effect
         document.querySelector('.container').classList.add('loaded');
     	}).catch(async (error) => {
@@ -4655,6 +4667,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
