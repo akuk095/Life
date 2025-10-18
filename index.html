@@ -1453,75 +1453,78 @@ function applyHeaderImage() {
         header.style.backgroundRepeat = 'no-repeat';
         
         // Detect image brightness and set text color
-        detectImageBrightness(headerImage, (isLight) => {
-            console.log('Image is', isLight ? 'LIGHT' : 'DARK');
-            const textColor = isLight ? '#2c3e50' : 'white';
-            const scrimColor = isLight ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.5)';
-            
-            // Apply background directly to text elements
-            const h1 = header.querySelector('h1');
-            const p = header.querySelector('p');
-            
-            if (h1) {
-                h1.style.cssText = `
-                    position: relative;
-                    z-index: 1;
-                    color: ${textColor};
-                    background: radial-gradient(ellipse at center, 
-                        rgba(${r}, ${g}, ${b}, 0.5) 0%, 
-                        rgba(${r}, ${g}, ${b}, 0.5) 50%, 
-                        transparent 100%);
-                    backdrop-filter: blur(6px);
-                    -webkit-backdrop-filter: blur(6px);
-                    padding: 4px 12px;
-                    border-radius: 10px;
-                    display: block;
-                    text-align: center;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    margin-bottom: 2px;
-                    font-size: 20px;
-                `;
-            }
-            
-            if (p) {
-                p.style.cssText = `
-                    position: relative;
-                    z-index: 1;
-                    color: ${textColor};
-                    background: radial-gradient(ellipse at center, 
-                        rgba(${r}, ${g}, ${b}, 0.5) 0%, 
-                        rgba(${r}, ${g}, ${b}, 0.5) 50%, 
-                        transparent 100%);
-                    backdrop-filter: blur(8px);
-                    -webkit-backdrop-filter: blur(8px);
-                    padding: 6px 20px;
-                    border-radius: 8px;
-                    display: block;
-                    text-align: center;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    margin-top: 2px;
-                    font-size: 12px;
-                `;
-            }
-            
-            // Keep buttons visible with correct color
-            const menuBtn = header.querySelector('.edit-btn, #menuBtn');
-            const guideMenuBtn = header.querySelector('.guide-menu-btn');
-            const saveBtn = header.querySelector('.save-btn');
-            
-            if (menuBtn) {
-                menuBtn.style.color = textColor;
-                menuBtn.style.zIndex = '100';
-            }
-            if (guideMenuBtn) {
-                guideMenuBtn.style.color = textColor;
-                guideMenuBtn.style.zIndex = '100';
-            }
-            if (saveBtn) {
-                saveBtn.style.color = textColor;
-                saveBtn.style.zIndex = '100';
-            }
-        });
+	detectImageBrightness(headerImage, (isLight, avgR, avgG, avgB) => {
+    console.log('Image is', isLight ? 'LIGHT' : 'DARK');
+    const textColor = isLight ? '#2c3e50' : 'white';
+    const scrimColor = isLight ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.5)';
+    const r = avgR || 0;
+    const g = avgG || 0;
+    const b = avgB || 0;
+    
+    // Apply background directly to text elements
+    const h1 = header.querySelector('h1');
+    const p = header.querySelector('p');
+    
+    if (h1) {
+        h1.style.cssText = `
+            position: relative;
+            z-index: 1;
+            color: ${textColor};
+            background: radial-gradient(ellipse at center, 
+                rgba(${r}, ${g}, ${b}, 0.5) 0%, 
+                rgba(${r}, ${g}, ${b}, 0.5) 50%, 
+                transparent 100%);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 4px 12px;
+            border-radius: 10px;
+            display: block;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2px;
+            font-size: 20px;
+        `;
+    }
+    
+    if (p) {
+        p.style.cssText = `
+            position: relative;
+            z-index: 1;
+            color: ${textColor};
+            background: radial-gradient(ellipse at center, 
+                rgba(${r}, ${g}, ${b}, 0.5) 0%, 
+                rgba(${r}, ${g}, ${b}, 0.5) 50%, 
+                transparent 100%);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 6px 20px;
+            border-radius: 8px;
+            display: block;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 2px;
+            font-size: 12px;
+        `;
+    }
+    
+    // Keep buttons visible with correct color
+    const menuBtn = header.querySelector('.edit-btn, #menuBtn');
+    const guideMenuBtn = header.querySelector('.guide-menu-btn');
+    const saveBtn = header.querySelector('.save-btn');
+    
+    if (menuBtn) {
+        menuBtn.style.color = textColor;
+        menuBtn.style.zIndex = '100';
+    }
+    if (guideMenuBtn) {
+        guideMenuBtn.style.color = textColor;
+        guideMenuBtn.style.zIndex = '100';
+    }
+    if (saveBtn) {
+        saveBtn.style.color = textColor;
+        saveBtn.style.zIndex = '100';
+    }
+});
     } else {
         console.log('Removing header image, reverting to theme');
         // Remove image background and revert to theme gradient
@@ -1564,27 +1567,41 @@ function detectImageBrightness(imageSrc, callback) {
         const imageData = ctx.getImageData(25, 25, 50, 50);
         const data = imageData.data;
         
+        let totalR = 0, totalG = 0, totalB = 0;
         let brightness = 0;
+        
         for (let i = 0; i < data.length; i += 4) {
             const r = data[i];
             const g = data[i + 1];
             const b = data[i + 2];
+            
+            totalR += r;
+            totalG += g;
+            totalB += b;
+            
             // Calculate perceived brightness
             brightness += (0.299 * r + 0.587 * g + 0.114 * b);
         }
         
-        brightness = brightness / (data.length / 4);
+        const pixelCount = data.length / 4;
+        brightness = brightness / pixelCount;
+        
+        // Calculate average RGB values
+        const avgR = Math.round(totalR / pixelCount);
+        const avgG = Math.round(totalG / pixelCount);
+        const avgB = Math.round(totalB / pixelCount);
+        
         console.log('Detected brightness:', brightness);
         
         // If brightness > 128, image is light, use dark text
         const isLight = brightness > 128;
-        callback(isLight);
+        callback(isLight, avgR, avgG, avgB);
     };
     
     img.onerror = function() {
         console.log('Image failed to load for brightness detection');
-        // If image fails to load, default to dark text
-        callback(true);
+        // If image fails to load, default to dark text with neutral gray
+        callback(true, 128, 128, 128);
     };
 }
 // Wallpaper Management
@@ -2220,7 +2237,7 @@ function saveHeader() {
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appSubtitle`), appSubtitle);
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appIcon`), appIcon);
   renderHeader();
-  populateGuideDropdown();
+  
 }
 
 async function renderHeader() {
@@ -2583,7 +2600,7 @@ if (autoRefreshBtn) {
 	    }
 
     applyTheme();
-    populateGuideDropdown();
+    
 
     // Add double-click edit for header (only when not in edit mode)
     if (!editMode) {
@@ -4590,6 +4607,7 @@ function createNewFolder(name) {
 </div>
 </body>
 </html>
+
 
 
 
