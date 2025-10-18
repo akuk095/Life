@@ -4558,9 +4558,38 @@ function createNewFolder(name) {
 }
 	
 </script>
-	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
-	<div class="home-page" id="homePage">
-	<div class="profile-page" id="profilePage">
+<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
+<div class="home-page" id="homePage">
+    <div class="home-container">
+        <div class="home-header">
+            <h1 class="home-title">Notebook</h1>
+        </div>
+        <div class="home-divider"></div>
+        <div class="home-search-bar">
+            <div class="home-search-wrapper">
+                <svg class="home-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="home-search-input" id="homeSearchInput" placeholder="Search guides...">
+            </div>
+        </div>
+        <div class="home-actions">
+            <button class="home-create-folder-btn" id="homeCreateFolderBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    <line x1="12" y1="11" x2="12" y2="17"></line>
+                    <line x1="9" y1="14" x2="15" y2="14"></line>
+                </svg>
+                Create Folder
+            </button>
+        </div>
+        <div class="home-guides-list" id="homeGuidesList">
+            <!-- Guides and folders will be populated here -->
+        </div>
+    </div>
+</div>
+<div class="profile-page" id="profilePage">
     <div class="profile-container">
         <div class="profile-header">
             <div class="profile-email-label">Email</div>
@@ -4607,18 +4636,3 @@ function createNewFolder(name) {
 </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
