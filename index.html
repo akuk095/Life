@@ -382,7 +382,7 @@ function customAlert(message, title = '') {
     });
 }
 
-function customConfirm(message, title = '') {
+function customConfirm(message, title = '', confirmText = 'OK') {
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
         overlay.className = 'custom-dialog-overlay';
@@ -395,9 +395,14 @@ function customConfirm(message, title = '') {
             html += `<div class="custom-dialog-title">${title}</div>`;
         }
         html += `<div class="custom-dialog-message">${message}</div>`;
+        
+        // Use destructive class only if confirmText suggests danger
+        const isDangerous = confirmText.toLowerCase().includes('delete') || confirmText.toLowerCase().includes('remove');
+        const buttonClass = isDangerous ? 'destructive' : 'primary';
+        
         html += `<div class="custom-dialog-buttons">
             <button class="custom-dialog-button" data-result="false">Cancel</button>
-            <button class="custom-dialog-button destructive" data-result="true">Delete</button>
+            <button class="custom-dialog-button ${buttonClass}" data-result="true">${confirmText}</button>
         </div>`;
         
         dialog.innerHTML = html;
@@ -4448,12 +4453,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileDeleteAccountBtn = document.getElementById('profileDeleteAccountBtn');
     
     if (profileLogoutBtn) {
-        profileLogoutBtn.addEventListener('click', async () => {
-            if (await customConfirm('Are you sure you want to log out?', 'Logout')) {
-                logout();
-            }
-        });
-    }
+	    profileLogoutBtn.addEventListener('click', async () => {
+	        if (await customConfirm('Are you sure you want to log out?', 'Logout', 'Logout')) {
+	            logout();
+	        }
+	    });
+	}
     
     if (profileDeleteAccountBtn) {
         profileDeleteAccountBtn.addEventListener('click', async () => {
@@ -4547,6 +4552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
