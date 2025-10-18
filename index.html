@@ -876,6 +876,7 @@ document.addEventListener('drop', (e) => {
 async function loadUserData(userId) {
     // Hide container initially
     document.querySelector('.container').classList.remove('loaded');
+	document.querySelector('.container').style.opacity = '0';
     
     // Check if guide exists for this user
     get(ref(database, `users/${userId}/guides/${currentGuideId}`)).then((snapshot) => {
@@ -988,7 +989,12 @@ async function loadUserData(userId) {
 		
 		// Apply wallpaper AFTER content area is rendered
 		setTimeout(() => applyWallpaper(), 50);
-					
+
+		// Show container with loaded data
+		setTimeout(() => {
+		    document.querySelector('.container').style.opacity = '1';
+		}, 100);
+			
         // Hide spinner
 		const spinner = document.getElementById('refreshSpinner');
 		if (spinner) spinner.classList.remove('show');
@@ -4793,6 +4799,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
