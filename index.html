@@ -167,7 +167,7 @@
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
-		.skill-card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 0; align-items: center; padding: 0; background: transparent; pointer-events: none; z-index: 9; }
+		.skill-card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 0; align-items: center; padding: 0; background: transparent; pointer-events: none; z-index: 5; }
 		.skill-card-controls.show { pointer-events: auto; }
 		.edit-mode .skill-card-controls { pointer-events: auto; }
 		body:not(.edit-mode-active) .skill-card-controls.show { pointer-events: auto; }
@@ -4667,6 +4667,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
