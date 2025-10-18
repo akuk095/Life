@@ -221,7 +221,7 @@
 		.custom-dialog-button.danger:hover { background: #e62e24; transform: translateY(-1px); }
 		.custom-dialog-buttons.single-button { display: block; padding: 0 24px 24px; }
 		.custom-dialog-buttons.single-button .custom-dialog-button { width: 100%; max-width: 200px; margin: 0 auto; display: block; }
-		.guides-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: var(--bg-primary, #0f172a); z-index: 99; overflow-y: auto; color: var(--text-primary, #f8fafc); }
+		.guides-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: var(--bg-primary, #f0f2f5); z-index: 99; overflow-y: auto; color: var(--text-primary, #f8fafc); }
 		.guides-page.active { display: block; }
 		.guides-page :root { --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #1e293b; --text-primary: #f8fafc; --text-secondary: #cbd5e1; --text-muted: #64748b; --accent: #3b82f6; --accent-hover: #2563eb; --border: rgba(148, 163, 184, 0.1); --shadow: rgba(0, 0, 0, 0.3); }
 		.guides-container { max-width: 680px; margin: 0 auto; padding: 24px 20px 40px; }
@@ -3464,6 +3464,8 @@ function renderTabs() {
             if (menuBtn) menuBtn.style.display = 'none';
         }, 0);
     }
+	// Reapply wallpaper after rendering content
+	    setTimeout(() => applyWallpaper(), 50);
 }
 		
 function toggleBulletStyle(catIndex, skillIndex) {
@@ -4667,6 +4669,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
