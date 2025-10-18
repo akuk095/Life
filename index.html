@@ -3467,58 +3467,74 @@ function renderTabs() {
 	
 }
 
-// Continuous tab navigation - cleaner approach
-let navTabsScrollHandler = null;
-
-function setupContinuousTabScroll() {
+// Infinite scroll for tabs
+function setupInfiniteTabScroll() {
     const navTabs = document.getElementById('navTabs');
     if (!navTabs || categories.length <= 1 || editMode) return;
     
-    // Remove old listener if exists
-    if (navTabsScrollHandler) {
-        navTabs.removeEventListener('scroll', navTabsScrollHandler);
-    }
+    // Remove any existing clones first
+    navTabs.querySelectorAll('[data-clone]').forEach(el => el.remove());
     
-    let isTransitioning = false;
+    const realTabs = Array.from(navTabs.querySelectorAll('.tab-wrapper'));
+    if (realTabs.length === 0) return;
     
-    navTabsScrollHandler = function() {
-        if (isTransitioning) return;
+    // Clone all tabs and add to both sides
+    const clonesBefore = realTabs.map(tab => {
+        const clone = tab.cloneNode(true);
+        clone.dataset.clone = 'before';
+        clone.querySelectorAll('button').forEach(btn => {
+            btn.style.pointerEvents = 'none';
+        });
+        return clone;
+    });
+    
+    const clonesAfter = realTabs.map(tab => {
+        const clone = tab.cloneNode(true);
+        clone.dataset.clone = 'after';
+        clone.querySelectorAll('button').forEach(btn => {
+            btn.style.pointerEvents = 'none';
+        });
+        return clone;
+    });
+    
+    // Insert clones
+    clonesBefore.reverse().forEach(clone => {
+        navTabs.insertBefore(clone, navTabs.firstChild);
+    });
+    clonesAfter.forEach(clone => {
+        navTabs.appendChild(clone);
+    });
+    
+    // Calculate widths
+    const singleSetWidth = realTabs.reduce((sum, tab) => sum + tab.offsetWidth, 0);
+    
+    // Set initial scroll position to middle set (real tabs)
+    navTabs.scrollLeft = singleSetWidth;
+    
+    // Handle scroll wrapping
+    let isAdjusting = false;
+    const handleScroll = () => {
+        if (isAdjusting) return;
         
-        const scrollLeft = navTabs.scrollLeft;
-        const scrollWidth = navTabs.scrollWidth;
-        const clientWidth = navTabs.clientWidth;
-        const maxScroll = scrollWidth - clientWidth;
+        const scrollPos = navTabs.scrollLeft;
         
-        // Near the end - wrap to beginning
-        if (scrollLeft >= maxScroll - 5) {
-            isTransitioning = true;
-            requestAnimationFrame(() => {
-                navTabs.style.scrollBehavior = 'auto';
-                navTabs.scrollLeft = 0;
-                setTimeout(() => {
-                    navTabs.style.scrollBehavior = 'smooth';
-                    isTransitioning = false;
-                }, 50);
-            });
+        // If scrolled past the end clones, wrap to real tabs
+        if (scrollPos >= singleSetWidth * 2) {
+            isAdjusting = true;
+            navTabs.scrollLeft = scrollPos - singleSetWidth;
+            setTimeout(() => isAdjusting = false, 10);
         }
-        // Near the beginning - wrap to end
-        else if (scrollLeft <= 5) {
-            isTransitioning = true;
-            requestAnimationFrame(() => {
-                navTabs.style.scrollBehavior = 'auto';
-                navTabs.scrollLeft = maxScroll;
-                setTimeout(() => {
-                    navTabs.style.scrollBehavior = 'smooth';
-                    isTransitioning = false;
-                }, 50);
-            });
+        // If scrolled before the beginning clones, wrap to real tabs
+        else if (scrollPos < singleSetWidth) {
+            isAdjusting = true;
+            navTabs.scrollLeft = scrollPos + singleSetWidth;
+            setTimeout(() => isAdjusting = false, 10);
         }
     };
     
-    navTabs.addEventListener('scroll', navTabsScrollHandler);
+    navTabs.removeEventListener('scroll', handleScroll);
+    navTabs.addEventListener('scroll', handleScroll, { passive: true });
 }
-
-
 function toggleBulletStyle(catIndex, skillIndex) {
     const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
     const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
@@ -3996,9 +4012,9 @@ function switchTab(index) {
                 behavior: 'smooth'
             });
         }
-        
-        // Setup continuous scroll after centering
-        setupContinuousTabScroll();
+
+		// Setup infinite scroll
+        setTimeout(() => setupInfiniteTabScroll(), 100);
     }, 50); // Small delay to ensure tab is rendered
 }
 
