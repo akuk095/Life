@@ -122,7 +122,7 @@
 		.edit-mode-active .nav-tab .emoji-remove-btn { pointer-events: auto; }
 		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
 		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }	
-		.nav-tabs { display: flex; background: white; border-bottom: none; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: relative; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 0 0 16px 16px; padding: 8px 8px 0; margin-bottom: 12px; }
+		.nav-tabs { display: flex; background: white; border-bottom: none; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: relative; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 0 0 16px 16px; padding: 4px 8px 0; margin-bottom: 12px; height: 40px; }
 		.nav-tabs::-webkit-scrollbar { display: none; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
@@ -3478,6 +3478,9 @@ function setupInfiniteTabScroll() {
     const realTabs = Array.from(navTabs.querySelectorAll('.tab-wrapper'));
     if (realTabs.length === 0) return;
     
+    // Store current scroll position before adding clones
+    const currentScrollLeft = navTabs.scrollLeft;
+    
     // Clone all tabs and add to both sides
     const clonesBefore = realTabs.map(tab => {
         const clone = tab.cloneNode(true);
@@ -3508,8 +3511,8 @@ function setupInfiniteTabScroll() {
     // Calculate widths
     const singleSetWidth = realTabs.reduce((sum, tab) => sum + tab.offsetWidth, 0);
     
-    // Set initial scroll position to middle set (real tabs)
-    navTabs.scrollLeft = singleSetWidth;
+    // Restore scroll position adjusted for the clones we added before
+    navTabs.scrollLeft = currentScrollLeft + singleSetWidth;
     
     // Handle scroll wrapping
     let isAdjusting = false;
@@ -4741,4 +4744,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
