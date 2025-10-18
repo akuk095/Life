@@ -3465,7 +3465,8 @@ function renderTabs() {
 	    }, 0);
 	} else {
 	    // Setup continuous scroll when not in edit mode
-	    setTimeout(() => setupContinuousScroll(), 100);
+	    setTimeout(() => {
+	    if (!editMode) setupContinuousScroll();	}, 100);
 	}
 
 // Continuous scrolling setup 
@@ -3514,11 +3515,6 @@ if (typeof setupContinuousScroll === 'undefined') {
         navTabs.addEventListener('scroll', handleScroll);
     };
 }
-
-// Call it at the end of renderTabs
-setTimeout(() => {
-    if (!editMode) setupContinuousScroll();
-}, 100);
 		
 function toggleBulletStyle(catIndex, skillIndex) {
     const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
@@ -4723,6 +4719,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
