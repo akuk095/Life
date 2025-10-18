@@ -104,7 +104,7 @@
 		.guide-dropdown.show { transform: translateX(0); }
 		.guide-menu-btn { position: absolute; top: 10px; left: 10px; background: none; color: white; border: none; padding: 8px; cursor: pointer; font-size: 24px; font-weight: 600; transition: all 0.3s ease; line-height: 1; z-index: 10; }
 		.guide-menu-btn:hover { opacity: 0.7; }
-		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: max(env(safe-area-inset-top), 20px) 20px 20px; text-align: center; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.15); border-radius: 0 0 20px 20px; z-index: 98; }
+		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: max(env(safe-area-inset-top), 20px) 20px 20px; text-align: center; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.15); border-radius: 0; z-index: 98; }
 		.header h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px; }
 		.header p { opacity: 0.95; font-size: 13px; font-weight: 400; }
 		.header .editable:focus { outline: 2px solid #fff; background: rgba(255, 255, 255, 0.2); color: #fff; }
@@ -122,7 +122,8 @@
 		.edit-mode-active .nav-tab .emoji-remove-btn { pointer-events: auto; }
 		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
 		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }	
-		.nav-tabs { display: flex; background: white; border-bottom: none; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: relative; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 0 0 16px 16px; padding: 8px 8px 0; margin-bottom: 12px; }
+		.nav-tabs { display: flex; background: white; border-bottom: none; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: relative; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 0 0 16px 16px; padding: 8px 8px 0; margin-bottom: 12px; justify-content: center; }
+		.nav-tabs::before, .nav-tabs::after { content: ''; flex: 1 0 50%; }
 		.nav-tabs::-webkit-scrollbar { display: none; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
@@ -4670,4 +4671,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
