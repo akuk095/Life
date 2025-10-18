@@ -4437,218 +4437,11 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-	// Guides List Page Functionality
-async function initGuidesPage() {
-    if (!currentUser) return;
-    
-    // Fetch user's guides from Firebase
-    const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
-    const guides = guidesSnapshot.val() || {};
-    
-    // Convert guides object to array
-    const guidesArray = Object.keys(guides).map(id => ({
-        id: id,
-        title: guides[id].appTitle || 'Untitled Guide',
-        subtitle: guides[id].appSubtitle || 'No description',
-        icon: guides[id].appIcon || '📄',
-        color: guides[id].themeColor || '#3498db',
-        categories: guides[id].categories || [],
-        updated: 'Recently' // You can add lastUpdated timestamp to Firebase if needed
-    }));
-    
-    // Calculate total items for each guide
-    guidesArray.forEach(guide => {
-        let totalItems = 0;
-        if (guide.categories) {
-            guide.categories.forEach(cat => {
-                if (cat.skills) {
-                    cat.skills.forEach(skill => {
-                        if (skill.items) {
-                            totalItems += skill.items.length;
-                        }
-                    });
-                }
-            });
-        }
-        guide.itemCount = totalItems;
-    });
-
-    // For now, use empty favorites (you can add favorites functionality later)
-    const favorites = [
-        { name: 'Daily', icon: '☀️', color: '#f59e0b' },
-        { name: 'Work', icon: '💼', color: '#8b5cf6' },
-        { name: 'Health', icon: '💪', color: '#10b981' },
-        { name: 'Learn', icon: '📚', color: '#3b82f6' }
-    ];
-
-    // Render favorites
-    const favoritesGrid = document.getElementById('guidesFavoritesGrid');
-    favoritesGrid.innerHTML = '';
-    favorites.forEach((fav, index) => {
-        const card = document.createElement('div');
-        card.className = 'guides-favorite-card';
-        card.style.background = `linear-gradient(135deg, ${fav.color}22, ${fav.color}44)`;
-        card.style.animationDelay = `${0.4 + index * 0.05}s`;
-        card.style.animation = 'fadeInUp 0.5s ease-out backwards';
-        card.innerHTML = `
-            <div class="guides-favorite-icon">${fav.icon}</div>
-            <div class="guides-favorite-name">${fav.name}</div>
-        `;
-        card.addEventListener('click', () => {
-            console.log('Favorite clicked:', fav.name);
-            // You can add favorite filtering functionality here
-        });
-        favoritesGrid.appendChild(card);
-    });
-
-    // Render guides
-    const guidesList = document.getElementById('guidesListContainer');
-    guidesList.innerHTML = '';
-    
-    if (guidesArray.length === 0) {
-        // Show empty state
-        guidesList.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-                <div style="font-size: 64px; margin-bottom: 16px;">📚</div>
-                <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No guides yet</div>
-                <div style="font-size: 14px;">Create your first guide to get started</div>
-            </div>
-        `;
-        return;
-    }
-    
-    guidesArray.forEach((guide, index) => {
-        const card = document.createElement('div');
-        card.className = 'guide-list-card entering';
-        card.style.animationDelay = `${index * 0.08}s`;
-        
-        // Extract icon display
-        let iconDisplay = guide.icon;
-        if (guide.icon && guide.icon.startsWith('svg:')) {
-            try {
-                const iconData = JSON.parse(guide.icon.substring(4));
-                iconDisplay = `<span style="display: inline-flex; width: 48px; height: 48px; background: ${iconData.bg}; border-radius: 12px; align-items: center; justify-content: center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-            } catch (e) {
-                iconDisplay = guide.icon;
-            }
-        }
-        
-        card.innerHTML = `
-            <div class="guide-list-card-inner">
-                <div class="guide-list-thumbnail" style="background: linear-gradient(135deg, ${guide.color}dd, ${guide.color})">
-                    <span>${iconDisplay}</span>
-                </div>
-                <div class="guide-list-content">
-                    <div class="guide-list-title">${guide.title}</div>
-                    <div class="guide-list-preview">${guide.subtitle}</div>
-                    <div class="guide-list-meta">
-                        <div>📝 ${guide.itemCount}</div>
-                        <div>🕒 ${guide.updated}</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        card.addEventListener('click', () => {
-            // Switch to this guide and hide guides page
-            switchGuide(guide.id);
-            document.getElementById('guidesPage').classList.remove('active');
-            document.querySelector('.container').style.display = 'block';
-            // Update bottom nav
-            document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelectorAll('.bottom-nav-item')[1].classList.add('active'); // Menu tab
-        });
-        
-        guidesList.appendChild(card);
-    });
-
-    // Card stacking parallax effect
-    const cards = document.querySelectorAll('.guide-list-card');
-    
-    // Set sticky positions
-    cards.forEach((card, index) => {
-        const stickyTop = 200 + (index * 6);
-        card.style.top = `${stickyTop}px`;
-    });
-
-    // Parallax on scroll
-    const guidesPageEl = document.getElementById('guidesPage');
-    let ticking = false;
-    
-    function updateGuidesParallax() {
-        cards.forEach((card, index) => {
-            const rect = card.getBoundingClientRect();
-            const stickyTop = 200 + (index * 6);
-            
-            if (rect.top <= stickyTop) {
-                let stackedAbove = 0;
-                for (let i = 0; i < index; i++) {
-                    const prevCard = cards[i];
-                    const prevRect = prevCard.getBoundingClientRect();
-                    const prevStickyTop = 200 + (i * 6);
-                    if (prevRect.top <= prevStickyTop) {
-                        stackedAbove++;
-                    }
-                }
-                
-                const scale = Math.max(0.96, 1 - (stackedAbove * 0.012));
-                const opacity = Math.max(0.75, 1 - (stackedAbove * 0.04));
-                const translateY = stackedAbove * -1.5;
-                
-                card.style.transform = `scale(${scale}) translateY(${translateY}px)`;
-                card.style.opacity = opacity;
-                card.style.zIndex = index;
-                card.style.pointerEvents = stackedAbove >= 5 ? 'none' : 'auto';
-            } else {
-                card.style.transform = 'scale(1) translateY(0)';
-                card.style.opacity = '1';
-                card.style.zIndex = index;
-                card.style.pointerEvents = 'auto';
-            }
-        });
-    }
-
-    guidesPageEl.addEventListener('scroll', () => {
-        if (!ticking) {
-            requestAnimationFrame(() => {
-                updateGuidesParallax();
-                ticking = false;
-            });
-            ticking = true;
-        }
-    });
-
-    updateGuidesParallax();
-
-    // Search functionality
-    const searchInput = document.getElementById('guidesSearchInput');
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        cards.forEach(card => {
-            const title = card.querySelector('.guide-list-title').textContent.toLowerCase();
-            const preview = card.querySelector('.guide-list-preview').textContent.toLowerCase();
-            
-            if (title.includes(searchTerm) || preview.includes(searchTerm)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    });
-}
-
 // Bottom Navigation Handler
 document.addEventListener('DOMContentLoaded', () => {
     const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
-    const guidesPage = document.getElementById('guidesPage');
     const profilePage = document.getElementById('profilePage');
     const mainContainer = document.querySelector('.container');
-    
-    // Set up profile page email
-    if (currentUser && profilePage) {
-        const profileEmail = document.getElementById('profileEmail');
-        if (profileEmail) profileEmail.textContent = currentUser.email;
-    }
     
     // Profile page event listeners
     const profileLogoutBtn = document.getElementById('profileLogoutBtn');
@@ -4688,13 +4481,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (page === 'main') {
                 // Show main container, hide everything else
                 mainContainer.style.display = 'block';
-                if (guidesPage) guidesPage.classList.remove('active');
                 if (profilePage) profilePage.classList.remove('active');
                 closeDrawer();
             } else if (page === 'profile') {
                 // Show profile page
                 mainContainer.style.display = 'none';
-                if (guidesPage) guidesPage.classList.remove('active');
                 if (profilePage) {
                     profilePage.classList.add('active');
                     // Update email
@@ -4706,21 +4497,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-            // Add active class to clicked item
-            item.classList.add('active');
-            
-            // Handle Home button (first item, index 0)
-            if (index === 0) {
-                guidesPage.classList.add('active');
-                mainContainer.style.display = 'none';
-                initGuidesPage(); // Reload guides each time
-            } else {
-                guidesPage.classList.remove('active');
-                mainContainer.style.display = 'block';
-            }
-        });
-    });
-});
+	
 </script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 	<div class="profile-page" id="profilePage">
@@ -4770,6 +4547,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
