@@ -2922,57 +2922,6 @@ function toggleGuideSelection(guideId, checkbox) {
     }
 }
 
-function createGuideElement(guide, isInFolder) {
-    const item = document.createElement('div');
-    item.className = isInFolder ? 'home-folder-guide-item' : 'home-guide-item';
-    if (guide.id === currentGuideId && !isInFolder) {
-        item.classList.add('current');
-    }
-    
-    // Handle icon display
-    let iconDisplay = guide.icon;
-    if (guide.icon && guide.icon.startsWith('svg:')) {
-        try {
-            const iconData = JSON.parse(guide.icon.substring(4));
-            iconDisplay = `<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg>`;
-        } catch (e) {
-            iconDisplay = guide.icon;
-        }
-    }
-    
-    if (isInFolder) {
-        item.innerHTML = `
-            <div class="home-folder-guide-icon" style="background: linear-gradient(135deg, ${guide.color}dd, ${guide.color})">
-                ${iconDisplay}
-            </div>
-            <div class="home-folder-guide-title">${guide.title}</div>
-        `;
-    } else {
-        item.innerHTML = `
-            <div class="home-guide-icon" style="background: linear-gradient(135deg, ${guide.color}dd, ${guide.color})">
-                ${iconDisplay}
-            </div>
-            <div class="home-guide-info">
-                <div class="home-guide-title">${guide.title}</div>
-                <div class="home-guide-meta">${guide.subtitle}</div>
-            </div>
-            <svg class="home-guide-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-        `;
-    }
-    
-    item.addEventListener('click', () => {
-        switchGuide(guide.id);
-        document.getElementById('homePage').classList.remove('active');
-        document.querySelector('.container').style.display = 'block';
-        document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
-        document.querySelectorAll('.bottom-nav-item')[1].classList.add('active');
-    });
-    
-    return item;
-}
-
 
 // Reuse these same handlers for drawer items
 function handleDragStart(e) {
@@ -4880,4 +4829,5 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
 </div>
 </body>
 </html>
+
 
