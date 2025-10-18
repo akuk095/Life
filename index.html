@@ -3456,66 +3456,69 @@ function renderTabs() {
     }
     
     // Preserve Done button state if in edit mode
-	if (editMode) {
-	    setTimeout(() => {
-	        const saveBtn = document.getElementById('saveBtn');
-	        const menuBtn = document.getElementById('menuBtn');
-	        if (saveBtn) saveBtn.style.display = 'block';
-	        if (menuBtn) menuBtn.style.display = 'none';
-	    }, 0);
-	} else {
-	    // Setup continuous scroll when not in edit mode
-	    setTimeout(() => {
-	    if (!editMode) setupContinuousScroll();	}, 100);
-	}
+    if (editMode) {
+        setTimeout(() => {
+            const saveBtn = document.getElementById('saveBtn');
+            const menuBtn = document.getElementById('menuBtn');
+            if (saveBtn) saveBtn.style.display = 'block';
+            if (menuBtn) menuBtn.style.display = 'none';
+        }, 0);
+    }
+	
 }
-// Continuous scrolling setup 
-if (typeof setupContinuousScroll === 'undefined') {
-    window.setupContinuousScroll = function() {
-        const navTabs = document.getElementById('navTabs');
-        if (!navTabs || categories.length <= 1) return;
+
+// Continuous tab navigation - cleaner approach
+let navTabsScrollHandler = null;
+
+function setupContinuousTabScroll() {
+    const navTabs = document.getElementById('navTabs');
+    if (!navTabs || categories.length <= 1 || editMode) return;
+    
+    // Remove old listener if exists
+    if (navTabsScrollHandler) {
+        navTabs.removeEventListener('scroll', navTabsScrollHandler);
+    }
+    
+    let isTransitioning = false;
+    
+    navTabsScrollHandler = function() {
+        if (isTransitioning) return;
         
-        // Clone first and last tabs for infinite scroll
-        const allTabs = Array.from(navTabs.querySelectorAll('.tab-wrapper'));
-        if (allTabs.length < 2) return;
+        const scrollLeft = navTabs.scrollLeft;
+        const scrollWidth = navTabs.scrollWidth;
+        const clientWidth = navTabs.clientWidth;
+        const maxScroll = scrollWidth - clientWidth;
         
-        const firstTab = allTabs[0].cloneNode(true);
-        const lastTab = allTabs[allTabs.length - 1].cloneNode(true);
-        
-        firstTab.dataset.isClone = 'true';
-        lastTab.dataset.isClone = 'true';
-        
-        navTabs.insertBefore(lastTab, navTabs.firstChild);
-        navTabs.appendChild(firstTab);
-        
-        // Setup scroll handler
-        let isAdjusting = false;
-        const handleScroll = () => {
-            if (isAdjusting) return;
-            
-            const tabs = Array.from(navTabs.querySelectorAll('.tab-wrapper:not([data-is-clone])'));
-            const scrollLeft = navTabs.scrollLeft;
-            const firstTabWidth = tabs[0].offsetWidth;
-            const totalRealWidth = tabs.reduce((sum, tab) => sum + tab.offsetWidth, 0);
-            
-            // Scrolled past end clone - jump to start
-            if (scrollLeft >= firstTabWidth + totalRealWidth) {
-                isAdjusting = true;
-                navTabs.scrollLeft = firstTabWidth;
-                setTimeout(() => isAdjusting = false, 50);
-            }
-            // Scrolled before start clone - jump to end
-            else if (scrollLeft <= 0) {
-                isAdjusting = true;
-                navTabs.scrollLeft = totalRealWidth;
-                setTimeout(() => isAdjusting = false, 50);
-            }
-        };
-        
-        navTabs.addEventListener('scroll', handleScroll);
+        // Near the end - wrap to beginning
+        if (scrollLeft >= maxScroll - 5) {
+            isTransitioning = true;
+            requestAnimationFrame(() => {
+                navTabs.style.scrollBehavior = 'auto';
+                navTabs.scrollLeft = 0;
+                setTimeout(() => {
+                    navTabs.style.scrollBehavior = 'smooth';
+                    isTransitioning = false;
+                }, 50);
+            });
+        }
+        // Near the beginning - wrap to end
+        else if (scrollLeft <= 5) {
+            isTransitioning = true;
+            requestAnimationFrame(() => {
+                navTabs.style.scrollBehavior = 'auto';
+                navTabs.scrollLeft = maxScroll;
+                setTimeout(() => {
+                    navTabs.style.scrollBehavior = 'smooth';
+                    isTransitioning = false;
+                }, 50);
+            });
+        }
     };
+    
+    navTabs.addEventListener('scroll', navTabsScrollHandler);
 }
-		
+
+
 function toggleBulletStyle(catIndex, skillIndex) {
     const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
     const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
@@ -3993,6 +3996,9 @@ function switchTab(index) {
                 behavior: 'smooth'
             });
         }
+        
+        // Setup continuous scroll after centering
+        setupContinuousTabScroll();
     }, 50); // Small delay to ensure tab is rendered
 }
 
@@ -4719,33 +4725,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
