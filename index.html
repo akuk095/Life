@@ -2863,8 +2863,8 @@ if (createFolderMenuBtn) {
             createNewFolder(folderName);
         }
     });
+	}	
 }
-
 function createGuideElement(guide, isInFolder) {
     const item = document.createElement('div');
     item.className = isInFolder ? 'home-folder-guide-item' : 'home-guide-item';
@@ -4809,7 +4809,7 @@ document.getElementById('homeMoveBtn')?.addEventListener('click', async () => {
         }
     });
 });
-
+	
 // Delete selected guides
 document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => {
     if (selectedGuides.size === 0) {
@@ -4935,6 +4935,7 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
 </div>
 </body>
 </html>
+
 
 
 
