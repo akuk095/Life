@@ -1600,14 +1600,12 @@ if (wallpaperUrl) {
 function closeDrawer() {
     const dropdown = document.getElementById('guideDropdown');
     const backdrop = document.getElementById('drawerBackdrop');
-    const footer = document.getElementById('drawerFooter');
     const floatingBtn = document.getElementById('layoutBtn');
     
     dropdown.classList.remove('show');
     backdrop.classList.remove('show');
-    dropdown.style.transform = '';
-    backdrop.style.opacity = '';
-    if (footer) footer.style.transform = ''; // Reset footer transform
+    dropdown.style.transform = 'translateX(-100%)';
+    backdrop.style.opacity = '0';
     document.body.style.overflow = '';
     if (floatingBtn) floatingBtn.style.display = 'flex';
 }
@@ -2065,41 +2063,27 @@ document.addEventListener('touchend', async (e) => {
     currentSwipedCard = null;
 });
 
-	
-function toggleGuideMenu(e) {
-    e.stopPropagation();
-    const dropdown = document.getElementById('guideDropdown');
-    const backdrop = document.getElementById('drawerBackdrop');
-    const floatingBtn = document.getElementById('layoutBtn');
+function createNewGuide() {
+    if (!currentUser) return;
+    const timestamp = Date.now();
+    const newId = `guide_${timestamp}`;
     
-    const isShowing = dropdown.classList.contains('show');
+    const newGuideData = {
+        appTitle: 'New Guide',
+        appSubtitle: 'Tap to add description',
+        appIcon: '📝',
+        categories: [],
+        themeColor: '#3498db',
+        checkedItems: {}
+    };
     
-    if (isShowing) {
-        // Close drawer
-        dropdown.classList.remove('show');
-        backdrop.classList.remove('show');
-        document.body.style.overflow = '';
-        if (floatingBtn) floatingBtn.style.display = 'flex';
-    } else {
-        // Open drawer
-        dropdown.classList.add('show');
-        backdrop.classList.add('show');
-        dropdown.style.transform = 'translateX(0)';
-        backdrop.style.opacity = '1';
-        const footer = document.getElementById('drawerFooter');
-        if (footer) footer.style.transform = 'translateX(0)';
-        document.body.style.overflow = 'hidden';
-        if (floatingBtn) floatingBtn.style.display = 'none';
-        
-        // Initialize swipe after drawer is open
-        setTimeout(() => initDrawerSwipe(), 100);
-    }
-    
-    // Close other menus
-    const otherMenu = document.getElementById('dropdownMenu');
-    if (otherMenu) otherMenu.classList.remove('show');
+    set(ref(database, `users/${currentUser.uid}/guides/${newId}`), newGuideData).then(() => {
+        currentGuideId = newId;
+        localStorage.setItem('currentGuideId', newId);
+        loadUserData(currentUser.uid);
+    });
 }
-
+	
 function toggleMenu(e) {
     e.stopPropagation();
     const menu = document.getElementById('dropdownMenu');
@@ -4447,22 +4431,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
     const profilePage = document.getElementById('profilePage');
     const mainContainer = document.querySelector('.container');
+    const drawer = document.getElementById('guideDropdown');
+    const backdrop = document.getElementById('drawerBackdrop');
     
     // Profile page event listeners
     const profileLogoutBtn = document.getElementById('profileLogoutBtn');
     const profileDeleteAccountBtn = document.getElementById('profileDeleteAccountBtn');
     
     if (profileLogoutBtn) {
-	    profileLogoutBtn.addEventListener('click', async () => {
-	        if (await customConfirm('Are you sure you want to log out?', 'Logout', 'Logout')) {
-	            logout();
-	        }
-	    });
-	}
+        profileLogoutBtn.addEventListener('click', async () => {
+            if (await customConfirm('Are you sure you want to log out?', 'Logout', 'Logout')) {
+                logout();
+            }
+        });
+    }
     
     if (profileDeleteAccountBtn) {
         profileDeleteAccountBtn.addEventListener('click', async () => {
-            if (await customConfirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!', 'Delete Account')) {
+            if (await customConfirm('WARNING: This will permanently delete your account and ALL your data. This cannot be undone!', 'Delete Account', 'Delete')) {
                 const confirmation = await customPrompt('Type "DELETE" to confirm:', '', 'Confirm Deletion');
                 if (confirmation === 'DELETE') {
                     deleteAccount();
@@ -4481,23 +4467,36 @@ document.addEventListener('DOMContentLoaded', () => {
             item.classList.add('active');
             
             if (page === 'guides') {
-                // Show guides/drawer (full page)
-                toggleGuideMenu();
+                // Show drawer as full page home
+                mainContainer.style.display = 'none';
+                if (profilePage) profilePage.classList.remove('active');
+                if (drawer) {
+                    drawer.classList.add('show');
+                    drawer.style.transform = 'translateX(0)';
+                }
+                if (backdrop) {
+                    backdrop.classList.add('show');
+                    backdrop.style.opacity = '1';
+                }
+                document.body.style.overflow = 'hidden';
+                populateGuideDropdown(); // Refresh the list
             } else if (page === 'main') {
-                // Show main container, hide everything else
+                // Create new guide
+                createNewGuide();
+                // After creating, switch to main view
                 mainContainer.style.display = 'block';
                 if (profilePage) profilePage.classList.remove('active');
                 closeDrawer();
             } else if (page === 'profile') {
                 // Show profile page
                 mainContainer.style.display = 'none';
+                closeDrawer();
                 if (profilePage) {
                     profilePage.classList.add('active');
                     // Update email
                     const profileEmail = document.getElementById('profileEmail');
                     if (profileEmail && currentUser) profileEmail.textContent = currentUser.email;
                 }
-                closeDrawer();
             }
         });
     });
@@ -4552,6 +4551,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
