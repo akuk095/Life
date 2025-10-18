@@ -124,7 +124,7 @@
 		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }	
 		.nav-tabs { display: flex; background: white; border-bottom: none; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: relative; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 0 0 16px 16px; padding: 8px 8px 0; margin-bottom: 12px; justify-content: center; }
 		.nav-tabs::before,
-		.nav-tabs::after { content: ''; flex: 1 0 0; min-width: 50%; }
+		.nav-tabs::after { content: ''; flex: 1 0 auto; }
 		.nav-tabs::-webkit-scrollbar { display: none; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
@@ -178,11 +178,13 @@
 		.skill-card-controls.show .skill-control-btn:nth-child(1) { transform: translateX(-36px); transition-delay: 0.05s; }
 		.skill-card-controls.show .skill-control-btn:nth-child(2) { transform: translateX(-72px); transition-delay: 0.1s; }
 		.skill-card-controls.show .skill-control-btn:nth-child(3) { transform: translateX(-108px); transition-delay: 0.15s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(4) { transform: translateX(-144px); transition-delay: 0.2s; }
 		.skill-control-btn:hover { opacity: 1 !important; color: #6b7280; }
 		.skill-control-btn.delete-control:hover { color: #dc2626; }
 		.skill-card-controls.show .skill-control-btn:nth-child(1):hover { transform: translateX(-36px) scale(1.1); }
 		.skill-card-controls.show .skill-control-btn:nth-child(2):hover { transform: translateX(-72px) scale(1.1); }
 		.skill-card-controls.show .skill-control-btn:nth-child(3):hover { transform: translateX(-108px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(4):hover { transform: translateX(-144px) scale(1.1); }
 		.drawer-footer { position: fixed; bottom: 60px; left: 0; width: 85%; max-width: 320px; height: 60px; background: rgba(237,239,240,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; padding-bottom: max(env(safe-area-inset-bottom),0); z-index: 2001; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0.0,0.2,1); }
 		.guide-dropdown.show ~ .drawer-footer { transform: translateX(0); }
 		.drawer-create-icon { background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
@@ -266,7 +268,25 @@
 		@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 		@keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
 		.guide-list-card.entering { animation: slideIn 0.5s ease-out; }
-
+		.reminder-toggle-btn { background: none; border: none; padding: 8px; cursor: pointer; color: #6b7280; transition: all 0.2s ease; }
+		.reminder-toggle-btn:hover { color: var(--primary-color); }
+		.reminder-toggle-btn.active { color: #f59e0b; }
+		.reminder-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-left: 8px; cursor: pointer; opacity: 0.4; transition: all 0.2s ease; color: #9ca3af; }
+		.reminder-icon:hover { opacity: 1; color: #f59e0b; transform: scale(1.1); }
+		.reminder-icon.has-reminder { opacity: 1; color: #f59e0b; animation: pulse 2s ease-in-out infinite; }
+		@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+		.reminder-time-picker { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 10000; min-width: 300px; }
+		.reminder-time-picker.show { display: block; }
+		.reminder-time-picker h3 { margin: 0 0 16px 0; font-size: 18px; color: #2c3e50; }
+		.reminder-time-picker input[type="time"] { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px; }
+		.reminder-time-picker .button-group { display: flex; gap: 8px; }
+		.reminder-time-picker button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s ease; }
+		.reminder-time-picker .save-reminder { background: var(--primary-color, #3498db); color: white; }
+		.reminder-time-picker .save-reminder:hover { opacity: 0.9; }
+		.reminder-time-picker .cancel-reminder { background: #e5e7eb; color: #6b7280; }
+		.reminder-time-picker .cancel-reminder:hover { background: #d1d5db; }
+		.reminder-time-picker .delete-reminder { background: #ef4444; color: white; margin-top: 8px; width: 100%; }
+		.reminder-time-picker .delete-reminder:hover { background: #dc2626; }
 		
 	</style>
     </head>
@@ -498,6 +518,8 @@ function customPrompt(message, defaultValue = '', title = '') {
 	const auth = getAuth(app);
 	let currentUser = null;
 	let currentGuideId = localStorage.getItem('currentGuideId') || "defaultGuide";
+	let skillReminders = {}; // Format: { 'catIndex-skillIndex': { enabled: true, items: { 'itemIndex': 'HH:MM' } } }
+	
 	// Default data structure
 	let categories = [
 	    {
@@ -878,7 +900,8 @@ async function loadUserData(userId) {
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/lastRefreshDate`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/headerImage`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/wallpaper`)),
-	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap]) => {
+			get(ref(database, `users/${userId}/guides/${currentGuideId}/skillReminders`)),
+	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap]) => {
 
 			
 		// Load categories
@@ -943,7 +966,11 @@ async function loadUserData(userId) {
 		    wallpaperUrl = '';
 		    console.log('No wallpaper in Firebase');
 		}
-		
+
+		// Load skill reminders
+		if (remindersSnap.val()) {
+		    skillReminders = remindersSnap.val();
+		}
 		// Check if we need to auto-refresh
 		checkAndAutoRefresh(lastRefreshSnap.val());
 		
@@ -3200,6 +3227,11 @@ function saveAutoRefreshSettings() {
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/autoRefreshTime`), autoRefreshTime);
 }
 
+function saveSkillReminders() {
+    if (!currentUser) return;
+    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/skillReminders`), skillReminders);
+}
+	
 function checkAndAutoRefresh(lastRefreshDate) {
     if (!autoRefreshEnabled || !currentUser) return;
     
@@ -3489,7 +3521,65 @@ function duplicateSkill(catIndex, skillIndex) {
     saveCategories();
     renderContent();
 }
-		
+
+function toggleSkillReminder(catIndex, skillIndex) {
+    const key = `${catIndex}-${skillIndex}`;
+    if (!skillReminders[key]) {
+        skillReminders[key] = { enabled: true, items: {} };
+    } else {
+        skillReminders[key].enabled = !skillReminders[key].enabled;
+    }
+    saveSkillReminders();
+    renderContent();
+}
+
+function showReminderPicker(catIndex, skillIndex, itemIndex) {
+    const key = `${catIndex}-${skillIndex}`;
+    const existingTime = skillReminders[key]?.items?.[itemIndex] || '09:00';
+    
+    const picker = document.createElement('div');
+    picker.className = 'reminder-time-picker show';
+    picker.innerHTML = `
+        <h3>Set Reminder</h3>
+        <input type="time" id="reminderTimeInput" value="${existingTime}">
+        <div class="button-group">
+            <button class="cancel-reminder">Cancel</button>
+            <button class="save-reminder">Save</button>
+        </div>
+        ${skillReminders[key]?.items?.[itemIndex] ? '<button class="delete-reminder">Delete Reminder</button>' : ''}
+    `;
+    
+    document.body.appendChild(picker);
+    
+    picker.querySelector('.cancel-reminder').addEventListener('click', () => {
+        picker.remove();
+    });
+    
+    picker.querySelector('.save-reminder').addEventListener('click', () => {
+        const time = document.getElementById('reminderTimeInput').value;
+        if (!skillReminders[key]) {
+            skillReminders[key] = { enabled: true, items: {} };
+        }
+        skillReminders[key].items[itemIndex] = time;
+        saveSkillReminders();
+        renderContent();
+        picker.remove();
+    });
+    
+    const deleteBtn = picker.querySelector('.delete-reminder');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            if (skillReminders[key]?.items?.[itemIndex]) {
+                delete skillReminders[key].items[itemIndex];
+                saveSkillReminders();
+                renderContent();
+            }
+            picker.remove();
+        });
+    }
+}
+
+
 function renderContent() { 
     const contentArea = document.getElementById('contentArea'); 
     contentArea.innerHTML = ''; 
@@ -3635,11 +3725,24 @@ function renderContent() {
                 deleteSkill(catIndex, skillIndex);
                 // Don't need to hide - card is being deleted anyway
             });
-            
-            // Add in order: bullet, duplicate, delete (left to right)
-            controlsContainer.appendChild(deleteBtn);
-            controlsContainer.appendChild(duplicateBtn);
-            controlsContainer.appendChild(toggleBtn);
+
+			// Reminder toggle button
+			const reminderKey = `${catIndex}-${skillIndex}`;
+			const reminderEnabled = skillReminders[reminderKey]?.enabled || false;
+			const reminderBtn = document.createElement('button');
+			reminderBtn.className = `skill-control-btn reminder-toggle-btn ${reminderEnabled ? 'active' : ''}`;
+			reminderBtn.innerHTML = '🔔';
+			reminderBtn.title = 'Toggle Reminders';
+			reminderBtn.addEventListener('click', (e) => {
+			    e.stopPropagation();
+			    toggleSkillReminder(catIndex, skillIndex);
+			});
+			
+            // Add in order: bullet, duplicate, reminder, delete (left to right)
+			controlsContainer.appendChild(deleteBtn);
+			controlsContainer.appendChild(reminderBtn);
+			controlsContainer.appendChild(duplicateBtn);
+			controlsContainer.appendChild(toggleBtn);
             
             card.appendChild(controlsContainer);
             
@@ -3690,11 +3793,11 @@ function renderContent() {
                 });
                 
                 // Reset timeout on any interaction with the controls
-                [toggleBtn, duplicateBtn, deleteBtn].forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        startHideTimer();
-                    });
-                });
+				[toggleBtn, duplicateBtn, reminderBtn, deleteBtn].forEach(btn => {
+				    btn.addEventListener('click', () => {
+				        startHideTimer();
+				    });
+				});
                 
                 card.appendChild(menuBtn);
                 
@@ -3759,6 +3862,24 @@ function renderContent() {
                 textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
                 textDiv.contentEditable = editMode;
                 textDiv.textContent = item;
+
+				// Add reminder icon if reminders are enabled for this skill
+				const reminderKey = `${catIndex}-${skillIndex}`;
+				if (skillReminders[reminderKey]?.enabled) {
+				    const hasReminder = skillReminders[reminderKey]?.items?.[itemIndex];
+				    const reminderIcon = document.createElement('span');
+				    reminderIcon.className = `reminder-icon ${hasReminder ? 'has-reminder' : ''}`;
+				    reminderIcon.innerHTML = '🔔';
+				    reminderIcon.title = hasReminder ? `Reminder: ${hasReminder}` : 'Set reminder';
+				    reminderIcon.dataset.catIndex = catIndex;
+				    reminderIcon.dataset.skillIndex = skillIndex;
+				    reminderIcon.dataset.itemIndex = itemIndex;
+				    reminderIcon.addEventListener('click', (e) => {
+				        e.stopPropagation();
+				        showReminderPicker(catIndex, skillIndex, itemIndex);
+				    });
+				    textDiv.appendChild(reminderIcon);
+				}
                 checkItem.appendChild(textDiv);
 
 				// Add click zone on right end to add new item below (only when NOT in edit mode)
@@ -4672,6 +4793,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
