@@ -1027,9 +1027,9 @@ document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, $
 	// Set save button color - use secondary for light themes
     document.documentElement.style.setProperty('--save-btn-color', isLight ? secondaryColor : primaryColor);
 	
-    // Apply background gradient
-    document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${primaryColor}CC 100%)`;
-    
+    // Don't apply background gradient theme colour
+	// document.body.style.background = `linear-gradient(135deg, ${secondaryColor}CC 0%, ${primaryColor}CC 100%)`;
+        
        
     // Adjust floating button
     const floatingBtn = document.getElementById('layoutBtn');
@@ -4651,6 +4651,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
