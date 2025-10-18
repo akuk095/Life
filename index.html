@@ -250,7 +250,7 @@
 		.home-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: #f0f2f5; z-index: 99; overflow-y: auto; }
 		.home-page.active { display: block; }
 		.home-container { max-width: 600px; margin: 0 auto; padding: 0; }
-		.home-header { background: white; padding: 20px 20px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+		.home-header { background: white; padding: 20px 20px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 		.home-title { font-size: 28px; font-weight: 700; color: #2c3e50; margin: 0 0 16px 0; letter-spacing: -0.5px; }
 		.home-divider { height: 1px; background: #e5e7eb; }
 		.home-search-bar { padding: 16px 20px; background: white; }
@@ -258,7 +258,7 @@
 		.home-search-input { width: 100%; padding: 12px 16px 12px 44px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; transition: all 0.2s ease; background: #f8f9fa; }
 		.home-search-input:focus { outline: none; border-color: var(--primary-color, #3498db); background: white; }
 		.home-search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
-		.home-actions { padding: 16px 20px; background: white; border-bottom: 1px solid #e5e7eb; display: flex; gap: 12px; }
+		.home-actions { padding: 12px 20px; background: white; border-bottom: 1px solid #e5e7eb; }
 		.home-action-btn { flex: 1; padding: 12px 16px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
 		.home-create-btn { background: var(--primary-color, #3498db); color: white; }
 		.home-create-btn:hover { opacity: 0.9; transform: translateY(-1px); }
@@ -278,6 +278,28 @@
 		.home-empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
 		.home-empty-text { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #6b7280; }
 		.home-empty-subtext { font-size: 14px; color: #9ca3af; }
+		.home-create-folder-btn { width: 100%; padding: 12px 16px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; background: #f3f4f6; color: #6b7280; }
+		.home-create-folder-btn:hover { background: #e5e7eb; }
+		.home-page.active ~ .floating-layout-btn { display: flex !important; }
+		.home-page.active ~ .floating-layout-btn svg { display: none; }
+		.home-page.active ~ .floating-layout-btn::before { content: '+'; font-size: 32px; font-weight: 300; line-height: 1; }
+		.profile-page.active ~ .floating-layout-btn { display: none !important; }
+		.home-folder { background: white; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+		.home-folder-header { padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s ease; }
+		.home-folder-header:hover { background: #f8f9fa; }
+		.home-folder-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+		.home-folder-info { flex: 1; min-width: 0; }
+		.home-folder-name { font-size: 15px; font-weight: 600; color: #2c3e50; margin-bottom: 2px; }
+		.home-folder-count { font-size: 12px; color: #9ca3af; }
+		.home-folder-arrow { color: #d1d5db; transition: transform 0.2s ease; }
+		.home-folder.expanded .home-folder-arrow { transform: rotate(90deg); }
+		.home-folder-guides { display: none; padding: 0 16px 12px; }
+		.home-folder.expanded .home-folder-guides { display: block; }
+		.home-folder-guide-item { background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; }
+		.home-folder-guide-item:hover { background: #e5e7eb; transform: translateX(4px); }
+		.home-folder-guide-item:last-child { margin-bottom: 0; }
+		.home-folder-guide-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+		.home-folder-guide-title { font-size: 14px; font-weight: 500; color: #2c3e50; flex: 1; }
 		
 	</style>
     </head>
@@ -2619,23 +2641,36 @@ if (autoRefreshBtn) {
     }
 }
 
-
 async function populateHomePage() {
     if (!currentUser) return;
     
     const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
+    const foldersSnapshot = await get(ref(database, `users/${currentUser.uid}/folders`));
     const guides = guidesSnapshot.val() || {};
+    const folders = foldersSnapshot.val() || {};
     const guidesList = document.getElementById('homeGuidesList');
     
     if (!guidesList) return;
     
+    // Convert guides to array
     const guidesArray = Object.keys(guides).map(id => ({
         id: id,
         title: guides[id].appTitle || 'Untitled',
         subtitle: guides[id].appSubtitle || 'No description',
         icon: guides[id].appIcon || '📄',
-        color: guides[id].themeColor || '#3498db'
+        color: guides[id].themeColor || '#3498db',
+        folderId: guides[id].folderId || null
     }));
+    
+    // Convert folders to array
+    const foldersArray = Object.keys(folders).map(id => ({
+        id: id,
+        name: folders[id].name || 'Untitled Folder',
+        guides: guidesArray.filter(g => g.folderId === id)
+    }));
+    
+    // Get guides not in any folder
+    const ungroupedGuides = guidesArray.filter(g => !g.folderId);
     
     guidesList.innerHTML = '';
     
@@ -2650,24 +2685,118 @@ async function populateHomePage() {
         return;
     }
     
-    guidesArray.forEach(guide => {
-        const item = document.createElement('div');
-        item.className = 'home-guide-item';
-        if (guide.id === currentGuideId) {
-            item.classList.add('current');
-        }
+    // Render folders first
+    foldersArray.forEach(folder => {
+        const folderEl = document.createElement('div');
+        folderEl.className = 'home-folder';
         
-        // Handle icon display
-        let iconDisplay = guide.icon;
-        if (guide.icon && guide.icon.startsWith('svg:')) {
-            try {
-                const iconData = JSON.parse(guide.icon.substring(4));
-                iconDisplay = `<svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg>`;
-            } catch (e) {
-                iconDisplay = guide.icon;
-            }
-        }
+        folderEl.innerHTML = `
+            <div class="home-folder-header">
+                <div class="home-folder-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="home-folder-info">
+                    <div class="home-folder-name">${folder.name}</div>
+                    <div class="home-folder-count">${folder.guides.length} guide${folder.guides.length !== 1 ? 's' : ''}</div>
+                </div>
+                <svg class="home-folder-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+            <div class="home-folder-guides"></div>
+        `;
         
+        const folderHeader = folderEl.querySelector('.home-folder-header');
+        const folderGuidesContainer = folderEl.querySelector('.home-folder-guides');
+        
+        // Toggle folder expansion
+        folderHeader.addEventListener('click', () => {
+            folderEl.classList.toggle('expanded');
+        });
+        
+        // Add guides to folder
+        folder.guides.forEach(guide => {
+            const guideEl = createGuideElement(guide, true);
+            folderGuidesContainer.appendChild(guideEl);
+        });
+        
+        guidesList.appendChild(folderEl);
+    });
+    
+    // Render ungrouped guides
+    ungroupedGuides.forEach(guide => {
+        const guideEl = createGuideElement(guide, false);
+        guidesList.appendChild(guideEl);
+    });
+    
+    // Add search functionality
+    const searchInput = document.getElementById('homeSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            // Search in folders
+            document.querySelectorAll('.home-folder').forEach(folder => {
+                const folderName = folder.querySelector('.home-folder-name').textContent.toLowerCase();
+                const guides = folder.querySelectorAll('.home-folder-guide-item');
+                let hasMatch = folderName.includes(searchTerm);
+                
+                guides.forEach(guide => {
+                    const title = guide.querySelector('.home-folder-guide-title').textContent.toLowerCase();
+                    if (title.includes(searchTerm)) {
+                        guide.style.display = 'flex';
+                        hasMatch = true;
+                    } else {
+                        guide.style.display = searchTerm ? 'none' : 'flex';
+                    }
+                });
+                
+                folder.style.display = hasMatch ? 'block' : 'none';
+                if (hasMatch && searchTerm) folder.classList.add('expanded');
+            });
+            
+            // Search in ungrouped guides
+            document.querySelectorAll('.home-guide-item').forEach(item => {
+                const title = item.querySelector('.home-guide-title').textContent.toLowerCase();
+                const meta = item.querySelector('.home-guide-meta').textContent.toLowerCase();
+                if (title.includes(searchTerm) || meta.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+}
+
+function createGuideElement(guide, isInFolder) {
+    const item = document.createElement('div');
+    item.className = isInFolder ? 'home-folder-guide-item' : 'home-guide-item';
+    if (guide.id === currentGuideId && !isInFolder) {
+        item.classList.add('current');
+    }
+    
+    // Handle icon display
+    let iconDisplay = guide.icon;
+    if (guide.icon && guide.icon.startsWith('svg:')) {
+        try {
+            const iconData = JSON.parse(guide.icon.substring(4));
+            iconDisplay = `<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg>`;
+        } catch (e) {
+            iconDisplay = guide.icon;
+        }
+    }
+    
+    if (isInFolder) {
+        item.innerHTML = `
+            <div class="home-folder-guide-icon" style="background: linear-gradient(135deg, ${guide.color}dd, ${guide.color})">
+                ${iconDisplay}
+            </div>
+            <div class="home-folder-guide-title">${guide.title}</div>
+        `;
+    } else {
         item.innerHTML = `
             <div class="home-guide-icon" style="background: linear-gradient(135deg, ${guide.color}dd, ${guide.color})">
                 ${iconDisplay}
@@ -2680,38 +2809,19 @@ async function populateHomePage() {
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         `;
-        
-        item.addEventListener('click', () => {
-            switchGuide(guide.id);
-            // Switch to main view
-            document.getElementById('homePage').classList.remove('active');
-            document.querySelector('.container').style.display = 'block';
-            // Update bottom nav
-            document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelectorAll('.bottom-nav-item')[1].classList.add('active');
-        });
-        
-        guidesList.appendChild(item);
+    }
+    
+    item.addEventListener('click', () => {
+        switchGuide(guide.id);
+        document.getElementById('homePage').classList.remove('active');
+        document.querySelector('.container').style.display = 'block';
+        document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+        document.querySelectorAll('.bottom-nav-item')[1].classList.add('active');
     });
     
-    // Add search functionality
-    const searchInput = document.getElementById('homeSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const items = guidesList.querySelectorAll('.home-guide-item');
-            items.forEach(item => {
-                const title = item.querySelector('.home-guide-title').textContent.toLowerCase();
-                const meta = item.querySelector('.home-guide-meta').textContent.toLowerCase();
-                if (title.includes(searchTerm) || meta.includes(searchTerm)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-    }
+    return item;
 }
+
 
 // Reuse these same handlers for drawer items
 function handleDragStart(e) {
@@ -4334,20 +4444,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContainer = document.querySelector('.container');
     
     // Home page event listeners
-    const homeCreateBtn = document.getElementById('homeCreateBtn');
-    const homeFolderBtn = document.getElementById('homeFolderBtn');
-    
-    if (homeCreateBtn) {
-        homeCreateBtn.addEventListener('click', () => {
-            createNewGuide();
-        });
-    }
-    
-    if (homeFolderBtn) {
-        homeFolderBtn.addEventListener('click', () => {
-            customAlert('Folders feature coming soon!', 'Folders');
-        });
-    }
+        
+   const homeCreateFolderBtn = document.getElementById('homeCreateFolderBtn');
+
+if (homeCreateFolderBtn) {
+    homeCreateFolderBtn.addEventListener('click', async () => {
+        const folderName = await customPrompt('Enter folder name:', 'New Folder', 'Create Folder');
+        if (folderName) {
+            createNewFolder(folderName);
+        }
+    });
+}
+      
     
     // Profile page event listeners
     const profileLogoutBtn = document.getElementById('profileLogoutBtn');
@@ -4408,44 +4516,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+	// Floating button handler for home page
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.floating-layout-btn')) {
+        const homePage = document.getElementById('homePage');
+        if (homePage && homePage.classList.contains('active')) {
+            createNewGuide();
+        }
+    }
+});
+
+function createNewFolder(name) {
+    if (!currentUser) return;
+    const timestamp = Date.now();
+    const folderId = `folder_${timestamp}`;
+    
+    set(ref(database, `users/${currentUser.uid}/folders/${folderId}`), {
+        name: name,
+        createdAt: timestamp
+    }).then(() => {
+        populateHomePage();
+    });
+}
 	
 </script>
 	<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 	<div class="home-page" id="homePage">
-    <div class="home-container">
-        <div class="home-header">
-            <h1 class="home-title">Notebook</h1>
-        </div>
-        <div class="home-divider"></div>
-        <div class="home-search-bar">
-            <div class="home-search-wrapper">
-                <svg class="home-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <input type="text" class="home-search-input" id="homeSearchInput" placeholder="Search guides...">
-            </div>
-        </div>
-        <div class="home-actions">
-            <button class="home-action-btn home-create-btn" id="homeCreateBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Create Guide
-            </button>
-            <button class="home-action-btn home-folder-btn" id="homeFolderBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-                Folders
-            </button>
-        </div>
-        <div class="home-guides-list" id="homeGuidesList">
-            <!-- Guides will be populated here -->
-        </div>
-    </div>
-</div>
 	<div class="profile-page" id="profilePage">
     <div class="profile-container">
         <div class="profile-header">
@@ -4493,6 +4590,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
 
