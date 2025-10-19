@@ -3521,47 +3521,31 @@ function createGuideElement(guide, isInFolder) {
             return;
         }
         
-        if (homeSelectMode) {
-            e.stopPropagation();
-            toggleGuideSelection(guide.id, checkbox);
-        } else {
-            switchGuide(guide.id);
-            localStorage.setItem('currentPage', 'guides'); // Add this line
-            document.getElementById('homePage').classList.remove('active');
-            document.querySelector('.container').style.display = 'block';
-			} else {
-            switchGuide(guide.id);
-            localStorage.setItem('currentPage', 'guides');
-            document.getElementById('homePage').classList.remove('active');
-            document.querySelector('.container').style.display = 'block';
-            document.body.classList.add('viewing-guide');  // ← ADD THIS LINE
-            document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelectorAll('.bottom-nav-item')[0].classList.add('active');
-            
-           // Show back button
-            setTimeout(() => {
-                const backBtn = document.getElementById('headerBackBtn');
-                if (backBtn) {
-                    backBtn.style.display = 'flex';
-                }
-            }, 100);
-        }
-            document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelectorAll('.bottom-nav-item')[0].classList.add('active'); // Changed from [1] to [0]
-            
-           // Show back button
-            setTimeout(() => {
-                const backBtn = document.getElementById('headerBackBtn');
-                if (backBtn) {
-                    backBtn.style.display = 'flex';
-                }
-            }, 100);
-        }
-    });
-    
-    return item;
-}
-
+		if (homeSelectMode) {
+		    e.stopPropagation();
+		    toggleGuideSelection(guide.id, checkbox);
+		} else {
+		    switchGuide(guide.id);
+		    localStorage.setItem('currentPage', 'guides');
+		    document.getElementById('homePage').classList.remove('active');
+		    document.querySelector('.container').style.display = 'block';
+		    document.body.classList.add('viewing-guide');  
+		    document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+		    document.querySelectorAll('.bottom-nav-item')[0].classList.add('active');
+		    
+		    // Show back button
+		    setTimeout(() => {
+		        const backBtn = document.getElementById('headerBackBtn');
+		        if (backBtn) {
+		            backBtn.style.display = 'flex';
+		        }
+		    }, 100);
+		}
+		});
+		
+		return item;
+		}
+		
 function toggleSelectMode() {
     homeSelectMode = !homeSelectMode;
     selectedGuides.clear();
@@ -5809,6 +5793,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
