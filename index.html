@@ -89,7 +89,7 @@
 		.emoji-remove-btn { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #e74c3c; color: white; border: 2px solid white; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; z-index: 10; transition: all 0.2s ease; }
 		.emoji-remove-btn:hover { background: #c0392b; transform: scale(1.1); }
 		.editable-icon { position: relative; display: inline-block; }
-		.floating-layout-btn { position: fixed; bottom: calc(60px + max(env(safe-area-inset-bottom), 24px)); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 999; display: none; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+		.floating-layout-btn { position: fixed; bottom: calc(60px + max(env(safe-area-inset-bottom), 24px)); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 100; display: none; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
 		.floating-layout-btn:active { transform: scale(0.9); }
 		.floating-layout-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 1; }
 		.container[style*="display: block"] ~ .floating-layout-btn { display: flex !important; }
@@ -97,6 +97,7 @@
 		.templates-page ~ .floating-layout-btn { display: none !important; }
 		.profile-page ~ .floating-layout-btn { display: none !important; }
 		.settings-page ~ .floating-layout-btn { display: none !important; }
+		body.viewing-guide .floating-layout-btn { display: flex !important; align-items: center; justify-content: center;}
 		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: max(env(safe-area-inset-top), 20px) 20px 20px; text-align: center; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.15); border-radius: 0; z-index: 98; }
 		.header h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px; }
 		.header p { opacity: 0.95; font-size: 13px; font-weight: 400; }
@@ -2832,6 +2833,7 @@ async function renderHeader() {
         backBtn.addEventListener('click', () => {
             // Go back to home page
             document.querySelector('.container').style.display = 'none';
+			document.body.classList.remove('viewing-guide');
             const homePage = document.getElementById('homePage');
             if (homePage) {
                 homePage.classList.add('active');
@@ -3527,6 +3529,23 @@ function createGuideElement(guide, isInFolder) {
             localStorage.setItem('currentPage', 'guides'); // Add this line
             document.getElementById('homePage').classList.remove('active');
             document.querySelector('.container').style.display = 'block';
+			} else {
+            switchGuide(guide.id);
+            localStorage.setItem('currentPage', 'guides');
+            document.getElementById('homePage').classList.remove('active');
+            document.querySelector('.container').style.display = 'block';
+            document.body.classList.add('viewing-guide');  // ← ADD THIS LINE
+            document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-item')[0].classList.add('active');
+            
+           // Show back button
+            setTimeout(() => {
+                const backBtn = document.getElementById('headerBackBtn');
+                if (backBtn) {
+                    backBtn.style.display = 'flex';
+                }
+            }, 100);
+        }
             document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
             document.querySelectorAll('.bottom-nav-item')[0].classList.add('active'); // Changed from [1] to [0]
             
@@ -5790,6 +5809,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
