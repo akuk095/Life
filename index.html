@@ -302,11 +302,12 @@
 		.home-folder-guide-item:last-child { margin-bottom: 0; }
 		.home-folder-guide-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 		.home-folder-guide-title { font-size: 14px; font-weight: 500; color: #2c3e50; flex: 1; }
-		.home-guide-checkbox { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border: 2px solid #d1d5db; border-radius: 6px; background: white; display: none; cursor: pointer; transition: all 0.2s ease; z-index: 2; }
+		.home-guide-checkbox { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border: 2px solid #d1d5db; border-radius: 6px; background: white; display: none; cursor: pointer; transition: all 0.2s ease; z-index: 2; }
 		.home-guide-checkbox.show { display: flex !important; align-items: center; justify-content: center; }
 		.home-guide-checkbox.checked { background: var(--primary-color, #3498db); border-color: var(--primary-color, #3498db); }
 		.home-guide-checkbox.checked::after { content: '✓'; color: white; font-size: 16px; font-weight: bold; }
 		.home-guide-item.select-mode { padding-left: 56px; }
+		.home-guide-item.select-mode .home-guide-icon { margin-left: 40px; }
 		.home-folder-guide-item.select-mode { padding-left: 48px; }
 		.home-folder-guide-checkbox { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border: 2px solid #d1d5db; border-radius: 5px; background: white; display: none; cursor: pointer; transition: all 0.2s ease; z-index: 2; }
 		.home-folder-guide-checkbox.show { display: flex; align-items: center; justify-content: center; }
@@ -5800,6 +5801,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
