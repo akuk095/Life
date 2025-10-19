@@ -5302,18 +5302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function createNewFolder(name) {
-    if (!currentUser) return;
-    const timestamp = Date.now();
-    const folderId = `folder_${timestamp}`;
-    
-    set(ref(database, `users/${currentUser.uid}/folders/${folderId}`), {
-        name: name,
-        createdAt: timestamp
-    }).then(() => {
-        populateHomePage();
-    });
-}
+
 document.getElementById('homeMoveBtn')?.addEventListener('click', async () => {
     if (selectedGuides.size === 0) {
         await customAlert('Please select at least one guide', 'No Selection');
@@ -5779,6 +5768,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
