@@ -3510,7 +3510,7 @@ function createGuideElement(guide, isInFolder) {
             document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
             document.querySelectorAll('.bottom-nav-item')[0].classList.add('active'); // Changed from [1] to [0]
             
-            // Show back button
+           // Show back button
             setTimeout(() => {
                 const backBtn = document.getElementById('headerBackBtn');
                 if (backBtn) {
@@ -3518,6 +3518,10 @@ function createGuideElement(guide, isInFolder) {
                 }
             }, 100);
         }
+    });
+    
+    return item;
+}
 
 function toggleSelectMode() {
     homeSelectMode = !homeSelectMode;
@@ -5747,6 +5751,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
