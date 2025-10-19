@@ -2471,12 +2471,12 @@ async function populateCollections() {
         });
         
         item.addEventListener('touchend', () => {
-            clearTimeout(longPressTimer);
-        });
-        
-        item.addEventListener('touchmove', () => {
-            clearTimeout(longPressTimer);
-        });
+		    clearTimeout(longPressTimer);
+		}, { passive: true });  
+		
+		item.addEventListener('touchmove', () => {
+		    clearTimeout(longPressTimer);
+		}, { passive: true });
         
         item.addEventListener('mousedown', (e) => {
             longPressTriggered = false;
@@ -2506,11 +2506,13 @@ async function populateCollections() {
         });
         
         item.addEventListener('mouseup', () => {
-            clearTimeout(longPressTimer);
-        });
-        
-        item.addEventListener('mouseleave', () => {
-            clearTimeout(longPressTimer);
+		    clearTimeout(longPressTimer);
+		}, { passive: true }); 
+		
+		item.addEventListener('mouseleave', () => {
+		    clearTimeout(longPressTimer);
+		}, { passive: true });
+		
         });
     });
 }  
@@ -5798,6 +5800,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
