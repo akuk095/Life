@@ -309,7 +309,7 @@
 		.home-guide-item.select-mode { padding-left: 56px; }
 		.home-guide-item.select-mode .home-guide-icon { margin-left: 40px; }
 		.home-folder-guide-item.select-mode { padding-left: 48px; }
-		.home-folder-guide-checkbox { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border: 2px solid #d1d5db; border-radius: 5px; background: white; display: none; cursor: pointer; transition: all 0.2s ease; z-index: 2; }
+		.home-folder-guide-checkbox { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border: 2px solid #d1d5db; border-radius: 5px; background: white; display: none; cursor: pointer; transition: all 0.2s ease; z-index: 2; }
 		.home-folder-guide-checkbox.show { display: flex; align-items: center; justify-content: center; }
 		.home-folder-guide-checkbox.checked { background: var(--primary-color, #3498db); border-color: var(--primary-color, #3498db); }
 		.home-folder-guide-checkbox.checked::after { content: '✓'; color: white; font-size: 12px; font-weight: bold; }
@@ -3566,18 +3566,24 @@ function toggleSelectMode() {
         actionsBar.classList.add('show');
     }
     
-    // DEBUG: Let's see what we're finding
+    // Add select mode to all guide items (both regular and folder guides)
     if (guidesList) {
         const items = guidesList.querySelectorAll('.home-guide-item, .home-folder-guide-item');
         const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox, .home-folder-guide-checkbox');
         
         console.log('Found items:', items.length);
         console.log('Found checkboxes:', checkboxes.length);
-        console.log('Items:', items);
-        console.log('Checkboxes:', checkboxes);
         
-        items.forEach(item => item.classList.add('select-mode'));
-        checkboxes.forEach(cb => cb.classList.add('show'));
+        items.forEach((item, index) => {
+            console.log(`Item ${index} classes before:`, item.className);  // ← ADD THIS
+            item.classList.add('select-mode');
+            console.log(`Item ${index} classes after:`, item.className);   // ← ADD THIS
+        });
+        
+        checkboxes.forEach((cb, index) => {
+            console.log(`Checkbox ${index} classes:`, cb.className);  // ← ADD THIS
+            cb.classList.add('show');
+        });
     }
     } else {
         // Exiting select mode
@@ -5801,6 +5807,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
