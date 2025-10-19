@@ -2508,27 +2508,7 @@ async function populateCollections() {
     });
 }  
 
-// Filter navigation functionality (OUTSIDE the function)
-document.querySelectorAll('.home-filter-item').forEach(item => {
-    item.addEventListener('click', () => {
-        selectedFilter = item.dataset.filter;
-        
-        // Update active state
-        document.querySelectorAll('.home-filter-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        
-        populateHomePage();
-    });
-});
 
-const homeCreateCollectionMenuBtn = document.getElementById('homeCreateCollectionMenuBtn');
-if (homeCreateCollectionMenuBtn) {
-    homeCreateCollectionMenuBtn.addEventListener('click', async () => {
-        const dropdownMenu = document.getElementById('homeDropdownMenu');
-        if (dropdownMenu) dropdownMenu.classList.remove('show');
-        await createNewCollection();
-    });
-}
         
 function toggleMenu(e) {
     e.stopPropagation();
@@ -3405,7 +3385,21 @@ async function populateHomePage() {
             currentDropdown.classList.remove('show');
         }
     });
-}
+
+	// Filter navigation functionality
+    document.querySelectorAll('.home-filter-item').forEach(item => {
+        item.addEventListener('click', () => {
+            selectedFilter = item.dataset.filter;
+            
+            // Update active state
+            document.querySelectorAll('.home-filter-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            populateHomePage();
+        });
+    });
+}  
+	
 function createGuideElement(guide, isInFolder) {
     const item = document.createElement('div');
     item.className = isInFolder ? 'home-folder-guide-item' : 'home-guide-item';
@@ -5753,6 +5747,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
