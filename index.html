@@ -92,9 +92,11 @@
 		.floating-layout-btn { position: fixed; bottom: calc(60px + max(env(safe-area-inset-bottom), 24px)); right: 24px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--secondary-color); opacity: 0.9; color: white; font-size: 24px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); cursor: pointer; transition: all 0.3s ease; z-index: 999; display: none; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
 		.floating-layout-btn:active { transform: scale(0.9); }
 		.floating-layout-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 1; }
-		.container:not([style*="display: none"]) ~ .floating-layout-btn { display: flex !important; }
-		.home-page.active ~ .floating-layout-btn { display: none !important; }
-		.profile-page.active ~ .floating-layout-btn { display: none !important; }
+		.container[style*="display: block"] ~ .floating-layout-btn { display: flex !important; }
+		.home-page ~ .floating-layout-btn { display: none !important; }
+		.templates-page ~ .floating-layout-btn { display: none !important; }
+		.profile-page ~ .floating-layout-btn { display: none !important; }
+		.settings-page ~ .floating-layout-btn { display: none !important; }
 		.header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: max(env(safe-area-inset-top), 20px) 20px 20px; text-align: center; position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.15); border-radius: 0; z-index: 98; }
 		.header h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px; }
 		.header p { opacity: 0.95; font-size: 13px; font-weight: 400; }
@@ -376,6 +378,20 @@
 		.settings-action-item svg { flex-shrink: 0; color: #9ca3af; transition: color 0.2s ease; }
 		.settings-action-item:hover svg { color: var(--primary-color, #3498db); }
 		
+		/* Collections Navigation */
+		.home-collections-nav { padding: 16px 20px; display: flex; gap: 16px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; min-height: 40px; }
+		.home-collections-nav::-webkit-scrollbar { display: none; }
+		.home-collections-nav:empty { display: none; }
+		.home-collection-item { display: flex; align-items: center; gap: 8px; cursor: pointer; flex-shrink: 0; padding: 8px 12px; border-radius: 20px; background: #f3f4f6; transition: all 0.2s ease; }
+		.home-collection-item:hover { background: #e5e7eb; }
+		.home-collection-item.active { background: var(--primary-color, #3498db); color: white; }
+		.home-collection-circle { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #9ca3af; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+		.home-collection-item.active .home-collection-circle { border-color: white; }
+		.home-collection-circle-dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; display: none; }
+		.home-collection-item.active .home-collection-circle-dot { display: block; background: white; }
+		.home-collection-name { font-size: 14px; font-weight: 500; color: #2c3e50; }
+		.home-collection-item.active .home-collection-name { color: white; }
+		
 	</style>
     </head>
 <body>
@@ -610,7 +626,7 @@ function customPrompt(message, defaultValue = '', title = '') {
 	const database = getDatabase(app);
 	const auth = getAuth(app);
 	let currentUser = null;
-	let currentGuideId = localStorage.getItem('currentGuideId') || "defaultGuide";
+	let currentGuideId = localStorage.getItem('currentGuideId') || null;
 	let skillReminders = {}; // Format: { 'catIndex-skillIndex': { enabled: true, items: { 'itemIndex': 'HH:MM' } } }
 	
 	// Default data structure
@@ -673,51 +689,26 @@ onAuthStateChanged(auth, (user) => {
         // Remove all active states
         bottomNavItems.forEach(nav => nav.classList.remove('active'));
         
-       if (lastPage === 'guides') {
-            // Check if viewing a guide or the guide list
-            const currentGuideExists = currentGuideId && currentGuideId !== 'defaultGuide';
-            
-            if (currentGuideExists && mainContainer) {
-                // User was viewing a specific guide within home
-                mainContainer.style.display = 'block';
-                if (templatesPage) templatesPage.classList.remove('active');
-                if (profilePage) profilePage.classList.remove('active');
-                if (settingsPage) settingsPage.classList.remove('active');
-                if (homePage) homePage.classList.remove('active');
-                
-                // Show back button
-                setTimeout(() => {
-                    const backBtn = document.getElementById('headerBackBtn');
-                    if (backBtn) {
-                        backBtn.style.display = 'flex';
-                    }
-                }, 100);
-            } else {
-                // User was on the guides list
-                mainContainer.style.display = 'none';
-                if (templatesPage) templatesPage.classList.remove('active');
-                if (profilePage) profilePage.classList.remove('active');
-                if (settingsPage) settingsPage.classList.remove('active');
-                if (homePage) {
-                    homePage.classList.add('active');
-                    populateHomePage();
-                }
+        // Hide all pages first
+        mainContainer.style.display = 'none';
+        if (homePage) homePage.classList.remove('active');
+        if (templatesPage) templatesPage.classList.remove('active');
+        if (profilePage) profilePage.classList.remove('active');
+        if (settingsPage) settingsPage.classList.remove('active');
+        
+        if (lastPage === 'guides') {
+            // Show home page with guides list
+            if (homePage) {
+                homePage.classList.add('active');
+                populateHomePage();
             }
-            bottomNavItems[0]?.classList.add('active'); // Always keep Home active
+            bottomNavItems[0]?.classList.add('active');
         } else if (lastPage === 'templates') {
-            mainContainer.style.display = 'none';
-            if (homePage) homePage.classList.remove('active');
-            if (profilePage) profilePage.classList.remove('active');
-            if (settingsPage) settingsPage.classList.remove('active');
             if (templatesPage) {
                 templatesPage.classList.add('active');
             }
             bottomNavItems[1]?.classList.add('active');
         } else if (lastPage === 'profile') {
-            mainContainer.style.display = 'none';
-            if (homePage) homePage.classList.remove('active');
-            if (templatesPage) templatesPage.classList.remove('active');
-            if (settingsPage) settingsPage.classList.remove('active');
             if (profilePage) {
                 profilePage.classList.add('active');
                 const profileEmail = document.getElementById('profileEmail');
@@ -727,33 +718,12 @@ onAuthStateChanged(auth, (user) => {
             }
             bottomNavItems[2]?.classList.add('active');
         } else if (lastPage === 'settings') {
-            mainContainer.style.display = 'none';
-            if (homePage) homePage.classList.remove('active');
-            if (templatesPage) templatesPage.classList.remove('active');
-            if (profilePage) profilePage.classList.remove('active');
             if (settingsPage) {
                 settingsPage.classList.add('active');
             }
             bottomNavItems[3]?.classList.add('active');
-        } else if (lastPage === 'main') {
-            // User was viewing a guide - restore that view
-            if (homePage) homePage.classList.remove('active');
-            if (templatesPage) templatesPage.classList.remove('active');
-            if (profilePage) profilePage.classList.remove('active');
-            if (settingsPage) settingsPage.classList.remove('active');
-            mainContainer.style.display = 'block';
-            
-            // Show back button when on a guide
-            const backBtn = document.getElementById('headerBackBtn');
-            if (backBtn) {
-                backBtn.style.display = 'flex';
-            }
         } else {
             // Fallback: go to home page
-            mainContainer.style.display = 'none';
-            if (templatesPage) templatesPage.classList.remove('active');
-            if (profilePage) profilePage.classList.remove('active');
-            if (settingsPage) settingsPage.classList.remove('active');
             if (homePage) {
                 homePage.classList.add('active');
                 populateHomePage();
@@ -776,14 +746,16 @@ let checkedItems = {};
 let editMode = false;
 let activeTabIndex = 0;
 let appIcon = "📚"; 
-let appTitle = "Essential Life Skills Guide";
-let appSubtitle = "Fundamental knowledge everyone should have to navigate life successfully";
+let appTitle = "Short note";
+let appSubtitle = "Double tap to add description";
 let themeColor = '#607d8b'; // Default grey
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
 let headerImage = null; 
 let wallpaperUrl = '';
+let selectedCollection = null; // Currently selected collection ID
+let selectedFilter = 'all'; // Currently selected filter (all, short-notes, etc.)
 	
 // Drag and drop state
 let draggedCard = null;
@@ -2264,8 +2236,10 @@ function createGuideFromTemplate(templateType) {
         appIcon: '📝',
         categories: [],
         themeColor: '#3498db',
-        checkedItems: {}
+        checkedItems: {},
+        templateType: templateType // ADD THIS LINE
     };
+    
     
     // Customize based on template type
     switch(templateType) {
@@ -2393,6 +2367,164 @@ function createGuideFromTemplate(templateType) {
     }).catch((error) => {
         console.error('Error creating template:', error);
         customAlert('Failed to create guide: ' + error.message, 'Error');
+    });
+}
+
+
+	// Create new collection
+async function createNewCollection() {
+    const collectionName = await customPrompt('Enter collection name:', 'New Collection', 'Create Collection');
+    if (!collectionName || !currentUser) return;
+    
+    const timestamp = Date.now();
+    const collectionId = `collection_${timestamp}`;
+    
+    await set(ref(database, `users/${currentUser.uid}/collections/${collectionId}`), {
+        name: collectionName,
+        createdAt: timestamp
+    });
+    
+    populateHomePage();
+}
+
+// Populate collections navigation
+async function populateCollections() {
+    if (!currentUser) return;
+    
+    const collectionsNav = document.getElementById('homeCollectionsNav');
+    if (!collectionsNav) return;
+    
+    const collectionsSnapshot = await get(ref(database, `users/${currentUser.uid}/collections`));
+    const collections = collectionsSnapshot.val() || {};
+    
+    const collectionsArray = Object.keys(collections).map(id => ({
+        id: id,
+        name: collections[id].name || 'Untitled Collection',
+        createdAt: collections[id].createdAt || 0
+    })).sort((a, b) => a.createdAt - b.createdAt);
+    
+    if (collectionsArray.length === 0) {
+        collectionsNav.innerHTML = '';
+        return;
+    }
+    
+    collectionsNav.innerHTML = collectionsArray.map(collection => `
+        <div class="home-collection-item ${selectedCollection === collection.id ? 'active' : ''}" data-collection-id="${collection.id}">
+            <div class="home-collection-circle">
+                <div class="home-collection-circle-dot"></div>
+            </div>
+            <span class="home-collection-name">${collection.name}</span>
+        </div>
+    `).join('');
+    
+    // Add click handlers
+    document.querySelectorAll('.home-collection-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const collectionId = item.dataset.collectionId;
+            
+            if (selectedCollection === collectionId) {
+                // Deselect if clicking on already selected collection
+                selectedCollection = null;
+            } else {
+                selectedCollection = collectionId;
+            }
+            
+            populateHomePage();
+        });
+
+		// Filter navigation functionality
+    document.querySelectorAll('.home-filter-item').forEach(item => {
+        item.addEventListener('click', () => {
+            selectedFilter = item.dataset.filter;
+            
+            // Update active state
+            document.querySelectorAll('.home-filter-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            populateHomePage();
+        });
+    });
+const homeCreateCollectionMenuBtn = document.getElementById('homeCreateCollectionMenuBtn');
+    if (homeCreateCollectionMenuBtn) {
+        homeCreateCollectionMenuBtn.addEventListener('click', async () => {
+            const dropdownMenu = document.getElementById('homeDropdownMenu');
+            if (dropdownMenu) dropdownMenu.classList.remove('show');
+            await createNewCollection();
+        });
+    }
+        // Long press to delete collection
+        let longPressTimer;
+        let longPressTriggered = false;
+        
+        item.addEventListener('touchstart', (e) => {
+            longPressTriggered = false;
+            longPressTimer = setTimeout(async () => {
+                longPressTriggered = true;
+                e.preventDefault();
+                const collectionId = item.dataset.collectionId;
+                const collectionName = item.querySelector('.home-collection-name').textContent;
+                
+                if (await customConfirm(`Delete collection "${collectionName}"? The guides inside will not be deleted.`, 'Delete Collection', 'Delete')) {
+                    await remove(ref(database, `users/${currentUser.uid}/collections/${collectionId}`));
+                    
+                    // Remove collection reference from guides
+                    const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
+                    const guides = guidesSnapshot.val() || {};
+                    
+                    for (const guideId in guides) {
+                        if (guides[guideId].collectionId === collectionId) {
+                            await remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/collectionId`));
+                        }
+                    }
+                    
+                    selectedCollection = null;
+                    populateHomePage();
+                }
+            }, 500);
+        });
+        
+        item.addEventListener('touchend', () => {
+            clearTimeout(longPressTimer);
+        });
+        
+        item.addEventListener('touchmove', () => {
+            clearTimeout(longPressTimer);
+        });
+        
+        item.addEventListener('mousedown', (e) => {
+            longPressTriggered = false;
+            longPressTimer = setTimeout(async () => {
+                longPressTriggered = true;
+                e.preventDefault();
+                const collectionId = item.dataset.collectionId;
+                const collectionName = item.querySelector('.home-collection-name').textContent;
+                
+                if (await customConfirm(`Delete collection "${collectionName}"? The guides inside will not be deleted.`, 'Delete Collection', 'Delete')) {
+                    await remove(ref(database, `users/${currentUser.uid}/collections/${collectionId}`));
+                    
+                    // Remove collection reference from guides
+                    const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
+                    const guides = guidesSnapshot.val() || {};
+                    
+                    for (const guideId in guides) {
+                        if (guides[guideId].collectionId === collectionId) {
+                            await remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/collectionId`));
+                        }
+                    }
+                    
+                    selectedCollection = null;
+                    populateHomePage();
+                }
+            }, 500);
+        });
+        
+        item.addEventListener('mouseup', () => {
+            clearTimeout(longPressTimer);
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            clearTimeout(longPressTimer);
+        });
     });
 }
 	
@@ -2706,8 +2838,8 @@ async function renderHeader() {
 	const clearChecksBtn = document.getElementById('clearChecksBtn');
 	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
 	// Back button handler
-    const backBtn = document.getElementById('headerBackBtn');
-
+    setTimeout(() => {
+        const backBtn = document.getElementById('headerBackBtn');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
             // Go back to home page
@@ -3026,33 +3158,35 @@ let selectedGuides = new Set();
 async function populateHomePage() {
     if (!currentUser) return;
     
+    // Populate collections first
+    await populateCollections();
+    
     const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
-    const foldersSnapshot = await get(ref(database, `users/${currentUser.uid}/folders`));
     const guides = guidesSnapshot.val() || {};
-    const folders = foldersSnapshot.val() || {};
     const guidesList = document.getElementById('homeGuidesList');
     
     if (!guidesList) return;
     
     // Convert guides to array
-    const guidesArray = Object.keys(guides).map(id => ({
+    let guidesArray = Object.keys(guides).map(id => ({
         id: id,
         title: guides[id].appTitle || 'Untitled',
         subtitle: guides[id].appSubtitle || 'No description',
         icon: guides[id].appIcon || '📄',
         color: guides[id].themeColor || '#3498db',
-        folderId: guides[id].folderId || null
+        collectionId: guides[id].collectionId || null,
+        templateType: guides[id].templateType || 'all'
     }));
     
-    // Convert folders to array
-    const foldersArray = Object.keys(folders).map(id => ({
-        id: id,
-        name: folders[id].name || 'Untitled Folder',
-        guides: guidesArray.filter(g => g.folderId === id)
-    }));
+    // Filter by selected collection
+    if (selectedCollection) {
+        guidesArray = guidesArray.filter(g => g.collectionId === selectedCollection);
+    }
     
-    // Get guides not in any folder
-    const ungroupedGuides = guidesArray.filter(g => !g.folderId);
+    // Filter by selected template type
+    if (selectedFilter !== 'all') {
+        guidesArray = guidesArray.filter(g => g.templateType === selectedFilter);
+    }
     
     guidesList.innerHTML = '';
     
@@ -3060,197 +3194,214 @@ async function populateHomePage() {
         guidesList.innerHTML = `
             <div class="home-empty">
                 <div class="home-empty-icon">📚</div>
-                <div class="home-empty-text">No guides yet</div>
-                <div class="home-empty-subtext">Create your first guide to get started</div>
+                <div class="home-empty-text">No guides found</div>
+                <div class="home-empty-subtext">${selectedCollection ? 'This collection is empty' : 'Create your first guide to get started'}</div>
             </div>
         `;
         return;
     }
     
-    // Render folders first
-foldersArray.forEach(folder => {
-    const folderEl = document.createElement('div');
-    folderEl.className = 'home-folder';
-    
-    folderEl.innerHTML = `
-        <div class="home-folder-header">
-            <div class="home-folder-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-            </div>
-            <div class="home-folder-info">
-                <div class="home-folder-name">${folder.name}</div>
-                <div class="home-folder-count">${folder.guides.length} guide${folder.guides.length !== 1 ? 's' : ''}</div>
-            </div>
-            <svg class="home-folder-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-        </div>
-        <div class="home-folder-guides"></div>
-    `;
-    
-    const folderHeader = folderEl.querySelector('.home-folder-header');
-    const folderGuides = folderEl.querySelector('.home-folder-guides');
-    
-    // ADD THIS NEW CODE - Long press to delete folder
-    let longPressTimer;
-    let longPressTriggered = false;
-    
-    folderHeader.addEventListener('touchstart', (e) => {
-        longPressTriggered = false;
-        longPressTimer = setTimeout(async () => {
-            longPressTriggered = true;
-            e.preventDefault();
-            if (await customConfirm(`Delete folder "${folder.name}"? The guides inside will not be deleted.`, 'Delete Folder', 'Delete')) {
-                await remove(ref(database, `users/${currentUser.uid}/folders/${folder.id}`));
-                // Remove folder reference from guides
-                folder.guides.forEach(async (guide) => {
-                    await remove(ref(database, `users/${currentUser.uid}/guides/${guide.id}/folderId`));
-                });
-                populateHomePage();
-            }
-        }, 500);
+    // Render guides
+    guidesArray.forEach(guide => {
+        const item = createGuideElement(guide, false);
+        guidesList.appendChild(item);
     });
     
-    folderHeader.addEventListener('touchend', () => {
-        clearTimeout(longPressTimer);
-    });
+    // Search button functionality
+    const homeSearchBtn = document.getElementById('homeSearchBtn');
+    const homeSearchOverlay = document.getElementById('homeSearchOverlay');
+    const homeSearchClose = document.getElementById('homeSearchClose');
+    const homeSearchInputFull = document.getElementById('homeSearchInputFull');
+    const homeSearchResults = document.getElementById('homeSearchResults');
     
-    folderHeader.addEventListener('touchmove', () => {
-        clearTimeout(longPressTimer);
-    });
-    
-    folderHeader.addEventListener('mousedown', (e) => {
-        longPressTriggered = false;
-        longPressTimer = setTimeout(async () => {
-            longPressTriggered = true;
-            e.preventDefault();
-            if (await customConfirm(`Delete folder "${folder.name}"? The guides inside will not be deleted.`, 'Delete Folder', 'Delete')) {
-                await remove(ref(database, `users/${currentUser.uid}/folders/${folder.id}`));
-                // Remove folder reference from guides
-                folder.guides.forEach(async (guide) => {
-                    await remove(ref(database, `users/${currentUser.uid}/guides/${guide.id}/folderId`));
-                });
-                populateHomePage();
-            }
-        }, 500);
-    });
-    
-    folderHeader.addEventListener('mouseup', () => {
-        clearTimeout(longPressTimer);
-    });
-    
-    folderHeader.addEventListener('mouseleave', () => {
-        clearTimeout(longPressTimer);
-    });
-    // END OF NEW CODE
-    
-    folderHeader.addEventListener('click', (e) => {
-        // Don't toggle if long press was triggered
-        if (longPressTriggered) {
-            longPressTriggered = false;
-            return;
-        }
+    if (homeSearchBtn && homeSearchOverlay) {
+        // Remove old listeners by cloning
+        const newSearchBtn = homeSearchBtn.cloneNode(true);
+        homeSearchBtn.parentNode.replaceChild(newSearchBtn, homeSearchBtn);
         
-        folderEl.classList.toggle('expanded');
-    });
-        
-        // Add guides to folder
-        folder.guides.forEach(guide => {
-            const guideEl = createGuideElement(guide, true);
-            folderGuidesContainer.appendChild(guideEl);
+        newSearchBtn.addEventListener('click', () => {
+            homeSearchOverlay.classList.add('show');
+            homeSearchInputFull.focus();
         });
+    }
+    
+    if (homeSearchClose) {
+        const newCloseBtn = homeSearchClose.cloneNode(true);
+        homeSearchClose.parentNode.replaceChild(newCloseBtn, homeSearchClose);
         
-        guidesList.appendChild(folderEl);
-    });
+        newCloseBtn.addEventListener('click', () => {
+            homeSearchOverlay.classList.remove('show');
+            if (homeSearchInputFull) homeSearchInputFull.value = '';
+            if (homeSearchResults) homeSearchResults.innerHTML = '';
+        });
+    }
     
-    // Render ungrouped guides
-    ungroupedGuides.forEach(guide => {
-        const guideEl = createGuideElement(guide, false);
-        guidesList.appendChild(guideEl);
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('homeSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
+    if (homeSearchInputFull) {
+        const newSearchInput = homeSearchInputFull.cloneNode(true);
+        homeSearchInputFull.parentNode.replaceChild(newSearchInput, homeSearchInputFull);
+        
+        newSearchInput.addEventListener('input', async (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
             
-            document.querySelectorAll('.home-folder').forEach(folder => {
-                const folderName = folder.querySelector('.home-folder-name').textContent.toLowerCase();
-                const guides = folder.querySelectorAll('.home-folder-guide-item');
-                let hasMatch = folderName.includes(searchTerm);
-                
-                guides.forEach(guide => {
-                    const title = guide.querySelector('.home-folder-guide-title').textContent.toLowerCase();
-                    if (title.includes(searchTerm)) {
-                        guide.style.display = 'flex';
-                        hasMatch = true;
-                    } else {
-                        guide.style.display = searchTerm ? 'none' : 'flex';
-                    }
-                });
-                
-                folder.style.display = hasMatch ? 'block' : 'none';
-                if (hasMatch && searchTerm) folder.classList.add('expanded');
-            });
+            if (!searchTerm) {
+                homeSearchResults.innerHTML = '';
+                return;
+            }
             
-            document.querySelectorAll('.home-guide-item').forEach(item => {
-                const title = item.querySelector('.home-guide-title').textContent.toLowerCase();
-                const meta = item.querySelector('.home-guide-meta').textContent.toLowerCase();
-                if (title.includes(searchTerm) || meta.includes(searchTerm)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
+            if (!currentUser) return;
+            
+            // Search through all guides
+            const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
+            const guides = guidesSnapshot.val() || {};
+            
+            let results = [];
+            
+            Object.keys(guides).forEach(guideId => {
+                const guide = guides[guideId];
+                const guideTitle = guide.appTitle || '';
+                const guideSubtitle = guide.appSubtitle || '';
+                
+                // Search in guide title and subtitle
+                if (guideTitle.toLowerCase().includes(searchTerm) || 
+                    guideSubtitle.toLowerCase().includes(searchTerm)) {
+                    results.push({
+                        type: 'guide',
+                        id: guideId,
+                        title: guideTitle,
+                        subtitle: guideSubtitle,
+                        icon: guide.appIcon || '📄',
+                        color: guide.themeColor || '#3498db'
+                    });
                 }
+                
+                // Search in categories and items
+                const categories = guide.categories || [];
+                categories.forEach((cat, catIndex) => {
+                    cat.skills?.forEach((skill, skillIndex) => {
+                        skill.items?.forEach((item, itemIndex) => {
+                            if (item.toLowerCase().includes(searchTerm)) {
+                                results.push({
+                                    type: 'item',
+                                    id: guideId,
+                                    title: item,
+                                    subtitle: `${guideTitle} > ${cat.name} > ${skill.title}`,
+                                    icon: skill.icon || '📝',
+                                    color: guide.themeColor || '#3498db',
+                                    location: {
+                                        catIndex,
+                                        skillIndex,
+                                        itemIndex
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
             });
+            
+            // Display results
+            if (results.length === 0) {
+                homeSearchResults.innerHTML = '<div style="padding: 40px 20px; text-align: center; color: #9ca3af;">No results found</div>';
+            } else {
+                homeSearchResults.innerHTML = results.map(result => `
+                    <div class="search-result-item" data-guide-id="${result.id}" style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer; display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, ${result.color}dd, ${result.color}); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+                            ${result.icon}
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-size: 14px; font-weight: 500; color: #2c3e50; margin-bottom: 2px;">${result.title}</div>
+                            <div style="font-size: 12px; color: #9ca3af;">${result.subtitle}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Add click handlers
+                document.querySelectorAll('.search-result-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const guideId = item.dataset.guideId;
+                        switchGuide(guideId);
+                        homeSearchOverlay.classList.remove('show');
+                        newSearchInput.value = '';
+                        homeSearchResults.innerHTML = '';
+                        
+                        document.getElementById('homePage').classList.remove('active');
+                        document.querySelector('.container').style.display = 'block';
+                        document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+                        document.querySelectorAll('.bottom-nav-item')[0].classList.add('active');
+                        
+                        setTimeout(() => {
+                            const backBtn = document.getElementById('headerBackBtn');
+                            if (backBtn) backBtn.style.display = 'flex';
+                        }, 100);
+                    });
+                });
+            }
+        });
+    }
+
+    // Create button functionality
+    const homeCreateBtn = document.getElementById('homeCreateBtn');
+    if (homeCreateBtn) {
+        const newCreateBtn = homeCreateBtn.cloneNode(true);
+        homeCreateBtn.parentNode.replaceChild(newCreateBtn, homeCreateBtn);
+        
+        newCreateBtn.addEventListener('click', () => {
+            createNewGuide();
         });
     }
     
     // Menu button
-const menuBtn = document.getElementById('homeMenuBtn');
-const dropdownMenu = document.getElementById('homeDropdownMenu');
-const selectMenuBtn = document.getElementById('homeSelectMenuBtn');
-const createFolderMenuBtn = document.getElementById('homeCreateFolderMenuBtn');
+    const menuBtn = document.getElementById('homeMenuBtn');
+    const dropdownMenu = document.getElementById('homeDropdownMenu');
+    const selectMenuBtn = document.getElementById('homeSelectMenuBtn');
+    const createCollectionMenuBtn = document.getElementById('homeCreateCollectionMenuBtn');
 
-if (menuBtn && dropdownMenu) {
-    menuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdownMenu.classList.toggle('show');
+    if (menuBtn && dropdownMenu) {
+        const newMenuBtn = menuBtn.cloneNode(true);
+        menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
         
-        // Update select button text
-        if (selectMenuBtn) {
-            selectMenuBtn.innerHTML = homeSelectMode 
-                ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancel`
-                : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Select`;
-        }
-    });
+        newMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+            
+            // Update select button text
+            if (selectMenuBtn) {
+                selectMenuBtn.innerHTML = homeSelectMode 
+                    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancel`
+                    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Select`;
+            }
+        });
+    }
+
+    if (selectMenuBtn) {
+        const newSelectBtn = selectMenuBtn.cloneNode(true);
+        selectMenuBtn.parentNode.replaceChild(newSelectBtn, selectMenuBtn);
+        
+        newSelectBtn.addEventListener('click', () => {
+            toggleSelectMode();
+            dropdownMenu.classList.remove('show');
+        });
+    }
+
+    if (createCollectionMenuBtn) {
+        const newCollectionBtn = createCollectionMenuBtn.cloneNode(true);
+        createCollectionMenuBtn.parentNode.replaceChild(newCollectionBtn, createCollectionMenuBtn);
+        
+        newCollectionBtn.addEventListener('click', async () => {
+            dropdownMenu.classList.remove('show');
+            await createNewCollection();
+        });
+    }
     
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
-        if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            dropdownMenu.classList.remove('show');
+        const currentMenuBtn = document.getElementById('homeMenuBtn');
+        const currentDropdown = document.getElementById('homeDropdownMenu');
+        if (currentMenuBtn && currentDropdown && 
+            !currentMenuBtn.contains(e.target) && !currentDropdown.contains(e.target)) {
+            currentDropdown.classList.remove('show');
         }
     });
-}
-
-if (selectMenuBtn) {
-    selectMenuBtn.addEventListener('click', () => {
-        toggleSelectMode();
-        dropdownMenu.classList.remove('show');
-    });
-}
-
-if (createFolderMenuBtn) {
-    createFolderMenuBtn.addEventListener('click', async () => {
-        dropdownMenu.classList.remove('show');
-        const folderName = await customPrompt('Enter folder name:', 'New Folder', 'Create Folder');
-        if (folderName) {
-            createNewFolder(folderName);
-        }
-    });
-	}	
 }
 function createGuideElement(guide, isInFolder) {
     const item = document.createElement('div');
@@ -3356,16 +3507,20 @@ function createGuideElement(guide, isInFolder) {
             toggleGuideSelection(guide.id, checkbox);
         } else {
             switchGuide(guide.id);
-            localStorage.setItem('currentPage', 'main');
+            localStorage.setItem('currentPage', 'guides'); // Add this line
             document.getElementById('homePage').classList.remove('active');
             document.querySelector('.container').style.display = 'block';
             document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelectorAll('.bottom-nav-item')[1].classList.add('active');
+            document.querySelectorAll('.bottom-nav-item')[0].classList.add('active'); // Changed from [1] to [0]
+            
+            // Show back button
+            setTimeout(() => {
+                const backBtn = document.getElementById('headerBackBtn');
+                if (backBtn) {
+                    backBtn.style.display = 'flex';
+                }
+            }, 100);
         }
-    });
-    
-    return item;
-}
 
 function toggleSelectMode() {
     homeSelectMode = !homeSelectMode;
@@ -5156,42 +5311,41 @@ function createNewFolder(name) {
         populateHomePage();
     });
 }
-// Move selected guides to folder
 document.getElementById('homeMoveBtn')?.addEventListener('click', async () => {
     if (selectedGuides.size === 0) {
         await customAlert('Please select at least one guide', 'No Selection');
         return;
     }
     
-    const foldersSnapshot = await get(ref(database, `users/${currentUser.uid}/folders`));
-    const folders = foldersSnapshot.val() || {};
-    const foldersArray = Object.keys(folders).map(id => ({
+    const collectionsSnapshot = await get(ref(database, `users/${currentUser.uid}/collections`));
+    const collections = collectionsSnapshot.val() || {};
+    const collectionsArray = Object.keys(collections).map(id => ({
         id: id,
-        name: folders[id].name
+        name: collections[id].name
     }));
     
-    if (foldersArray.length === 0) {
-        await customAlert('No folders available. Create a folder first.', 'No Folders');
+    if (collectionsArray.length === 0) {
+        await customAlert('No collections available. Create a collection first.', 'No Collections');
         return;
     }
     
-    // Show folder selection dialog
-    const folderOptions = foldersArray.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+    // Show collection selection dialog
+    const collectionOptions = collectionsArray.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     const overlay = document.createElement('div');
     overlay.className = 'custom-dialog-overlay';
     
     const dialog = document.createElement('div');
     dialog.className = 'custom-dialog';
     dialog.innerHTML = `
-        <div class="custom-dialog-title">Move to Folder</div>
-        <div class="custom-dialog-message">Select a folder for ${selectedGuides.size} guide${selectedGuides.size > 1 ? 's' : ''}:</div>
-        <select id="folderSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; margin-bottom: 16px;">
-            <option value="">Remove from folder</option>
-            ${folderOptions}
+        <div class="custom-dialog-title">Move to Collection</div>
+        <div class="custom-dialog-message">Select a collection for ${selectedGuides.size} guide${selectedGuides.size > 1 ? 's' : ''}</div>
+        <select id="collectionSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
+            <option value="">Remove from collection</option>
+            ${collectionOptions}
         </select>
         <div class="custom-dialog-buttons">
-            <button class="custom-dialog-button">Cancel</button>
-            <button class="custom-dialog-button primary">Move</button>
+            <button class="custom-dialog-button" data-result="cancel">Cancel</button>
+            <button class="custom-dialog-button primary" data-result="ok">Move</button>
         </div>
     `;
     
@@ -5199,36 +5353,28 @@ document.getElementById('homeMoveBtn')?.addEventListener('click', async () => {
     document.body.appendChild(overlay);
     setTimeout(() => overlay.classList.add('show'), 10);
     
-    const buttons = dialog.querySelectorAll('.custom-dialog-button');
-    buttons[0].addEventListener('click', () => {
-        overlay.classList.remove('show');
-        setTimeout(() => document.body.removeChild(overlay), 200);
-    });
-    
-    buttons[1].addEventListener('click', () => {
-        const folderId = document.getElementById('folderSelect').value;
-        
-        selectedGuides.forEach(guideId => {
-            if (folderId) {
-                set(ref(database, `users/${currentUser.uid}/guides/${guideId}/folderId`), folderId);
-            } else {
-                remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/folderId`));
+    const closeDialog = async (result) => {
+        if (result === 'ok') {
+            const collectionId = document.getElementById('collectionSelect').value;
+            
+            for (const guideId of selectedGuides) {
+                if (collectionId) {
+                    await set(ref(database, `users/${currentUser.uid}/guides/${guideId}/collectionId`), collectionId);
+                } else {
+                    await remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/collectionId`));
+                }
             }
-        });
+            
+            toggleSelectMode();
+            populateHomePage();
+        }
         
         overlay.classList.remove('show');
         setTimeout(() => document.body.removeChild(overlay), 200);
-        
-        toggleSelectMode();
-        populateHomePage();
-        customAlert('Guides moved successfully!', 'Success');
-    });
+    };
     
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            overlay.classList.remove('show');
-            setTimeout(() => document.body.removeChild(overlay), 200);
-        }
+    dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
+        btn.addEventListener('click', () => closeDialog(btn.dataset.result));
     });
 });
 	
@@ -5285,7 +5431,80 @@ async function backupContent() {
         await customAlert('Failed to create backup: ' + error.message, 'Backup Failed');
     }
 }
-	
+
+		// Profile name editing
+    const profileNameTitle = document.getElementById('profileNameTitle');
+    if (profileNameTitle) {
+        profileNameTitle.addEventListener('click', () => {
+            profileNameTitle.contentEditable = 'true';
+            profileNameTitle.focus();
+            // Select all text
+            const range = document.createRange();
+            range.selectNodeContents(profileNameTitle);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        });
+        
+        profileNameTitle.addEventListener('blur', () => {
+            profileNameTitle.contentEditable = 'false';
+            const newName = profileNameTitle.textContent.trim() || 'Enter Name';
+            profileNameTitle.textContent = newName;
+            
+            // Save to Firebase
+            if (currentUser) {
+                set(ref(database, `users/${currentUser.uid}/profileName`), newName);
+            }
+        });
+        
+        profileNameTitle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                profileNameTitle.blur();
+            }
+        });
+    }
+    
+    // Load profile name when showing profile page
+    if (profilePage && currentUser) {
+        get(ref(database, `users/${currentUser.uid}/profileName`)).then((snapshot) => {
+            if (snapshot.exists() && profileNameTitle) {
+                profileNameTitle.textContent = snapshot.val();
+            }
+        });
+    }
+
+		// Settings restore from backup
+    const settingsRestoreBtn = document.getElementById('settingsRestoreBtn');
+    const restoreFileInput = document.getElementById('restoreFileInput');
+    
+    if (settingsRestoreBtn && restoreFileInput) {
+        settingsRestoreBtn.addEventListener('click', () => {
+            restoreFileInput.click();
+        });
+        
+        restoreFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            try {
+                const text = await file.text();
+                const backupData = JSON.parse(text);
+                
+                if (await customConfirm('This will restore all data from the backup file. Your current data will be replaced. Continue?', 'Restore Backup', 'Restore')) {
+                    // Upload to Firebase
+                    await set(ref(database, `users/${currentUser.uid}`), backupData);
+                    await customAlert('Backup restored successfully! Refreshing...', 'Restore Complete');
+                    window.location.reload();
+                }
+            } catch (error) {
+                await customAlert('Failed to restore backup: ' + error.message, 'Restore Failed');
+            }
+            
+            // Reset file input
+            restoreFileInput.value = '';
+        });
+    }
 </script>
 <button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 <div class="home-page" id="homePage">
@@ -5316,7 +5535,13 @@ async function backupContent() {
         </div>
         
         <div class="home-divider"></div>
-             
+        
+        <div class="home-collections-nav" id="homeCollectionsNav">
+            <!-- Collections will be populated here dynamically -->
+        </div>
+        
+        <div class="home-divider"></div>
+        
         <div class="home-filter-nav">
             <div class="home-filter-item active" data-filter="all">All files</div>
             <div class="home-filter-item" data-filter="short-notes">Short notes</div>
@@ -5353,7 +5578,7 @@ async function backupContent() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
             </svg>
-            Move to Folder
+            Move to Collection
         </button>
         <button class="home-action-delete" id="homeDeleteBtn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -5361,6 +5586,22 @@ async function backupContent() {
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
             Delete
+        </button>
+    </div>
+    
+    <div class="home-dropdown-menu" id="homeDropdownMenu">
+        <button id="homeSelectMenuBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            Select
+        </button>
+        <button id="homeCreateCollectionMenuBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Create Collection
         </button>
     </div>
 </div>
@@ -5439,6 +5680,21 @@ async function backupContent() {
         
         <div class="home-divider" style="margin: 20px 0;"></div>
         
+        <div class="profile-page" id="profilePage">
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1 class="profile-title editable" id="profileNameTitle" contenteditable="false">Enter Name</h1>
+        </div>
+        
+        <div class="home-divider" style="margin: 20px 0;"></div>
+        
+        <div class="profile-info-section">
+            <div class="profile-label">Email</div>
+            <div class="profile-value" id="profileEmail">user@example.com</div>
+        </div>
+        
+        <div class="home-divider" style="margin: 20px 0;"></div>
+        
         <div class="profile-actions">
             <button class="profile-action-item" id="profileSwitchAccountBtn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -5482,10 +5738,19 @@ async function backupContent() {
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                <span>Backup content</span>
+                <span>Download backup</span>
+            </button>
+            <button class="settings-action-item" id="settingsRestoreBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Upload from backup</span>
             </button>
         </div>
     </div>
+    <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
 </div>
 <div class="bottom-nav">
     <div class="bottom-nav-item active" data-page="guides">
@@ -5497,7 +5762,10 @@ async function backupContent() {
 	    <span>Templates</span>
 	</div>
     <div class="bottom-nav-item" data-page="profile">
-	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+	        <circle cx="12" cy="7" r="4"></circle>
+	        <path d="M5.5 21c0-3.5 2.9-6.5 6.5-6.5s6.5 3 6.5 6.5"></path>
+	    </svg>
 	    <span>Profile</span>
 	</div>
 	<div class="bottom-nav-item" data-page="settings">
@@ -5507,6 +5775,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
