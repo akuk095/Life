@@ -3376,15 +3376,24 @@ async function populateHomePage() {
         });
     }
     
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
+    // Close menu when clicking outside (remove old listeners first)
+    const closeMenuHandler = (e) => {
         const currentMenuBtn = document.getElementById('homeMenuBtn');
         const currentDropdown = document.getElementById('homeDropdownMenu');
         if (currentMenuBtn && currentDropdown && 
             !currentMenuBtn.contains(e.target) && !currentDropdown.contains(e.target)) {
             currentDropdown.classList.remove('show');
         }
-    });
+    };
+    
+    // Remove old listener if it exists
+    if (window.homeMenuCloseHandler) {
+        document.removeEventListener('click', window.homeMenuCloseHandler);
+    }
+    
+    // Add new listener and store reference
+    window.homeMenuCloseHandler = closeMenuHandler;
+    document.addEventListener('click', closeMenuHandler);
 
 	// Filter navigation functionality
     document.querySelectorAll('.home-filter-item').forEach(item => {
@@ -5751,6 +5760,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
