@@ -3147,12 +3147,9 @@ let selectedGuides = new Set();
 async function populateHomePage() {
     if (!currentUser) return;
     
-    // Turn off select mode when re-populating
+    // Exit select mode when re-populating
     if (homeSelectMode) {
-        homeSelectMode = false;
-        selectedGuides.clear();
-        const actionsBar = document.getElementById('homeActionsBar');
-        if (actionsBar) actionsBar.classList.remove('show');
+        toggleSelectMode();
     }
     
     // Populate collections first
@@ -3551,27 +3548,45 @@ function toggleSelectMode() {
     selectedGuides.clear();
     
     const actionsBar = document.getElementById('homeActionsBar');
-    const homeGuidesList = document.getElementById('homeGuidesList');
-    const checkboxes = homeGuidesList ? homeGuidesList.querySelectorAll('.home-guide-checkbox, .home-folder-guide-checkbox') : [];
-    const items = homeGuidesList ? homeGuidesList.querySelectorAll('.home-guide-item, .home-folder-guide-item') : [];
+    const guidesList = document.getElementById('homeGuidesList');
     const selectMenuBtn = document.getElementById('homeSelectMenuBtn');
     
     if (homeSelectMode) {
+        // Entering select mode
         if (selectMenuBtn) {
             selectMenuBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancel`;
         }
-        actionsBar.classList.add('show');
-        checkboxes.forEach(cb => cb.classList.add('show'));
-        items.forEach(item => item.classList.add('select-mode'));
+        if (actionsBar) {
+            actionsBar.classList.add('show');
+        }
+        
+        // Add select mode to all guide items in the list
+        if (guidesList) {
+            const items = guidesList.querySelectorAll('.home-guide-item');
+            const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox');
+            
+            items.forEach(item => item.classList.add('select-mode'));
+            checkboxes.forEach(cb => cb.classList.add('show'));
+        }
     } else {
+        // Exiting select mode
         if (selectMenuBtn) {
             selectMenuBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Select`;
         }
-        actionsBar.classList.remove('show');
-        checkboxes.forEach(cb => {
-            cb.classList.remove('show', 'checked');
-        });
-        items.forEach(item => item.classList.remove('select-mode'));
+        if (actionsBar) {
+            actionsBar.classList.remove('show');
+        }
+        
+        // Remove select mode from all guide items
+        if (guidesList) {
+            const items = guidesList.querySelectorAll('.home-guide-item');
+            const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox');
+            
+            items.forEach(item => item.classList.remove('select-mode'));
+            checkboxes.forEach(cb => {
+                cb.classList.remove('show', 'checked');
+            });
+        }
     }
 }
 
@@ -5775,6 +5790,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
