@@ -765,6 +765,8 @@ let headerImage = null;
 let wallpaperUrl = '';
 let selectedCollection = null; // Currently selected collection ID
 let selectedFilter = 'all'; // Currently selected filter (all, short-notes, etc.)
+let selectedCollection = null; // null means "All files"
+let selectedFilter = null; // null means no filter active
 	
 // Drag and drop state
 let draggedCard = null;
@@ -2411,6 +2413,27 @@ async function populateCollections() {
         name: collections[id].name || 'Untitled Collection',
         createdAt: collections[id].createdAt || 0
     })).sort((a, b) => a.createdAt - b.createdAt);
+
+	// Add "All files" as the default first item
+    const allFilesHTML = `
+        <div class="home-collection-item ${selectedCollection === null ? 'active' : ''}" data-collection-id="">
+            <div class="home-collection-circle">
+                <div class="home-collection-circle-dot"></div>
+            </div>
+            <span class="home-collection-name">All files</span>
+        </div>
+    `;
+    
+    const collectionsHTML = collectionsArray.map(collection => `
+        <div class="home-collection-item ${selectedCollection === collection.id ? 'active' : ''}" data-collection-id="${collection.id}">
+            <div class="home-collection-circle">
+                <div class="home-collection-circle-dot"></div>
+            </div>
+            <span class="home-collection-name">${collection.name}</span>
+        </div>
+    `).join('');
+    
+    collectionsNav.innerHTML = allFilesHTML + collectionsHTML;
     
     if (collectionsArray.length === 0) {
         collectionsNav.innerHTML = '';
@@ -2427,19 +2450,19 @@ async function populateCollections() {
     `).join('');
     
     // Add click handlers
-    document.querySelectorAll('.home-collection-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const collectionId = item.dataset.collectionId;
-            
-            if (selectedCollection === collectionId) {
-                // Deselect if clicking on already selected collection
-                selectedCollection = null;
-            } else {
-                selectedCollection = collectionId;
-            }
-            
-            populateHomePage();
-        });
+	document.querySelectorAll('.home-collection-item').forEach(item => {
+	    item.addEventListener('click', () => {
+	        const collectionId = item.dataset.collectionId;
+	        
+	        // Always select - can't deselect collections
+	        if (collectionId === '') {
+	            selectedCollection = null;  // "All files"
+	        } else {
+	            selectedCollection = collectionId;  // Specific collection
+	        }
+	        
+	        populateHomePage();
+	    });
 
         // Long press to delete collection
         let longPressTimer;
@@ -3439,11 +3462,18 @@ if (homePage) {
 // Filter navigation functionality
 document.querySelectorAll('.home-filter-item').forEach(item => {
     item.addEventListener('click', () => {
-        selectedFilter = item.dataset.filter;
+        const clickedFilter = item.dataset.filter;
         
-        // Update active state
-        document.querySelectorAll('.home-filter-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
+        // Toggle filter - clicking same filter deselects it
+        if (selectedFilter === clickedFilter) {
+            selectedFilter = null;
+            item.classList.remove('active');
+        } else {
+            selectedFilter = clickedFilter;
+            // Update active state
+            document.querySelectorAll('.home-filter-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        }
         
         populateHomePage();
     });
@@ -5627,7 +5657,6 @@ async function backupContent() {
         <div class="home-divider"></div>
         
         <div class="home-filter-nav">
-            <div class="home-filter-item active" data-filter="all">All files</div>
             <div class="home-filter-item" data-filter="short-notes">Short notes</div>
             <div class="home-filter-item" data-filter="reminders">Reminders</div>
             <div class="home-filter-item" data-filter="routines">Routines</div>
@@ -5832,9 +5861,9 @@ async function backupContent() {
 	</div>
     <div class="bottom-nav-item" data-page="profile">
 	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-	        <circle cx="12" cy="7" r="4"></circle>
-	        <path d="M5.5 21c0-3.5 2.9-6.5 6.5-6.5s6.5 3 6.5 6.5"></path>
-	    </svg>
+		    <circle cx="12" cy="7" r="4"></circle>
+		    <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path>
+		</svg>
 	    <span>Profile</span>
 	</div>
 	<div class="bottom-nav-item" data-page="settings">
@@ -5844,6 +5873,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
