@@ -3560,10 +3560,10 @@ function toggleSelectMode() {
             actionsBar.classList.add('show');
         }
         
-        // Add select mode to all guide items in the list
+        // Add select mode to all guide items (both regular and folder guides)
         if (guidesList) {
-            const items = guidesList.querySelectorAll('.home-guide-item');
-            const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox');
+            const items = guidesList.querySelectorAll('.home-guide-item, .home-folder-guide-item');
+            const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox, .home-folder-guide-checkbox');
             
             items.forEach(item => item.classList.add('select-mode'));
             checkboxes.forEach(cb => cb.classList.add('show'));
@@ -3579,8 +3579,8 @@ function toggleSelectMode() {
         
         // Remove select mode from all guide items
         if (guidesList) {
-            const items = guidesList.querySelectorAll('.home-guide-item');
-            const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox');
+            const items = guidesList.querySelectorAll('.home-guide-item, .home-folder-guide-item');
+            const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox, .home-folder-guide-checkbox');
             
             items.forEach(item => item.classList.remove('select-mode'));
             checkboxes.forEach(cb => {
@@ -5790,6 +5790,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
