@@ -673,16 +673,37 @@ onAuthStateChanged(auth, (user) => {
         // Remove all active states
         bottomNavItems.forEach(nav => nav.classList.remove('active'));
         
-        if (lastPage === 'guides') {
-            mainContainer.style.display = 'none';
-            if (templatesPage) templatesPage.classList.remove('active');
-            if (profilePage) profilePage.classList.remove('active');
-            if (settingsPage) settingsPage.classList.remove('active');
-            if (homePage) {
-                homePage.classList.add('active');
-                populateHomePage();
+       if (lastPage === 'guides') {
+            // Check if viewing a guide or the guide list
+            const currentGuideExists = currentGuideId && currentGuideId !== 'defaultGuide';
+            
+            if (currentGuideExists && mainContainer) {
+                // User was viewing a specific guide within home
+                mainContainer.style.display = 'block';
+                if (templatesPage) templatesPage.classList.remove('active');
+                if (profilePage) profilePage.classList.remove('active');
+                if (settingsPage) settingsPage.classList.remove('active');
+                if (homePage) homePage.classList.remove('active');
+                
+                // Show back button
+                setTimeout(() => {
+                    const backBtn = document.getElementById('headerBackBtn');
+                    if (backBtn) {
+                        backBtn.style.display = 'flex';
+                    }
+                }, 100);
+            } else {
+                // User was on the guides list
+                mainContainer.style.display = 'none';
+                if (templatesPage) templatesPage.classList.remove('active');
+                if (profilePage) profilePage.classList.remove('active');
+                if (settingsPage) settingsPage.classList.remove('active');
+                if (homePage) {
+                    homePage.classList.add('active');
+                    populateHomePage();
+                }
             }
-            bottomNavItems[0]?.classList.add('active');
+            bottomNavItems[0]?.classList.add('active'); // Always keep Home active
         } else if (lastPage === 'templates') {
             mainContainer.style.display = 'none';
             if (homePage) homePage.classList.remove('active');
@@ -1190,13 +1211,16 @@ async function loadUserData(userId) {
 function switchGuide(guideId) {
     currentGuideId = guideId;
     localStorage.setItem('currentGuideId', guideId);
+    localStorage.setItem('currentPage', 'guides'); // Keep as 'guides' so home stays active
     loadUserData(currentUser.uid);
     
     // Show back button when viewing a guide
-    const backBtn = document.getElementById('headerBackBtn');
-    if (backBtn) {
-        backBtn.style.display = 'flex';
-    }
+    setTimeout(() => {
+        const backBtn = document.getElementById('headerBackBtn');
+        if (backBtn) {
+            backBtn.style.display = 'flex';
+        }
+    }, 100);
 }
 	
 function applyTheme() {
@@ -2208,15 +2232,24 @@ function createNewGuide() {
     set(ref(database, `users/${currentUser.uid}/guides/${newId}`), newGuideData).then(() => {
         currentGuideId = newId;
         localStorage.setItem('currentGuideId', newId);
-        localStorage.setItem('currentPage', 'main');
+        localStorage.setItem('currentPage', 'guides'); // Changed to 'guides'
         loadUserData(currentUser.uid);
         
         // Switch to main view
         document.getElementById('homePage')?.classList.remove('active');
         document.querySelector('.container').style.display = 'block';
-        // Update bottom nav to show create as active
+        
+        // Keep Home button active
         document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
-        document.querySelectorAll('.bottom-nav-item')[1].classList.add('active');
+        document.querySelectorAll('.bottom-nav-item')[0]?.classList.add('active'); // Home button
+        
+        // Show back button
+        setTimeout(() => {
+            const backBtn = document.getElementById('headerBackBtn');
+            if (backBtn) {
+                backBtn.style.display = 'flex';
+            }
+        }, 100);
     });
 }
 
@@ -2336,7 +2369,9 @@ function createGuideFromTemplate(templateType) {
     set(ref(database, `users/${currentUser.uid}/guides/${newId}`), templateData).then(() => {
         currentGuideId = newId;
         localStorage.setItem('currentGuideId', newId);
-        localStorage.setItem('currentPage', 'main');
+        localStorage.setItem('currentPage', 'guides'); // Changed to 'guides' so home stays active
+        
+        // Load the user data for the new guide
         loadUserData(currentUser.uid);
         
         // Switch to main view
@@ -2344,15 +2379,20 @@ function createGuideFromTemplate(templateType) {
         document.getElementById('templatesPage')?.classList.remove('active');
         document.querySelector('.container').style.display = 'block';
         
-        // Update bottom nav
+        // Keep Home button active since guides are part of home
         document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
-        // Don't set any bottom nav as active when viewing a guide
+        document.querySelectorAll('.bottom-nav-item')[0]?.classList.add('active'); // Home button
         
         // Show back button
-        const backBtn = document.getElementById('headerBackBtn');
-        if (backBtn) {
-            backBtn.style.display = 'flex';
-        }
+        setTimeout(() => {
+            const backBtn = document.getElementById('headerBackBtn');
+            if (backBtn) {
+                backBtn.style.display = 'flex';
+            }
+        }, 100);
+    }).catch((error) => {
+        console.error('Error creating template:', error);
+        customAlert('Failed to create guide: ' + error.message, 'Error');
     });
 }
 	
@@ -5467,6 +5507,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
