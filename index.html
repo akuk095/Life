@@ -3555,22 +3555,27 @@ function toggleSelectMode() {
     const selectMenuBtn = document.getElementById('homeSelectMenuBtn');
     
     if (homeSelectMode) {
-        // Entering select mode
-        if (selectMenuBtn) {
-            selectMenuBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancel`;
-        }
-        if (actionsBar) {
-            actionsBar.classList.add('show');
-        }
+    // Entering select mode
+    if (selectMenuBtn) {
+        selectMenuBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancel`;
+    }
+    if (actionsBar) {
+        actionsBar.classList.add('show');
+    }
+    
+    // DEBUG: Let's see what we're finding
+    if (guidesList) {
+        const items = guidesList.querySelectorAll('.home-guide-item, .home-folder-guide-item');
+        const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox, .home-folder-guide-checkbox');
         
-        // Add select mode to all guide items (both regular and folder guides)
-        if (guidesList) {
-            const items = guidesList.querySelectorAll('.home-guide-item, .home-folder-guide-item');
-            const checkboxes = guidesList.querySelectorAll('.home-guide-checkbox, .home-folder-guide-checkbox');
-            
-            items.forEach(item => item.classList.add('select-mode'));
-            checkboxes.forEach(cb => cb.classList.add('show'));
-        }
+        console.log('Found items:', items.length);
+        console.log('Found checkboxes:', checkboxes.length);
+        console.log('Items:', items);
+        console.log('Checkboxes:', checkboxes);
+        
+        items.forEach(item => item.classList.add('select-mode'));
+        checkboxes.forEach(cb => cb.classList.add('show'));
+    }
     } else {
         // Exiting select mode
         if (selectMenuBtn) {
@@ -5793,6 +5798,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
