@@ -320,6 +320,61 @@
 		.home-empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
 		.home-empty-text { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #6b7280; }
 		.home-empty-subtext { font-size: 14px; color: #9ca3af; }
+		.header-back-btn { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: all 0.2s ease; z-index: 100; }
+		.header-back-btn:hover { background: rgba(255,255,255,0.3); }
+		.header-back-btn:active { transform: translateY(-50%) scale(0.95); }
+		/* Templates Page */
+		.templates-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: white; z-index: 99; overflow-y: auto; }
+		.templates-page.active { display: block; }
+		.templates-container { padding-bottom: 80px; }
+		.templates-header { padding: max(env(safe-area-inset-top), 20px) 20px 20px; }
+		.templates-title { font-size: 24px; font-weight: 700; color: #2c3e50; }
+		.templates-presets { padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+		.template-preset-item { display: flex; align-items: center; gap: 12px; padding: 0; background: none; border: none; cursor: pointer; color: #2c3e50; font-size: 15px; font-weight: 500; transition: all 0.2s ease; }
+		.template-preset-item:hover { color: var(--primary-color, #3498db); }
+		.template-preset-item:active { transform: scale(0.98); }
+		.template-preset-icon { flex-shrink: 0; color: #9ca3af; transition: color 0.2s ease; }
+		.template-preset-item:hover .template-preset-icon { color: var(--primary-color, #3498db); }
+		.templates-custom { padding: 20px; }
+		.template-custom-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 16px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+		.template-custom-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+		.template-custom-btn:active { transform: translateY(0); }
+		.template-custom-btn svg { flex-shrink: 0; }
+		
+		/* Updated Profile Page */
+		.profile-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: white; z-index: 99; overflow-y: auto; }
+		.profile-page.active { display: block; }
+		.profile-container { padding-bottom: 80px; }
+		.profile-header { padding: max(env(safe-area-inset-top), 20px) 20px 20px; }
+		.profile-title { font-size: 24px; font-weight: 700; color: #2c3e50; }
+		.profile-info-section { padding: 0 20px; }
+		.profile-label { font-size: 13px; color: #9ca3af; font-weight: 500; margin-bottom: 8px; }
+		.profile-value { font-size: 15px; color: #2c3e50; font-weight: 500; }
+		.profile-actions { padding: 0 20px; display: flex; flex-direction: column; gap: 0; }
+		.profile-action-item { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px 0; background: none; border: none; border-bottom: 1px solid #f3f4f6; cursor: pointer; color: #2c3e50; font-size: 15px; font-weight: 500; transition: all 0.2s ease; text-align: left; }
+		.profile-action-item:last-child { border-bottom: none; }
+		.profile-action-item:hover { color: var(--primary-color, #3498db); }
+		.profile-action-item:active { transform: scale(0.98); }
+		.profile-action-item svg { flex-shrink: 0; color: #9ca3af; transition: color 0.2s ease; }
+		.profile-action-item:hover svg { color: var(--primary-color, #3498db); }
+		.profile-action-item.danger { color: #dc2626; }
+		.profile-action-item.danger svg { color: #dc2626; }
+		.profile-action-item.danger:hover { color: #b91c1c; background: #fee2e2; }
+		.profile-action-item.danger:hover svg { color: #b91c1c; }
+		
+		/* Settings Page */
+		.settings-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: white; z-index: 99; overflow-y: auto; }
+		.settings-page.active { display: block; }
+		.settings-container { padding-bottom: 80px; }
+		.settings-header { padding: max(env(safe-area-inset-top), 20px) 20px 20px; }
+		.settings-title { font-size: 24px; font-weight: 700; color: #2c3e50; }
+		.settings-actions { padding: 0 20px; display: flex; flex-direction: column; gap: 0; }
+		.settings-action-item { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px 0; background: none; border: none; border-bottom: 1px solid #f3f4f6; cursor: pointer; color: #2c3e50; font-size: 15px; font-weight: 500; transition: all 0.2s ease; text-align: left; }
+		.settings-action-item:last-child { border-bottom: none; }
+		.settings-action-item:hover { color: var(--primary-color, #3498db); }
+		.settings-action-item:active { transform: scale(0.98); }
+		.settings-action-item svg { flex-shrink: 0; color: #9ca3af; transition: color 0.2s ease; }
+		.settings-action-item:hover svg { color: var(--primary-color, #3498db); }
 		
 	</style>
     </head>
@@ -606,10 +661,12 @@ onAuthStateChanged(auth, (user) => {
         
         loadUserData(user.uid);
         
-        // Restore last active page from localStorage, default to home
+// Restore last active page from localStorage, default to home
         const lastPage = localStorage.getItem('currentPage') || 'guides';
         const homePage = document.getElementById('homePage');
+        const templatesPage = document.getElementById('templatesPage');
         const profilePage = document.getElementById('profilePage');
+        const settingsPage = document.getElementById('settingsPage');
         const mainContainer = document.querySelector('.container');
         const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
         
@@ -618,15 +675,28 @@ onAuthStateChanged(auth, (user) => {
         
         if (lastPage === 'guides') {
             mainContainer.style.display = 'none';
+            if (templatesPage) templatesPage.classList.remove('active');
             if (profilePage) profilePage.classList.remove('active');
+            if (settingsPage) settingsPage.classList.remove('active');
             if (homePage) {
                 homePage.classList.add('active');
                 populateHomePage();
             }
             bottomNavItems[0]?.classList.add('active');
+        } else if (lastPage === 'templates') {
+            mainContainer.style.display = 'none';
+            if (homePage) homePage.classList.remove('active');
+            if (profilePage) profilePage.classList.remove('active');
+            if (settingsPage) settingsPage.classList.remove('active');
+            if (templatesPage) {
+                templatesPage.classList.add('active');
+            }
+            bottomNavItems[1]?.classList.add('active');
         } else if (lastPage === 'profile') {
             mainContainer.style.display = 'none';
             if (homePage) homePage.classList.remove('active');
+            if (templatesPage) templatesPage.classList.remove('active');
+            if (settingsPage) settingsPage.classList.remove('active');
             if (profilePage) {
                 profilePage.classList.add('active');
                 const profileEmail = document.getElementById('profileEmail');
@@ -635,14 +705,42 @@ onAuthStateChanged(auth, (user) => {
                 }
             }
             bottomNavItems[2]?.classList.add('active');
-        } else {
-            // Default to main/create page
+        } else if (lastPage === 'settings') {
+            mainContainer.style.display = 'none';
             if (homePage) homePage.classList.remove('active');
+            if (templatesPage) templatesPage.classList.remove('active');
             if (profilePage) profilePage.classList.remove('active');
+            if (settingsPage) {
+                settingsPage.classList.add('active');
+            }
+            bottomNavItems[3]?.classList.add('active');
+        } else if (lastPage === 'main') {
+            // User was viewing a guide - restore that view
+            if (homePage) homePage.classList.remove('active');
+            if (templatesPage) templatesPage.classList.remove('active');
+            if (profilePage) profilePage.classList.remove('active');
+            if (settingsPage) settingsPage.classList.remove('active');
             mainContainer.style.display = 'block';
-            bottomNavItems[1]?.classList.add('active');
+            
+            // Show back button when on a guide
+            const backBtn = document.getElementById('headerBackBtn');
+            if (backBtn) {
+                backBtn.style.display = 'flex';
+            }
+        } else {
+            // Fallback: go to home page
+            mainContainer.style.display = 'none';
+            if (templatesPage) templatesPage.classList.remove('active');
+            if (profilePage) profilePage.classList.remove('active');
+            if (settingsPage) settingsPage.classList.remove('active');
+            if (homePage) {
+                homePage.classList.add('active');
+                populateHomePage();
+            }
+            bottomNavItems[0]?.classList.add('active');
         }
     } else {
+        // User is NOT logged in
         currentUser = null;
         appContainer.classList.remove('show');
         appContainer.style.display = 'none';
@@ -652,7 +750,6 @@ onAuthStateChanged(auth, (user) => {
         setTimeout(() => loginScreen.classList.add('show'), 10);
     }
 });
-
 
 let checkedItems = {};
 let editMode = false;
@@ -1090,13 +1187,18 @@ async function loadUserData(userId) {
     });
 }
 
-function switchGuide(id) {
-    currentGuideId = id;
-    localStorage.setItem('currentGuideId', id);
-    // Reset to default theme before loading
-    themeColor = '#607d8b';
+function switchGuide(guideId) {
+    currentGuideId = guideId;
+    localStorage.setItem('currentGuideId', guideId);
     loadUserData(currentUser.uid);
+    
+    // Show back button when viewing a guide
+    const backBtn = document.getElementById('headerBackBtn');
+    if (backBtn) {
+        backBtn.style.display = 'flex';
+    }
 }
+	
 function applyTheme() {
     const theme = colorThemes.find(t => t.primary === themeColor);
     let primaryColor, secondaryColor;
@@ -2118,6 +2220,141 @@ function createNewGuide() {
     });
 }
 
+function createGuideFromTemplate(templateType) {
+    if (!currentUser) return;
+    const timestamp = Date.now();
+    const newId = `guide_${timestamp}`;
+    
+    let templateData = {
+        appTitle: 'New Guide',
+        appSubtitle: 'Tap to add description',
+        appIcon: '📝',
+        categories: [],
+        themeColor: '#3498db',
+        checkedItems: {}
+    };
+    
+    // Customize based on template type
+    switch(templateType) {
+        case 'short-notes':
+            templateData.appTitle = 'Short Notes';
+            templateData.appSubtitle = 'Quick notes and ideas';
+            templateData.appIcon = '📝';
+            templateData.categories = [
+                {
+                    name: "Notes",
+                    icon: "📄",
+                    skills: [
+                        {
+                            title: "Ideas",
+                            icon: "💡",
+                            bulletStyle: "bullet",
+                            items: []
+                        }
+                    ]
+                }
+            ];
+            break;
+        case 'reminders':
+            templateData.appTitle = 'Reminders';
+            templateData.appSubtitle = 'Things to remember';
+            templateData.appIcon = '🔔';
+            templateData.categories = [
+                {
+                    name: "To Do",
+                    icon: "✅",
+                    skills: [
+                        {
+                            title: "Today",
+                            icon: "📌",
+                            bulletStyle: "checkbox",
+                            items: []
+                        }
+                    ]
+                }
+            ];
+            break;
+        case 'trackers':
+            templateData.appTitle = 'Trackers';
+            templateData.appSubtitle = 'Track your progress';
+            templateData.appIcon = '📊';
+            templateData.categories = [
+                {
+                    name: "Habits",
+                    icon: "🎯",
+                    skills: [
+                        {
+                            title: "Daily Habits",
+                            icon: "✨",
+                            bulletStyle: "checkbox",
+                            items: []
+                        }
+                    ]
+                }
+            ];
+            break;
+        case 'routines':
+            templateData.appTitle = 'Routines';
+            templateData.appSubtitle = 'Daily routines';
+            templateData.appIcon = '🔄';
+            templateData.categories = [
+                {
+                    name: "Morning",
+                    icon: "🌅",
+                    skills: [
+                        {
+                            title: "Morning Routine",
+                            icon: "☀️",
+                            bulletStyle: "checkbox",
+                            items: []
+                        }
+                    ]
+                }
+            ];
+            break;
+        case 'journals':
+            templateData.appTitle = 'Journal';
+            templateData.appSubtitle = 'Daily thoughts and reflections';
+            templateData.appIcon = '📖';
+            templateData.categories = [
+                {
+                    name: "Entries",
+                    icon: "📝",
+                    skills: [
+                        {
+                            title: "Today",
+                            icon: "✍️",
+                            bulletStyle: "bullet",
+                            items: []
+                        }
+                    ]
+                }
+            ];
+            break;
+    }
+    
+    set(ref(database, `users/${currentUser.uid}/guides/${newId}`), templateData).then(() => {
+        currentGuideId = newId;
+        localStorage.setItem('currentGuideId', newId);
+        localStorage.setItem('currentPage', 'main');
+        loadUserData(currentUser.uid);
+        
+        // Switch to main view
+        document.getElementById('homePage')?.classList.remove('active');
+        document.getElementById('templatesPage')?.classList.remove('active');
+        document.querySelector('.container').style.display = 'block';
+        
+        // Update bottom nav
+        document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+        // Don't set any bottom nav as active when viewing a guide
+        
+        // Show back button
+        const backBtn = document.getElementById('headerBackBtn');
+        if (backBtn) {
+            backBtn.style.display = 'flex';
+        }
+    });
+}
 	
 function toggleMenu(e) {
     e.stopPropagation();
@@ -2313,8 +2550,15 @@ async function renderHeader() {
             </div>
         `;
     });
-    
+    const backButton = `
+        <button class="header-back-btn" id="headerBackBtn" style="display: none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+    `;
         header.innerHTML = `
+        ${backButton}
 	
 	<div class="edit-toggle">
 	    <button class="save-btn" id="saveBtn" style="display: none;">Done</button>
@@ -2421,6 +2665,29 @@ async function renderHeader() {
 	const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
 	const clearChecksBtn = document.getElementById('clearChecksBtn');
 	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+	// Back button handler
+    const backBtn = document.getElementById('headerBackBtn');
+
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            // Go back to home page
+            document.querySelector('.container').style.display = 'none';
+            const homePage = document.getElementById('homePage');
+            if (homePage) {
+                homePage.classList.add('active');
+                populateHomePage();
+            }
+            
+            localStorage.setItem('currentPage', 'guides');
+            
+            // Update bottom nav
+            document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-item')[0]?.classList.add('active');
+            
+            // Hide back button
+            backBtn.style.display = 'none';
+        });
+    }
 	
   	if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
@@ -4716,26 +4983,34 @@ window.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
     const homePage = document.getElementById('homePage');
+    const templatesPage = document.getElementById('templatesPage');
     const profilePage = document.getElementById('profilePage');
+    const settingsPage = document.getElementById('settingsPage');
     const mainContainer = document.querySelector('.container');
     
     // Home page event listeners
-        
-   const homeCreateFolderBtn = document.getElementById('homeCreateFolderBtn');
-
-if (homeCreateFolderBtn) {
-    homeCreateFolderBtn.addEventListener('click', async () => {
-        const folderName = await customPrompt('Enter folder name:', 'New Folder', 'Create Folder');
-        if (folderName) {
-            createNewFolder(folderName);
-        }
-    });
-}
-      
+    const homeCreateFolderBtn = document.getElementById('homeCreateFolderBtn');
+    if (homeCreateFolderBtn) {
+        homeCreateFolderBtn.addEventListener('click', async () => {
+            const folderName = await customPrompt('Enter folder name:', 'New Folder', 'Create Folder');
+            if (folderName) {
+                createNewFolder(folderName);
+            }
+        });
+    }
     
     // Profile page event listeners
+    const profileSwitchAccountBtn = document.getElementById('profileSwitchAccountBtn');
     const profileLogoutBtn = document.getElementById('profileLogoutBtn');
     const profileDeleteAccountBtn = document.getElementById('profileDeleteAccountBtn');
+    
+    if (profileSwitchAccountBtn) {
+        profileSwitchAccountBtn.addEventListener('click', async () => {
+            if (await customConfirm('Switch to a different account? You will be logged out.', 'Switch Account', 'Switch')) {
+                logout();
+            }
+        });
+    }
     
     if (profileLogoutBtn) {
         profileLogoutBtn.addEventListener('click', async () => {
@@ -4756,6 +5031,30 @@ if (homeCreateFolderBtn) {
         });
     }
     
+    // Settings page event listeners
+    const settingsBackupBtn = document.getElementById('settingsBackupBtn');
+    if (settingsBackupBtn) {
+        settingsBackupBtn.addEventListener('click', async () => {
+            await backupContent();
+        });
+    }
+    
+    // Templates page event listeners
+    const templateCustomBtn = document.getElementById('templateCustomBtn');
+    if (templateCustomBtn) {
+        templateCustomBtn.addEventListener('click', () => {
+            createNewGuide();
+        });
+    }
+    
+    // Handle template preset clicks
+    document.querySelectorAll('.template-preset-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const template = item.dataset.template;
+            createGuideFromTemplate(template);
+        });
+    });
+    
     bottomNavItems.forEach((item) => {
         item.addEventListener('click', () => {
             const page = item.dataset.page;
@@ -4768,42 +5067,41 @@ if (homeCreateFolderBtn) {
             // Add active class to clicked item
             item.classList.add('active');
             
+            // Hide all pages
+            mainContainer.style.display = 'none';
+            if (homePage) homePage.classList.remove('active');
+            if (templatesPage) templatesPage.classList.remove('active');
+            if (profilePage) profilePage.classList.remove('active');
+            if (settingsPage) settingsPage.classList.remove('active');
+            
             if (page === 'guides') {
                 // Show home page
-                mainContainer.style.display = 'none';
-                if (profilePage) profilePage.classList.remove('active');
                 if (homePage) {
                     homePage.classList.add('active');
                     populateHomePage();
                 }
-                closeDrawer();
-            } else if (page === 'main') {
-                // Create new guide
-                createNewGuide();
+            } else if (page === 'templates') {
+                // Show templates page
+                if (templatesPage) {
+                    templatesPage.classList.add('active');
+                }
             } else if (page === 'profile') {
                 // Show profile page
-                mainContainer.style.display = 'none';
-                if (homePage) homePage.classList.remove('active');
                 if (profilePage) {
                     profilePage.classList.add('active');
-                    // Update email
                     const profileEmail = document.getElementById('profileEmail');
-                    if (profileEmail && currentUser) profileEmail.textContent = currentUser.email;
+                    if (profileEmail && currentUser) {
+                        profileEmail.textContent = currentUser.email;
+                    }
                 }
-                closeDrawer();
+            } else if (page === 'settings') {
+                // Show settings page
+                if (settingsPage) {
+                    settingsPage.classList.add('active');
+                }
             }
         });
     });
-});
-
-	// Floating button handler for home page
-document.addEventListener('click', (e) => {
-    if (e.target.closest('.floating-layout-btn')) {
-        const homePage = document.getElementById('homePage');
-        if (homePage && homePage.classList.contains('active')) {
-            createNewGuide();
-        }
-    }
 });
 
 function createNewFolder(name) {
@@ -4914,6 +5212,40 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
         await customAlert('Guides deleted successfully!', 'Success');
     }
 });	
+
+async function backupContent() {
+    if (!currentUser) return;
+    
+    try {
+        // Get all user data
+        const snapshot = await get(ref(database, `users/${currentUser.uid}`));
+        const userData = snapshot.val();
+        
+        if (!userData) {
+            await customAlert('No data to backup', 'Backup');
+            return;
+        }
+        
+        // Create JSON blob
+        const dataStr = JSON.stringify(userData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        // Create download link
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `notebook-backup-${Date.now()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        await customAlert('Backup downloaded successfully!', 'Backup Complete');
+    } catch (error) {
+        await customAlert('Failed to create backup: ' + error.message, 'Backup Failed');
+    }
+}
+	
 </script>
 <button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
 <div class="home-page" id="homePage">
@@ -4944,47 +5276,7 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
         </div>
         
         <div class="home-divider"></div>
-        
-        <div class="home-presets">
-            <div class="home-preset-item" data-preset="short-notes">
-                <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
-                <span>Short notes</span>
-            </div>
-            <div class="home-preset-item" data-preset="reminders">
-                <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                </svg>
-                <span>Reminders</span>
-            </div>
-            <div class="home-preset-item" data-preset="trackers">
-			    <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-			    </svg>
-			    <span>Trackers</span>
-			</div>
-            <div class="home-preset-item" data-preset="routines">
-			    <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			        <polyline points="23 4 23 10 17 10"></polyline>
-			        <polyline points="1 20 1 14 7 14"></polyline>
-			        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-			    </svg>
-			    <span>Routines</span>
-			</div>
-            <div class="home-preset-item" data-preset="journals">
-                <svg class="home-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                </svg>
-                <span>Journals</span>
-            </div>
-        </div>
-        
-        <div class="home-divider"></div>
-        
+             
         <div class="home-filter-nav">
             <div class="home-filter-item active" data-filter="all">All files</div>
             <div class="home-filter-item" data-filter="short-notes">Short notes</div>
@@ -5032,54 +5324,150 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
         </button>
     </div>
 </div>
-
-<div class="profile-page" id="profilePage">
-    <div class="profile-container">
-        <div class="profile-header">
-            <div class="profile-email-label">Email</div>
-            <div class="profile-email" id="profileEmail">user@example.com</div>
+<div class="templates-page" id="templatesPage">
+    <div class="templates-container">
+        <div class="templates-header">
+            <h1 class="templates-title">Templates</h1>
         </div>
-        <div class="profile-divider"></div>
-        <div class="profile-options">
-            <button class="profile-option-btn" id="profileLogoutBtn">
-                <svg class="profile-option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
+        
+        <div class="home-divider"></div>
+        
+        <div class="templates-presets">
+            <div class="template-preset-item" data-template="short-notes">
+                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
                 </svg>
-                Logout
-            </button>
-            <button class="profile-option-btn danger" id="profileDeleteAccountBtn">
-                <svg class="profile-option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <span>Short notes</span>
+            </div>
+            <div class="template-preset-item" data-template="reminders">
+                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                 </svg>
-                Delete Account
+                <span>Reminders</span>
+            </div>
+            <div class="template-preset-item" data-template="trackers">
+                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span>Trackers</span>
+            </div>
+            <div class="template-preset-item" data-template="routines">
+                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                <span>Routines</span>
+            </div>
+            <div class="template-preset-item" data-template="journals">
+                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <span>Journals</span>
+            </div>
+        </div>
+        
+        <div class="home-divider"></div>
+        
+        <div class="templates-custom">
+            <button class="template-custom-btn" id="templateCustomBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Create custom template</span>
             </button>
         </div>
     </div>
 </div>
 
+<div class="profile-page" id="profilePage">
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1 class="profile-title">Profile</h1>
+        </div>
+        
+        <div class="home-divider" style="margin: 20px 0;"></div>
+        
+        <div class="profile-info-section">
+            <div class="profile-label">Email</div>
+            <div class="profile-value" id="profileEmail">user@example.com</div>
+        </div>
+        
+        <div class="home-divider" style="margin: 20px 0;"></div>
+        
+        <div class="profile-actions">
+            <button class="profile-action-item" id="profileSwitchAccountBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <polyline points="17 11 19 13 23 9"></polyline>
+                </svg>
+                <span>Switch account</span>
+            </button>
+            <button class="profile-action-item" id="profileLogoutBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Logout</span>
+            </button>
+            <button class="profile-action-item danger" id="profileDeleteAccountBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>Delete account</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+		<div class="settings-page" id="settingsPage">
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1 class="settings-title">Settings</h1>
+        </div>
+        
+        <div class="home-divider" style="margin: 20px 0;"></div>
+        
+        <div class="settings-actions">
+            <button class="settings-action-item" id="settingsBackupBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Backup content</span>
+            </button>
+        </div>
+    </div>
+</div>
 <div class="bottom-nav">
     <div class="bottom-nav-item active" data-page="guides">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
         <span>Home</span>
     </div>
-    <div class="bottom-nav-item" data-page="main">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-        <span>Create</span>
-    </div>
+    <div class="bottom-nav-item" data-page="templates">
+	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+	    <span>Templates</span>
+	</div>
     <div class="bottom-nav-item" data-page="profile">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Profile</span>
-    </div>
-    <div class="bottom-nav-item">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <span>Settings</span>
-    </div>
+	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+	    <span>Profile</span>
+	</div>
+	<div class="bottom-nav-item" data-page="settings">
+	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+	    <span>Settings</span>
+	</div>
 </div>
 </body>
 </html>
+
 
 
 
