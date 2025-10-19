@@ -3382,6 +3382,13 @@ async function populateHomePage() {
         });
     }
 
+	// Tap empty area to exit select mode
+	document.getElementById('homeGuidesList')?.addEventListener('click', (e) => {
+	    if (homeSelectMode && e.target.id === 'homeGuidesList') {
+	        toggleSelectMode();
+	    }
+	});
+	
     if (createCollectionMenuBtn) {
         const newCollectionBtn = createCollectionMenuBtn.cloneNode(true);
         createCollectionMenuBtn.parentNode.replaceChild(newCollectionBtn, createCollectionMenuBtn);
@@ -5807,6 +5814,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
