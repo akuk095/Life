@@ -3147,6 +3147,14 @@ let selectedGuides = new Set();
 async function populateHomePage() {
     if (!currentUser) return;
     
+    // Turn off select mode when re-populating
+    if (homeSelectMode) {
+        homeSelectMode = false;
+        selectedGuides.clear();
+        const actionsBar = document.getElementById('homeActionsBar');
+        if (actionsBar) actionsBar.classList.remove('show');
+    }
+    
     // Populate collections first
     await populateCollections();
     
@@ -5767,6 +5775,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
