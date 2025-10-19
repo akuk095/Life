@@ -322,6 +322,12 @@
 		.home-empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
 		.home-empty-text { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #6b7280; }
 		.home-empty-subtext { font-size: 14px; color: #9ca3af; }
+		.home-dropdown-menu { display: none; position: absolute; top: 50px; right: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 200px; z-index: 1001; overflow: hidden; border: 1px solid #e8eaed; }
+		.home-dropdown-menu.show { display: block; }
+		.home-dropdown-menu button { width: 100%; padding: 14px 20px; border: none; background: white; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: all 0.2s ease; font-weight: 500; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f3f4f6; }
+		.home-dropdown-menu button:last-child { border-bottom: none; }
+		.home-dropdown-menu button:hover { background: #f8f9fa; }
+		.home-dropdown-menu button svg { width: 18px; height: 18px; flex-shrink: 0; }
 		.header-back-btn { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: all 0.2s ease; z-index: 100; }
 		.header-back-btn:hover { background: rgba(255,255,255,0.3); }
 		.header-back-btn:active { transform: translateY(-50%) scale(0.95); }
@@ -5760,6 +5766,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
