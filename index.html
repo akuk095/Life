@@ -3543,8 +3543,9 @@ function toggleSelectMode() {
     selectedGuides.clear();
     
     const actionsBar = document.getElementById('homeActionsBar');
-    const checkboxes = document.querySelectorAll('.home-guide-checkbox, .home-folder-guide-checkbox');
-    const items = document.querySelectorAll('.home-guide-item, .home-folder-guide-item');
+    const homeGuidesList = document.getElementById('homeGuidesList');
+    const checkboxes = homeGuidesList ? homeGuidesList.querySelectorAll('.home-guide-checkbox, .home-folder-guide-checkbox') : [];
+    const items = homeGuidesList ? homeGuidesList.querySelectorAll('.home-guide-item, .home-folder-guide-item') : [];
     const selectMenuBtn = document.getElementById('homeSelectMenuBtn');
     
     if (homeSelectMode) {
@@ -5766,6 +5767,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
