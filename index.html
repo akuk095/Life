@@ -127,7 +127,7 @@
 		.save-btn { position: absolute; top: 5px; right: 5px; background: transparent; color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 16px; cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(255, 255, 255, 0.1); transition: all 0.2s ease; display: none; z-index: 10; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
 		.save-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.2); }
 		.save-btn:active { box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4); transform: translateY(1px); }
-		.skill-card { background: white; border-radius: 4px; padding: 24px; border-left: 4px solid var(--primary-color); border-bottom: 1px solid #e8eaed; box-shadow: 0 4px 8px var(--shadow-color); transition: all 0.3s ease; position: relative; margin-bottom: 16px; }
+		.skill-card { background: white; border-radius: 4px; padding: 24px; border-left: 4px solid var(--primary-color); border-bottom: 1px solid #e8eaed; box-shadow: 0 4px 8px var(--shadow-color); transition: all 0.3s ease; position: relative; z-index: 1; margin-bottom: 16px; }
 		.skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
 		.skill-card.expanded .collapse-btn { display: block; }
 		.skill-grid { display: flex; flex-direction: column; gap: 32px; margin-top: 0; padding: 16px 0 0 0; transition: all 0.3s ease; }
@@ -163,8 +163,8 @@
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
-		.skill-card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 0; background: transparent; pointer-events: none; z-index: 5; }
-		.skill-card-controls.show { pointer-events: auto; }
+		.skill-card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; flex-wrap: wrap; position: relative; z-index: 10; align-items: center; padding: 0; background: transparent; pointer-events: none; z-index: 5; }
+		.skill-card-controls.show { pointer-events: auto; z-index: 100;}
 		.edit-mode .skill-card-controls { pointer-events: auto; }
 		body:not(.edit-mode-active) .skill-card-controls.show { pointer-events: auto; }
 		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0; cursor: pointer; padding: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: normal; pointer-events: auto !important; position: absolute; right: 0; top: 0; transition: all 0.3s ease; }
@@ -6668,6 +6668,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
