@@ -3163,6 +3163,7 @@ async function populateHomePage() {
     console.log('Search button exists?', document.getElementById('homeSearchBtn'));
     console.log('Create button exists?', document.getElementById('homeCreateBtn'));
     console.log('Menu button exists?', document.getElementById('homeMenuBtn'));
+    console.log('Search button already initialized?', document.getElementById('homeSearchBtn')?.dataset.initialized);
     if (!currentUser) return;
     
     // Exit select mode when re-populating
@@ -5852,6 +5853,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
