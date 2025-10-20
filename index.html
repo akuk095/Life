@@ -4948,9 +4948,9 @@ function renderContent() {
             const titleDiv = document.createElement('div'); 
             titleDiv.className = 'skill-title';
 
-			// Hide title if hideHeading is enabled
-			if (skill.hideHeading) {
-			    titleDiv.style.display = 'none';
+			// Only append title if hideHeading is not enabled
+			if (!skill.hideHeading) {
+			    card.appendChild(titleDiv);
 			}
             
             // Add double-click to edit (only when not in edit mode)
@@ -5028,7 +5028,6 @@ function renderContent() {
                 }
             }
             
-            card.appendChild(titleDiv);
             
             // Add control buttons (available always, shown on double-tap or in edit mode)
             const controlsContainer = document.createElement('div');
@@ -6522,6 +6521,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
