@@ -48,10 +48,10 @@
 		.collapse-btn:hover { background: #ecf0f1; transform: scale(1.1); }
 		.collapse-btn svg { width: 100%; height: 100%; stroke: #95a5a6; transition: stroke 0.2s ease; }
 		.collapse-btn:hover svg { stroke: #2c3e50; }
-		.color-option { width: 32px; height: 32px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
+		/* .color-option { width: 32px; height: 32px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
 		.color-option:hover { transform: scale(1.1); border-color: #2c3e50; }
 		.color-option.selected { border-color: #2c3e50; border-width: 3px; }
-		.color-options { display: flex; flex-wrap: wrap; gap: 8px; }
+		.color-options { display: flex; flex-wrap: wrap; gap: 8px; } */
 		.color-picker-menu { display: none; background: #f8f9fa; border-radius: 0; padding: 15px; margin: 0; position: relative; box-shadow: none; width: 100%; border-top: 1px solid #e9ecef; }
 		.color-picker-menu h3 { margin: 0 0 10px 0; font-size: 12px; color: #6c757d; font-weight: normal; }
 		.color-picker-menu.show { display: block; }
@@ -443,10 +443,10 @@
 		.journal-menu-dropdown button:last-child { border-bottom: none; } 
 		.journal-menu-dropdown button:hover { background: #f8f9fa; } 
 		.journal-menu-dropdown button svg { width: 18px; height: 18px; flex-shrink: 0; }
-		.color-option-pill { display: flex; width: 60px; height: 36px; border-radius: 18px; overflow: hidden; cursor: pointer; transition: all 0.2s; border: 3px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-		.color-option-pill:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-		.color-option-pill.selected { border-color: #2c3e50; box-shadow: 0 0 0 2px white, 0 0 0 5px #2c3e50; transform: scale(1.05); }
-		.color-pill-half { flex: 1; }
+		.color-option { display: flex; width: 60px; height: 36px; border-radius: 18px; overflow: hidden; cursor: pointer; transition: all 0.2s; border: 3px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+		.color-option:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+		.color-option.selected { border-color: #2c3e50; box-shadow: 0 0 0 2px white, 0 0 0 5px #2c3e50; transform: scale(1.05); }
+		.color-options { flex: 1; }
 		
 	</style>
     </head>
@@ -1062,16 +1062,16 @@ let draggedTab = null;
 let draggedTabIndex = null;
 	
 const colorThemes = [
-    { name: 'Ocean Blue', primary: '#3498db', secondary: '#2980b9' },
-    { name: 'Emerald Green', primary: '#27ae60', secondary: '#229954' },
-    { name: 'Sunset Orange', primary: '#e67e22', secondary: '#d35400' },
-    { name: 'Royal Purple', primary: '#8e44ad', secondary: '#7d3c98' },
-    { name: 'Ruby Red', primary: '#e74c3c', secondary: '#c0392b' },
-    { name: 'Pink', primary: '#ff6b9d', secondary: '#e84a86' },
-    { name: 'Teal', primary: '#16a085', secondary: '#138d75' },
-    { name: 'Amber', primary: '#f39c12', secondary: '#e67e22' },
-    { name: 'Midnight', primary: '#34495e', secondary: '#2c3e50' },
-    { name: 'Lavender', primary: '#9b59b6', secondary: '#8e44ad' }
+    { name: 'Ocean Blue', primary: '#3498db', secondary: '#1abc9c' },      // Blue + Turquoise
+    { name: 'Forest', primary: '#27ae60', secondary: '#f39c12' },          // Green + Amber
+    { name: 'Sunset', primary: '#e67e22', secondary: '#e74c3c' },          // Orange + Red
+    { name: 'Royal', primary: '#8e44ad', secondary: '#3498db' },           // Purple + Blue
+    { name: 'Cherry', primary: '#e74c3c', secondary: '#c0392b' },          // Red + Dark Red
+    { name: 'Berry', primary: '#ff6b9d', secondary: '#9b59b6' },           // Pink + Purple
+    { name: 'Tropical', primary: '#16a085', secondary: '#f39c12' },        // Teal + Gold
+    { name: 'Sunshine', primary: '#f39c12', secondary: '#e67e22' },        // Yellow + Orange
+    { name: 'Slate', primary: '#34495e', secondary: '#7f8c8d' },           // Dark Blue + Gray
+    { name: 'Lavender Sky', primary: '#9b59b6', secondary: '#3498db' }     // Purple + Sky Blue
 ];
 
 		const svgIcons = [
@@ -6483,6 +6483,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
