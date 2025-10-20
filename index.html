@@ -5362,28 +5362,7 @@ controlsContainer.appendChild(hideHeadingBtn);
 			
 			checkItem.appendChild(textDiv);
 
-				// Add timer icon for setting timers on items
-				const timerIcon = document.createElement('span');
-				timerIcon.className = 'timer-icon';
-				const itemTimerKey = `${catIndex}-${skillIndex}-${itemIndex}`;
-				const hasTimer = itemTimers?.[itemTimerKey];
-				timerIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				    <circle cx="12" cy="12" r="10"></circle>
-				    <polyline points="12 6 12 12 16 14"></polyline>
-				</svg>`;
-				timerIcon.title = hasTimer ? `Timer: ${hasTimer.hours || 0}h ${hasTimer.minutes || 0}m` : 'Set timer';
-				timerIcon.style.cursor = 'pointer';
-				timerIcon.style.marginLeft = '8px';
-				timerIcon.style.opacity = hasTimer ? '1' : '0.4';
-				timerIcon.style.color = hasTimer ? 'var(--primary-color)' : '#9ca3af';
-				timerIcon.dataset.catIndex = catIndex;
-				timerIcon.dataset.skillIndex = skillIndex;
-				timerIcon.dataset.itemIndex = itemIndex;
-				timerIcon.addEventListener('click', (e) => {
-				    e.stopPropagation();
-				    showTimerPicker(catIndex, skillIndex, itemIndex);
-				});
-				textDiv.appendChild(timerIcon);
+				
 				
 				// Add click zone on right end to add new item below (only when NOT in edit mode)
                 if (!editMode) {
@@ -6659,6 +6638,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
