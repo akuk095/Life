@@ -5202,7 +5202,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
 const timerToggleBtn = document.createElement('button');
 timerToggleBtn.className = 'skill-control-btn';
 const timerKey = `${catIndex}-${skillIndex}`;
-const timerEnabled = skillTimers[timerKey]?.enabled || false;
+const timerEnabled = itemTimers[timerKey]?.enabled || false;  // Changed from skillTimers to itemTimers
 timerToggleBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="10"></circle>
     <polyline points="12 6 12 12 16 14"></polyline>
@@ -6667,6 +6667,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
