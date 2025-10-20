@@ -4956,23 +4956,23 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     const picker = document.createElement('div');
     picker.className = 'timer-picker show';
     picker.innerHTML = `
-        <h3>Set Timer</h3>
-        <div class="timer-inputs">
-            <div class="timer-input-group">
-                <label>Hours</label>
-                <input type="number" id="timerHoursInput" min="0" max="23" value="${existingTimer.hours || 0}">
-            </div>
-            <div class="timer-input-group">
-                <label>Minutes</label>
-                <input type="number" id="timerMinutesInput" min="0" max="59" value="${existingTimer.minutes || 0}">
-            </div>
-        </div>
-        <div class="button-group">
-            <button class="cancel-timer">Cancel</button>
-            <button class="save-timer">Save</button>
-        </div>
-        ${itemTimers[key] ? '<button class="delete-timer">Remove Timer</button>' : ''}
-    `;
+	    <h3>Set Timer</h3>
+	    <div class="timer-inputs">
+	        <div class="timer-input-group">
+	            <label>Hours</label>
+	            <input type="number" id="timerHoursInput" min="0" max="23" value="${existingTimer.hours || 0}">
+	        </div>
+	        <div class="timer-input-group">
+	            <label>Minutes</label>
+	            <input type="number" id="timerMinutesInput" min="0" max="59" value="${existingTimer.minutes || 0}">
+	        </div>
+	    </div>
+	    <div class="timer-button-group">
+	        <button class="timer-cancel-btn">Cancel</button>
+	        <button class="timer-save-btn">Save</button>
+	    </div>
+	    ${itemTimers[key] ? '<button class="timer-delete-btn">Remove Timer</button>' : ''}
+	`;
     
     document.body.appendChild(picker);
     
@@ -6667,6 +6667,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
