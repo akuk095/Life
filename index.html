@@ -3172,7 +3172,11 @@ async function populateHomePage() {
     }
     
     // Populate collections first
+    try {
     await populateCollections();
+} catch (error) {
+    console.error('Error in populateCollections:', error);
+}
     
     const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
     const guides = guidesSnapshot.val() || {};
@@ -5865,6 +5869,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
