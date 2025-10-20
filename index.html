@@ -2235,6 +2235,52 @@ document.addEventListener('touchmove', (e) => {
         const highlightOpacity = Math.floor(progress * 15);
         currentRightSwipeItem.style.background = `rgba(var(--primary-color-rgb, 52, 152, 219), 0.${highlightOpacity > 9 ? highlightOpacity : '0' + highlightOpacity})`;
         currentRightSwipeItem.style.transition = 'none';
+        
+        // Morph the bullet as preview
+        const catIndex = parseInt(currentRightSwipeItem.dataset.catIndex);
+        const skillIndex = parseInt(currentRightSwipeItem.dataset.skillIndex);
+        const bullet = currentRightSwipeItem.querySelector('.checkbox, .bullet-number, .bullet-square, .bullet-circle, .bullet-none');
+        
+        if (bullet && !isNaN(catIndex) && !isNaN(skillIndex)) {
+            const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
+            const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
+            const currentIndex = styles.indexOf(currentStyle);
+            const nextIndex = (currentIndex + 1) % styles.length;
+            const nextStyle = styles[nextIndex];
+            
+            // Create visual morph effect based on progress
+            bullet.style.transition = 'none';
+            
+            // Fade out current, fade in next
+            if (progress < 0.5) {
+                // First half: fade out current style
+                bullet.style.opacity = `${1 - (progress * 2)}`;
+            } else {
+                // Second half: show next style and fade in
+                bullet.style.opacity = `${(progress - 0.5) * 2}`;
+                
+                // Change the visual appearance to next bullet type
+                if (nextStyle === 'checkbox') {
+                    bullet.className = 'checkbox';
+                } else if (nextStyle === 'number') {
+                    bullet.className = 'bullet-number';
+                    bullet.textContent = parseInt(currentRightSwipeItem.dataset.itemIndex) + 1;
+                } else if (nextStyle === 'square') {
+                    bullet.className = 'bullet-square';
+                    bullet.textContent = '■';
+                } else if (nextStyle === 'circle') {
+                    bullet.className = 'bullet-circle';
+                    bullet.textContent = '●';
+                } else if (nextStyle === 'none') {
+                    bullet.className = 'bullet-none';
+                    bullet.textContent = '';
+                }
+            }
+            
+            // Subtle scale for smooth transition feel
+            const scale = 0.9 + (Math.sin(progress * Math.PI) * 0.1);
+            bullet.style.transform = `scale(${scale})`;
+        }
     }
 });
 
@@ -2267,8 +2313,18 @@ document.addEventListener('touchend', (e) => {
             }, 150);
         }
     } else {
-        // Snap back
+        // Snap back - morph back to original
         currentRightSwipeItem.style.background = '';
+        const bullet = currentRightSwipeItem.querySelector('.checkbox, .bullet-number, .bullet-square, .bullet-circle, .bullet-none');
+        if (bullet) {
+            bullet.style.transition = 'all 0.2s ease';
+            bullet.style.opacity = '1';
+            bullet.style.transform = 'scale(1)';
+        }
+        // Re-render to restore original bullet
+        setTimeout(() => {
+            renderContent();
+        }, 200);
     }
     
     isRightSwiping = false;
@@ -5817,6 +5873,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
