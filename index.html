@@ -3455,10 +3455,10 @@ async function populateHomePage() {
     
     // Populate collections first
     try {
-    await populateCollections();
-} catch (error) {
-    console.error('Error in populateCollections:', error);
-}
+        await populateCollections();
+    } catch (error) {
+        console.error('Error in populateCollections:', error);
+    }
     
     const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
     const guides = guidesSnapshot.val() || {};
@@ -3505,54 +3505,7 @@ async function populateHomePage() {
         const item = createGuideElement(guide, false);
         guidesList.appendChild(item);
     });
-    
-    
-// Exit select mode by tapping outside guide items
-const homePage = document.getElementById('homePage');
-if (homePage) {
-    // Remove old listener
-    if (window.homeOutsideClickHandler) {
-        homePage.removeEventListener('click', window.homeOutsideClickHandler);
-    }
-    
-    // Create new handler
-    window.homeOutsideClickHandler = (e) => {
-        if (homeSelectMode && 
-            !e.target.closest('.home-guide-item') && 
-            !e.target.closest('.home-actions-bar') &&
-            !e.target.closest('.home-dropdown-menu') &&
-            !e.target.closest('.home-header-icon-btn')) {
-            toggleSelectMode();
-        }
-    };
-    
-    homePage.addEventListener('click', window.homeOutsideClickHandler);
 }
-
-// Filter navigation functionality
-document.querySelectorAll('.home-filter-item').forEach(item => {
-    if (!item._initialized) {
-        item._initialized = true;
-        
-        item.addEventListener('click', () => {
-            const clickedFilter = item.dataset.filter;
-            
-            // Toggle filter - clicking same filter deselects it
-            if (selectedFilter === clickedFilter) {
-                selectedFilter = null;
-                item.classList.remove('active');
-            } else {
-                selectedFilter = clickedFilter;
-                // Update active state
-                document.querySelectorAll('.home-filter-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-            }
-            
-            populateHomePage();
-        });
-    }
-});
-} 
 	
 function createGuideElement(guide, isInFolder) {
     const item = document.createElement('div');
@@ -5947,6 +5900,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
