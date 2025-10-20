@@ -761,50 +761,6 @@ if (homeSearchInputFull) {
     });
 }
 
-const homeCreateBtn = document.getElementById('homeCreateBtn');
-if (homeCreateBtn) {
-    homeCreateBtn.addEventListener('click', () => {
-        createNewGuide();
-    });
-}
-
-const homeMenuBtn = document.getElementById('homeMenuBtn');
-const homeDropdownMenu = document.getElementById('homeDropdownMenu');
-const homeSelectMenuBtn = document.getElementById('homeSelectMenuBtn');
-const homeCreateCollectionMenuBtn = document.getElementById('homeCreateCollectionMenuBtn');
-
-if (homeMenuBtn && homeDropdownMenu) {
-    homeMenuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        homeDropdownMenu.classList.toggle('show');
-        
-        if (homeSelectMenuBtn) {
-            homeSelectMenuBtn.innerHTML = homeSelectMode 
-                ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancel`
-                : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Select`;
-        }
-    });
-}
-
-if (homeSelectMenuBtn) {
-    homeSelectMenuBtn.addEventListener('click', () => {
-        toggleSelectMode();
-        homeDropdownMenu.classList.remove('show');
-    });
-}
-
-if (homeCreateCollectionMenuBtn) {
-    homeCreateCollectionMenuBtn.addEventListener('click', async () => {
-        homeDropdownMenu.classList.remove('show');
-        await createNewCollection();
-    });
-}
-
-document.addEventListener('click', (e) => {
-    if (homeDropdownMenu && !homeMenuBtn.contains(e.target) && !homeDropdownMenu.contains(e.target)) {
-        homeDropdownMenu.classList.remove('show');
-    }
-});
 
 // HOME PAGE BUTTONS - Set up once on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -5900,6 +5856,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
