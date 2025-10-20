@@ -402,6 +402,47 @@
 		.home-collection-item.active .home-collection-circle-dot { display: block; background: white; }
 		.home-collection-name { font-size: 14px; font-weight: 500; color: #2c3e50; }
 		.home-collection-item.active .home-collection-name { color: white; }
+		/* Journal Editor Page */ 
+		.journal-editor-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 60px; background: white; z-index: 99; overflow-y: auto; } 
+		.journal-editor-page.active { display: block; } 
+		.journal-editor-container { padding-bottom: 40px; } 
+		.journal-header { padding: max(env(safe-area-inset-top), 40px) 20px 20px; background: linear-gradient(135deg, var(--secondary-color, #27ae60) 0%, var(--primary-color, #3498db) 100%); color: white; position: relative; } 
+		.journal-header-content { display: flex; align-items: center; gap: 16px; } 
+		.journal-header-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; } 
+		.journal-header-icon:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); } 
+		.journal-header-text { flex: 1; min-width: 0; } 
+		.journal-header-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; word-wrap: break-word; cursor: pointer; } 
+		.journal-header-title.editable:hover { opacity: 0.9; } 
+		.journal-meta-section { padding: 20px; border-bottom: 1px solid #e5e7eb; } 
+		.journal-date { font-size: 13px; color: #6b7280; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; } 
+		.journal-date svg { width: 16px; height: 16px; } 
+		.journal-tags-wrapper { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; } 
+		.journal-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(var(--primary-color-rgb, 52, 152, 219), 0.1); color: var(--primary-color, #3498db); border-radius: 12px; font-size: 12px; font-weight: 600; } 
+		.journal-tag-remove { cursor: pointer; font-size: 14px; opacity: 0.6; transition: opacity 0.2s; } 
+		.journal-tag-remove:hover { opacity: 1; } 
+		.journal-add-tag-btn { padding: 6px 12px; background: transparent; border: 1px dashed #d1d5db; color: #6b7280; border-radius: 12px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; } 
+		.journal-add-tag-btn:hover { border-color: var(--primary-color, #3498db); color: var(--primary-color, #3498db); background: rgba(var(--primary-color-rgb, 52, 152, 219), 0.05); } 
+		.journal-mood-section { margin-top: 12px; } 
+		.journal-mood-label { font-size: 13px; color: #6b7280; font-weight: 500; margin-bottom: 8px; } 
+		.journal-mood-selector { display: flex; gap: 12px; overflow-x: auto; } 
+		.journal-mood-option { width: 40px; height: 40px; border-radius: 50%; background: #f8f9fa; border: 2px solid transparent; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; } 
+		.journal-mood-option:hover { background: #e8f4f8; transform: scale(1.1); } 
+		.journal-mood-option.selected { border-color: var(--primary-color, #3498db); background: rgba(var(--primary-color-rgb, 52, 152, 219), 0.1); } 
+		.journal-quick-actions { padding: 12px 20px; background: #f8f9fa; display: flex; gap: 8px; overflow-x: auto; border-bottom: 1px solid #e5e7eb; } 
+		.journal-action-btn { padding: 8px 14px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #6b7280; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; gap: 6px; } 
+		.journal-action-btn:hover { border-color: var(--primary-color, #3498db); color: var(--primary-color, #3498db); background: rgba(var(--primary-color-rgb, 52, 152, 219), 0.05); } 
+		.journal-action-btn svg { flex-shrink: 0; } 
+		.journal-writing-area { padding: 20px; display: flex; flex-direction: column; gap: 16px; } 
+		.journal-title-input { border: none; font-size: 24px; font-weight: 700; color: #2c3e50; outline: none; width: 100%; padding: 0; background: transparent; font-family: inherit; } 
+		.journal-title-input::placeholder { color: #d1d5db; } 
+		.journal-content-input { border: none; font-size: 16px; line-height: 1.7; color: #495057; outline: none; width: 100%; padding: 0; background: transparent; resize: none; min-height: 400px; font-family: inherit; } 
+		.journal-content-input::placeholder { color: #d1d5db; } 
+		.journal-menu-dropdown { display: none; position: absolute; top: 100%; right: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 200px; z-index: 1001; overflow: hidden; border: 1px solid #e8eaed; margin-top: 8px; } 
+		.journal-menu-dropdown.show { display: block; } 
+		.journal-menu-dropdown button { width: 100%; padding: 14px 20px; border: none; background: white; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: all 0.2s ease; font-weight: 500; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f3f4f6; } 
+		.journal-menu-dropdown button:last-child { border-bottom: none; } 
+		.journal-menu-dropdown button:hover { background: #f8f9fa; } 
+		.journal-menu-dropdown button svg { width: 18px; height: 18px; flex-shrink: 0; }
 		
 	</style>
     </head>
@@ -639,6 +680,8 @@ function customPrompt(message, defaultValue = '', title = '') {
 	let currentUser = null;
 	let currentGuideId = localStorage.getItem('currentGuideId') || null;
 	let skillReminders = {}; // Format: { 'catIndex-skillIndex': { enabled: true, items: { 'itemIndex': 'HH:MM' } } }
+	let currentJournalEntryId = null;
+	let currentJournalData = {};
 	
 	// Default data structure
 	let categories = [
@@ -2587,25 +2630,14 @@ function createGuideFromTemplate(templateType) {
                 }
             ];
             break;
-        case 'journals':
-            templateData.appTitle = 'Journal';
-            templateData.appSubtitle = 'Daily thoughts and reflections';
-            templateData.appIcon = '📖';
-            templateData.categories = [
-                {
-                    name: "Entries",
-                    icon: "📝",
-                    skills: [
-                        {
-                            title: "Today",
-                            icon: "✍️",
-                            bulletStyle: "bullet",
-                            items: []
-                        }
-                    ]
-                }
-            ];
-            break;
+        case 'journal':
+    templateData.appTitle = 'My Journal';
+    templateData.appSubtitle = 'Personal thoughts and reflections';
+    templateData.appIcon = '📔';
+    templateData.categories = [];
+    templateData.templateType = 'journal';
+    templateData.journalEntries = {}; // New field for journal entries
+    break;
     }
     
     set(ref(database, `users/${currentUser.uid}/guides/${newId}`), templateData).then(() => {
@@ -2636,6 +2668,357 @@ function createGuideFromTemplate(templateType) {
         console.error('Error creating template:', error);
         customAlert('Failed to create guide: ' + error.message, 'Error');
     });
+}
+
+async function createJournalEntry(journalGuideId) {
+    if (!currentUser) return;
+    const timestamp = Date.now();
+    const entryId = `entry_${timestamp}`;
+    
+    const newEntry = {
+        title: 'New Entry',
+        icon: '📝',
+        date: new Date().toISOString(),
+        tags: [],
+        mood: '',
+        content: '',
+        createdAt: timestamp,
+        updatedAt: timestamp
+    };
+    
+    await set(ref(database, `users/${currentUser.uid}/guides/${journalGuideId}/journalEntries/${entryId}`), newEntry);
+    
+    // Open the journal entry editor
+    openJournalEditor(journalGuideId, entryId);
+}
+
+async function openJournalEditor(journalGuideId, entryId) {
+    currentGuideId = journalGuideId;
+    currentJournalEntryId = entryId;
+    localStorage.setItem('currentGuideId', journalGuideId);
+    localStorage.setItem('currentJournalEntryId', entryId);
+    localStorage.setItem('currentPage', 'journal-editor');
+    
+    // Hide home page, show journal editor
+    document.getElementById('homePage')?.classList.remove('active');
+    document.getElementById('journalEditorPage')?.classList.add('active');
+    
+    // Load and render journal entry
+    await loadJournalEntry(journalGuideId, entryId);
+}
+
+async function loadJournalEntry(journalGuideId, entryId) {
+    if (!currentUser) return;
+    
+    const entrySnapshot = await get(ref(database, `users/${currentUser.uid}/guides/${journalGuideId}/journalEntries/${entryId}`));
+    const guideSnapshot = await get(ref(database, `users/${currentUser.uid}/guides/${journalGuideId}`));
+    
+    if (!entrySnapshot.exists() || !guideSnapshot.exists()) return;
+    
+    currentJournalData = entrySnapshot.val();
+    const guideData = guideSnapshot.val();
+    themeColor = guideData.themeColor || '#3498db';
+    applyTheme(themeColor);
+    
+    renderJournalHeader();
+    renderJournalMeta();
+    renderJournalContent();
+}
+
+function renderJournalHeader() {
+    const header = document.getElementById('journalHeader');
+    if (!header) return;
+    
+    const backButton = `
+        <button class="header-back-btn" id="journalBackBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+    `;
+    
+    const isLight = isLightColor(themeColor);
+    const textColor = isLight ? '#2c3e50' : 'white';
+    
+    header.style.background = `linear-gradient(135deg, ${secondaryColor} 0%, ${themeColor} 100%)`;
+    header.style.color = textColor;
+    
+    header.innerHTML = `
+        ${backButton}
+        <div class="journal-header-content">
+            <div class="journal-header-icon" id="journalHeaderIcon">${currentJournalData.icon || '📝'}</div>
+            <div class="journal-header-text">
+                <div class="journal-header-title" id="journalHeaderTitle">${currentJournalData.title || 'New Entry'}</div>
+            </div>
+        </div>
+        <button class="edit-btn" id="journalMenuBtn" style="color: ${textColor};">⋮</button>
+        <div class="journal-menu-dropdown" id="journalMenuDropdown">
+            <button id="journalEditBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit
+            </button>
+            <button id="journalDeleteBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+            </button>
+            <button id="journalHeaderImageBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                Header Image
+            </button>
+            <button id="journalWallpaperBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                Wallpaper
+            </button>
+            <button id="journalThemeBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                Theme
+            </button>
+        </div>
+    `;
+    
+    // Add event listeners
+    const journalBackBtn = document.getElementById('journalBackBtn');
+    const journalMenuBtn = document.getElementById('journalMenuBtn');
+    const journalMenuDropdown = document.getElementById('journalMenuDropdown');
+    const journalHeaderIcon = document.getElementById('journalHeaderIcon');
+    const journalHeaderTitle = document.getElementById('journalHeaderTitle');
+    const journalDeleteBtn = document.getElementById('journalDeleteBtn');
+    
+    if (journalBackBtn) {
+        journalBackBtn.addEventListener('click', () => {
+            saveJournalEntry();
+            closeJournalEditor();
+        });
+    }
+    
+    if (journalMenuBtn) {
+        journalMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            journalMenuDropdown?.classList.toggle('show');
+        });
+    }
+    
+    if (journalHeaderIcon) {
+        journalHeaderIcon.addEventListener('click', async () => {
+            const newIcon = await customPrompt('Enter emoji icon:', currentJournalData.icon || '📝', 'Change Icon');
+            if (newIcon) {
+                currentJournalData.icon = newIcon;
+                journalHeaderIcon.textContent = newIcon;
+                saveJournalEntry();
+            }
+        });
+    }
+    
+    if (journalHeaderTitle) {
+        journalHeaderTitle.addEventListener('click', async () => {
+            const newTitle = await customPrompt('Enter title:', currentJournalData.title || 'New Entry', 'Change Title');
+            if (newTitle) {
+                currentJournalData.title = newTitle;
+                journalHeaderTitle.textContent = newTitle;
+                saveJournalEntry();
+            }
+        });
+    }
+    
+    if (journalDeleteBtn) {
+        journalDeleteBtn.addEventListener('click', async () => {
+            if (await customConfirm('Delete this journal entry?', 'Delete Entry', 'Delete')) {
+                await remove(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/journalEntries/${currentJournalEntryId}`));
+                closeJournalEditor();
+            }
+        });
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!journalMenuBtn?.contains(e.target) && !journalMenuDropdown?.contains(e.target)) {
+            journalMenuDropdown?.classList.remove('show');
+        }
+    });
+}
+
+function renderJournalMeta() {
+    const journalDate = document.getElementById('journalDate');
+    const journalTagsWrapper = document.getElementById('journalTagsWrapper');
+    const journalMoodSection = document.getElementById('journalMoodSection');
+    
+    // Render date
+    if (journalDate) {
+        const date = currentJournalData.date ? new Date(currentJournalData.date) : new Date();
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        
+        journalDate.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            ${dateStr} • ${timeStr}
+        `;
+    }
+    
+    // Render tags
+    if (journalTagsWrapper) {
+        const tags = currentJournalData.tags || [];
+        let tagsHTML = '';
+        
+        tags.forEach((tag, index) => {
+            tagsHTML += `
+                <div class="journal-tag">
+                    ${tag}
+                    <span class="journal-tag-remove" data-tag-index="${index}">×</span>
+                </div>
+            `;
+        });
+        
+        tagsHTML += '<button class="journal-add-tag-btn" id="journalAddTagBtn">+ Add Tag</button>';
+        journalTagsWrapper.innerHTML = tagsHTML;
+        
+        // Add tag button listener
+        const addTagBtn = document.getElementById('journalAddTagBtn');
+        if (addTagBtn) {
+            addTagBtn.addEventListener('click', async () => {
+                const newTag = await customPrompt('Enter tag:', '', 'Add Tag');
+                if (newTag) {
+                    if (!currentJournalData.tags) currentJournalData.tags = [];
+                    currentJournalData.tags.push(newTag);
+                    saveJournalEntry();
+                    renderJournalMeta();
+                }
+            });
+        }
+        
+        // Remove tag listeners
+        document.querySelectorAll('.journal-tag-remove').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.tagIndex);
+                currentJournalData.tags.splice(index, 1);
+                saveJournalEntry();
+                renderJournalMeta();
+            });
+        });
+    }
+    
+    // Render mood selector
+    if (journalMoodSection) {
+        const moods = ['😊', '🌟', '😌', '💭', '😔', '🎉', '😴', '🔥'];
+        let moodHTML = '<div class="journal-mood-label">How are you feeling?</div><div class="journal-mood-selector">';
+        
+        moods.forEach(mood => {
+            const selected = currentJournalData.mood === mood ? 'selected' : '';
+            moodHTML += `<div class="journal-mood-option ${selected}" data-mood="${mood}">${mood}</div>`;
+        });
+        
+        moodHTML += '</div>';
+        journalMoodSection.innerHTML = moodHTML;
+        
+        // Mood selection listeners
+        document.querySelectorAll('.journal-mood-option').forEach(option => {
+            option.addEventListener('click', () => {
+                currentJournalData.mood = option.dataset.mood;
+                saveJournalEntry();
+                renderJournalMeta();
+            });
+        });
+    }
+}
+
+function renderJournalContent() {
+    const titleInput = document.getElementById('journalTitleInput');
+    const contentInput = document.getElementById('journalContentInput');
+    
+    if (titleInput) {
+        titleInput.value = currentJournalData.title || '';
+        titleInput.addEventListener('input', () => {
+            currentJournalData.title = titleInput.value;
+            // Auto-save on input
+            clearTimeout(window.journalSaveTimeout);
+            window.journalSaveTimeout = setTimeout(() => saveJournalEntry(), 1000);
+        });
+    }
+    
+    if (contentInput) {
+        contentInput.value = currentJournalData.content || '';
+        contentInput.addEventListener('input', () => {
+            currentJournalData.content = contentInput.value;
+            // Auto-save on input
+            clearTimeout(window.journalSaveTimeout);
+            window.journalSaveTimeout = setTimeout(() => saveJournalEntry(), 1000);
+        });
+    }
+    
+    // Quick action buttons
+    const addPhotoBtn = document.getElementById('journalAddPhotoBtn');
+    const addLocationBtn = document.getElementById('journalAddLocationBtn');
+    const addAudioBtn = document.getElementById('journalAddAudioBtn');
+    
+    if (addPhotoBtn) {
+        addPhotoBtn.addEventListener('click', () => {
+            customAlert('Photo attachment feature coming soon!', 'Info');
+        });
+    }
+    
+    if (addLocationBtn) {
+        addLocationBtn.addEventListener('click', () => {
+            customAlert('Location feature coming soon!', 'Info');
+        });
+    }
+    
+    if (addAudioBtn) {
+        addAudioBtn.addEventListener('click', () => {
+            customAlert('Audio recording feature coming soon!', 'Info');
+        });
+    }
+}
+
+async function saveJournalEntry() {
+    if (!currentUser || !currentGuideId || !currentJournalEntryId) return;
+    
+    currentJournalData.updatedAt = Date.now();
+    
+    await set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/journalEntries/${currentJournalEntryId}`), currentJournalData);
+}
+
+function closeJournalEditor() {
+    document.getElementById('journalEditorPage')?.classList.remove('active');
+    document.getElementById('homePage')?.classList.add('active');
+    
+    currentJournalEntryId = null;
+    localStorage.removeItem('currentJournalEntryId');
+    localStorage.setItem('currentPage', 'guides');
+    
+    // Refresh home page to show updated journal
+    populateHomePage();
+    
+    // Set home nav as active
+    document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.bottom-nav-item')[0]?.classList.add('active');
 }
 
 
@@ -3478,9 +3861,15 @@ async function populateHomePage() {
     
     // Render guides
     guidesArray.forEach(guide => {
+    if (guide.templateType === 'journal') {
+        // For journal guides, show the journal entries
+        renderJournalGuideCard(guide);
+    } else {
+        // For regular guides
         const item = createGuideElement(guide, false);
         guidesList.appendChild(item);
-    });
+    }
+});
 }
 	
 function createGuideElement(guide, isInFolder) {
@@ -3606,7 +3995,125 @@ function createGuideElement(guide, isInFolder) {
 		
 		return item;
 		}
-		
+
+async function renderJournalGuideCard(guide) {
+    const guidesList = document.getElementById('homeGuidesList');
+    if (!guidesList) return;
+    
+    // Get journal entries
+    const entriesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides/${guide.id}/journalEntries`));
+    const entries = entriesSnapshot.val() || {};
+    
+    // Create journal card
+    const journalCard = document.createElement('div');
+    journalCard.className = 'home-guide-item';
+    journalCard.style.cursor = 'pointer';
+    
+    const entriesCount = Object.keys(entries).length;
+    
+    journalCard.innerHTML = `
+        <div class="home-guide-icon" style="background: linear-gradient(135deg, ${guide.color}, ${guide.color}dd);">${guide.icon}</div>
+        <div class="home-guide-content">
+            <div class="home-guide-title">${guide.title}</div>
+            <div class="home-guide-subtitle">${entriesCount} ${entriesCount === 1 ? 'entry' : 'entries'}</div>
+        </div>
+        <svg class="home-guide-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+    `;
+    
+    journalCard.addEventListener('click', () => {
+        showJournalEntriesList(guide.id);
+    });
+    
+    guidesList.appendChild(journalCard);
+}
+
+async function showJournalEntriesList(journalGuideId) {
+    // Store current guide ID
+    currentGuideId = journalGuideId;
+    localStorage.setItem('currentGuideId', journalGuideId);
+    
+    // Get journal entries
+    const entriesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides/${journalGuideId}/journalEntries`));
+    const entries = entriesSnapshot.val() || {};
+    
+    const entriesArray = Object.keys(entries).map(id => ({
+        id: id,
+        ...entries[id]
+    })).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    
+    const guidesList = document.getElementById('homeGuidesList');
+    if (!guidesList) return;
+    
+    // Clear and show entries list
+    guidesList.innerHTML = '';
+    
+    // Add header with back button and create new entry button
+    const header = document.createElement('div');
+    header.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid #e5e7eb;';
+    header.innerHTML = `
+        <button id="journalListBackBtn" style="background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 15px; color: #2c3e50; font-weight: 500;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Back
+        </button>
+        <button id="createJournalEntryBtn" style="padding: 10px 20px; background: var(--primary-color, #3498db); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;">
+            + New Entry
+        </button>
+    `;
+    guidesList.appendChild(header);
+    
+    // Add event listeners
+    document.getElementById('journalListBackBtn')?.addEventListener('click', () => {
+        populateHomePage();
+    });
+    
+    document.getElementById('createJournalEntryBtn')?.addEventListener('click', () => {
+        createJournalEntry(journalGuideId);
+    });
+    
+    // Show entries or empty state
+    if (entriesArray.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'home-empty';
+        empty.innerHTML = `
+            <div class="home-empty-icon">📔</div>
+            <div class="home-empty-text">No journal entries yet</div>
+            <div class="home-empty-subtext">Click "New Entry" to start writing</div>
+        `;
+        guidesList.appendChild(empty);
+    } else {
+        entriesArray.forEach(entry => {
+            const entryCard = document.createElement('div');
+            entryCard.className = 'home-guide-item';
+            entryCard.style.cursor = 'pointer';
+            
+            const date = entry.date ? new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+            const preview = entry.content ? entry.content.substring(0, 60) + (entry.content.length > 60 ? '...' : '') : 'No content';
+            
+            entryCard.innerHTML = `
+                <div class="home-guide-icon" style="background: linear-gradient(135deg, var(--primary-color, #3498db), var(--secondary-color, #27ae60));">${entry.icon || '📝'}</div>
+                <div class="home-guide-content">
+                    <div class="home-guide-title">${entry.title || 'Untitled Entry'}</div>
+                    <div class="home-guide-subtitle">${date} ${entry.mood ? '• ' + entry.mood : ''}</div>
+                    <div style="font-size: 13px; color: #9ca3af; margin-top: 4px;">${preview}</div>
+                </div>
+                <svg class="home-guide-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            `;
+            
+            entryCard.addEventListener('click', () => {
+                openJournalEditor(journalGuideId, entry.id);
+            });
+            
+            guidesList.appendChild(entryCard);
+        });
+    }
+}
+	
 function toggleSelectMode() {
     homeSelectMode = !homeSelectMode;
     selectedGuides.clear();
@@ -5777,7 +6284,56 @@ async function backupContent() {
         </div>
     </div>
 </div>
-
+<!-- Journal Editor Page -->
+<div class="journal-editor-page" id="journalEditorPage">
+    <div class="journal-editor-container">
+        <!-- Header -->
+        <div class="journal-header" id="journalHeader">
+            <!-- Will be populated by renderJournalHeader() -->
+        </div>
+        
+        <!-- Meta Section -->
+        <div class="journal-meta-section">
+            <div class="journal-date" id="journalDate"></div>
+            <div class="journal-tags-wrapper" id="journalTagsWrapper"></div>
+            <div class="journal-mood-section" id="journalMoodSection"></div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="journal-quick-actions">
+            <button class="journal-action-btn" id="journalAddPhotoBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                Add Photo
+            </button>
+            <button class="journal-action-btn" id="journalAddLocationBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Add Location
+            </button>
+            <button class="journal-action-btn" id="journalAddAudioBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+                Add Audio
+            </button>
+        </div>
+        
+        <!-- Writing Area -->
+        <div class="journal-writing-area">
+            <input type="text" class="journal-title-input" id="journalTitleInput" placeholder="Entry Title...">
+            <textarea class="journal-content-input" id="journalContentInput" placeholder="Start writing your thoughts..."></textarea>
+        </div>
+    </div>
+</div>
 <div class="profile-page" id="profilePage">
     <div class="profile-container">
         <div class="profile-header">
@@ -5873,6 +6429,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
