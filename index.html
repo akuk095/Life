@@ -665,8 +665,148 @@ function customPrompt(message, defaultValue = '', title = '') {
         ]
     }
 ];
+
+// HOME PAGE BUTTON SETUP (outside populateHomePage)
+const homeSearchBtn = document.getElementById('homeSearchBtn');
+const homeSearchOverlay = document.getElementById('homeSearchOverlay');
+const homeSearchClose = document.getElementById('homeSearchClose');
+const homeSearchInputFull = document.getElementById('homeSearchInputFull');
+const homeSearchResults = document.getElementById('homeSearchResults');
+
+if (homeSearchBtn && homeSearchOverlay) {
+    homeSearchBtn.addEventListener('click', () => {
+        homeSearchOverlay.classList.add('show');
+        if (homeSearchInputFull) homeSearchInputFull.focus();
+    });
+}
+
+if (homeSearchClose) {
+    homeSearchClose.addEventListener('click', () => {
+        homeSearchOverlay.classList.remove('show');
+        if (homeSearchInputFull) homeSearchInputFull.value = '';
+        if (homeSearchResults) homeSearchResults.innerHTML = '';
+    });
+}
+
+if (homeSearchInputFull) {
+    homeSearchInputFull.addEventListener('input', async (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        if (!searchTerm) {
+            homeSearchResults.innerHTML = '';
+            return;
+        }
+        
+        if (!currentUser) return;
+        
+        const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
+        const guides = guidesSnapshot.val() || {};
+        
+        let results = [];
+        
+        Object.keys(guides).forEach(guideId => {
+            const guide = guides[guideId];
+            const guideTitle = guide.appTitle || '';
+            const guideSubtitle = guide.appSubtitle || '';
+            
+            if (guideTitle.toLowerCase().includes(searchTerm) || 
+                guideSubtitle.toLowerCase().includes(searchTerm)) {
+                results.push({
+                    type: 'guide',
+                    id: guideId,
+                    title: guideTitle,
+                    subtitle: guideSubtitle,
+                    icon: guide.appIcon || '📄',
+                    color: guide.themeColor || '#3498db'
+                });
+            }
+        });
+        
+        if (results.length === 0) {
+            homeSearchResults.innerHTML = '<div style="text-align: center; color: #9ca3af; padding: 40px 0;">No results found</div>';
+        } else {
+            homeSearchResults.innerHTML = results.map(result => `
+                <div class="search-result-item" data-guide-id="${result.id}" style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, ${result.color}dd, ${result.color}); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+                        ${result.icon}
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 14px; font-weight: 500; color: #2c3e50; margin-bottom: 2px;">${result.title}</div>
+                        <div style="font-size: 12px; color: #9ca3af;">${result.subtitle}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const guideId = item.dataset.guideId;
+                    switchGuide(guideId);
+                    homeSearchOverlay.classList.remove('show');
+                    homeSearchInputFull.value = '';
+                    homeSearchResults.innerHTML = '';
+                    
+                    document.getElementById('homePage').classList.remove('active');
+                    document.querySelector('.container').style.display = 'block';
+                    document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+                    document.querySelectorAll('.bottom-nav-item')[0].classList.add('active');
+                    
+                    setTimeout(() => {
+                        const backBtn = document.getElementById('headerBackBtn');
+                        if (backBtn) backBtn.style.display = 'flex';
+                    }, 100);
+                });
+            });
+        }
+    });
+}
+
+const homeCreateBtn = document.getElementById('homeCreateBtn');
+if (homeCreateBtn) {
+    homeCreateBtn.addEventListener('click', () => {
+        createNewGuide();
+    });
+}
+
+const homeMenuBtn = document.getElementById('homeMenuBtn');
+const homeDropdownMenu = document.getElementById('homeDropdownMenu');
+const homeSelectMenuBtn = document.getElementById('homeSelectMenuBtn');
+const homeCreateCollectionMenuBtn = document.getElementById('homeCreateCollectionMenuBtn');
+
+if (homeMenuBtn && homeDropdownMenu) {
+    homeMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        homeDropdownMenu.classList.toggle('show');
+        
+        if (homeSelectMenuBtn) {
+            homeSelectMenuBtn.innerHTML = homeSelectMode 
+                ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancel`
+                : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Select`;
+        }
+    });
+}
+
+if (homeSelectMenuBtn) {
+    homeSelectMenuBtn.addEventListener('click', () => {
+        toggleSelectMode();
+        homeDropdownMenu.classList.remove('show');
+    });
+}
+
+if (homeCreateCollectionMenuBtn) {
+    homeCreateCollectionMenuBtn.addEventListener('click', async () => {
+        homeDropdownMenu.classList.remove('show');
+        await createNewCollection();
+    });
+}
+
+document.addEventListener('click', (e) => {
+    if (homeDropdownMenu && !homeMenuBtn.contains(e.target) && !homeDropdownMenu.contains(e.target)) {
+        homeDropdownMenu.classList.remove('show');
+    }
+});
+
 // Check if user is logged in
-onAuthStateChanged(auth, (user) => {
+auth.onAuthStateChanged(async (user) => {
     const loginScreen = document.getElementById('loginScreen');
     const signupScreen = document.getElementById('signupScreen');
     const appContainer = document.getElementById('app');
@@ -5869,6 +6009,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
