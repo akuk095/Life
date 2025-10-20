@@ -2232,14 +2232,14 @@ document.addEventListener('touchmove', (e) => {
     
     // Visual feedback - animate the checkbox/bullet
     if (deltaX > 0) {
-        const adjustedDelta = Math.min(deltaX - 20, 60); // Max 60px movement
-        const progress = adjustedDelta / 60;
+        const adjustedDelta = Math.min(deltaX - 20, 80); // Max 80px movement
+        const progress = adjustedDelta / 80;
         
         // Find the checkbox or bullet element
         const bullet = currentRightSwipeItem.querySelector('.checkbox, .bullet-number, .bullet-square, .bullet-circle');
         if (bullet) {
-            // Pulse and scale animation
-            bullet.style.transform = `scale(${1 + progress * 0.5}) rotate(${progress * 360}deg)`;
+            // Smooth scale animation without rotation
+            bullet.style.transform = `scale(${1 + progress * 0.3})`;
             bullet.style.transition = 'none';
             
             // Color change based on next bullet type
@@ -2250,20 +2250,23 @@ document.addEventListener('touchmove', (e) => {
             const currentIndex = styles.indexOf(currentStyle);
             const nextIndex = (currentIndex + 1) % styles.length;
             
-            // Show preview color based on next type
+            // Softer, more modern colors that match the app
             const colors = {
-                'checkbox': '#10b981',
+                'checkbox': 'var(--primary-color, #3498db)',
                 'number': '#3b82f6', 
                 'square': '#8b5cf6',
                 'circle': '#f59e0b',
                 'none': '#6b7280'
             };
             bullet.style.background = colors[styles[nextIndex]];
+            bullet.style.opacity = `${0.6 + (progress * 0.4)}`;
         }
         
-        // Subtle background gradient
-        currentRightSwipeItem.style.background = `linear-gradient(90deg, #f8f9fa 0%, #dbeafe ${adjustedDelta}%)`; 
+        // Softer background transition
+        const bgOpacity = Math.min(progress * 100, 30);
+        currentRightSwipeItem.style.background = `linear-gradient(90deg, #f8f9fa 0%, rgba(59, 130, 246, 0.${Math.floor(bgOpacity)}) 100%)`; 
         currentRightSwipeItem.style.transition = 'none';
+        currentRightSwipeItem.style.borderColor = `rgba(59, 130, 246, ${progress * 0.3})`;
     }
 });
 
@@ -5853,6 +5856,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
