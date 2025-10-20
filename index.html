@@ -37,7 +37,8 @@
 		.checkbox-menu button { width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; font-size: 14px; color: #2c3e50; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
 		.checkbox-menu button:last-child { border-bottom: none; }
 		.checkbox-menu button:hover { background: #f8f9fa; }
-		.checkbox-menu.show { display: block; }.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
+		.checkbox-menu.show { display: block; }
+		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
 		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
@@ -458,7 +459,7 @@
 		.timer-input-group label { display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500; }
 		.timer-input-group input { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; text-align: center; }
 		.timer-input-group input:focus { outline: none; border-color: var(--primary-color); }
-		.timer-display { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); padding: 4px 10px; background: rgba(var(--primary-color-rgb, 52, 152, 219), 0.1); color: var(--primary-color); border-radius: 12px; font-size: 12px; font-weight: 600; }
+		.timer-display { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); padding: 4px 10px; background: rgba(var(--primary-color-rgb, 52, 152, 219), 0.1); color: var(--primary-color); border-radius: 12px; font-size: 12px; font-weight: 600; pointer-events: none; }
 		.delete-timer { width: 100%; padding: 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 12px; }
 		.delete-timer:hover { background: #fecaca; }
 
@@ -5011,7 +5012,19 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     saveCategories();
     renderContent();
 }
+	
+function toggleTimerForSkill(catIndex, skillIndex) {
+    const key = `${catIndex}-${skillIndex}`;
+    if (!itemTimers[key]) {
+        itemTimers[key] = { enabled: true };
+    } else {
+        itemTimers[key].enabled = !itemTimers[key].enabled;
+    }
+    saveItemTimers();
+    renderContent();
+}
 
+	
 function renderContent() { 
     const contentArea = document.getElementById('contentArea'); 
     contentArea.innerHTML = ''; 
@@ -5185,17 +5198,30 @@ hideHeadingBtn.addEventListener('click', (e) => {
     toggleSkillHeading(catIndex, skillIndex);
 });
 
-// Add in order: bullet, duplicate, reminder, delete, hide heading (left to right)
-controlsContainer.appendChild(deleteBtn);
-controlsContainer.appendChild(reminderBtn);
-controlsContainer.appendChild(duplicateBtn);
-controlsContainer.appendChild(toggleBtn);
-controlsContainer.appendChild(hideHeadingBtn);
-            // Add in order: bullet, duplicate, reminder, delete (left to right)
+			// Timer toggle button
+const timerToggleBtn = document.createElement('button');
+timerToggleBtn.className = 'skill-control-btn';
+const timerKey = `${catIndex}-${skillIndex}`;
+const timerEnabled = skillTimers[timerKey]?.enabled || false;
+timerToggleBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <polyline points="12 6 12 12 16 14"></polyline>
+</svg>`;
+timerToggleBtn.title = timerEnabled ? 'Disable Timers' : 'Enable Timers';
+timerToggleBtn.style.opacity = timerEnabled ? '1' : '0.5';
+timerToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleTimerForSkill(catIndex, skillIndex);
+});
+
+			// Add in order: bullet, duplicate, reminder, delete, hide heading, timer
 			controlsContainer.appendChild(deleteBtn);
 			controlsContainer.appendChild(reminderBtn);
 			controlsContainer.appendChild(duplicateBtn);
 			controlsContainer.appendChild(toggleBtn);
+			controlsContainer.appendChild(hideHeadingBtn);
+			controlsContainer.appendChild(timerToggleBtn);
+			
             
             card.appendChild(controlsContainer);
             
@@ -5337,28 +5363,31 @@ controlsContainer.appendChild(hideHeadingBtn);
 				    textDiv.appendChild(reminderIcon);
 				}
 
-			// Add timer icon for setting timers on items
-			const timerIcon = document.createElement('span');
-			timerIcon.className = 'timer-icon';
-			const itemTimerKey = `${catIndex}-${skillIndex}-${itemIndex}`;
-			const hasTimer = itemTimers?.[itemTimerKey];
-			timerIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			    <circle cx="12" cy="12" r="10"></circle>
-			    <polyline points="12 6 12 12 16 14"></polyline>
-			</svg>`;
-			timerIcon.title = hasTimer ? `Timer: ${hasTimer.hours || 0}h ${hasTimer.minutes || 0}m` : 'Set timer';
-			timerIcon.style.cursor = 'pointer';
-			timerIcon.style.marginLeft = '8px';
-			timerIcon.style.opacity = hasTimer ? '1' : '0.4';
-			timerIcon.style.color = hasTimer ? 'var(--primary-color)' : '#9ca3af';
-			timerIcon.dataset.catIndex = catIndex;
-			timerIcon.dataset.skillIndex = skillIndex;
-			timerIcon.dataset.itemIndex = itemIndex;
-			timerIcon.addEventListener('click', (e) => {
-			    e.stopPropagation();
-			    showTimerPicker(catIndex, skillIndex, itemIndex);
-			});
-			textDiv.appendChild(timerIcon);
+			// Add timer icon if timers are enabled for this skill
+			const timerSkillKey = `${catIndex}-${skillIndex}`;
+			if (itemTimers[timerSkillKey]?.enabled) {
+			    const timerIcon = document.createElement('span');
+			    timerIcon.className = 'timer-icon';
+			    const itemTimerKey = `${catIndex}-${skillIndex}-${itemIndex}`;
+			    const hasTimer = itemTimers?.[itemTimerKey];
+			    timerIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			        <circle cx="12" cy="12" r="10"></circle>
+			        <polyline points="12 6 12 12 16 14"></polyline>
+			    </svg>`;
+			    timerIcon.title = hasTimer ? `Timer: ${hasTimer.hours || 0}h ${hasTimer.minutes || 0}m` : 'Set timer';
+			    timerIcon.style.cursor = 'pointer';
+			    timerIcon.style.marginLeft = '8px';
+			    timerIcon.style.opacity = hasTimer ? '1' : '0.4';
+			    timerIcon.style.color = hasTimer ? 'var(--primary-color)' : '#9ca3af';
+			    timerIcon.dataset.catIndex = catIndex;
+			    timerIcon.dataset.skillIndex = skillIndex;
+			    timerIcon.dataset.itemIndex = itemIndex;
+			    timerIcon.addEventListener('click', (e) => {
+			        e.stopPropagation();
+			        showTimerPicker(catIndex, skillIndex, itemIndex);
+			    });
+			    textDiv.appendChild(timerIcon);
+			}
 			
 			checkItem.appendChild(textDiv);
 
@@ -6638,6 +6667,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
