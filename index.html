@@ -4674,24 +4674,7 @@ if (enabled) {
     }
 }
 
-function renderTabs() { 
-    const navTabs = document.getElementById('navTabs'); 
-    navTabs.innerHTML = ''; 
-    
-    categories.forEach((cat, i) => { 
-        const tabWrapper = document.createElement('div');
-        tabWrapper.className = 'tab-wrapper';
-        
-        const tab = document.createElement('button'); 
-        tab.className = 'nav-tab' + (i === activeTabIndex ? ' active' : ''); 
-
-        // Make tabs draggable when NOT in edit mode
-        if (!editMode) {
-            tab.draggable = true;
-            tab.dataset.catIndex = i;
-            tab.style.cursor = 'grab';
-        }
-        
+      
         function renderTabs() {
     const navTabs = document.getElementById('navTabs');
     navTabs.innerHTML = '';
@@ -6701,6 +6684,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
