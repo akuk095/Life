@@ -2211,18 +2211,15 @@ document.addEventListener('touchmove', (e) => {
     const deltaX = rightSwipeTouchCurrentX - rightSwipeTouchStartX;
     const deltaY = rightSwipeTouchCurrentY - rightSwipeTouchStartY;
     
-    // Dead zone - ignore first 20px
     if (!isRightSwiping && Math.abs(deltaX) < 20) {
         return;
     }
     
-    // Only start if horizontal movement is greater than vertical AND swiping RIGHT
     if (!isRightSwiping) {
         if (deltaX > 20 && Math.abs(deltaX) > Math.abs(deltaY)) {
             isRightSwiping = true;
-            e.preventDefault(); // Prevent scrolling
+            e.preventDefault();
         } else if (Math.abs(deltaY) > 15) {
-            // Vertical scroll - cancel
             currentRightSwipeItem = null;
             return;
         }
@@ -2230,43 +2227,14 @@ document.addEventListener('touchmove', (e) => {
     
     if (!isRightSwiping) return;
     
-    // Visual feedback - animate the checkbox/bullet
     if (deltaX > 0) {
-        const adjustedDelta = Math.min(deltaX - 20, 80); // Max 80px movement
-        const progress = adjustedDelta / 80;
+        const adjustedDelta = Math.min(deltaX - 20, 70);
+        const progress = adjustedDelta / 70;
         
-        // Find the checkbox or bullet element
-        const bullet = currentRightSwipeItem.querySelector('.checkbox, .bullet-number, .bullet-square, .bullet-circle');
-        if (bullet) {
-            // Smooth scale animation without rotation
-            bullet.style.transform = `scale(${1 + progress * 0.3})`;
-            bullet.style.transition = 'none';
-            
-            // Color change based on next bullet type
-            const catIndex = parseInt(currentRightSwipeItem.dataset.catIndex);
-            const skillIndex = parseInt(currentRightSwipeItem.dataset.skillIndex);
-            const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
-            const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
-            const currentIndex = styles.indexOf(currentStyle);
-            const nextIndex = (currentIndex + 1) % styles.length;
-            
-            // Softer, more modern colors that match the app
-            const colors = {
-                'checkbox': 'var(--primary-color, #3498db)',
-                'number': '#3b82f6', 
-                'square': '#8b5cf6',
-                'circle': '#f59e0b',
-                'none': '#6b7280'
-            };
-            bullet.style.background = colors[styles[nextIndex]];
-            bullet.style.opacity = `${0.6 + (progress * 0.4)}`;
-        }
-        
-        // Softer background transition
-        const bgOpacity = Math.min(progress * 100, 30);
-        currentRightSwipeItem.style.background = `linear-gradient(90deg, #f8f9fa 0%, rgba(59, 130, 246, 0.${Math.floor(bgOpacity)}) 100%)`; 
+        // Simple highlight that intensifies as you swipe
+        const highlightOpacity = Math.floor(progress * 15);
+        currentRightSwipeItem.style.background = `rgba(var(--primary-color-rgb, 52, 152, 219), 0.${highlightOpacity > 9 ? highlightOpacity : '0' + highlightOpacity})`;
         currentRightSwipeItem.style.transition = 'none';
-        currentRightSwipeItem.style.borderColor = `rgba(59, 130, 246, ${progress * 0.3})`;
     }
 });
 
@@ -2274,40 +2242,33 @@ document.addEventListener('touchend', (e) => {
     if (!currentRightSwipeItem) return;
     
     const deltaX = rightSwipeTouchCurrentX - rightSwipeTouchStartX;
-    const threshold = 50; // Minimum swipe distance
+    const threshold = 50;
     
-    currentRightSwipeItem.style.transition = 'all 0.3s ease';
+    currentRightSwipeItem.style.transition = 'all 0.2s ease';
     
     if (isRightSwiping && deltaX > threshold) {
-        // Get the data
         const catIndex = parseInt(currentRightSwipeItem.dataset.catIndex);
         const skillIndex = parseInt(currentRightSwipeItem.dataset.skillIndex);
         
         if (!isNaN(catIndex) && !isNaN(skillIndex)) {
-            // Flash animation
-            currentRightSwipeItem.style.transform = 'translateX(0)';
-            currentRightSwipeItem.style.background = '#dbeafe'; // Light blue flash
+            // Quick flash to indicate action
+            currentRightSwipeItem.style.background = 'rgba(var(--primary-color-rgb, 52, 152, 219), 0.2)';
             
             setTimeout(() => {
-                // Get current bullet style
                 const currentStyle = categories[catIndex].skills[skillIndex].bulletStyle || 'checkbox';
-                
-                // Cycle through styles
                 const styles = ['checkbox', 'number', 'square', 'circle', 'none'];
                 const currentIndex = styles.indexOf(currentStyle);
                 const nextIndex = (currentIndex + 1) % styles.length;
                 const nextStyle = styles[nextIndex];
                 
-                // Update the bullet style
                 categories[catIndex].skills[skillIndex].bulletStyle = nextStyle;
                 saveCategories();
                 renderContent();
-            }, 200);
+            }, 150);
         }
     } else {
-        // Not enough swipe - snap back
-        currentRightSwipeItem.style.transform = 'translateX(0)';
-        currentRightSwipeItem.style.background = '#f8f9fa';
+        // Snap back
+        currentRightSwipeItem.style.background = '';
     }
     
     isRightSwiping = false;
@@ -5856,6 +5817,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
