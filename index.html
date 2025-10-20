@@ -3228,13 +3228,25 @@ const homeSearchInputFull = document.getElementById('homeSearchInputFull');
 const homeSearchResults = document.getElementById('homeSearchResults');
 
 // Only set up buttons once
-if (homeSearchBtn && homeSearchOverlay && !homeSearchBtn._initialized) {
-    homeSearchBtn._initialized = true;
+console.log('Checking search button setup...');
+console.log('homeSearchBtn:', homeSearchBtn);
+console.log('homeSearchOverlay:', homeSearchOverlay);
+console.log('initialized?', homeSearchBtn?.dataset.initialized);
+
+if (homeSearchBtn && homeSearchOverlay && !homeSearchBtn.dataset.initialized) {
+    console.log('✓ Setting up search button now!');
+    homeSearchBtn.dataset.initialized = 'true';
     
     homeSearchBtn.addEventListener('click', () => {
+        console.log('✓ Search button CLICKED!');
         homeSearchOverlay.classList.add('show');
-        homeSearchInputFull.focus();
+        if (homeSearchInputFull) homeSearchInputFull.focus();
     });
+} else {
+    console.log('✗ NOT setting up search button because:');
+    console.log('  - homeSearchBtn exists?', !!homeSearchBtn);
+    console.log('  - homeSearchOverlay exists?', !!homeSearchOverlay);
+    console.log('  - already initialized?', homeSearchBtn?.dataset.initialized);
 }
 
 if (homeSearchClose && !homeSearchClose._initialized) {
@@ -5853,6 +5865,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
