@@ -2412,8 +2412,8 @@ async function populateCollections() {
         name: collections[id].name || 'Untitled Collection',
         createdAt: collections[id].createdAt || 0
     })).sort((a, b) => a.createdAt - b.createdAt);
-
-	// Add "All files" as the default first item
+    
+    // Always show "All files" as the first item (selected by default)
     const allFilesHTML = `
         <div class="home-collection-item ${selectedCollection === null ? 'active' : ''}" data-collection-id="">
             <div class="home-collection-circle">
@@ -2423,6 +2423,7 @@ async function populateCollections() {
         </div>
     `;
     
+    // Add user-created collections
     const collectionsHTML = collectionsArray.map(collection => `
         <div class="home-collection-item ${selectedCollection === collection.id ? 'active' : ''}" data-collection-id="${collection.id}">
             <div class="home-collection-circle">
@@ -2432,114 +2433,99 @@ async function populateCollections() {
         </div>
     `).join('');
     
-    collectionsNav.innerHTML = allFilesHTML + collectionsHTML;
-    
-    if (collectionsArray.length === 0) {
-        collectionsNav.innerHTML = '';
-        return;
-    }
-    
-    collectionsNav.innerHTML = collectionsArray.map(collection => `
-        <div class="home-collection-item ${selectedCollection === collection.id ? 'active' : ''}" data-collection-id="${collection.id}">
-            <div class="home-collection-circle">
-                <div class="home-collection-circle-dot"></div>
-            </div>
-            <span class="home-collection-name">${collection.name}</span>
-        </div>
-    `).join('');
+    collectionsNav.innerHTML = allFilesHTML + collectionsHTML;  // ← KEEP ONLY THIS ONE
     
     // Add click handlers
-	document.querySelectorAll('.home-collection-item').forEach(item => {
-	    item.addEventListener('click', () => {
-	        const collectionId = item.dataset.collectionId;
-	        
-	        // Always select - can't deselect collections
-	        if (collectionId === '') {
-	            selectedCollection = null;  // "All files"
-	        } else {
-	            selectedCollection = collectionId;  // Specific collection
-	        }
-	        
-	        populateHomePage();
-	    });
+    document.querySelectorAll('.home-collection-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const collectionId = item.dataset.collectionId;
+            
+            // Always select - can't deselect collections
+            if (collectionId === '') {
+                selectedCollection = null;  // "All files"
+            } else {
+                selectedCollection = collectionId;  // Specific collection
+            }
+            
+            populateHomePage();
+        });
 
-        // Long press to delete collection
-        let longPressTimer;
-        let longPressTriggered = false;
-        
-        item.addEventListener('touchstart', (e) => {
-            longPressTriggered = false;
-            longPressTimer = setTimeout(async () => {
-                longPressTriggered = true;
-                e.preventDefault();
-                const collectionId = item.dataset.collectionId;
-                const collectionName = item.querySelector('.home-collection-name').textContent;
-                
-                if (await customConfirm(`Delete collection "${collectionName}"? The guides inside will not be deleted.`, 'Delete Collection', 'Delete')) {
-                    await remove(ref(database, `users/${currentUser.uid}/collections/${collectionId}`));
+        // Long press to delete collection (only for user-created collections)
+        const collectionId = item.dataset.collectionId;
+        if (collectionId !== '') {  // Don't allow deleting "All files"
+            let longPressTimer;
+            let longPressTriggered = false;
+            
+            item.addEventListener('touchstart', (e) => {
+                longPressTriggered = false;
+                longPressTimer = setTimeout(async () => {
+                    longPressTriggered = true;
+                    e.preventDefault();
+                    const collectionName = item.querySelector('.home-collection-name').textContent;
                     
-                    // Remove collection reference from guides
-                    const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
-                    const guides = guidesSnapshot.val() || {};
-                    
-                    for (const guideId in guides) {
-                        if (guides[guideId].collectionId === collectionId) {
-                            await remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/collectionId`));
+                    if (await customConfirm(`Delete collection "${collectionName}"? The guides inside will not be deleted.`, 'Delete Collection', 'Delete')) {
+                        await remove(ref(database, `users/${currentUser.uid}/collections/${collectionId}`));
+                        
+                        // Remove collection reference from guides
+                        const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
+                        const guides = guidesSnapshot.val() || {};
+                        
+                        for (const guideId in guides) {
+                            if (guides[guideId].collectionId === collectionId) {
+                                await remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/collectionId`));
+                            }
                         }
+                        
+                        selectedCollection = null;
+                        populateHomePage();
                     }
+                }, 500);
+            });
+            
+            item.addEventListener('touchend', () => {
+                clearTimeout(longPressTimer);
+            }, { passive: true });
+            
+            item.addEventListener('touchmove', () => {
+                clearTimeout(longPressTimer);
+            }, { passive: true });
+            
+            item.addEventListener('mousedown', (e) => {
+                longPressTriggered = false;
+                longPressTimer = setTimeout(async () => {
+                    longPressTriggered = true;
+                    e.preventDefault();
+                    const collectionName = item.querySelector('.home-collection-name').textContent;
                     
-                    selectedCollection = null;
-                    populateHomePage();
-                }
-            }, 500);
-        });
-        
-        item.addEventListener('touchend', () => {
-		    clearTimeout(longPressTimer);
-		}, { passive: true });  
-		
-		item.addEventListener('touchmove', () => {
-		    clearTimeout(longPressTimer);
-		}, { passive: true });
-        
-        item.addEventListener('mousedown', (e) => {
-            longPressTriggered = false;
-            longPressTimer = setTimeout(async () => {
-                longPressTriggered = true;
-                e.preventDefault();
-                const collectionId = item.dataset.collectionId;
-                const collectionName = item.querySelector('.home-collection-name').textContent;
-                
-                if (await customConfirm(`Delete collection "${collectionName}"? The guides inside will not be deleted.`, 'Delete Collection', 'Delete')) {
-                    await remove(ref(database, `users/${currentUser.uid}/collections/${collectionId}`));
-                    
-                    // Remove collection reference from guides
-                    const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
-                    const guides = guidesSnapshot.val() || {};
-                    
-                    for (const guideId in guides) {
-                        if (guides[guideId].collectionId === collectionId) {
-                            await remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/collectionId`));
+                    if (await customConfirm(`Delete collection "${collectionName}"? The guides inside will not be deleted.`, 'Delete Collection', 'Delete')) {
+                        await remove(ref(database, `users/${currentUser.uid}/collections/${collectionId}`));
+                        
+                        // Remove collection reference from guides
+                        const guidesSnapshot = await get(ref(database, `users/${currentUser.uid}/guides`));
+                        const guides = guidesSnapshot.val() || {};
+                        
+                        for (const guideId in guides) {
+                            if (guides[guideId].collectionId === collectionId) {
+                                await remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/collectionId`));
+                            }
                         }
+                        
+                        selectedCollection = null;
+                        populateHomePage();
                     }
-                    
-                    selectedCollection = null;
-                    populateHomePage();
-                }
-            }, 500);
-        });
-        
-        item.addEventListener('mouseup', () => {
-		    clearTimeout(longPressTimer);
-		}, { passive: true }); 
-		
-		item.addEventListener('mouseleave', () => {
-		    clearTimeout(longPressTimer);
-		}, { passive: true });
-		
-        
+                }, 500);
+            });
+            
+            item.addEventListener('mouseup', () => {
+                clearTimeout(longPressTimer);
+            }, { passive: true });
+            
+            item.addEventListener('mouseleave', () => {
+                clearTimeout(longPressTimer);
+            }, { passive: true });
+        }
     });
-}  
+}
 
 
         
@@ -5872,6 +5858,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
