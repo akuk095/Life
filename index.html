@@ -1062,18 +1062,25 @@ let draggedTab = null;
 let draggedTabIndex = null;
 	
 const colorThemes = [
-    { name: 'Ocean Blue', primary: '#3498db', secondary: '#1abc9c' },      // Blue + Turquoise
     { name: 'Forest', primary: '#27ae60', secondary: '#f39c12' },          // Green + Amber
-    { name: 'Sunset', primary: '#e67e22', secondary: '#e74c3c' },          // Orange + Red
-    { name: 'Royal', primary: '#8e44ad', secondary: '#3498db' },           // Purple + Blue
     { name: 'Cherry', primary: '#e74c3c', secondary: '#c0392b' },          // Red + Dark Red
-    { name: 'Berry', primary: '#ff6b9d', secondary: '#9b59b6' },           // Pink + Purple
-    { name: 'Tropical', primary: '#16a085', secondary: '#f39c12' },        // Teal + Gold
-    { name: 'Sunshine', primary: '#f39c12', secondary: '#e67e22' },        // Yellow + Orange
-    { name: 'Slate', primary: '#34495e', secondary: '#7f8c8d' },           // Dark Blue + Gray
+    { name: 'Tropical', primary: '#16a085', secondary: '#23a88e' },        // Teal + Gold
+    { name: 'Tropical2', primary: '#f39c12', secondary: '#f2b555' },        
+	{ name: 'Slate', primary: '#34495e', secondary: '#7f8c8d' },           // Dark Blue + Gray
     { name: 'Lavender Sky', primary: '#9b59b6', secondary: '#3498db' },     // Purple + Sky Blue
-	{ name: 'Serene', primary: '#3EACA8', secondary: '#5A5050' }  // Teal + Brown from your palette
-];
+	{ name: 'Serene', primary: '#3EACA8', secondary: '#46b0ac' },  // Teal + Brown from your palette
+	{ name: 'Serene2', primary: '#5A5050', secondary: '#756767' },  // Teal + Brown from your palet
+	{ name: 'Dusty Rose', primary: '#C9A0A0', secondary: '#A88080' },
+    { name: 'Rose Clay', primary: '#D98C8C', secondary: '#A96565' },
+	{ name: 'Elegant Burgundy', primary: '#8B4359', secondary: '#6B3349' },
+    { name: 'Deep Teal', primary: '#4A7C7E', secondary: '#355E60' },
+	{ name: 'Elegant Navy', primary: '#1E3A5F', secondary: '#2C5F8D' },
+    { name: 'Stormy Blue', primary: '#6A8CA5', secondary: '#456274' },
+	{ name: 'Slate Blue', primary: '#6B7C93', secondary: '#4A5F7F' },
+    { name: 'Steel Blue', primary: '#607D8B', secondary: '#455A64' },
+	{ name: 'Charcoal', primary: '#5C6B73', secondary: '#3D4A52' },
+	{ name: 'Dark', primary: '#0A0A0A', secondary: '#000000' }
+]; 
 
 		const svgIcons = [
     { name: 'Night', bg: '#6B7C9E', path: 'M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z' },
@@ -6484,6 +6491,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
