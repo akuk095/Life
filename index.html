@@ -4680,8 +4680,10 @@ if (enabled) {
     navTabs.innerHTML = '';
     
     // Add conditional classes for first/last tab active
-    navTabs.classList.toggle('first-active', activeTabIndex === 0);
-    navTabs.classList.toggle('last-active', activeTabIndex === categories.length - 1);
+	if (categories && categories.length > 0) {
+	    navTabs.classList.toggle('first-active', activeTabIndex === 0);
+	    navTabs.classList.toggle('last-active', activeTabIndex === categories.length - 1);
+	}
     
     categories.forEach((cat, i) => {
         const tab = document.createElement('div');
@@ -6684,6 +6686,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
