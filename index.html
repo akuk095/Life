@@ -1047,7 +1047,7 @@ let autoRefreshTime = "00:00"; // Default midnight
 let headerImage = null; 
 let wallpaperUrl = '';
 let selectedCollection = null; // Currently selected collection ID
-let selectedFilter = null; // null means no filter active
+let selectedFilter = 'all'; // 'all' means no filter active
 	
 // Drag and drop state
 let draggedCard = null;
@@ -5900,6 +5900,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
