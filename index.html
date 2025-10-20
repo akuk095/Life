@@ -1040,6 +1040,7 @@ let appIcon = "📚";
 let appTitle = "Short note";
 let appSubtitle = "Double tap to add description";
 let themeColor = '#607d8b'; // Default grey
+let accentColor = '#5dade2';
 let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
@@ -1058,20 +1059,24 @@ let draggedTab = null;
 let draggedTabIndex = null;
 	
 const colorThemes = [
-    { name: 'Soft Cream', primary: '#F5F7D9', secondary: '#E1E3C1' },
-	{ name: 'Warm Sand', primary: '#E5D4B0', secondary: '#DAC898' },
-	{ name: 'Dusty Rose', primary: '#C9A0A0', secondary: '#A88080' },
-    { name: 'Rose Clay', primary: '#D98C8C', secondary: '#A96565' },
-	{ name: 'Elegant Burgundy', primary: '#8B4359', secondary: '#6B3349' },
-    { name: 'Deep Teal', primary: '#4A7C7E', secondary: '#355E60' },
-	{ name: 'Forest Deep', primary: '#3A5A4A', secondary: '#22342D' },
-	{ name: 'Elegant Navy', primary: '#1E3A5F', secondary: '#2C5F8D' },
-    { name: 'Ocean Blue', primary: '#5B8FA3', secondary: '#407084' },
-    { name: 'Stormy Blue', primary: '#6A8CA5', secondary: '#456274' },
-	{ name: 'Slate Blue', primary: '#6B7C93', secondary: '#4A5F7F' },
-    { name: 'Steel Blue', primary: '#607D8B', secondary: '#455A64' },
-	{ name: 'Charcoal', primary: '#5C6B73', secondary: '#3D4A52' },
-	{ name: 'Dark', primary: '#0A0A0A', secondary: '#000000' }
+    { name: 'Ocean Blue', primary: '#3498db', secondary: '#2980b9', accent: '#5dade2' },
+    { name: 'Emerald', primary: '#27ae60', secondary: '#229954', accent: '#58d68d' },
+    { name: 'Sunset Orange', primary: '#e67e22', secondary: '#d35400', accent: '#f39c12' },
+    { name: 'Royal Purple', primary: '#8e44ad', secondary: '#7d3c98', accent: '#a569bd' },
+    { name: 'Ruby Red', primary: '#e74c3c', secondary: '#c0392b', accent: '#ec7063' },
+    { name: 'Coral Pink', primary: '#ff6b9d', secondary: '#e84a86', accent: '#ff8fb3' },
+    { name: 'Teal', primary: '#16a085', secondary: '#138d75', accent: '#48c9b0' },
+    { name: 'Amber', primary: '#f39c12', secondary: '#e67e22', accent: '#f8c471' },
+    { name: 'Slate Gray', primary: '#34495e', secondary: '#2c3e50', accent: '#5d6d7e' },
+    { name: 'Lavender', primary: '#9b59b6', secondary: '#8e44ad', accent: '#bb8fce' },
+    { name: 'Mint Green', primary: '#1abc9c', secondary: '#16a085', accent: '#52be80' },
+    { name: 'Sky Blue', primary: '#5dade2', secondary: '#3498db', accent: '#85c1e9' },
+    { name: 'Rose Gold', primary: '#e8b4b8', secondary: '#d4989d', accent: '#f0c9cd' },
+    { name: 'Forest Green', primary: '#28b463', secondary: '#239b56', accent: '#52be80' },
+    { name: 'Indigo', primary: '#5b69c4', secondary: '#4b59b4', accent: '#7b89d4' },
+    { name: 'Burgundy', primary: '#943126', secondary: '#78281f', accent: '#a93226' },
+    { name: 'Golden Yellow', primary: '#f4d03f', secondary: '#f1c40f', accent: '#f7dc6f' },
+    { name: 'Deep Teal', primary: '#117864', secondary: '#0e6251', accent: '#45b39d' }
 ];
 
 		const svgIcons = [
@@ -1488,14 +1493,15 @@ function switchGuide(guideId) {
 	
 function applyTheme() {
     const theme = colorThemes.find(t => t.primary === themeColor);
-    let primaryColor, secondaryColor;
+    let primaryColor, secondaryColor, accentColor;
     
     if (theme) {
         // Use preset theme
         primaryColor = theme.primary;
         secondaryColor = theme.secondary;
+        accentColor = theme.accent;
     } else {
-        // Custom color - calculate darker shade
+        // Custom color - calculate darker and lighter shades
         primaryColor = themeColor;
         const hex = themeColor.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
@@ -1507,6 +1513,14 @@ function applyTheme() {
         const darkerB = Math.max(0, b - 30);
         
         secondaryColor = '#' + [darkerR, darkerG, darkerB]
+            .map(x => x.toString(16).padStart(2, '0')).join('');
+        
+        // Generate accent color (lighter)
+        const lighterR = Math.min(255, Math.floor(r * 1.3));
+        const lighterG = Math.min(255, Math.floor(g * 1.3));
+        const lighterB = Math.min(255, Math.floor(b * 1.3));
+        
+        accentColor = '#' + [lighterR, lighterG, lighterB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
     }
     
@@ -1531,19 +1545,21 @@ function applyTheme() {
     // Set CSS variables
     document.documentElement.style.setProperty('--primary-color', primaryColor);
     document.documentElement.style.setProperty('--secondary-color', secondaryColor);
-	// Set shadow with secondary color at 30% opacity
-const hex = secondaryColor.replace('#', '');
-const r = parseInt(hex.substr(0, 2), 16);
-const g = parseInt(hex.substr(2, 2), 16);
-const b = parseInt(hex.substr(4, 2), 16);
-document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, ${b}, 0.3)`);
+    document.documentElement.style.setProperty('--accent-color', accentColor);
+    
+    // Set shadow with secondary color at 30% opacity
+    const hex = secondaryColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, ${b}, 0.3)`);
     
     // Set tab active color - use secondary for light themes
     document.documentElement.style.setProperty('--tab-active-color', isLight ? secondaryColor : primaryColor);
-
-	// Set save button color - use secondary for light themes
+    
+    // Set save button color - use secondary for light themes
     document.documentElement.style.setProperty('--save-btn-color', isLight ? secondaryColor : primaryColor);
-	
+    
     // Apply background color only if no wallpaper exists
     if (!wallpaperUrl) {
         document.body.style.background = '#f0f2f5';
@@ -1581,6 +1597,7 @@ document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, $
         });
     }
 }
+	
 function toggleColorPicker(e) {
     e.stopPropagation();
     const picker = document.getElementById('colorPickerMenu');
@@ -6429,6 +6446,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
