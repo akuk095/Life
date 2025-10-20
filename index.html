@@ -163,7 +163,7 @@
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
-		.skill-card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 0; align-items: center; padding: 0; background: transparent; pointer-events: none; z-index: 5; }
+		.skill-card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 0; background: transparent; pointer-events: none; z-index: 5; }
 		.skill-card-controls.show { pointer-events: auto; }
 		.edit-mode .skill-card-controls { pointer-events: auto; }
 		body:not(.edit-mode-active) .skill-card-controls.show { pointer-events: auto; }
@@ -450,6 +450,7 @@
 		.color-pill-half { flex: 1; }
 
 		.timer-icon { display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+		.timer-icon svg { display: block; }
 		.timer-icon:hover { opacity: 1 !important; transform: scale(1.1); }
 		.timer-picker { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 10001; min-width: 300px; }
 		.timer-picker.show { display: block; }
@@ -5143,6 +5144,7 @@ const bulletIcons = {
     'circle': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>',
     'none': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"></path><path d="M9 6l3 14 3-14"></path><path d="M8 12h8"></path></svg>'
 };
+// Toggle bullets button
 const toggleBtn = document.createElement('button');
 toggleBtn.className = 'skill-control-btn';
 toggleBtn.innerHTML = bulletIcons[bulletStyle];
@@ -5221,8 +5223,7 @@ timerToggleBtn.addEventListener('click', (e) => {
 			controlsContainer.appendChild(toggleBtn);
 			controlsContainer.appendChild(hideHeadingBtn);
 			controlsContainer.appendChild(timerToggleBtn);
-			
-            
+			            
             card.appendChild(controlsContainer);
             
             // Add a visible menu button when not in edit mode
@@ -6667,6 +6668,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
