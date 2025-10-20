@@ -4675,7 +4675,7 @@ if (enabled) {
 }
 
       
-        function renderTabs() {
+function renderTabs() {
     const navTabs = document.getElementById('navTabs');
     navTabs.innerHTML = '';
     
@@ -4840,7 +4840,7 @@ if (enabled) {
             });
         }
         
-        tabWrapper.appendChild(tab);
+        navTabs.appendChild(tab);
         
         if (editMode) {
             const deleteBtn = document.createElement('button');
@@ -4850,10 +4850,10 @@ if (enabled) {
                 e.stopPropagation();
                 deleteCategory(i);
             });
-            tabWrapper.appendChild(deleteBtn);
+            navTabs.appendChild(deleteBtn);
         }
         
-        navTabs.appendChild(tabWrapper); 
+         
     }); 
     
     if (editMode) {
@@ -6686,6 +6686,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
