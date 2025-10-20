@@ -3159,6 +3159,10 @@ let homeSelectMode = false;
 let selectedGuides = new Set();
 
 async function populateHomePage() {
+    console.log('Page is loading');
+    console.log('Search button exists?', document.getElementById('homeSearchBtn'));
+    console.log('Create button exists?', document.getElementById('homeCreateBtn'));
+    console.log('Menu button exists?', document.getElementById('homeMenuBtn'));
     if (!currentUser) return;
     
     // Exit select mode when re-populating
@@ -5848,6 +5852,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
