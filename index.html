@@ -2687,6 +2687,59 @@ function createGuideFromTemplate(templateType) {
     });
 }
 
+	async function createJournalFromTemplate() {
+    if (!currentUser) return;
+    const timestamp = Date.now();
+    const newId = `guide_${timestamp}`;
+    
+    const journalGuideData = {
+        appTitle: 'My Journal',
+        appSubtitle: 'Personal thoughts and reflections',
+        appIcon: '📔',
+        categories: [],
+        themeColor: '#3498db',
+        checkedItems: {},
+        templateType: 'journal',
+        journalEntries: {}
+    };
+    
+    // Create the journal guide
+    await set(ref(database, `users/${currentUser.uid}/guides/${newId}`), journalGuideData);
+    
+    // Immediately create first entry
+    const entryTimestamp = Date.now();
+    const entryId = `entry_${entryTimestamp}`;
+    
+    const newEntry = {
+        title: 'My First Entry',
+        icon: '📝',
+        date: new Date().toISOString(),
+        tags: [],
+        mood: '',
+        content: '',
+        createdAt: entryTimestamp,
+        updatedAt: entryTimestamp
+    };
+    
+    await set(ref(database, `users/${currentUser.uid}/guides/${newId}/journalEntries/${entryId}`), newEntry);
+    
+    // Open the journal entry editor
+    currentGuideId = newId;
+    localStorage.setItem('currentGuideId', newId);
+    localStorage.setItem('currentPage', 'journal-editor');
+    
+    // Hide templates page, show journal editor
+    document.getElementById('templatesPage')?.classList.remove('active');
+    document.getElementById('journalEditorPage')?.classList.add('active');
+    
+    // Set Home nav as active (since journal is part of home)
+    document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.bottom-nav-item')[0]?.classList.add('active');
+    
+    // Load and render journal entry
+    await openJournalEditor(newId, entryId);
+}
+	
 async function createJournalEntry(journalGuideId) {
     if (!currentUser) return;
     const timestamp = Date.now();
@@ -5879,12 +5932,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Handle template preset clicks
-    document.querySelectorAll('.template-preset-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const template = item.dataset.template;
+document.querySelectorAll('.template-preset-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const template = item.dataset.template;
+        if (template === 'journal') {
+            // For journal, create the guide and then immediately create an entry
+            createJournalFromTemplate();
+        } else {
             createGuideFromTemplate(template);
-        });
+        }
     });
+});
     
     bottomNavItems.forEach((item) => {
         item.addEventListener('click', () => {
@@ -6446,6 +6504,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
