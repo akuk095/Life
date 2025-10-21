@@ -5689,11 +5689,11 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				checkItem.appendChild(timerIcon);
 			}	
 				
-				// Add click zone on right end to add new item below (only when NOT in edit mode)
+				// Add click zone on LEFT to add new item at the clicked position (only when NOT in edit mode)
                 if (!editMode) {
                     const addZone = document.createElement('div');
                     addZone.style.position = 'absolute';
-                    addZone.style.right = '0';
+                    addZone.style.left = '0';
                     addZone.style.top = '0';
                     addZone.style.width = '50px';
                     addZone.style.height = '100%';
@@ -5706,6 +5706,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
                     addZone.innerHTML = '+';
                     addZone.style.fontSize = '20px';
                     addZone.style.color = 'var(--primary-color)';
+                    addZone.style.zIndex = '10';
                     
                     addZone.addEventListener('mouseenter', () => {
                         addZone.style.opacity = '0.5';
@@ -5716,7 +5717,8 @@ hideHeadingBtn.addEventListener('click', (e) => {
                     
                     addZone.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        categories[catIndex].skills[skillIndex].items.splice(itemIndex + 1, 0, "New item");
+                        // Add new item BEFORE the current item (at the clicked spot)
+                        categories[catIndex].skills[skillIndex].items.splice(itemIndex, 0, "New item");
                         saveCategories();
                         renderContent();
                     });
@@ -7027,6 +7029,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
