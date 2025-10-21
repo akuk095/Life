@@ -5611,10 +5611,10 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
 				    </svg>`;
 				    reminderIcon.title = hasReminder ? `Reminder: ${hasReminder}` : 'Set reminder';
-				    reminderIcon.style.position = 'absolute';
-				    reminderIcon.style.right = '35px';
-				    reminderIcon.style.top = '50%';
-				    reminderIcon.style.transform = 'translateY(-50%)';
+				    reminderIcon.style.position = 'relative';
+				    reminderIcon.style.display = 'block';
+				    reminderIcon.style.marginTop = '4px';
+				    reminderIcon.style.marginLeft = '0';
 				    reminderIcon.style.pointerEvents = 'auto';
 				    reminderIcon.dataset.catIndex = catIndex;
 				    reminderIcon.dataset.skillIndex = skillIndex;
@@ -5629,7 +5629,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				        reminderIcon.style.display = 'none';
 				    }
 				    
-				    checkItem.appendChild(reminderIcon);
+				   textDiv.appendChild(reminderIcon);
 				}
 
 				checkItem.appendChild(textDiv);
@@ -7115,6 +7115,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
