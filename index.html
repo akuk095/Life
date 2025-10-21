@@ -5054,12 +5054,78 @@ function renderContent() {
             card.dataset.skillIndex = skillIndex; 
             
             const titleDiv = document.createElement('div'); 
-            titleDiv.className = 'skill-title';
-
+			titleDiv.className = 'skill-title';
 			// Only append title if hideHeading is not enabled
 			if (!skill.hideHeading) {
 			    card.appendChild(titleDiv);
 			}
+			
+			// Add tap-and-hold + swipe down gesture to duplicate card
+			let touchStartY = 0;
+			let touchStartTime = 0;
+			let longPressTimer = null;
+			let isLongPress = false;
+			
+			titleDiv.addEventListener('touchstart', (e) => {
+			    if (editMode) return;
+			    touchStartY = e.touches[0].clientY;
+			    touchStartTime = Date.now();
+			    isLongPress = false;
+			    
+			    // Set timer for long press (500ms)
+			    longPressTimer = setTimeout(() => {
+			        isLongPress = true;
+			        // Visual feedback - slight scale
+			        titleDiv.style.transition = 'transform 0.2s ease';
+			        titleDiv.style.transform = 'scale(1.05)';
+			    }, 500);
+			});
+			
+			titleDiv.addEventListener('touchmove', (e) => {
+			    if (editMode || !isLongPress) return;
+			    
+			    const currentY = e.touches[0].clientY;
+			    const deltaY = currentY - touchStartY;
+			    
+			    // Only proceed if swiping down
+			    if (deltaY > 20) {
+			        // Visual feedback during swipe
+			        titleDiv.style.opacity = '0.7';
+			    }
+			});
+			
+			titleDiv.addEventListener('touchend', (e) => {
+			    if (editMode) return;
+			    
+			    clearTimeout(longPressTimer);
+			    
+			    // Reset visual feedback
+			    titleDiv.style.transition = '';
+			    titleDiv.style.transform = '';
+			    titleDiv.style.opacity = '';
+			    
+			    if (isLongPress) {
+			        const touchEndY = e.changedTouches[0].clientY;
+			        const deltaY = touchEndY - touchStartY;
+			        const swipeDistance = 50; // minimum distance to trigger
+			        
+			        // Check if swiped down enough
+			        if (deltaY > swipeDistance) {
+			            // Duplicate the card
+			            duplicateSkill(catIndex, skillIndex);
+			        }
+			    }
+			    
+			    isLongPress = false;
+			});
+			
+			titleDiv.addEventListener('touchcancel', () => {
+			    clearTimeout(longPressTimer);
+			    titleDiv.style.transition = '';
+			    titleDiv.style.transform = '';
+			    titleDiv.style.opacity = '';
+			    isLongPress = false;
+			});
             
             // Add double-click to edit (only when not in edit mode)
             if (!editMode) {
@@ -6713,6 +6779,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
