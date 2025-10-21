@@ -4996,7 +4996,7 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     
     // Add backdrop FIRST
     const backdrop = document.createElement('div');
-    backdrop.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000;';
+	backdrop.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; pointer-events: none;';
     backdrop.addEventListener('click', (e) => {
         if (e.target === backdrop) {
             backdrop.remove();
@@ -5008,6 +5008,7 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     // Then create picker
     const picker = document.createElement('div');
     picker.className = 'reminder-time-picker show';
+	picker.style.pointerEvents = 'auto';
     picker.innerHTML = `
         <h3>Set Reminder</h3>
         <div class="reminder-datetime-container">
