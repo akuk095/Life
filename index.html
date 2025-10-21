@@ -5723,16 +5723,21 @@ hideHeadingBtn.addEventListener('click', (e) => {
                 textDiv.contentEditable = editMode;
                 textDiv.textContent = item;
 
-				// Add reminder icon if reminders are enabled for this skill
-				const reminderKey = `${catIndex}-${skillIndex}`;
-				if (skillReminders[reminderKey]?.enabled) {
-				    const hasReminder = skillReminders[reminderKey]?.items?.[itemIndex];
-					const reminderIcon = document.createElement('span');
-					reminderIcon.className = `reminder-icon ${hasReminder ? 'has-reminder' : ''}`;
+				
+				}
+
+				checkItem.appendChild(textDiv);
+				
+				// Add reminder icon if reminders are enabled for this skill 
+				const reminderKey2 = `${catIndex}-${skillIndex}`;
+				if (skillReminders[reminderKey2]?.enabled) {
+				    const hasReminder2 = skillReminders[reminderKey2]?.items?.[itemIndex];
+					const reminderIcon2 = document.createElement('span');
+					reminderIcon2.className = `reminder-icon ${hasReminder2 ? 'has-reminder' : ''}`;
 					
-					if (hasReminder) {
+					if (hasReminder2) {
 				    // Show reminder info text instead of bell icon
-				    const formatDate = (dateStr) => {
+				    const formatDate2 = (dateStr) => {
 				    if (!dateStr) return '';
 				    const d = new Date(dateStr + 'T00:00:00');
 				    const today = new Date();
@@ -5753,7 +5758,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				    return `${day}${suffix} ${monthNames[d.getMonth()]}`;
 				};
 				    
-				    const formatRepeat = (days) => {
+				    const formatRepeat2 = (days) => {
 				        if (!days || days.length === 0) return '';
 				        if (days.length === 7) return 'Daily';
 				        if (days.length === 5 && !days.includes('Sat') && !days.includes('Sun')) return 'Weekdays';
@@ -5764,49 +5769,47 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				    // Build text: Repeat first, then Date (if exists), then Time
 				    let parts = [];
 				    
-				    if (hasReminder.repeatDays?.length > 0) {
-				        parts.push(formatRepeat(hasReminder.repeatDays));
+				    if (hasReminder2.repeatDays?.length > 0) {
+				        parts.push(formatRepeat2(hasReminder2.repeatDays));
 				    }
 				    
-				    if (hasReminder.date) {
-				        parts.push(formatDate(hasReminder.date));
+				    if (hasReminder2.date) {
+				        parts.push(formatDate2(hasReminder2.date));
 				    }
 				    
-				    parts.push(hasReminder.time);
+				    parts.push(hasReminder2.time);
 				    
 				    const infoText = parts.join(', ');
-				    reminderIcon.innerHTML = `<div class="reminder-info-text">${infoText}</div>`;
-				    reminderIcon.title = 'Edit reminder';
+				    reminderIcon2.innerHTML = `<div class="reminder-info-text">${infoText}</div>`;
+				    reminderIcon2.title = 'Edit reminder';
 				} else {
 					    // Show bell icon
-					    reminderIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					    reminderIcon2.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
 					        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
 					    </svg>`;
-					    reminderIcon.title = 'Set reminder';
+					    reminderIcon2.title = 'Set reminder';
 					}
-				    reminderIcon.style.position = 'relative';
-				    reminderIcon.style.display = 'block';
-				    reminderIcon.style.marginTop = '4px';
-				    reminderIcon.style.marginLeft = '0';
-				    reminderIcon.style.pointerEvents = 'auto';
-				    reminderIcon.dataset.catIndex = catIndex;
-				    reminderIcon.dataset.skillIndex = skillIndex;
-				    reminderIcon.dataset.itemIndex = itemIndex;
-				    reminderIcon.addEventListener('click', (e) => {
+				    reminderIcon2.style.position = 'relative';
+				    reminderIcon2.style.display = 'block';
+				    reminderIcon2.style.marginTop = '4px';
+				    reminderIcon2.style.marginLeft = '24px';
+				    reminderIcon2.style.pointerEvents = 'auto';
+				    reminderIcon2.dataset.catIndex = catIndex;
+				    reminderIcon2.dataset.skillIndex = skillIndex;
+				    reminderIcon2.dataset.itemIndex = itemIndex;
+				    reminderIcon2.addEventListener('click', (e) => {
 				        e.stopPropagation();
 				        showReminderPicker(catIndex, skillIndex, itemIndex);
 				    });
 				    
 				    // Hide reminder during text editing
 				    if (editMode) {
-				        reminderIcon.style.display = 'none';
+				        reminderIcon2.style.display = 'none';
 				    }
 				    
-				   textDiv.appendChild(reminderIcon);
+				   card.appendChild(reminderIcon2);
 				}
-
-				checkItem.appendChild(textDiv);
 				
 			// Add timer icon if timers are enabled for this skill
 			const timerSkillKey = `${catIndex}-${skillIndex}`;
@@ -7289,6 +7292,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
