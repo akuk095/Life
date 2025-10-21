@@ -5431,13 +5431,10 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			    toggleItemBackground(catIndex, skillIndex);
 			});
 						
-			// Add in order: bullet, duplicate, reminder, delete, hide heading, timer
-			controlsContainer.appendChild(deleteBtn);
+			// Add in order: reminder, hide heading, timer, hide background
 			controlsContainer.appendChild(reminderBtn);
-			controlsContainer.appendChild(duplicateBtn);
-			controlsContainer.appendChild(toggleBtn);
-			controlsContainer.appendChild(hideHeadingBtn);
 			controlsContainer.appendChild(timerToggleBtn);
+			controlsContainer.appendChild(hideHeadingBtn);
 			controlsContainer.appendChild(hideBackgroundBtn);
 			            
             card.appendChild(controlsContainer);
@@ -5490,7 +5487,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
                 });
                 
                 // Reset timeout on any interaction with the controls
-				[toggleBtn, duplicateBtn, reminderBtn, deleteBtn, hideHeadingBtn, timerToggleBtn, hideBackgroundBtn].forEach(btn => {
+				[reminderBtn, timerToggleBtn, hideHeadingBtn, hideBackgroundBtn].forEach(btn => {
 				    btn.addEventListener('click', () => {
 				        startHideTimer();
 				    });
@@ -7115,6 +7112,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
