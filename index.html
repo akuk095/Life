@@ -247,7 +247,7 @@
 		.reminder-icon:hover { opacity: 1; color: #f59e0b; transform: scale(1.1); }
 		.reminder-icon.has-reminder { opacity: 1; color: #f59e0b; animation: pulse 2s ease-in-out infinite; }
 		@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-		.reminder-time-picker { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 10000; min-width: 300px; pointer-events: auto; }
+		.reminder-time-picker { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 10001; min-width: 300px; pointer-events: auto; }
 		.reminder-time-picker.show { display: block; }
 		.reminder-time-picker h3 { margin: 0 0 16px 0; font-size: 18px; color: #2c3e50; }
 		.reminder-time-picker input[type="time"] { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px; }
@@ -456,7 +456,7 @@
 		.color-option-pill.selected { border-color: #2c3e50; box-shadow: 0 0 0 2px white, 0 0 0 5px #2c3e50; transform: scale(1.05); }
 		.color-pill-half { flex: 1; }
 
-		.timer-icon { display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+		.timer-icon { display: none; align-items: center; justify-content: center; transition: all 0.2s ease; }
 		.timer-icon svg { display: block; }
 		.timer-icon:hover { opacity: 1 !important; transform: scale(1.1); }
 		.timer-picker { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 10001; min-width: 300px; pointer-events: auto; }
@@ -5568,11 +5568,13 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			    });
 			    
 			    // Hide timer during text editing
-			    if (editMode) {
-			        timerIcon.style.display = 'none';
-			    }
-			    
-			    checkItem.appendChild(timerIcon);
+					if (editMode) {
+					    timerIcon.style.display = 'none';
+					} else {
+					    timerIcon.style.display = 'inline-flex';
+					}
+					
+					checkItem.appendChild(timerIcon);
 			}	
 				
 				// Add click zone on right end to add new item below (only when NOT in edit mode)
@@ -5624,35 +5626,6 @@ hideHeadingBtn.addEventListener('click', (e) => {
                     });
                 }
 
-				// Add click listener to open timer picker when timers are enabled
-				if (!editMode) {
-				    const timerSkillKey = `${catIndex}-${skillIndex}`;
-				    if (itemTimers[timerSkillKey]?.enabled) {
-				        let clickTimeout;
-				        textDiv.addEventListener('click', function(e) {
-				            // Don't trigger if clicking on reminder icon or timer icon
-				            if (e.target.closest('.reminder-icon') || e.target.closest('.timer-icon')) {
-				                return;
-				            }
-				            
-				            // Clear any existing timeout
-				            clearTimeout(clickTimeout);
-				            
-				            // Wait to see if it's a double-click
-				            clickTimeout = setTimeout(() => {
-				                e.stopPropagation();
-				                showTimerPicker(catIndex, skillIndex, itemIndex);
-				            }, 250);
-				        });
-				        
-				        // Cancel single click timer on double-click
-				        textDiv.addEventListener('dblclick', function() {
-				            clearTimeout(clickTimeout);
-				        });
-				        
-				        textDiv.style.cursor = 'pointer';
-				    }
-				}
                 if (editMode) {
                     const deleteItemBtn = document.createElement('button');
                     deleteItemBtn.className = 'delete-btn';
@@ -6902,6 +6875,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
