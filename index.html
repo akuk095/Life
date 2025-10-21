@@ -172,21 +172,28 @@
 		.menu-trigger-btn { opacity: 0.3 !important; position: absolute !important; right: 8px !important; top: 8px !important; z-index: 200 !important; }
 		.sticky-color-btn { opacity: 0.3 !important; position: absolute !important; right: 44px !important; top: 8px !important; z-index: 200 !important; background: conic-gradient(from 0deg, #fef3c7 0deg 90deg, #dbeafe 90deg 180deg, #fce7f3 180deg 270deg, #ffffff 270deg 360deg) !important; border: 2px solid white; width: 28px !important; height: 28px !important; border-radius: 50%; font-size: 0 !important; padding: 0 !important; }
 		.sticky-color-btn:hover { opacity: 1 !important; }
-		.sticky-color-menu { display: none; position: absolute; top: 40px; right: 44px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); padding: 12px; z-index: 201; }
-		.sticky-color-menu.show { display: block; }
-		.sticky-color-options { display: flex; gap: 10px; }
-		.sticky-color-option { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.2s ease; }
-		.sticky-color-option:hover { transform: scale(1.1); border-color: rgba(0,0,0,0.2); }
-		.sticky-color-option.active { border-color: var(--primary-color); transform: scale(1.15); }
+		.sticky-color-menu { position: absolute; top: 8px; right: 44px; display: flex; gap: 8px; z-index: 201; pointer-events: none; }
+		.sticky-color-menu.show { pointer-events: auto; }
+		.sticky-color-options { display: flex; gap: 8px; }
+		.sticky-color-option { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.3s ease; opacity: 0; transform: translateX(0); pointer-events: auto !important; }
+		.sticky-color-menu.show .sticky-color-option { opacity: 0.6; }
+		.sticky-color-menu.show .sticky-color-option:nth-child(1) { transform: translateX(-36px); transition-delay: 0.05s; }
+		.sticky-color-menu.show .sticky-color-option:nth-child(2) { transform: translateX(-72px); transition-delay: 0.1s; }
+		.sticky-color-menu.show .sticky-color-option:nth-child(3) { transform: translateX(-108px); transition-delay: 0.15s; }
+		.sticky-color-menu.show .sticky-color-option:nth-child(4) { transform: translateX(-144px); transition-delay: 0.2s; }
+		.sticky-color-option:hover { opacity: 1 !important; transform: scale(1.1); border-color: rgba(0,0,0,0.2); }
+		.sticky-color-menu.show .sticky-color-option:nth-child(1):hover { transform: translateX(-36px) scale(1.1); }
+		.sticky-color-menu.show .sticky-color-option:nth-child(2):hover { transform: translateX(-72px) scale(1.1); }
+		.sticky-color-menu.show .sticky-color-option:nth-child(3):hover { transform: translateX(-108px) scale(1.1); }
+		.sticky-color-menu.show .sticky-color-option:nth-child(4):hover { transform: translateX(-144px) scale(1.1); }
+		.sticky-color-option.active { border-color: var(--primary-color); opacity: 1 !important; }
 		.sticky-color-yellow { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
 		.sticky-color-blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
 		.sticky-color-pink { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); }
 		.sticky-color-white { background: white; border: 2px solid #e5e7eb; }
-		.skill-card.sticky-style { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 2px; padding: 24px 20px 28px 20px; border: none; border-left: none !important; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06); transform: rotate(-1deg); position: relative; }
-		.skill-card.sticky-style:nth-child(even) { transform: rotate(1deg); }
-		.skill-card.sticky-style:nth-child(3n) { transform: rotate(-0.5deg); }
+		.skill-card.sticky-style { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 2px; padding: 24px 20px 28px 20px; border: none; border-left: none !important; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06); transform: none; position: relative; }
 		.skill-card.sticky-style::before { content: ''; position: absolute; top: -2px; left: 50%; transform: translateX(-50%); width: 60px; height: 20px; background: rgba(0, 0, 0, 0.08); border-radius: 3px 3px 0 0; }
-		.skill-card.sticky-style:hover { transform: rotate(0deg) scale(1.02); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.1); z-index: 10; }
+		.skill-card.sticky-style:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12); z-index: 10; }
 		.skill-card.sticky-style .skill-title { text-align: center; border-bottom: 2px dashed rgba(0, 0, 0, 0.15); padding-bottom: 12px; border-left: none !important; padding-left: 0 !important; }
 		.skill-card.sticky-style .checklist-item { background: transparent; border: none; border-bottom: 1px dotted rgba(0, 0, 0, 0.2); border-radius: 0; }
 		.skill-card.sticky-style .checklist-item:last-of-type { border-bottom: none; }
@@ -6980,6 +6987,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
