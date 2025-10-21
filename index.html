@@ -5009,35 +5009,35 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     const picker = document.createElement('div');
     picker.className = 'reminder-time-picker show';
     picker.innerHTML = `
-        <h3>Set Reminder</h3>
-        <div class="reminder-datetime-container">
-            <div class="reminder-datetime-half">
-                <label>Date</label>
-                <input type="date" id="reminderDateInput" value="${existingDate}">
-            </div>
-            <div class="reminder-datetime-half">
-                <label>Time</label>
-                <input type="time" id="reminderTimeInput" value="${existingTime}">
-            </div>
-        </div>
-        <div class="repeat-section">
-            <label>Repeat</label>
-            <div class="repeat-days">
-                <button class="day-btn" data-day="Mon">M</button>
-                <button class="day-btn" data-day="Tue">T</button>
-                <button class="day-btn" data-day="Wed">W</button>
-                <button class="day-btn" data-day="Thu">T</button>
-                <button class="day-btn" data-day="Fri">F</button>
-                <button class="day-btn" data-day="Sat">S</button>
-                <button class="day-btn" data-day="Sun">S</button>
-            </div>
-        </div>
-        <div class="button-group">
-            <button class="cancel-reminder">Cancel</button>
-            <button class="save-reminder">Save</button>
-        </div>
-        ${skillReminders[key]?.items?.[itemIndex] ? '<button class="delete-reminder">Delete Reminder</button>' : ''}
-    `;
+    	<h3>Set Reminder</h3>
+		    <div class="reminder-datetime-container">
+		        <div class="reminder-datetime-half">
+		            <label>Date</label>
+		            <input type="date" id="reminderDateInput" value="${existingDate}">
+		        </div>
+		        <div class="reminder-datetime-half">
+		            <label>Time</label>
+		            <input type="time" id="reminderTimeInput" value="${existingTime}">
+		        </div>
+		    </div>
+		    <div class="repeat-section">
+		        <label>Repeat</label>
+		        <div class="repeat-days">
+		            <button type="button" class="day-btn" data-day="Mon">M</button>
+		            <button type="button" class="day-btn" data-day="Tue">T</button>
+		            <button type="button" class="day-btn" data-day="Wed">W</button>
+		            <button type="button" class="day-btn" data-day="Thu">T</button>
+		            <button type="button" class="day-btn" data-day="Fri">F</button>
+		            <button type="button" class="day-btn" data-day="Sat">S</button>
+		            <button type="button" class="day-btn" data-day="Sun">S</button>
+		        </div>
+		    </div>
+		    <div class="button-group">
+		        <button type="button" class="cancel-reminder">Cancel</button>
+		        <button type="button" class="save-reminder">Save</button>
+		    </div>
+		    ${skillReminders[key]?.items?.[itemIndex] ? '<button type="button" class="delete-reminder">Delete Reminder</button>' : ''}
+		`;
     
     document.body.appendChild(picker);
     
@@ -7211,6 +7211,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
