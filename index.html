@@ -5689,13 +5689,13 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				checkItem.appendChild(timerIcon);
 			}	
 				
-				// Add click zone on LEFT to add new item at the clicked position (only when NOT in edit mode)
+				// Add click zone to the LEFT of the item (in the card's left margin area) (only when NOT in edit mode)
                 if (!editMode) {
                     const addZone = document.createElement('div');
                     addZone.style.position = 'absolute';
-                    addZone.style.left = '0';
+                    addZone.style.left = '-24px';
                     addZone.style.top = '0';
-                    addZone.style.width = '50px';
+                    addZone.style.width = '24px';
                     addZone.style.height = '100%';
                     addZone.style.cursor = 'pointer';
                     addZone.style.display = 'flex';
@@ -5704,12 +5704,12 @@ hideHeadingBtn.addEventListener('click', (e) => {
                     addZone.style.opacity = '0';
                     addZone.style.transition = 'opacity 0.2s';
                     addZone.innerHTML = '+';
-                    addZone.style.fontSize = '20px';
+                    addZone.style.fontSize = '18px';
                     addZone.style.color = 'var(--primary-color)';
                     addZone.style.zIndex = '10';
                     
                     addZone.addEventListener('mouseenter', () => {
-                        addZone.style.opacity = '0.5';
+                        addZone.style.opacity = '0.6';
                     });
                     addZone.addEventListener('mouseleave', () => {
                         addZone.style.opacity = '0';
@@ -7029,6 +7029,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
