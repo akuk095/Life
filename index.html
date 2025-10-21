@@ -5663,16 +5663,44 @@ hideHeadingBtn.addEventListener('click', (e) => {
                 });
                 
                 addCardZone.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const newSkill = {
-                        title: "New Skill",
-                        icon: "✨",
-                        items: ["New item - click to edit"]
-                    };
-                    categories[catIndex].skills.splice(skillIndex + 1, 0, newSkill);
-                    saveCategories();
-                    renderContent();
-                });
+			    e.stopPropagation();
+			    const newSkill = {
+			        title: "New Skill",
+			        icon: "✨",
+			        items: ["New item - click to edit"]
+			    };
+			    
+			    // Insert new skill
+			    categories[catIndex].skills.splice(skillIndex + 1, 0, newSkill);
+			    saveCategories();
+			    
+			    // Re-render content
+			    renderContent();
+			    
+			    // Animate the new card sliding in from the right
+			    setTimeout(() => {
+			        const newCard = document.querySelector(`.skill-card[data-cat-index="${catIndex}"][data-skill-index="${skillIndex + 1}"]`);
+			        if (newCard) {
+			            // Start from right side, off-screen
+			            newCard.style.transition = 'none';
+			            newCard.style.transform = 'translateX(100%)';
+			            newCard.style.opacity = '0';
+			            
+			            // Animate to final position
+			            setTimeout(() => {
+			                newCard.style.transition = 'all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1)';
+			                newCard.style.transform = 'translateX(0)';
+			                newCard.style.opacity = '1';
+			                
+			                // Clean up after animation
+			                setTimeout(() => {
+			                    newCard.style.transition = '';
+			                    newCard.style.transform = '';
+			                }, 500);
+			            }, 50);
+			        }
+			    }, 10);
+			});
                 
                 card.appendChild(addCardZone);
                 card.style.position = 'relative'; // Ensure card has position for absolute child
@@ -6815,6 +6843,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
