@@ -5615,14 +5615,28 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				if (!editMode) {
 				    const timerSkillKey = `${catIndex}-${skillIndex}`;
 				    if (itemTimers[timerSkillKey]?.enabled) {
+				        let clickTimeout;
 				        textDiv.addEventListener('click', function(e) {
 				            // Don't trigger if clicking on reminder icon or timer icon
 				            if (e.target.closest('.reminder-icon') || e.target.closest('.timer-icon')) {
 				                return;
 				            }
-				            e.stopPropagation();
-				            showTimerPicker(catIndex, skillIndex, itemIndex);
+				            
+				            // Clear any existing timeout
+				            clearTimeout(clickTimeout);
+				            
+				            // Wait to see if it's a double-click
+				            clickTimeout = setTimeout(() => {
+				                e.stopPropagation();
+				                showTimerPicker(catIndex, skillIndex, itemIndex);
+				            }, 250);
 				        });
+				        
+				        // Cancel single click timer on double-click
+				        textDiv.addEventListener('dblclick', function() {
+				            clearTimeout(clickTimeout);
+				        });
+				        
 				        textDiv.style.cursor = 'pointer';
 				    }
 				}
@@ -6875,6 +6889,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
