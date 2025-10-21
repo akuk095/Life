@@ -5093,33 +5093,37 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     });
     
     const saveBtn = picker.querySelector('.save-reminder');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const time = document.getElementById('reminderTimeInput').value;
-            const noDate = document.getElementById('noDateCheckbox').checked;
-            const date = noDate ? null : document.getElementById('reminderDateInput').value;
-            const selectedDays = noDate ? Array.from(picker.querySelectorAll('.day-btn.selected')).map(btn => btn.dataset.day) : [];
-            
-            if (!skillReminders[key]) {
-                skillReminders[key] = { enabled: true, items: {} };
-            }
-            
-            skillReminders[key].items[itemIndex] = {
-                time: time,
-                date: date,
-                noDate: noDate,
-                repeatDays: selectedDays
-            };
-            
-            saveSkillReminders();
-            renderContent();
-            backdrop.remove();
-            picker.remove();
-        });
-    }
+	if (saveBtn) {
+    saveBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const time = document.getElementById('reminderTimeInput').value;
+        const noDate = document.getElementById('noDateCheckbox').checked;
+        const date = noDate ? null : document.getElementById('reminderDateInput').value;
+        const selectedDays = noDate ? Array.from(picker.querySelectorAll('.day-btn.selected')).map(btn => btn.dataset.day) : [];
+        
+        if (!skillReminders[key]) {
+            skillReminders[key] = { enabled: true, items: {} };
+        }
+        
+        if (!skillReminders[key].items) {
+            skillReminders[key].items = {};
+        }
+        
+        skillReminders[key].items[itemIndex] = {
+            time: time,
+            date: date,
+            noDate: noDate,
+            repeatDays: selectedDays
+        };
+        
+        saveSkillReminders();
+        renderContent();
+        backdrop.remove();
+        picker.remove();
+    });
+}
     
     const deleteBtn = picker.querySelector('.delete-reminder');
     if (deleteBtn) {
@@ -7285,6 +7289,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
