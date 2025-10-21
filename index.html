@@ -5718,12 +5718,18 @@ hideHeadingBtn.addEventListener('click', (e) => {
                     bulletElement.style.cursor = 'pointer';
                 }
                 
-                const textDiv = document.createElement('div');
-                textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
-                textDiv.contentEditable = editMode;
-                textDiv.textContent = item;
-
-				checkItem.appendChild(textDiv);
+                const textWrapper = document.createElement('div');
+				textWrapper.style.flex = '1';
+				textWrapper.style.display = 'flex';
+				textWrapper.style.flexDirection = 'column';
+				
+				const textDiv = document.createElement('div');
+				textDiv.className = 'checklist-text' + (editMode ? ' editable' : '');
+				textDiv.contentEditable = editMode;
+				textDiv.textContent = item;
+				
+				textWrapper.appendChild(textDiv);
+				checkItem.appendChild(textWrapper);
 				
 				// Add reminder icon if reminders are enabled for this skill 
 				const reminderKey2 = `${catIndex}-${skillIndex}`;
@@ -5805,7 +5811,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				        reminderIcon2.style.display = 'none';
 				    }
 				    
-				   checkItem.appendChild(reminderIcon2);
+				   textWrapper.appendChild(reminderIcon2);
 				}
 				
 			// Add timer icon if timers are enabled for this skill
@@ -7289,6 +7295,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
