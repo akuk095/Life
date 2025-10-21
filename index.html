@@ -4976,26 +4976,26 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     
     document.body.appendChild(picker);
     
-    picker.querySelector('.cancel-timer').addEventListener('click', () => {
-        picker.remove();
-    });
-    
-    picker.querySelector('.save-timer').addEventListener('click', () => {
-        const hours = parseInt(document.getElementById('timerHoursInput').value) || 0;
-        const minutes = parseInt(document.getElementById('timerMinutesInput').value) || 0;
-        
-        if (hours === 0 && minutes === 0) {
-            customAlert('Please set at least 1 minute or 1 hour', 'Invalid Timer');
-            return;
-        }
-        
-        itemTimers[key] = { hours, minutes };
-        saveItemTimers();
-        renderContent();
-        picker.remove();
-    });
-    
-    const deleteBtn = picker.querySelector('.delete-timer');
+    picker.querySelector('.timer-cancel-btn').addEventListener('click', () => {
+    picker.remove();
+	});
+	
+	picker.querySelector('.timer-save-btn').addEventListener('click', () => {
+	    const hours = parseInt(document.getElementById('timerHoursInput').value) || 0;
+	    const minutes = parseInt(document.getElementById('timerMinutesInput').value) || 0;
+	    
+	    if (hours === 0 && minutes === 0) {
+	        customAlert('Please set at least 1 minute or 1 hour', 'Invalid Timer');
+	        return;
+	    }
+	    
+	    itemTimers[key] = { hours, minutes };
+	    saveItemTimers();
+	    renderContent();
+	    picker.remove();
+	});
+	
+	const deleteBtn = picker.querySelector('.timer-delete-btn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
             delete itemTimers[key];
@@ -6678,6 +6678,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
