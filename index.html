@@ -39,6 +39,8 @@
 		.checkbox-menu button:hover { background: #f8f9fa; }
 		.checkbox-menu.show { display: block; }
 		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
+		.checklist-item.no-background { background: transparent !important; border: none !important; border-radius: 0 !important; padding: 14px 0 !important; }
+		.checklist-item.no-background:hover { background: transparent !important; border: none !important; }
 		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
@@ -209,6 +211,8 @@
 		.skill-card-controls.show .skill-control-btn:nth-child(4) { transform: translateX(-108px); transition-delay: 0.2s; }
 		.skill-card-controls.show .skill-control-btn:nth-child(5) { transform: translateX(-144px); transition-delay: 0.25s; }
 		.skill-card-controls.show .skill-control-btn:nth-child(6) { transform: translateX(-180px); transition-delay: 0.3s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(7) { transform: translateX(-216px); transition-delay: 0.35s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(7):hover { transform: translateX(-216px) scale(1.1); }
 		.skill-control-btn:hover { opacity: 1 !important; color: #6b7280; }
 		.skill-control-btn.delete-control:hover { color: #dc2626; }
 		.skill-card-controls.show .skill-control-btn:nth-child(1):hover { transform: translateX(0px) scale(1.1); }
@@ -5098,6 +5102,13 @@ function toggleTimerForSkill(catIndex, skillIndex) {
     renderContent();
 }
 
+function toggleItemBackground(catIndex, skillIndex) {
+    const skill = categories[catIndex].skills[skillIndex];
+    skill.hideItemBackground = !skill.hideItemBackground;
+    saveCategories();
+    renderContent();
+}
+	
 	
 function renderContent() { 
     const contentArea = document.getElementById('contentArea'); 
@@ -5392,6 +5403,19 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			    toggleTimerForSkill(catIndex, skillIndex);
 			});
 
+			// Hide Background toggle button
+			const hideBackgroundBtn = document.createElement('button');
+			hideBackgroundBtn.className = 'skill-control-btn';
+			const backgroundHidden = skill.hideItemBackground || false;
+			hideBackgroundBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+			    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-dasharray="4 4"></rect>
+			</svg>`;
+			hideBackgroundBtn.title = backgroundHidden ? 'Show Item Background' : 'Hide Item Background';
+			hideBackgroundBtn.addEventListener('click', (e) => {
+			    e.stopPropagation();
+			    toggleItemBackground(catIndex, skillIndex);
+			});
+						
 			// Add in order: bullet, duplicate, reminder, delete, hide heading, timer
 			controlsContainer.appendChild(deleteBtn);
 			controlsContainer.appendChild(reminderBtn);
@@ -5399,6 +5423,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			controlsContainer.appendChild(toggleBtn);
 			controlsContainer.appendChild(hideHeadingBtn);
 			controlsContainer.appendChild(timerToggleBtn);
+			controlsContainer.appendChild(hideBackgroundBtn);
 			            
             card.appendChild(controlsContainer);
             
@@ -5450,7 +5475,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
                 });
                 
                 // Reset timeout on any interaction with the controls
-				[toggleBtn, duplicateBtn, reminderBtn, deleteBtn, hideHeadingBtn, timerToggleBtn].forEach(btn => {
+				[toggleBtn, duplicateBtn, reminderBtn, deleteBtn, hideHeadingBtn, timerToggleBtn, hideBackgroundBtn].forEach(btn => {
 				    btn.addEventListener('click', () => {
 				        startHideTimer();
 				    });
@@ -5509,7 +5534,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
             skill.items.forEach((item, itemIndex) => { 
                 const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
                 const checkItem = document.createElement('div'); 
-                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : '');
+                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : '') + (skill.hideItemBackground ? ' no-background' : '');
                 checkItem.dataset.catIndex = catIndex;
                 checkItem.dataset.skillIndex = skillIndex;
                 checkItem.dataset.itemIndex = itemIndex;
@@ -6987,6 +7012,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
