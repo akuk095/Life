@@ -5758,7 +5758,44 @@ hideHeadingBtn.addEventListener('click', (e) => {
                 
                 card.appendChild(checkItem); 
             }); 
-            
+
+			// Add click zone below the last item on the left (only when NOT in edit mode)
+            if (!editMode && skill.items.length > 0) {
+                const addBelowLastZone = document.createElement('div');
+                addBelowLastZone.style.position = 'absolute';
+                addBelowLastZone.style.left = '0';
+                addBelowLastZone.style.bottom = editMode ? '52px' : '0';
+                addBelowLastZone.style.width = '24px';
+                addBelowLastZone.style.height = '40px';
+                addBelowLastZone.style.cursor = 'pointer';
+                addBelowLastZone.style.display = 'flex';
+                addBelowLastZone.style.alignItems = 'center';
+                addBelowLastZone.style.justifyContent = 'center';
+                addBelowLastZone.style.opacity = '0';
+                addBelowLastZone.style.transition = 'opacity 0.2s';
+                addBelowLastZone.innerHTML = '+';
+                addBelowLastZone.style.fontSize = '18px';
+                addBelowLastZone.style.color = 'var(--primary-color)';
+                addBelowLastZone.style.zIndex = '10';
+                
+                addBelowLastZone.addEventListener('mouseenter', () => {
+                    addBelowLastZone.style.opacity = '0.6';
+                });
+                addBelowLastZone.addEventListener('mouseleave', () => {
+                    addBelowLastZone.style.opacity = '0';
+                });
+                
+                addBelowLastZone.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Add new item AFTER the last item
+                    categories[catIndex].skills[skillIndex].items.push("New item");
+                    saveCategories();
+                    renderContent();
+                });
+                
+                card.appendChild(addBelowLastZone);
+            }
+			
             const addItemBtn = document.createElement('button'); 
             addItemBtn.className = 'add-item-btn'; 
             addItemBtn.textContent = '+ Add Item'; 
@@ -7029,6 +7066,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
