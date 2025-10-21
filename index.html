@@ -5079,20 +5079,23 @@ function renderContent() {
 			        titleDiv.style.transition = 'transform 0.2s ease';
 			        titleDiv.style.transform = 'scale(1.05)';
 			    }, 500);
-			});
+			}, { passive: false });
 			
 			titleDiv.addEventListener('touchmove', (e) => {
-			    if (editMode || !isLongPress) return;
-			    
-			    const currentY = e.touches[0].clientY;
-			    const deltaY = currentY - touchStartY;
-			    
-			    // Only proceed if swiping down
-			    if (deltaY > 20) {
-			        // Visual feedback during swipe
-			        titleDiv.style.opacity = '0.7';
-			    }
-			});
+		    if (editMode || !isLongPress) return;
+		    
+		    // Prevent scrolling during swipe gesture
+		    e.preventDefault();
+		    
+		    const currentY = e.touches[0].clientY;
+		    const deltaY = currentY - touchStartY;
+		    
+		    // Only proceed if swiping down
+		    if (deltaY > 20) {
+		        // Visual feedback during swipe
+		        titleDiv.style.opacity = '0.7';
+		    }
+		}, { passive: false });
 			
 			titleDiv.addEventListener('touchend', (e) => {
 			    if (editMode) return;
@@ -6779,6 +6782,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
