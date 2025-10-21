@@ -586,7 +586,7 @@
 <script type="module">
 	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 	import { getDatabase, ref, set, get, update, remove, onValue, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-	import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+	import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 	
 	// Initialize Firebase
 	const firebaseConfig = {
@@ -3340,6 +3340,15 @@ async function login(email, password) {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         currentUser = userCredential.user;
+        
+        // Check if email is verified
+        if (!currentUser.emailVerified) {
+            await customAlert('Please verify your email before logging in. Check your inbox for the verification link.', 'Email Not Verified');
+            await signOut(auth);
+            currentUser = null;
+            return;
+        }
+        
         loadUserData(currentUser.uid);
     } catch (error) {
         await customAlert(error.message, 'Login Failed');
@@ -3351,7 +3360,17 @@ async function signup(email, password) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         currentUser = userCredential.user;
-        loadUserData(currentUser.uid);
+        
+        // Send verification email
+        await sendEmailVerification(currentUser);
+        await customAlert('A verification email has been sent to ' + email + '. Please check your inbox and verify your email before logging in.', 'Verify Your Email');
+        
+        // Sign out the user so they must verify before using the app
+        await signOut(auth);
+        currentUser = null;
+        
+        // Go back to login screen
+        backToLogin();
     } catch (error) {
         await customAlert(error.message, 'Signup Failed');
     }
@@ -7112,6 +7131,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
