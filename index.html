@@ -124,10 +124,6 @@
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
-		.nav-tabs::before { content: ''; flex-shrink: 0; width: 0; transition: width 0.3s ease; }
-		.nav-tabs::after { content: ''; flex-shrink: 0; width: 0; transition: width 0.3s ease; }
-		.nav-tabs.first-active::before { width: 50vw; }
-		.nav-tabs.last-active::after { width: 50vw; }
 		.save-btn { position: absolute; top: 5px; right: 5px; background: transparent; color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 16px; cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(255, 255, 255, 0.1); transition: all 0.2s ease; display: none; z-index: 10; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
 		.save-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.2); }
 		.save-btn:active { box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4); transform: translateY(1px); }
@@ -5567,7 +5563,7 @@ function switchTab(index) {
     const cats = document.querySelectorAll('.category'); 
     cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); 
     
-    // Scroll the active tab to center
+    // Scroll the active tab to center with longer delay to allow spacer to render
     setTimeout(() => {
         const activeTab = document.querySelector('.nav-tab.active');
         const navTabs = document.getElementById('navTabs');
@@ -5576,32 +5572,18 @@ function switchTab(index) {
             const tabRect = activeTab.getBoundingClientRect();
             const navRect = navTabs.getBoundingClientRect();
             
-            // Check if it's first or last tab
-            const isFirstTab = index === 0;
-            const isLastTab = index === categories.length - 1;
+            // Calculate the scroll position to center the tab
+            const scrollLeft = activeTab.offsetLeft - (navRect.width / 2) + (tabRect.width / 2);
             
-            let scrollLeft;
-            
-            if (isFirstTab) {
-                // First tab: scroll to show it centered (or as far left as possible)
-                scrollLeft = Math.max(0, activeTab.offsetLeft - (navRect.width / 2) + (tabRect.width / 2));
-            } else if (isLastTab) {
-                // Last tab: scroll to show it centered (or as far right as possible)
-                scrollLeft = activeTab.offsetLeft - (navRect.width / 2) + (tabRect.width / 2);
-            } else {
-                // Middle tabs: center normally
-                scrollLeft = activeTab.offsetLeft - (navRect.width / 2) + (tabRect.width / 2);
-            }
-            
-            // Smooth scroll to position
+            // Smooth scroll to center
             navTabs.scrollTo({
                 left: scrollLeft,
                 behavior: 'smooth'
             });
         }
-    }, 50);
+    }, 100); 
 }
-
+	
 function toggleCheck(itemId) { 
     if (editMode) return; 
     
@@ -6688,6 +6670,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
