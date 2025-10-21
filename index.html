@@ -5364,6 +5364,8 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				    textDiv.appendChild(reminderIcon);
 				}
 
+				checkItem.appendChild(textDiv);
+				
 			// Add timer icon if timers are enabled for this skill
 			const timerSkillKey = `${catIndex}-${skillIndex}`;
 			if (itemTimers[timerSkillKey]?.enabled) {
@@ -5396,40 +5398,28 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			    
 			    timerIcon.title = hasTimer ? `Timer: ${hasTimer.hours || 0}h ${hasTimer.minutes || 0}m` : 'Set timer';
 			    timerIcon.style.cursor = 'pointer';
-			    timerIcon.style.marginLeft = '8px';
+			    timerIcon.style.position = 'absolute';
+			    timerIcon.style.right = '60px';
+			    timerIcon.style.top = '50%';
+			    timerIcon.style.transform = 'translateY(-50%)';
 			    timerIcon.style.opacity = hasTimer ? '1' : '0.4';
 			    timerIcon.style.color = hasTimer ? 'var(--primary-color)' : '#9ca3af';
+			    timerIcon.style.pointerEvents = 'auto';
 			    timerIcon.dataset.catIndex = catIndex;
 			    timerIcon.dataset.skillIndex = skillIndex;
 			    timerIcon.dataset.itemIndex = itemIndex;
 			    timerIcon.addEventListener('click', (e) => {
-				    e.stopPropagation();
-				    
-				    // If timer is already set, launch phone timer app
-				    if (hasTimer) {
-				        const hours = hasTimer.hours || 0;
-				        const minutes = hasTimer.minutes || 0;
-				        const totalSeconds = (hours * 3600) + (minutes * 60);
-				        
-				        // Try to open native timer app (works on iOS/Android)
-				        const timerUrl = `clock://timer?seconds=${totalSeconds}`;
-				        window.location.href = timerUrl;
-				        
-				        // Fallback: If the above doesn't work after 1 second, show picker as alternative
-				        setTimeout(() => {
-				            showTimerPicker(catIndex, skillIndex, itemIndex);
-				        }, 1000);
-				    } else {
-				        // No timer set yet, show picker to set one
-				        showTimerPicker(catIndex, skillIndex, itemIndex);
-				    }
-				});
-			    textDiv.appendChild(timerIcon);
-			}
-			
-			checkItem.appendChild(textDiv);
-
-				
+			        e.stopPropagation();
+			        showTimerPicker(catIndex, skillIndex, itemIndex);
+			    });
+			    
+			    // Hide timer during text editing
+			    if (editMode) {
+			        timerIcon.style.display = 'none';
+			    }
+			    
+			    checkItem.appendChild(timerIcon);
+			}	
 				
 				// Add click zone on right end to add new item below (only when NOT in edit mode)
                 if (!editMode) {
@@ -6716,6 +6706,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
