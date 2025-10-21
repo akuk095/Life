@@ -5394,7 +5394,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			            timeText = `${minutes}m`;
 			        }
 			        timerIcon.innerHTML = timeText;
-			        timerIcon.style.fontSize = '12px';
+			        timerIcon.style.fontSize = '15px';
 			        timerIcon.style.fontWeight = '600';
 			    } else {
 			        timerIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -5406,7 +5406,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			    timerIcon.title = hasTimer ? `Timer: ${hasTimer.hours || 0}h ${hasTimer.minutes || 0}m` : 'Set timer';
 			    timerIcon.style.cursor = 'pointer';
 			    timerIcon.style.position = 'absolute';
-			    timerIcon.style.right = '60px';
+			    timerIcon.style.right = '8px';
 			    timerIcon.style.top = '50%';
 			    timerIcon.style.transform = 'translateY(-50%)';
 			    timerIcon.style.opacity = hasTimer ? '1' : '0.4';
@@ -6713,6 +6713,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
