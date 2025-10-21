@@ -183,7 +183,7 @@
 		.skill-card-controls.show .skill-control-btn:nth-child(4):hover { transform: translateX(-144px) scale(1.1); }
 		.skill-card-controls.show .skill-control-btn:nth-child(5):hover { transform: translateX(-180px) scale(1.1); }
 		.skill-card-controls.show .skill-control-btn:nth-child(6):hover { transform: translateX(-216px) scale(1.1); }
-		.skill-card-controls { position: relative; z-index: 1000; }
+		
 		/* Hide all scrollbars but keep scroll functionality */
 		* { scrollbar-width: none; -ms-overflow-style: none; }
 		*::-webkit-scrollbar { display: none; }
@@ -5361,34 +5361,29 @@ timerToggleBtn.addEventListener('click', (e) => {
 				    textDiv.appendChild(reminderIcon);
 				}
 
-			// Add timer icon if timers are enabled for this skill
-			const timerSkillKey = `${catIndex}-${skillIndex}`;
-			if (itemTimers[timerSkillKey]?.enabled) {
-			    const itemTimerKey = `${catIndex}-${skillIndex}-${itemIndex}`;
-			    const hasTimer = itemTimers?.[itemTimerKey];
-			    
-			    // Only show the timer icon if a timer is actually set for this item
-			    if (hasTimer) {
-			        const timerIcon = document.createElement('span');
-			        timerIcon.className = 'timer-icon';
-			        timerIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			            <circle cx="12" cy="12" r="10"></circle>
-			            <polyline points="12 6 12 12 16 14"></polyline>
-			        </svg>`;
-			        timerIcon.title = `Timer: ${hasTimer.hours || 0}h ${hasTimer.minutes || 0}m`;
-			        timerIcon.style.cursor = 'pointer';
-			        timerIcon.style.marginLeft = '8px';
-			        timerIcon.style.opacity = '1';
-			        timerIcon.style.color = 'var(--primary-color)';
-			        timerIcon.dataset.catIndex = catIndex;
-			        timerIcon.dataset.skillIndex = skillIndex;
-			        timerIcon.dataset.itemIndex = itemIndex;
-			        timerIcon.addEventListener('click', (e) => {
-			            e.stopPropagation();
-			            showTimerPicker(catIndex, skillIndex, itemIndex);
-			        });
-			        textDiv.appendChild(timerIcon);
-			    }
+			// Add timer icon ONLY if a timer is actually set for this specific item
+			const itemTimerKey = `${catIndex}-${skillIndex}-${itemIndex}`;
+			const hasTimer = itemTimers?.[itemTimerKey];
+			if (hasTimer) {
+			    const timerIcon = document.createElement('span');
+			    timerIcon.className = 'timer-icon';
+			    timerIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			        <circle cx="12" cy="12" r="10"></circle>
+			        <polyline points="12 6 12 12 16 14"></polyline>
+			    </svg>`;
+			    timerIcon.title = `Timer: ${hasTimer.hours || 0}h ${hasTimer.minutes || 0}m`;
+			    timerIcon.style.cursor = 'pointer';
+			    timerIcon.style.marginLeft = '8px';
+			    timerIcon.style.opacity = '1';
+			    timerIcon.style.color = 'var(--primary-color)';
+			    timerIcon.dataset.catIndex = catIndex;
+			    timerIcon.dataset.skillIndex = skillIndex;
+			    timerIcon.dataset.itemIndex = itemIndex;
+			    timerIcon.addEventListener('click', (e) => {
+			        e.stopPropagation();
+			        showTimerPicker(catIndex, skillIndex, itemIndex);
+			    });
+			    textDiv.appendChild(timerIcon);
 			}
 			
 			checkItem.appendChild(textDiv);
@@ -6665,6 +6660,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
