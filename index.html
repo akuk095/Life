@@ -4922,6 +4922,16 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     const key = `${catIndex}-${skillIndex}`;
     const existingTime = skillReminders[key]?.items?.[itemIndex] || '09:00';
     
+    // Add backdrop FIRST
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999;';
+    backdrop.addEventListener('click', () => {
+        backdrop.remove();
+        document.querySelector('.reminder-time-picker')?.remove();
+    });
+    document.body.appendChild(backdrop);
+    
+    // Then create picker
     const picker = document.createElement('div');
     picker.className = 'reminder-time-picker show';
     picker.innerHTML = `
@@ -4937,6 +4947,7 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     document.body.appendChild(picker);
     
     picker.querySelector('.cancel-reminder').addEventListener('click', () => {
+        backdrop.remove();
         picker.remove();
     });
     
@@ -4948,6 +4959,7 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
         skillReminders[key].items[itemIndex] = time;
         saveSkillReminders();
         renderContent();
+        backdrop.remove();
         picker.remove();
     });
     
@@ -4959,6 +4971,7 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
                 saveSkillReminders();
                 renderContent();
             }
+            backdrop.remove();
             picker.remove();
         });
     }
@@ -6851,6 +6864,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
