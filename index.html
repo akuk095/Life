@@ -4951,17 +4951,30 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
         picker.remove();
     });
     
-    picker.querySelector('.save-reminder').addEventListener('click', () => {
-        const time = document.getElementById('reminderTimeInput').value;
-        if (!skillReminders[key]) {
-            skillReminders[key] = { enabled: true, items: {} };
-        }
-        skillReminders[key].items[itemIndex] = time;
-        saveSkillReminders();
-        renderContent();
-        backdrop.remove();
-        picker.remove();
-    });
+    const saveBtn = picker.querySelector('.save-reminder');
+		console.log('Save button found:', saveBtn); // Debug log
+		if (saveBtn) {
+		    saveBtn.addEventListener('click', (e) => {
+		        console.log('Save button clicked!'); // Debug log
+		        e.preventDefault();
+		        e.stopPropagation();
+		        
+		        const time = document.getElementById('reminderTimeInput').value;
+		        if (!skillReminders[key]) {
+		            skillReminders[key] = { enabled: true, items: {} };
+		        }
+		        skillReminders[key].items[itemIndex] = time;
+		        saveSkillReminders();
+		        renderContent();
+		        backdrop.remove();
+		        picker.remove();
+		    });
+		    
+		    // Also try mousedown as backup
+		    saveBtn.addEventListener('mousedown', (e) => {
+		        console.log('Save button mousedown!'); // Debug log
+		    });
+		}
     
     const deleteBtn = picker.querySelector('.delete-reminder');
     if (deleteBtn) {
@@ -6889,6 +6902,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
