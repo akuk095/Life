@@ -492,7 +492,7 @@
 		.color-option-pill.selected { border-color: #2c3e50; box-shadow: 0 0 0 2px white, 0 0 0 5px #2c3e50; transform: scale(1.05); }
 		.color-pill-half { flex: 1; }
 
-		.timer-icon { display: none; align-items: center; justify-content: center; transition: all 0.2s ease; }
+		.timer-icon { display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
 		.timer-icon svg { display: block; }
 		.timer-icon:hover { opacity: 1 !important; transform: scale(1.1); }
 		.timer-picker { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 10001; min-width: 300px; pointer-events: auto; }
@@ -5033,6 +5033,16 @@ function showTimerPicker(catIndex, skillIndex, itemIndex) {
     const key = `${catIndex}-${skillIndex}-${itemIndex}`;
     const existingTimer = itemTimers[key] || { hours: 0, minutes: 0 };
     
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000;';
+    backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) {
+            backdrop.remove();
+            document.querySelector('.timer-picker')?.remove();
+        }
+    });
+    document.body.appendChild(backdrop);
+    
     const picker = document.createElement('div');
     picker.className = 'timer-picker show';
     picker.innerHTML = `
@@ -5057,6 +5067,7 @@ function showTimerPicker(catIndex, skillIndex, itemIndex) {
     document.body.appendChild(picker);
     
     picker.querySelector('.cancel-timer').addEventListener('click', () => {
+        backdrop.remove();
         picker.remove();
     });
     
@@ -5072,6 +5083,7 @@ function showTimerPicker(catIndex, skillIndex, itemIndex) {
         itemTimers[key] = { hours, minutes };
         saveItemTimers();
         renderContent();
+        backdrop.remove();
         picker.remove();
     });
     
@@ -5081,6 +5093,7 @@ function showTimerPicker(catIndex, skillIndex, itemIndex) {
             delete itemTimers[key];
             saveItemTimers();
             renderContent();
+            backdrop.remove();
             picker.remove();
         });
     }
@@ -7014,6 +7027,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
