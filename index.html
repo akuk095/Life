@@ -4992,6 +4992,7 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     const existingTime = existingReminder.time || '09:00';
     const existingDate = existingReminder.date || new Date().toISOString().split('T')[0];
     const existingDays = existingReminder.repeatDays || [];
+    const existingNoDate = existingReminder.noDate || false;
     
     // Add backdrop FIRST
     const backdrop = document.createElement('div');
@@ -5007,72 +5008,72 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     // Then create picker
     const picker = document.createElement('div');
     picker.className = 'reminder-time-picker show';
-	    picker.innerHTML = `
-	    <h3>Set Reminder</h3>
-	    <div class="reminder-datetime-container">
-	        <div class="reminder-datetime-half">
-	            <label>Time</label>
-	            <input type="time" id="reminderTimeInput" value="${existingTime}">
-	        </div>
-	        <div class="reminder-datetime-half">
-	            <label>Date</label>
-	            <input type="date" id="reminderDateInput" value="${existingDate}" ${!existingReminder.date || existingReminder.noDate ? 'disabled' : ''}>
-	        </div>
-	    </div>
-	    <div style="margin-bottom: 16px;">
-	        <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6b7280; cursor: pointer;">
-	            <input type="checkbox" id="noDateCheckbox" ${!existingReminder.date || existingReminder.noDate ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
-	            <span>No specific date</span>
-	        </label>
-	    </div>
-	    <div class="repeat-section" id="repeatSection" ${!existingReminder.date || existingReminder.noDate ? '' : 'style="display: none;"'}>
-	        <label>Repeat</label>
-	        <div class="repeat-days">
-	            <button type="button" class="day-btn" data-day="Mon">M</button>
-	            <button type="button" class="day-btn" data-day="Tue">T</button>
-	            <button type="button" class="day-btn" data-day="Wed">W</button>
-	            <button type="button" class="day-btn" data-day="Thu">T</button>
-	            <button type="button" class="day-btn" data-day="Fri">F</button>
-	            <button type="button" class="day-btn" data-day="Sat">S</button>
-	            <button type="button" class="day-btn" data-day="Sun">S</button>
-	        </div>
-	    </div>
-		    <div class="button-group">
-		        <button type="button" class="cancel-reminder">Cancel</button>
-		        <button type="button" class="save-reminder">Save</button>
-		    </div>
-		    ${skillReminders[key]?.items?.[itemIndex] ? '<button type="button" class="delete-reminder">Delete Reminder</button>' : ''}
-		`;
+    picker.innerHTML = `
+        <h3>Set Reminder</h3>
+        <div class="reminder-datetime-container">
+            <div class="reminder-datetime-half">
+                <label>Time</label>
+                <input type="time" id="reminderTimeInput" value="${existingTime}">
+            </div>
+            <div class="reminder-datetime-half">
+                <label>Date</label>
+                <input type="date" id="reminderDateInput" value="${existingDate}" ${existingNoDate ? 'disabled' : ''}>
+            </div>
+        </div>
+        <div style="margin-bottom: 16px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6b7280; cursor: pointer;">
+                <input type="checkbox" id="noDateCheckbox" ${existingNoDate ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
+                <span>No specific date</span>
+            </label>
+        </div>
+        <div class="repeat-section" id="repeatSection" ${existingNoDate ? '' : 'style="display: none;"'}>
+            <label>Repeat</label>
+            <div class="repeat-days">
+                <button type="button" class="day-btn" data-day="Mon">M</button>
+                <button type="button" class="day-btn" data-day="Tue">T</button>
+                <button type="button" class="day-btn" data-day="Wed">W</button>
+                <button type="button" class="day-btn" data-day="Thu">T</button>
+                <button type="button" class="day-btn" data-day="Fri">F</button>
+                <button type="button" class="day-btn" data-day="Sat">S</button>
+                <button type="button" class="day-btn" data-day="Sun">S</button>
+            </div>
+        </div>
+        <div class="button-group">
+            <button type="button" class="cancel-reminder">Cancel</button>
+            <button type="button" class="save-reminder">Save</button>
+        </div>
+        ${skillReminders[key]?.items?.[itemIndex] ? '<button type="button" class="delete-reminder">Delete Reminder</button>' : ''}
+    `;
     
     document.body.appendChild(picker);
-
-	// Handle "No Date" checkbox logic
-		const noDateCheckbox = picker.querySelector('#noDateCheckbox');
-		const dateInput = picker.querySelector('#reminderDateInput');
-		const repeatSection = picker.querySelector('#repeatSection');
-		
-		noDateCheckbox.addEventListener('change', (e) => {
-		    if (e.target.checked) {
-		        dateInput.disabled = true;
-		        dateInput.value = '';
-		        repeatSection.style.display = 'block';
-		    } else {
-		        dateInput.disabled = false;
-		        dateInput.value = new Date().toISOString().split('T')[0];
-		        repeatSection.style.display = 'none';
-		        // Clear selected days
-		        picker.querySelectorAll('.day-btn.selected').forEach(btn => btn.classList.remove('selected'));
-		    }
-		});
-		
-		// Also disable repeat when date is manually selected
-		dateInput.addEventListener('change', (e) => {
-		    if (e.target.value) {
-		        repeatSection.style.display = 'none';
-		        picker.querySelectorAll('.day-btn.selected').forEach(btn => btn.classList.remove('selected'));
-		    }
-		});
-	
+    
+    // Handle "No Date" checkbox logic
+    const noDateCheckbox = picker.querySelector('#noDateCheckbox');
+    const dateInput = picker.querySelector('#reminderDateInput');
+    const repeatSection = picker.querySelector('#repeatSection');
+    
+    noDateCheckbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            dateInput.disabled = true;
+            dateInput.value = '';
+            repeatSection.style.display = 'block';
+        } else {
+            dateInput.disabled = false;
+            dateInput.value = new Date().toISOString().split('T')[0];
+            repeatSection.style.display = 'none';
+            // Clear selected days
+            picker.querySelectorAll('.day-btn.selected').forEach(btn => btn.classList.remove('selected'));
+        }
+    });
+    
+    // Also disable repeat when date is manually selected
+    dateInput.addEventListener('change', (e) => {
+        if (e.target.value) {
+            repeatSection.style.display = 'none';
+            picker.querySelectorAll('.day-btn.selected').forEach(btn => btn.classList.remove('selected'));
+        }
+    });
+    
     // Set selected days
     const dayBtns = picker.querySelectorAll('.day-btn');
     dayBtns.forEach(btn => {
@@ -5097,20 +5098,20 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
             e.stopPropagation();
             
             const time = document.getElementById('reminderTimeInput').value;
-			const noDate = document.getElementById('noDateCheckbox').checked;
-			const date = noDate ? null : document.getElementById('reminderDateInput').value;
-			const selectedDays = noDate ? Array.from(picker.querySelectorAll('.day-btn.selected')).map(btn => btn.dataset.day) : [];
-			
-			if (!skillReminders[key]) {
-			    skillReminders[key] = { enabled: true, items: {} };
-			}
-			
-			skillReminders[key].items[itemIndex] = {
-			    time: time,
-			    date: date,
-			    noDate: noDate,
-			    repeatDays: selectedDays
-			};
+            const noDate = document.getElementById('noDateCheckbox').checked;
+            const date = noDate ? null : document.getElementById('reminderDateInput').value;
+            const selectedDays = noDate ? Array.from(picker.querySelectorAll('.day-btn.selected')).map(btn => btn.dataset.day) : [];
+            
+            if (!skillReminders[key]) {
+                skillReminders[key] = { enabled: true, items: {} };
+            }
+            
+            skillReminders[key].items[itemIndex] = {
+                time: time,
+                date: date,
+                noDate: noDate,
+                repeatDays: selectedDays
+            };
             
             saveSkillReminders();
             renderContent();
@@ -7283,6 +7284,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
