@@ -1464,6 +1464,10 @@ async function loadUserData(userId) {
 		if (remindersSnap.val()) {
 		    skillReminders = remindersSnap.val();
 		}
+
+		// Load item timers
+		await loadItemTimers();
+			
 		// Check if we need to auto-refresh
 		checkAndAutoRefresh(lastRefreshSnap.val());
 		
@@ -6706,6 +6710,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
