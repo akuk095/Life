@@ -5098,29 +5098,62 @@ function renderContent() {
 		}, { passive: false });
 			
 			titleDiv.addEventListener('touchend', (e) => {
-			    if (editMode) return;
-			    
-			    clearTimeout(longPressTimer);
-			    
-			    // Reset visual feedback
-			    titleDiv.style.transition = '';
-			    titleDiv.style.transform = '';
-			    titleDiv.style.opacity = '';
-			    
-			    if (isLongPress) {
-			        const touchEndY = e.changedTouches[0].clientY;
-			        const deltaY = touchEndY - touchStartY;
-			        const swipeDistance = 50; // minimum distance to trigger
-			        
-			        // Check if swiped down enough
-			        if (deltaY > swipeDistance) {
-			            // Duplicate the card
-			            duplicateSkill(catIndex, skillIndex);
-			        }
-			    }
-			    
-			    isLongPress = false;
-			});
+		    if (editMode) return;
+		    
+		    clearTimeout(longPressTimer);
+		    
+		    // Reset visual feedback
+		    titleDiv.style.transition = '';
+		    titleDiv.style.transform = '';
+		    titleDiv.style.opacity = '';
+		    
+		    if (isLongPress) {
+		        const touchEndY = e.changedTouches[0].clientY;
+		        const deltaY = touchEndY - touchStartY;
+		        const swipeDistance = 50; // minimum distance to trigger
+		        
+		        // Check if swiped down enough
+		        if (deltaY > swipeDistance) {
+		            // Create duplicate with animation
+		            const originalSkill = categories[catIndex].skills[skillIndex];
+		            const duplicatedSkill = JSON.parse(JSON.stringify(originalSkill));
+		            duplicatedSkill.title = duplicatedSkill.title + ' (Copy)';
+		            
+		            // Insert duplicate
+		            categories[catIndex].skills.splice(skillIndex + 1, 0, duplicatedSkill);
+		            saveCategories();
+		            
+		            // Re-render content
+		            renderContent();
+		            
+		            // Animate the new duplicate card
+		            setTimeout(() => {
+		                const newCard = document.querySelector(`.skill-card[data-cat-index="${catIndex}"][data-skill-index="${skillIndex + 1}"]`);
+		                if (newCard) {
+		                    // Start from original position (overlapping)
+		                    newCard.style.transition = 'none';
+		                    newCard.style.transform = 'translateY(-100%)';
+		                    newCard.style.opacity = '0';
+		                    
+		                    // Animate to final position
+		                    setTimeout(() => {
+		                        newCard.style.transition = 'all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)';
+		                        newCard.style.transform = 'translateY(0)';
+		                        newCard.style.opacity = '1';
+		                        
+		                        // Clean up after animation
+		                        setTimeout(() => {
+		                            newCard.style.transition = '';
+		                            newCard.style.transform = '';
+		                        }, 400);
+		                    }, 50);
+		                }
+		            }, 10);
+		        }
+		    }
+		    
+		    isLongPress = false;
+		});
 			
 			titleDiv.addEventListener('touchcancel', () => {
 			    clearTimeout(longPressTimer);
@@ -6782,6 +6815,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
