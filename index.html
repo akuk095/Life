@@ -4924,7 +4924,7 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     
     // Add backdrop FIRST
     const backdrop = document.createElement('div');
-    backdrop.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999;';
+    backdrop.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000;';
     backdrop.addEventListener('click', () => {
         backdrop.remove();
         document.querySelector('.reminder-time-picker')?.remove();
@@ -5567,14 +5567,12 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			        showTimerPicker(catIndex, skillIndex, itemIndex);
 			    });
 			    
-			    // Hide timer during text editing
-					if (editMode) {
-					    timerIcon.style.display = 'none';
-					} else {
-					    timerIcon.style.display = 'inline-flex';
-					}
-					
-					checkItem.appendChild(timerIcon);
+			    // Hide timer during text editing OR if timers not enabled
+				if (editMode || !itemTimers[timerSkillKey]?.enabled) {
+				    timerIcon.style.display = 'none';
+				}
+				
+				checkItem.appendChild(timerIcon);
 			}	
 				
 				// Add click zone on right end to add new item below (only when NOT in edit mode)
@@ -6875,6 +6873,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
