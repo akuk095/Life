@@ -5727,19 +5727,25 @@ hideHeadingBtn.addEventListener('click', (e) => {
 					if (hasReminder) {
 				    // Show reminder info text instead of bell icon
 				    const formatDate = (dateStr) => {
-				        if (!dateStr) return '';
-				        const d = new Date(dateStr + 'T00:00:00');
-				        const today = new Date();
-				        const tomorrow = new Date(today);
-				        tomorrow.setDate(tomorrow.getDate() + 1);
-				        
-				        const isTomorrow = d.getDate() === tomorrow.getDate() && 
-				                          d.getMonth() === tomorrow.getMonth() && 
-				                          d.getFullYear() === tomorrow.getFullYear();
-				        
-				        if (isTomorrow) return 'Tomorrow';
-				        return `${d.getDate()}/${d.getMonth() + 1}`;
-				    };
+				    if (!dateStr) return '';
+				    const d = new Date(dateStr + 'T00:00:00');
+				    const today = new Date();
+				    const tomorrow = new Date(today);
+				    tomorrow.setDate(tomorrow.getDate() + 1);
+				    
+				    const isTomorrow = d.getDate() === tomorrow.getDate() && 
+				                      d.getMonth() === tomorrow.getMonth() && 
+				                      d.getFullYear() === tomorrow.getFullYear();
+				    
+				    if (isTomorrow) return 'Tomorrow';
+				    
+				    // Format with ordinal suffix (1st, 2nd, 3rd, etc.)
+				    const day = d.getDate();
+				    const suffix = ['th', 'st', 'nd', 'rd'][(day % 10 > 3 || Math.floor(day % 100 / 10) === 1) ? 0 : day % 10];
+				    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+				    
+				    return `${day}${suffix} ${monthNames[d.getMonth()]}`;
+				};
 				    
 				    const formatRepeat = (days) => {
 				        if (!days || days.length === 0) return '';
@@ -7277,6 +7283,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
