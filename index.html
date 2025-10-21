@@ -5716,12 +5716,36 @@ hideHeadingBtn.addEventListener('click', (e) => {
                     });
                     
                     addZone.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        // Add new item BEFORE the current item (at the clicked spot)
-                        categories[catIndex].skills[skillIndex].items.splice(itemIndex, 0, "New item");
-                        saveCategories();
-                        renderContent();
-                    });
+                    e.stopPropagation();
+                    // Add new item BEFORE the current item (at the clicked spot)
+                    categories[catIndex].skills[skillIndex].items.splice(itemIndex, 0, "New item");
+                    saveCategories();
+                    renderContent();
+                    
+                    // Animate the new item sliding in from the right
+                    setTimeout(() => {
+                        const newItem = document.querySelector(`.checklist-item[data-cat-index="${catIndex}"][data-skill-index="${skillIndex}"][data-item-index="${itemIndex}"]`);
+                        if (newItem) {
+                            // Start from left side, off-screen
+                            newItem.style.transition = 'none';
+                            newItem.style.transform = 'translateX(100%)';
+                            newItem.style.opacity = '0';
+                            
+                            // Animate to final position
+                            setTimeout(() => {
+                                newItem.style.transition = 'all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)';
+                                newItem.style.transform = 'translateX(0)';
+                                newItem.style.opacity = '1';
+                                
+                                // Clean up after animation
+                                setTimeout(() => {
+                                    newItem.style.transition = '';
+                                    newItem.style.transform = '';
+                                }, 400);
+                            }, 50);
+                        }
+                    }, 10);
+                });
                     
                     checkItem.appendChild(addZone);
                     checkItem.style.position = 'relative';
@@ -5787,10 +5811,35 @@ hideHeadingBtn.addEventListener('click', (e) => {
                 
                 addBelowLastZone.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    const newItemIndex = categories[catIndex].skills[skillIndex].items.length;
                     // Add new item AFTER the last item
                     categories[catIndex].skills[skillIndex].items.push("New item");
                     saveCategories();
                     renderContent();
+                    
+                    // Animate the new item sliding in from the right
+                    setTimeout(() => {
+                        const newItem = document.querySelector(`.checklist-item[data-cat-index="${catIndex}"][data-skill-index="${skillIndex}"][data-item-index="${newItemIndex}"]`);
+                        if (newItem) {
+                            // Start from left side, off-screen
+                            newItem.style.transition = 'none';
+                            newItem.style.transform = 'translateX(100%)';
+                            newItem.style.opacity = '0';
+                            
+                            // Animate to final position
+                            setTimeout(() => {
+                                newItem.style.transition = 'all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)';
+                                newItem.style.transform = 'translateX(0)';
+                                newItem.style.opacity = '1';
+                                
+                                // Clean up after animation
+                                setTimeout(() => {
+                                    newItem.style.transition = '';
+                                    newItem.style.transform = '';
+                                }, 400);
+                            }, 50);
+                        }
+                    }, 10);
                 });
                 
                 card.appendChild(addBelowLastZone);
@@ -7066,6 +7115,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
