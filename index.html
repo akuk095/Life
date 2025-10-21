@@ -119,7 +119,7 @@
 		.edit-mode-active .nav-tab .emoji-remove-btn { pointer-events: auto; }
 		.nav-tab .tab-name:hover { background: rgba(255, 255, 255, 0.1); padding: 2px 4px; border-radius: 4px; }
 		.nav-tab .tab-name:focus { outline: 2px solid var(--primary-color, #3498db); background: white; color: #2c3e50; padding: 2px 4px; border-radius: 4px; }	
-		.nav-tabs { display: flex; gap: 8px; padding: 12px 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; background: white; border-bottom: 1px solid #f3f4f6; position: sticky; top: 0; z-index: 10; }
+		.nav-tabs { display: flex; gap: 8px; padding: 12px 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; background: white; border-bottom: 1px solid #f3f4f6; position: sticky; top: 0; z-index: 10; scroll-padding: 50%; }
 		.nav-tabs::-webkit-scrollbar { display: none; }
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
@@ -4677,11 +4677,6 @@ function renderTabs() {
     const navTabs = document.getElementById('navTabs');
     navTabs.innerHTML = '';
     
-    // Add conditional classes for first/last tab active
-	if (categories && categories.length > 0) {
-	    navTabs.classList.toggle('first-active', activeTabIndex === 0);
-	    navTabs.classList.toggle('last-active', activeTabIndex === categories.length - 1);
-	}
     
     categories.forEach((cat, i) => {
         const tab = document.createElement('div');
@@ -5563,25 +5558,17 @@ function switchTab(index) {
     const cats = document.querySelectorAll('.category'); 
     cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); 
     
-    // Scroll the active tab to center with longer delay to allow spacer to render
+    // Scroll the active tab to center
     setTimeout(() => {
         const activeTab = document.querySelector('.nav-tab.active');
-        const navTabs = document.getElementById('navTabs');
-        
-        if (activeTab && navTabs) {
-            const tabRect = activeTab.getBoundingClientRect();
-            const navRect = navTabs.getBoundingClientRect();
-            
-            // Calculate the scroll position to center the tab
-            const scrollLeft = activeTab.offsetLeft - (navRect.width / 2) + (tabRect.width / 2);
-            
-            // Smooth scroll to center
-            navTabs.scrollTo({
-                left: scrollLeft,
-                behavior: 'smooth'
+        if (activeTab) {
+            activeTab.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
             });
         }
-    }, 100); 
+    }, 50);
 }
 	
 function toggleCheck(itemId) { 
@@ -6670,6 +6657,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
