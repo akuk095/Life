@@ -5403,9 +5403,27 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			    timerIcon.dataset.skillIndex = skillIndex;
 			    timerIcon.dataset.itemIndex = itemIndex;
 			    timerIcon.addEventListener('click', (e) => {
-			        e.stopPropagation();
-			        showTimerPicker(catIndex, skillIndex, itemIndex);
-			    });
+				    e.stopPropagation();
+				    
+				    // If timer is already set, launch phone timer app
+				    if (hasTimer) {
+				        const hours = hasTimer.hours || 0;
+				        const minutes = hasTimer.minutes || 0;
+				        const totalSeconds = (hours * 3600) + (minutes * 60);
+				        
+				        // Try to open native timer app (works on iOS/Android)
+				        const timerUrl = `clock://timer?seconds=${totalSeconds}`;
+				        window.location.href = timerUrl;
+				        
+				        // Fallback: If the above doesn't work after 1 second, show picker as alternative
+				        setTimeout(() => {
+				            showTimerPicker(catIndex, skillIndex, itemIndex);
+				        }, 1000);
+				    } else {
+				        // No timer set yet, show picker to set one
+				        showTimerPicker(catIndex, skillIndex, itemIndex);
+				    }
+				});
 			    textDiv.appendChild(timerIcon);
 			}
 			
@@ -6698,6 +6716,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
