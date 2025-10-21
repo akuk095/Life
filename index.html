@@ -5538,30 +5538,29 @@ hideHeadingBtn.addEventListener('click', (e) => {
                 };
                 
                 menuBtn.addEventListener('click', (e) => {
-			    e.stopPropagation();
-			    const isShowing = controlsContainer.classList.contains('show');
-			    
-			    // Hide all other open controls first
-			    document.querySelectorAll('.skill-card-controls.show').forEach(c => {
-			        if (c !== controlsContainer) c.classList.remove('show');
-			    });
-			    
-			    // Hide sticky color button when menu opens, show when menu closes
-			    if (!isShowing) {
-			        stickyColorBtn.style.display = 'none';
-			    } else {
-			        stickyColorBtn.style.display = 'block';
-			    }
-			    
-			    controlsContainer.classList.toggle('show');
-			    
-			    // Start timer if showing
-			    if (!isShowing) {
-			        startHideTimer();
-			    } else {
-			        if (hideTimeout) clearTimeout(hideTimeout);
-			    }
-			});
+				    e.stopPropagation();
+				    const isShowing = controlsContainer.classList.contains('show');
+				    
+				    // Hide all other open controls first
+				    document.querySelectorAll('.skill-card-controls.show').forEach(c => {
+				        if (c !== controlsContainer) c.classList.remove('show');
+				    });
+				    
+				    // IMPORTANT: Hide the sticky color menu when 3-dots menu is clicked
+				    const stickyMenu = document.getElementById(`stickyColorMenu-${catIndex}-${skillIndex}`);
+				    if (stickyMenu) {
+				        stickyMenu.classList.remove('show');
+				    }
+				    
+				    controlsContainer.classList.toggle('show');
+				    
+				    // Start timer if showing
+				    if (!isShowing) {
+				        startHideTimer();
+				    } else {
+				        if (hideTimeout) clearTimeout(hideTimeout);
+				    }
+				});
                 
                 // Reset timeout on any interaction with the controls
 				[reminderBtn, timerToggleBtn, hideHeadingBtn, hideBackgroundBtn].forEach(btn => {
@@ -7211,6 +7210,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
