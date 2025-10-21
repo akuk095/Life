@@ -163,26 +163,27 @@
 		.checklist-text[contenteditable="true"],
 		.skill-title span[contenteditable="true"],
 		.tab-name-display[contenteditable="true"] {user-select: text !important; -webkit-user-select: text !important;   cursor: text !important;}
-		.skill-card-controls { position: absolute; top: 8px; right: 8px; display: flex; flex-wrap: wrap; position: relative; z-index: 10; align-items: center; padding: 0; background: transparent; pointer-events: none; z-index: 5; }
+		.skill-card-controls { position: absolute; top: 8px; right: 44px; display: flex; flex-wrap: wrap; z-index: 10; align-items: center; padding: 0; background: transparent; pointer-events: none; }
 		.skill-card-controls.show { pointer-events: auto; z-index: 100;}
 		.edit-mode .skill-card-controls { pointer-events: auto; }
 		body:not(.edit-mode-active) .skill-card-controls.show { pointer-events: auto; }
 		.skill-control-btn { background: none; border: none; color: var(--primary-color, #3498db); opacity: 0; cursor: pointer; padding: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: normal; pointer-events: auto !important; position: absolute; right: 0; top: 0; transition: all 0.3s ease; z-index: 100; }
+		.menu-trigger-btn { opacity: 0.3 !important; position: absolute !important; right: 8px !important; top: 8px !important; z-index: 200 !important; }
 		.skill-card-controls.show .skill-control-btn { opacity: 0.6; }
-		.skill-card-controls.show .skill-control-btn:nth-child(1) { transform: translateX(-36px); transition-delay: 0.05s; }
-		.skill-card-controls.show .skill-control-btn:nth-child(2) { transform: translateX(-72px); transition-delay: 0.1s; }
-		.skill-card-controls.show .skill-control-btn:nth-child(3) { transform: translateX(-108px); transition-delay: 0.15s; }
-		.skill-card-controls.show .skill-control-btn:nth-child(4) { transform: translateX(-144px); transition-delay: 0.2s; }
-		.skill-card-controls.show .skill-control-btn:nth-child(5) { transform: translateX(-180px); transition-delay: 0.25s; }
-		.skill-card-controls.show .skill-control-btn:nth-child(6) { transform: translateX(-216px); transition-delay: 0.3s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(1) { transform: translateX(0px); transition-delay: 0.05s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(2) { transform: translateX(-36px); transition-delay: 0.1s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(3) { transform: translateX(-72px); transition-delay: 0.15s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(4) { transform: translateX(-108px); transition-delay: 0.2s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(5) { transform: translateX(-144px); transition-delay: 0.25s; }
+		.skill-card-controls.show .skill-control-btn:nth-child(6) { transform: translateX(-180px); transition-delay: 0.3s; }
 		.skill-control-btn:hover { opacity: 1 !important; color: #6b7280; }
 		.skill-control-btn.delete-control:hover { color: #dc2626; }
-		.skill-card-controls.show .skill-control-btn:nth-child(1):hover { transform: translateX(-36px) scale(1.1); }
-		.skill-card-controls.show .skill-control-btn:nth-child(2):hover { transform: translateX(-72px) scale(1.1); }
-		.skill-card-controls.show .skill-control-btn:nth-child(3):hover { transform: translateX(-108px) scale(1.1); }
-		.skill-card-controls.show .skill-control-btn:nth-child(4):hover { transform: translateX(-144px) scale(1.1); }
-		.skill-card-controls.show .skill-control-btn:nth-child(5):hover { transform: translateX(-180px) scale(1.1); }
-		.skill-card-controls.show .skill-control-btn:nth-child(6):hover { transform: translateX(-216px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(1):hover { transform: translateX(0px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(2):hover { transform: translateX(-36px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(3):hover { transform: translateX(-72px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(4):hover { transform: translateX(-108px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(5):hover { transform: translateX(-144px) scale(1.1); }
+		.skill-card-controls.show .skill-control-btn:nth-child(6):hover { transform: translateX(-180px) scale(1.1); }
 		
 		/* Hide all scrollbars but keep scroll functionality */
 		* { scrollbar-width: none; -ms-overflow-style: none; }
@@ -5240,7 +5241,8 @@ timerToggleBtn.addEventListener('click', (e) => {
                 menuBtn.style.border = 'none';
                 menuBtn.style.cursor = 'pointer';
                 menuBtn.title = 'Card options';
-                
+                menuBtn.className = 'skill-control-btn menu-trigger-btn';
+				
                 let hideTimeout;
                 
                 const startHideTimer = () => {
@@ -6660,6 +6662,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
