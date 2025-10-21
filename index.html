@@ -5441,7 +5441,22 @@ hideHeadingBtn.addEventListener('click', (e) => {
                         enableQuickEdit(this, catIndex, skillIndex, itemIndex);
                     });
                 }
-                
+
+				// Add click listener to open timer picker when timers are enabled
+				if (!editMode) {
+				    const timerSkillKey = `${catIndex}-${skillIndex}`;
+				    if (itemTimers[timerSkillKey]?.enabled) {
+				        textDiv.addEventListener('click', function(e) {
+				            // Don't trigger if clicking on reminder icon or timer icon
+				            if (e.target.closest('.reminder-icon') || e.target.closest('.timer-icon')) {
+				                return;
+				            }
+				            e.stopPropagation();
+				            showTimerPicker(catIndex, skillIndex, itemIndex);
+				        });
+				        textDiv.style.cursor = 'pointer';
+				    }
+				}
                 if (editMode) {
                     const deleteItemBtn = document.createElement('button');
                     deleteItemBtn.className = 'delete-btn';
@@ -6663,6 +6678,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
