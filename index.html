@@ -124,8 +124,10 @@
 		.nav-tabs::-webkit-scrollbar-track { background: transparent; }
 		.nav-tabs::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; min-width: 10px; max-width: 10px; }
 		.nav-tabs::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
-		.nav-tabs.first-active::before { content: ''; flex-shrink: 0; width: 50vw; }
-		.nav-tabs.last-active::after { content: ''; flex-shrink: 0; width: 50vw; }
+		.nav-tabs::before { content: ''; flex-shrink: 0; width: 0; transition: width 0.3s ease; }
+		.nav-tabs::after { content: ''; flex-shrink: 0; width: 0; transition: width 0.3s ease; }
+		.nav-tabs.first-active::before { width: 50vw; }
+		.nav-tabs.last-active::after { width: 50vw; }
 		.save-btn { position: absolute; top: 5px; right: 5px; background: transparent; color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 16px; cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(255, 255, 255, 0.1); transition: all 0.2s ease; display: none; z-index: 10; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
 		.save-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.2); }
 		.save-btn:active { box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4); transform: translateY(1px); }
@@ -6686,6 +6688,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
