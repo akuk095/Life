@@ -283,10 +283,21 @@
 		.reminder-icon:hover { opacity: 1; color: #f59e0b; transform: scale(1.1); }
 		.reminder-icon.has-reminder { opacity: 1; color: #f59e0b; animation: pulse 2s ease-in-out infinite; }
 		@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-		.reminder-time-picker { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 10001; min-width: 300px; pointer-events: auto; }
+		.reminder-time-picker { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 10001; min-width: 340px; max-width: 90%; pointer-events: auto; }
 		.reminder-time-picker.show { display: block; }
 		.reminder-time-picker h3 { margin: 0 0 16px 0; font-size: 18px; color: #2c3e50; }
-		.reminder-time-picker input[type="time"] { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px; }
+		.reminder-datetime-container { display: flex; gap: 12px; margin-bottom: 16px; }
+		.reminder-datetime-half { flex: 1; }
+		.reminder-datetime-half label { display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500; }
+		.reminder-time-picker input[type="date"], .reminder-time-picker input[type="time"] { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; }
+		.reminder-time-picker input:focus { outline: none; border-color: var(--primary-color); }
+		.repeat-section { margin-bottom: 16px; }
+		.repeat-section label { display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500; }
+		.repeat-days { display: flex; gap: 8px; justify-content: space-between; }
+		.day-btn { flex: 1; padding: 10px 4px; border: 2px solid #e5e7eb; background: white; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; color: #6b7280; transition: all 0.2s ease; }
+		.day-btn:hover { border-color: var(--primary-color); }
+		.day-btn.selected { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+		.reminder-info-text { font-size: 11px; color: #9ca3af; font-weight: 500; margin-top: 2px; line-height: 1.3; }
 		.reminder-time-picker .button-group { display: flex; gap: 8px; }
 		.reminder-time-picker button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s ease; pointer-events: auto; }
 		.reminder-time-picker .save-reminder { background: var(--primary-color, #3498db); color: white; }
@@ -4976,17 +4987,22 @@ function toggleSkillReminder(catIndex, skillIndex) {
 
 function showReminderPicker(catIndex, skillIndex, itemIndex) {
     const key = `${catIndex}-${skillIndex}`;
-    const existingTime = skillReminders[key]?.items?.[itemIndex] || '09:00';
+    const existingReminder = skillReminders[key]?.items?.[itemIndex] || {};
+    
+    // Set defaults
+    const existingTime = existingReminder.time || '09:00';
+    const existingDate = existingReminder.date || new Date().toISOString().split('T')[0];
+    const existingDays = existingReminder.repeatDays || [];
     
     // Add backdrop FIRST
     const backdrop = document.createElement('div');
     backdrop.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000;';
     backdrop.addEventListener('click', (e) => {
-	    if (e.target === backdrop) {
-	        backdrop.remove();
-	        document.querySelector('.reminder-time-picker')?.remove();
-	    }
-	});
+        if (e.target === backdrop) {
+            backdrop.remove();
+            document.querySelector('.reminder-time-picker')?.remove();
+        }
+    });
     document.body.appendChild(backdrop);
     
     // Then create picker
@@ -4994,7 +5010,28 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     picker.className = 'reminder-time-picker show';
     picker.innerHTML = `
         <h3>Set Reminder</h3>
-        <input type="time" id="reminderTimeInput" value="${existingTime}">
+        <div class="reminder-datetime-container">
+            <div class="reminder-datetime-half">
+                <label>Date</label>
+                <input type="date" id="reminderDateInput" value="${existingDate}">
+            </div>
+            <div class="reminder-datetime-half">
+                <label>Time</label>
+                <input type="time" id="reminderTimeInput" value="${existingTime}">
+            </div>
+        </div>
+        <div class="repeat-section">
+            <label>Repeat</label>
+            <div class="repeat-days">
+                <button class="day-btn" data-day="Mon">M</button>
+                <button class="day-btn" data-day="Tue">T</button>
+                <button class="day-btn" data-day="Wed">W</button>
+                <button class="day-btn" data-day="Thu">T</button>
+                <button class="day-btn" data-day="Fri">F</button>
+                <button class="day-btn" data-day="Sat">S</button>
+                <button class="day-btn" data-day="Sun">S</button>
+            </div>
+        </div>
         <div class="button-group">
             <button class="cancel-reminder">Cancel</button>
             <button class="save-reminder">Save</button>
@@ -5004,35 +5041,49 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     
     document.body.appendChild(picker);
     
+    // Set selected days
+    const dayBtns = picker.querySelectorAll('.day-btn');
+    dayBtns.forEach(btn => {
+        if (existingDays.includes(btn.dataset.day)) {
+            btn.classList.add('selected');
+        }
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            btn.classList.toggle('selected');
+        });
+    });
+    
     picker.querySelector('.cancel-reminder').addEventListener('click', () => {
         backdrop.remove();
         picker.remove();
     });
     
     const saveBtn = picker.querySelector('.save-reminder');
-		console.log('Save button found:', saveBtn); // Debug log
-		if (saveBtn) {
-		    saveBtn.addEventListener('click', (e) => {
-		        console.log('Save button clicked!'); // Debug log
-		        e.preventDefault();
-		        e.stopPropagation();
-		        
-		        const time = document.getElementById('reminderTimeInput').value;
-		        if (!skillReminders[key]) {
-		            skillReminders[key] = { enabled: true, items: {} };
-		        }
-		        skillReminders[key].items[itemIndex] = time;
-		        saveSkillReminders();
-		        renderContent();
-		        backdrop.remove();
-		        picker.remove();
-		    });
-		    
-		    // Also try mousedown as backup
-		    saveBtn.addEventListener('mousedown', (e) => {
-		        console.log('Save button mousedown!'); // Debug log
-		    });
-		}
+    if (saveBtn) {
+        saveBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const time = document.getElementById('reminderTimeInput').value;
+            const date = document.getElementById('reminderDateInput').value;
+            const selectedDays = Array.from(picker.querySelectorAll('.day-btn.selected')).map(btn => btn.dataset.day);
+            
+            if (!skillReminders[key]) {
+                skillReminders[key] = { enabled: true, items: {} };
+            }
+            
+            skillReminders[key].items[itemIndex] = {
+                time: time,
+                date: date,
+                repeatDays: selectedDays
+            };
+            
+            saveSkillReminders();
+            renderContent();
+            backdrop.remove();
+            picker.remove();
+        });
+    }
     
     const deleteBtn = picker.querySelector('.delete-reminder');
     if (deleteBtn) {
@@ -5627,13 +5678,35 @@ hideHeadingBtn.addEventListener('click', (e) => {
 				const reminderKey = `${catIndex}-${skillIndex}`;
 				if (skillReminders[reminderKey]?.enabled) {
 				    const hasReminder = skillReminders[reminderKey]?.items?.[itemIndex];
-				    const reminderIcon = document.createElement('span');
-				    reminderIcon.className = `reminder-icon ${hasReminder ? 'has-reminder' : ''}`;
-				    reminderIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-				        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-				    </svg>`;
-				    reminderIcon.title = hasReminder ? `Reminder: ${hasReminder}` : 'Set reminder';
+					const reminderIcon = document.createElement('span');
+					reminderIcon.className = `reminder-icon ${hasReminder ? 'has-reminder' : ''}`;
+					
+					if (hasReminder) {
+					    // Show reminder info text instead of bell icon
+					    const formatDate = (dateStr) => {
+					        const d = new Date(dateStr);
+					        return `${d.getDate()}/${d.getMonth() + 1}`;
+					    };
+					    
+					    const formatRepeat = (days) => {
+					        if (!days || days.length === 0) return '';
+					        if (days.length === 7) return 'Daily';
+					        if (days.length === 5 && !days.includes('Sat') && !days.includes('Sun')) return 'Weekdays';
+					        if (days.length === 2 && days.includes('Sat') && days.includes('Sun')) return 'Weekends';
+					        return days.map(d => d.charAt(0)).join('');
+					    };
+					    
+					    const infoText = `${formatDate(hasReminder.date)} ${hasReminder.time}${hasReminder.repeatDays?.length > 0 ? ' • ' + formatRepeat(hasReminder.repeatDays) : ''}`;
+					    reminderIcon.innerHTML = `<div class="reminder-info-text">${infoText}</div>`;
+					    reminderIcon.title = 'Edit reminder';
+					} else {
+					    // Show bell icon
+					    reminderIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+					        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+					    </svg>`;
+					    reminderIcon.title = 'Set reminder';
+					}
 				    reminderIcon.style.position = 'relative';
 				    reminderIcon.style.display = 'block';
 				    reminderIcon.style.marginTop = '4px';
@@ -7138,6 +7211,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
