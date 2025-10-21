@@ -1394,7 +1394,8 @@ async function loadUserData(userId) {
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/headerImage`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/wallpaper`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/skillReminders`)),
-	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap]) => {
+			get(ref(database, `users/${userId}/guides/${currentGuideId}/itemTimers`)),
+	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap, timersSnap]) => {
 
 			
 		// Load categories
@@ -1466,7 +1467,9 @@ async function loadUserData(userId) {
 		}
 
 		// Load item timers
-		await loadItemTimers();
+		if (timersSnap.val()) {
+		    itemTimers = timersSnap.val();
+		}
 			
 		// Check if we need to auto-refresh
 		checkAndAutoRefresh(lastRefreshSnap.val());
@@ -6710,6 +6713,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
