@@ -4962,10 +4962,12 @@ function showReminderPicker(catIndex, skillIndex, itemIndex) {
     // Add backdrop FIRST
     const backdrop = document.createElement('div');
     backdrop.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000;';
-    backdrop.addEventListener('click', () => {
-        backdrop.remove();
-        document.querySelector('.reminder-time-picker')?.remove();
-    });
+    backdrop.addEventListener('click', (e) => {
+	    if (e.target === backdrop) {
+	        backdrop.remove();
+	        document.querySelector('.reminder-time-picker')?.remove();
+	    }
+	});
     document.body.appendChild(backdrop);
     
     // Then create picker
@@ -7012,6 +7014,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
