@@ -5273,7 +5273,7 @@ hideHeadingBtn.addEventListener('click', (e) => {
                 });
                 
                 // Reset timeout on any interaction with the controls
-				[toggleBtn, duplicateBtn, reminderBtn, deleteBtn].forEach(btn => {
+				[toggleBtn, duplicateBtn, reminderBtn, deleteBtn, hideHeadingBtn, timerToggleBtn].forEach(btn => {
 				    btn.addEventListener('click', () => {
 				        startHideTimer();
 				    });
@@ -6678,6 +6678,7 @@ async function backupContent() {
 </div>
 </body>
 </html>
+
 
 
 
