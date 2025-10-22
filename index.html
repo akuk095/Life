@@ -1,541 +1,621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Character encoding and viewport settings -->
     <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-	<meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- PWA and mobile app configuration -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Essential Life Skills Guide - Organize your life with customizable guides, checklists, and trackers">
+    <meta name="author" content="Life Skills Guide">
+
+    <!-- Page title -->
     <title>Essential Life Skills Guide</title>
+
+    <!-- External stylesheet -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-	<div id="refreshSpinner" class="refresh-spinner show">
-	    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-	        <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round"/>
-	    </svg>
-	</div>
-    <div id="loginScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; z-index: 9999;">
-    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
-        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Welcome Back</h2>
-
-        <input type="email" id="loginEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
-
-        <input type="password" id="loginPassword" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
-
-        <button id="loginBtn" style="width: 100%; padding: 14px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px;">Login</button>
-
-        <button id="googleBtn" style="width: 100%; padding: 14px; background: white; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-            Continue with Google
-        </button>
-
-        <div style="text-align: center; margin-top: 20px;">
-            <span style="color: #666;">Don't have an account?</span>
-            <button id="signupBtn" style="background: none; border: none; color: #667eea; font-weight: 600; cursor: pointer; margin-left: 5px;">Sign Up</button>
-        </div>
+    <!-- Loading Spinner -->
+    <div id="refreshSpinner" class="refresh-spinner show" role="status" aria-label="Loading application">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round"/>
+        </svg>
     </div>
-</div>
-    <div id="signupScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; z-index: 9999;">
-    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
-        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Create Account</h2>
 
-        <input type="email" id="signupEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+    <!-- ============================= -->
+    <!-- Authentication Screens -->
+    <!-- ============================= -->
 
-        <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="auth-screen" role="dialog" aria-labelledby="loginTitle" aria-hidden="true">
+        <div class="auth-card">
+            <h2 id="loginTitle" class="auth-title">Welcome Back</h2>
 
-        <input type="password" id="signupPasswordConfirm" placeholder="Confirm Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form" aria-label="Login form">
+                <input
+                    type="email"
+                    id="loginEmail"
+                    class="auth-input"
+                    placeholder="Email"
+                    aria-label="Email address"
+                    required
+                    autocomplete="email">
 
-        <button id="signupSubmitBtn" style="width: 100%; padding: 14px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px;">Create Account</button>
+                <input
+                    type="password"
+                    id="loginPassword"
+                    class="auth-input"
+                    placeholder="Password"
+                    aria-label="Password"
+                    required
+                    autocomplete="current-password">
 
-        <button id="googleSignupBtn" style="width: 100%; padding: 14px; background: white; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-            Sign up with Google
-        </button>
-
-        <div style="text-align: center; margin-top: 20px;">
-            <span style="color: #666;">Already have an account?</span>
-            <button id="backToLoginBtn" style="background: none; border: none; color: #667eea; font-weight: 600; cursor: pointer; margin-left: 5px;">Login</button>
-        </div>
-    </div>
-</div>
-    <div class="container" id="app" style="display: none;">
-    <div class="header-wrapper">
-        <div class="header">
-            <div class="edit-toggle"><button class="edit-btn" id="editModeBtn" onclick="toggleEditMode()">Edit</button></div>
-            <h1>📚 Personal Notebook</h1>
-            <p>note description</p>
-        </div>
-        <div class="nav-tabs" id="navTabs"></div>
-    </div>
-    <div class="content-area" id="contentArea"></div>
-</div>
-<button class="floating-layout-btn" id="layoutBtn" onclick="toggleLayout()" title="Switch layout" style="opacity: 0;"></button>
-<div class="home-page" id="homePage">
-    <div class="home-container">
-        <div class="home-header">
-            <h1 class="home-title">Notebook</h1>
-            <div class="home-header-actions">
-                <button class="home-header-icon-btn" id="homeSearchBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
+                <button
+                    type="submit"
+                    id="loginBtn"
+                    class="auth-btn auth-btn-primary"
+                    aria-label="Login">
+                    Login
                 </button>
-                <button class="home-header-icon-btn" id="homeCreateBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
+
+                <button
+                    type="button"
+                    id="googleBtn"
+                    class="auth-btn auth-btn-google"
+                    aria-label="Sign in with Google">
+                    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                     </svg>
+                    Continue with Google
                 </button>
-                <button class="home-header-icon-btn" id="homeMenuBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <circle cx="12" cy="5" r="1"></circle>
-                        <circle cx="12" cy="19" r="1"></circle>
+            </form>
+
+            <!-- Switch to signup -->
+            <div class="auth-footer">
+                <span class="auth-footer-text">Don't have an account?</span>
+                <button id="signupBtn" class="auth-link-btn" aria-label="Go to signup">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Screen -->
+    <div id="signupScreen" class="auth-screen" role="dialog" aria-labelledby="signupTitle" aria-hidden="true">
+        <div class="auth-card">
+            <h2 id="signupTitle" class="auth-title">Create Account</h2>
+
+            <!-- Signup Form -->
+            <form id="signupForm" class="auth-form" aria-label="Signup form">
+                <input
+                    type="email"
+                    id="signupEmail"
+                    class="auth-input"
+                    placeholder="Email"
+                    aria-label="Email address"
+                    required
+                    autocomplete="email">
+
+                <input
+                    type="password"
+                    id="signupPassword"
+                    class="auth-input"
+                    placeholder="Password (min 6 characters)"
+                    aria-label="Password"
+                    required
+                    minlength="6"
+                    autocomplete="new-password">
+
+                <input
+                    type="password"
+                    id="signupPasswordConfirm"
+                    class="auth-input"
+                    placeholder="Confirm Password"
+                    aria-label="Confirm password"
+                    required
+                    autocomplete="new-password">
+
+                <button
+                    type="submit"
+                    id="signupSubmitBtn"
+                    class="auth-btn auth-btn-primary"
+                    aria-label="Create account">
+                    Create Account
+                </button>
+
+                <button
+                    type="button"
+                    id="googleSignupBtn"
+                    class="auth-btn auth-btn-google"
+                    aria-label="Sign up with Google">
+                    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                     </svg>
+                    Sign up with Google
                 </button>
-            </div>
-        </div>
-        
-        <div class="home-divider"></div>
-        
-        <div class="home-collections-nav" id="homeCollectionsNav">
-            <!-- Collections will be populated here dynamically -->
-        </div>
-        
-        <div class="home-divider"></div>
-        
-        <div class="home-filter-nav">
-            <div class="home-filter-item" data-filter="short-notes">Short notes</div>
-            <div class="home-filter-item" data-filter="reminders">Reminders</div>
-            <div class="home-filter-item" data-filter="routines">Routines</div>
-            <div class="home-filter-item" data-filter="trackers">Trackers</div>
-            <div class="home-filter-item" data-filter="journals">Journals</div>
-        </div>
-        
-        <div class="home-guides-list" id="homeGuidesList">
-            <!-- Guides will be populated here -->
-        </div>
-    </div>
-    
-    <div class="home-search-overlay" id="homeSearchOverlay">
-        <div class="home-search-container">
-            <div class="home-search-header">
-                <input type="text" class="home-search-input-full" id="homeSearchInputFull" placeholder="Search guides..." autofocus>
-                <button class="home-search-close" id="homeSearchClose">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div class="home-search-results" id="homeSearchResults">
-                <!-- Search results will appear here -->
+            </form>
+
+            <!-- Switch to login -->
+            <div class="auth-footer">
+                <span class="auth-footer-text">Already have an account?</span>
+                <button id="backToLoginBtn" class="auth-link-btn" aria-label="Back to login">Login</button>
             </div>
         </div>
     </div>
-    
-    <div class="home-actions-bar" id="homeActionsBar">
-        <button class="home-action-move" id="homeMoveBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-            Move to Collection
-        </button>
-        <button class="home-action-delete" id="homeDeleteBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-            Delete
-        </button>
-    </div>
-    
-    <div class="home-dropdown-menu" id="homeDropdownMenu">
-        <button id="homeSelectMenuBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 11l3 3L22 4"></path>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-            </svg>
-            Select
-        </button>
-        <button id="homeCreateCollectionMenuBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-            Create Collection
-        </button>
-    </div>
-</div>
-<div class="templates-page" id="templatesPage">
-    <div class="templates-container">
-        <div class="templates-header">
-            <h1 class="templates-title">Templates</h1>
+
+    <!-- ============================= -->
+    <!-- Main Application Container -->
+    <!-- ============================= -->
+
+    <main id="app" class="container" style="display: none;" role="main">
+        <!-- Header with navigation tabs -->
+        <div class="header-wrapper">
+            <header class="header">
+                <div class="edit-toggle">
+                    <button
+                        class="edit-btn"
+                        id="editModeBtn"
+                        onclick="toggleEditMode()"
+                        aria-label="Toggle edit mode">
+                        Edit
+                    </button>
+                </div>
+                <h1>📚 Personal Notebook</h1>
+                <p>note description</p>
+            </header>
+
+            <!-- Category navigation tabs -->
+            <nav class="nav-tabs" id="navTabs" role="tablist" aria-label="Category navigation">
+                <!-- Tabs will be populated dynamically -->
+            </nav>
         </div>
-        
-        <div class="home-divider"></div>
-        
-        <div class="templates-presets">
-            <div class="template-preset-item" data-template="short-notes">
-                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
-                <span>Short notes</span>
+
+        <!-- Main content area -->
+        <div class="content-area" id="contentArea" role="tabpanel">
+            <!-- Content will be populated dynamically -->
+        </div>
+    </main>
+
+    <!-- Floating layout toggle button -->
+    <button
+        class="floating-layout-btn"
+        id="layoutBtn"
+        onclick="toggleLayout()"
+        title="Switch layout"
+        aria-label="Switch layout mode"
+        style="opacity: 0;">
+    </button>
+
+    <!-- ============================= -->
+    <!-- Home Page -->
+    <!-- ============================= -->
+
+    <div class="home-page" id="homePage" role="region" aria-label="Home page">
+        <div class="home-container">
+            <!-- Home page header -->
+            <header class="home-header">
+                <h1 class="home-title">Notebook</h1>
+
+                <!-- Action buttons -->
+                <div class="home-header-actions">
+                    <button class="home-header-icon-btn" id="homeSearchBtn" aria-label="Search guides">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+
+                    <button class="home-header-icon-btn" id="homeCreateBtn" aria-label="Create new guide">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+
+                    <button class="home-header-icon-btn" id="homeMenuBtn" aria-label="Open menu">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="12" cy="5" r="1"></circle>
+                            <circle cx="12" cy="19" r="1"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="home-divider" role="separator"></div>
+
+            <!-- Collections navigation -->
+            <nav class="home-collections-nav" id="homeCollectionsNav" aria-label="Collections">
+                <!-- Collections will be populated here dynamically -->
+            </nav>
+
+            <div class="home-divider" role="separator"></div>
+
+            <!-- Filter navigation -->
+            <nav class="home-filter-nav" role="navigation" aria-label="Filter guides">
+                <div class="home-filter-item" data-filter="short-notes">Short notes</div>
+                <div class="home-filter-item" data-filter="reminders">Reminders</div>
+                <div class="home-filter-item" data-filter="routines">Routines</div>
+                <div class="home-filter-item" data-filter="trackers">Trackers</div>
+                <div class="home-filter-item" data-filter="journals">Journals</div>
+            </nav>
+
+            <!-- Guides list -->
+            <div class="home-guides-list" id="homeGuidesList" role="list">
+                <!-- Guides will be populated here -->
             </div>
-            <div class="template-preset-item" data-template="reminders">
-                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                </svg>
-                <span>Reminders</span>
+        </div>
+
+        <!-- Search overlay -->
+        <div class="home-search-overlay" id="homeSearchOverlay" role="search" aria-label="Search overlay">
+            <div class="home-search-container">
+                <div class="home-search-header">
+                    <input
+                        type="text"
+                        class="home-search-input-full"
+                        id="homeSearchInputFull"
+                        placeholder="Search guides..."
+                        aria-label="Search guides"
+                        autofocus>
+
+                    <button
+                        class="home-search-close"
+                        id="homeSearchClose"
+                        aria-label="Close search">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="home-search-results" id="homeSearchResults" role="region" aria-live="polite">
+                    <!-- Search results will appear here -->
+                </div>
             </div>
-            <div class="template-preset-item" data-template="trackers">
-                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-                <span>Trackers</span>
-            </div>
-            <div class="template-preset-item" data-template="routines">
-                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <polyline points="1 20 1 14 7 14"></polyline>
-                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                </svg>
-                <span>Routines</span>
-            </div>
-            <div class="template-preset-item" data-template="journals">
-                <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                </svg>
-                <span>Journals</span>
-            </div>
         </div>
-        
-        <div class="home-divider"></div>
-        
-        <div class="templates-custom">
-            <button class="template-custom-btn" id="templateCustomBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
+
+        <!-- Actions bar (shown when guides are selected) -->
+        <div class="home-actions-bar" id="homeActionsBar" role="toolbar" aria-label="Guide actions">
+            <button class="home-action-move" id="homeMoveBtn" aria-label="Move to collection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>
-                <span>Create custom template</span>
+                Move to Collection
             </button>
-        </div>
-    </div>
-</div>
-<!-- Journal Editor Page -->
-<div class="journal-editor-page" id="journalEditorPage">
-    <div class="journal-editor-container">
-        <!-- Header -->
-        <div class="journal-header" id="journalHeader">
-            <!-- Will be populated by renderJournalHeader() -->
-        </div>
-        
-        <!-- Meta Section -->
-        <div class="journal-meta-section">
-            <div class="journal-date" id="journalDate"></div>
-            <div class="journal-tags-wrapper" id="journalTagsWrapper"></div>
-            <div class="journal-mood-section" id="journalMoodSection"></div>
-        </div>
-        
-        <!-- Quick Actions -->
-        <div class="journal-quick-actions">
-            <button class="journal-action-btn" id="journalAddPhotoBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-                Add Photo
-            </button>
-            <button class="journal-action-btn" id="journalAddLocationBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Add Location
-            </button>
-            <button class="journal-action-btn" id="journalAddAudioBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                </svg>
-                Add Audio
-            </button>
-        </div>
-        
-        <!-- Writing Area -->
-        <div class="journal-writing-area">
-            <input type="text" class="journal-title-input" id="journalTitleInput" placeholder="Entry Title...">
-            <textarea class="journal-content-input" id="journalContentInput" placeholder="Start writing your thoughts..."></textarea>
-        </div>
-    </div>
-</div>
-<div class="profile-page" id="profilePage">
-    <div class="profile-container">
-        <div class="profile-header">
-            <h1 class="profile-title editable" id="profileNameTitle" contenteditable="false">Enter Name</h1>
-        </div>
-        
-        <div class="home-divider" style="margin: 20px 0;"></div>
-        
-        <div class="profile-info-section">
-            <div class="profile-label">Email</div>
-            <div class="profile-value" id="profileEmail">user@example.com</div>
-        </div>
-        
-        <div class="home-divider" style="margin: 20px 0;"></div>
-        
-        <div class="profile-actions">
-            <button class="profile-action-item" id="profileSwitchAccountBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="8.5" cy="7" r="4"></circle>
-                    <polyline points="17 11 19 13 23 9"></polyline>
-                </svg>
-                <span>Switch account</span>
-            </button>
-            <button class="profile-action-item" id="profileLogoutBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                <span>Logout</span>
-            </button>
-            <button class="profile-action-item danger" id="profileDeleteAccountBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+            <button class="home-action-delete" id="homeDeleteBtn" aria-label="Delete selected guides">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
-                <span>Delete account</span>
+                Delete
             </button>
         </div>
-    </div>
-</div>
 
-		<div class="settings-page" id="settingsPage">
-    <div class="settings-container">
-        <div class="settings-header">
-            <h1 class="settings-title">Settings</h1>
+        <!-- Dropdown menu -->
+        <div class="home-dropdown-menu" id="homeDropdownMenu" role="menu">
+            <button id="homeSelectMenuBtn" role="menuitem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                Select
+            </button>
+
+            <button id="homeCreateCollectionMenuBtn" role="menuitem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Create Collection
+            </button>
         </div>
-        
-        <div class="home-divider" style="margin: 20px 0;"></div>
-        
-        <div class="settings-actions">
-            <button class="settings-action-item" id="darkModeToggleBtn" style="cursor: default;">
-                <div class="dark-mode-toggle-container">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                        </svg>
-                        <span>Dark mode</span>
+    </div>
+
+    <!-- ============================= -->
+    <!-- Templates Page -->
+    <!-- ============================= -->
+
+    <div class="templates-page" id="templatesPage" role="region" aria-label="Templates page">
+        <div class="templates-container">
+            <header class="templates-header">
+                <h1 class="templates-title">Templates</h1>
+            </header>
+
+            <div class="home-divider" role="separator"></div>
+
+            <!-- Template presets -->
+            <div class="templates-presets" role="list" aria-label="Template presets">
+                <button class="template-preset-item" data-template="short-notes" role="listitem">
+                    <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <span>Short notes</span>
+                </button>
+
+                <button class="template-preset-item" data-template="reminders" role="listitem">
+                    <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span>Reminders</span>
+                </button>
+
+                <button class="template-preset-item" data-template="trackers" role="listitem">
+                    <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    <span>Trackers</span>
+                </button>
+
+                <button class="template-preset-item" data-template="routines" role="listitem">
+                    <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    <span>Routines</span>
+                </button>
+
+                <button class="template-preset-item" data-template="journals" role="listitem">
+                    <svg class="template-preset-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <span>Journals</span>
+                </button>
+            </div>
+
+            <div class="home-divider" role="separator"></div>
+
+            <!-- Custom template button -->
+            <div class="templates-custom">
+                <button
+                    class="template-custom-btn"
+                    id="templateCustomBtn"
+                    aria-label="Create custom template">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Create custom template</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- Journal Editor Page -->
+    <!-- ============================= -->
+
+    <article class="journal-editor-page" id="journalEditorPage" role="article" aria-label="Journal editor">
+        <div class="journal-editor-container">
+            <!-- Journal header -->
+            <header class="journal-header" id="journalHeader">
+                <!-- Will be populated by renderJournalHeader() -->
+            </header>
+
+            <!-- Meta information section -->
+            <section class="journal-meta-section" aria-label="Journal metadata">
+                <div class="journal-date" id="journalDate" role="status"></div>
+                <div class="journal-tags-wrapper" id="journalTagsWrapper" role="list" aria-label="Journal tags"></div>
+                <div class="journal-mood-section" id="journalMoodSection" aria-label="Mood selector"></div>
+            </section>
+
+            <!-- Quick action buttons -->
+            <div class="journal-quick-actions" role="toolbar" aria-label="Quick actions">
+                <button class="journal-action-btn" id="journalAddPhotoBtn" aria-label="Add photo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    Add Photo
+                </button>
+
+                <button class="journal-action-btn" id="journalAddLocationBtn" aria-label="Add location">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    Add Location
+                </button>
+
+                <button class="journal-action-btn" id="journalAddAudioBtn" aria-label="Add audio">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    Add Audio
+                </button>
+            </div>
+
+            <!-- Writing area -->
+            <section class="journal-writing-area" aria-label="Journal content">
+                <input
+                    type="text"
+                    class="journal-title-input"
+                    id="journalTitleInput"
+                    placeholder="Entry Title..."
+                    aria-label="Journal entry title">
+
+                <textarea
+                    class="journal-content-input"
+                    id="journalContentInput"
+                    placeholder="Start writing your thoughts..."
+                    aria-label="Journal entry content"></textarea>
+            </section>
+        </div>
+    </article>
+
+    <!-- ============================= -->
+    <!-- Profile Page -->
+    <!-- ============================= -->
+
+    <div class="profile-page" id="profilePage" role="region" aria-label="Profile page">
+        <div class="profile-container">
+            <header class="profile-header">
+                <h1
+                    class="profile-title editable"
+                    id="profileNameTitle"
+                    contenteditable="false"
+                    aria-label="Profile name">
+                    Enter Name
+                </h1>
+            </header>
+
+            <div class="home-divider" role="separator"></div>
+
+            <!-- Email section -->
+            <section class="profile-info-section" aria-labelledby="profileEmailLabel">
+                <div class="profile-label" id="profileEmailLabel">Email</div>
+                <div class="profile-value" id="profileEmail" role="status">user@example.com</div>
+            </section>
+
+            <div class="home-divider" role="separator"></div>
+
+            <!-- Profile actions -->
+            <nav class="profile-actions" role="navigation" aria-label="Profile actions">
+                <button class="profile-action-item" id="profileSwitchAccountBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <polyline points="17 11 19 13 23 9"></polyline>
+                    </svg>
+                    <span>Switch account</span>
+                </button>
+
+                <button class="profile-action-item" id="profileLogoutBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Logout</span>
+                </button>
+
+                <button class="profile-action-item danger" id="profileDeleteAccountBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span>Delete account</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- Settings Page -->
+    <!-- ============================= -->
+
+    <div class="settings-page" id="settingsPage" role="region" aria-label="Settings page">
+        <div class="settings-container">
+            <header class="settings-header">
+                <h1 class="settings-title">Settings</h1>
+            </header>
+
+            <div class="home-divider" role="separator"></div>
+
+            <!-- Settings options -->
+            <div class="settings-actions" role="group" aria-label="Settings options">
+                <!-- Dark mode toggle -->
+                <div class="settings-action-item" id="darkModeToggleBtn" role="switch" aria-checked="false" aria-label="Dark mode">
+                    <div class="dark-mode-toggle-container">
+                        <div class="setting-label">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                            <span>Dark mode</span>
+                        </div>
+                        <label class="dark-mode-toggle">
+                            <input type="checkbox" id="darkModeCheckbox" aria-label="Toggle dark mode">
+                            <span class="dark-mode-slider"></span>
+                        </label>
                     </div>
-                    <label class="dark-mode-toggle">
-                        <input type="checkbox" id="darkModeCheckbox">
-                        <span class="dark-mode-slider"></span>
-                    </label>
                 </div>
-            </button>
-            <button class="settings-action-item" id="settingsBackupBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                <span>Download backup</span>
-            </button>
-            <button class="settings-action-item" id="settingsRestoreBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <span>Upload from backup</span>
-            </button>
+
+                <!-- Backup button -->
+                <button class="settings-action-item" id="settingsBackupBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>Download backup</span>
+                </button>
+
+                <!-- Restore button -->
+                <button class="settings-action-item" id="settingsRestoreBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Upload from backup</span>
+                </button>
+            </div>
         </div>
+
+        <!-- Hidden file input for restore -->
+        <input type="file" id="restoreFileInput" accept=".json" style="display: none;" aria-hidden="true">
     </div>
-    <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
-</div>
-<div class="bottom-nav">
-    <div class="bottom-nav-item active" data-page="guides">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>Home</span>
-    </div>
-    <div class="bottom-nav-item" data-page="templates">
-	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-	    <span>Templates</span>
-	</div>
-    <div class="bottom-nav-item" data-page="profile">
-	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-		    <circle cx="12" cy="7" r="4"></circle>
-		    <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path>
-		</svg>
-	    <span>Profile</span>
-	</div>
-	<div class="bottom-nav-item" data-page="settings">
-	    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-	    <span>Settings</span>
-	</div>
-</div>
-<script type="module" src="app.js"></script>
+
+    <!-- ============================= -->
+    <!-- Bottom Navigation Bar -->
+    <!-- ============================= -->
+
+    <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+        <button class="bottom-nav-item active" data-page="guides" role="tab" aria-selected="true" aria-label="Home">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Home</span>
+        </button>
+
+        <button class="bottom-nav-item" data-page="templates" role="tab" aria-selected="false" aria-label="Templates">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Templates</span>
+        </button>
+
+        <button class="bottom-nav-item" data-page="profile" role="tab" aria-selected="false" aria-label="Profile">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="7" r="4"></circle>
+                <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path>
+            </svg>
+            <span>Profile</span>
+        </button>
+
+        <button class="bottom-nav-item" data-page="settings" role="tab" aria-selected="false" aria-label="Settings">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Settings</span>
+        </button>
+    </nav>
+
+    <!-- JavaScript Module -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
