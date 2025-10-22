@@ -2057,8 +2057,8 @@ function createNewGuide() {
         appIcon: '📝',
         categories: [],
         themeColor: '#3498db',
-        checkedItems: {},
-        templateType: 'guide'
+        checkedItems: {}
+        // No templateType - leave untyped by default
     };
     
     set(ref(database, `users/${currentUser.uid}/guides/${newId}`), newGuideData).then(() => {
@@ -3455,7 +3455,7 @@ async function populateHomePage() {
         icon: guides[id].appIcon || '📄',
         color: guides[id].themeColor || '#3498db',
         collectionId: guides[id].collectionId || null,
-        templateType: guides[id].templateType || 'guide'
+        templateType: guides[id].templateType || null  // null for untyped guides
     }));
 
     // Filter by selected collection
@@ -3465,7 +3465,17 @@ async function populateHomePage() {
     }
 
     // Show/hide filter items based on what's in the selected collection
-    const availableTypes = new Set(collectionGuidesArray.map(g => g.templateType));
+    const availableTypes = new Set(
+        collectionGuidesArray
+            .map(g => g.templateType)
+            .filter(t => t !== null)  // Only count typed guides for filter visibility
+    );
+
+    // Check if there are any untyped guides (show 'file' filter if yes)
+    const hasUntypedGuides = collectionGuidesArray.some(g => g.templateType === null);
+    if (hasUntypedGuides) {
+        availableTypes.add('file');  // Show 'file' filter if there are untyped guides
+    }
 
     // If current filter is not available in this collection, reset to 'all' (no filter)
     if (selectedFilter !== 'all' && selectedCollection && !availableTypes.has(selectedFilter)) {
@@ -3495,7 +3505,13 @@ async function populateHomePage() {
     // Filter by selected template type
     // 'all' means no filter - show all guides
     if (selectedFilter !== 'all') {
-        guidesArray = collectionGuidesArray.filter(g => g.templateType === selectedFilter);
+        if (selectedFilter === 'file') {
+            // 'file' filter shows untyped guides (templateType is null)
+            guidesArray = collectionGuidesArray.filter(g => g.templateType === null);
+        } else {
+            // Other filters show guides with that specific type
+            guidesArray = collectionGuidesArray.filter(g => g.templateType === selectedFilter);
+        }
     } else {
         guidesArray = collectionGuidesArray;
     }
@@ -6359,7 +6375,7 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
         <div class="custom-dialog-title">Change Type</div>
         <div class="custom-dialog-message">Select a type for ${selectedGuides.size} guide${selectedGuides.size > 1 ? 's' : ''}</div>
         <select id="typeSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
-            <option value="guide">Guide</option>
+            <option value="file">File</option>
             <option value="short-notes">Short notes</option>
             <option value="reminders">Reminders</option>
             <option value="routines">Routines</option>
