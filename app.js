@@ -2051,7 +2051,8 @@ function createNewGuide() {
         appIcon: '📝',
         categories: [],
         themeColor: '#3498db',
-        checkedItems: {}
+        checkedItems: {},
+        templateType: 'all'
     };
     
     set(ref(database, `users/${currentUser.uid}/guides/${newId}`), newGuideData).then(() => {
@@ -2628,19 +2629,25 @@ async function createNewCollection() {
 // Populate collections navigation
 async function populateCollections() {
     if (!currentUser) return;
-    
+
     const collectionsNav = document.getElementById('homeCollectionsNav');
     if (!collectionsNav) return;
-    
+
     const collectionsSnapshot = await get(ref(database, `users/${currentUser.uid}/collections`));
     const collections = collectionsSnapshot.val() || {};
-    
+
     const collectionsArray = Object.keys(collections).map(id => ({
         id: id,
         name: collections[id].name || 'Untitled Collection',
         createdAt: collections[id].createdAt || 0
     })).sort((a, b) => a.createdAt - b.createdAt);
-    
+
+    // Validate selectedCollection - if it doesn't exist, reset to null
+    if (selectedCollection && !collections[selectedCollection]) {
+        selectedCollection = null;
+        localStorage.removeItem('selectedCollection');
+    }
+
     // "All files" collection (shown at the end)
     const allFilesHTML = `
         <div class="home-collection-item ${selectedCollection === null ? 'active' : ''}" data-collection-id="">
@@ -2650,7 +2657,7 @@ async function populateCollections() {
             <span class="home-collection-name">All files</span>
         </div>
     `;
-    
+
     // Add user-created collections
     const collectionsHTML = collectionsArray.map(collection => `
         <div class="home-collection-item ${selectedCollection === collection.id ? 'active' : ''}" data-collection-id="${collection.id}">
@@ -2660,7 +2667,7 @@ async function populateCollections() {
             <span class="home-collection-name">${collection.name}</span>
         </div>
     `).join('');
-    
+
     collectionsNav.innerHTML = collectionsHTML + allFilesHTML;  // "All files" at the end
     
     // Add click handlers
@@ -6316,7 +6323,62 @@ document.getElementById('homeMoveBtn')?.addEventListener('click', async () => {
         btn.addEventListener('click', () => closeDialog(btn.dataset.result));
     });
 });
-	
+
+// Change type of selected guides
+document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async () => {
+    if (selectedGuides.size === 0) {
+        await customAlert('Please select at least one guide', 'No Selection');
+        return;
+    }
+
+    // Show type selection dialog
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-dialog-overlay';
+
+    const dialog = document.createElement('div');
+    dialog.className = 'custom-dialog';
+    dialog.innerHTML = `
+        <div class="custom-dialog-title">Change Type</div>
+        <div class="custom-dialog-message">Select a type for ${selectedGuides.size} guide${selectedGuides.size > 1 ? 's' : ''}</div>
+        <select id="typeSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
+            <option value="all">Guide</option>
+            <option value="short-notes">Short notes</option>
+            <option value="reminders">Reminders</option>
+            <option value="routines">Routines</option>
+            <option value="trackers">Trackers</option>
+            <option value="journals">Journals</option>
+        </select>
+        <div class="custom-dialog-buttons">
+            <button class="custom-dialog-button" data-result="cancel">Cancel</button>
+            <button class="custom-dialog-button primary" data-result="ok">Change</button>
+        </div>
+    `;
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('show'), 10);
+
+    const closeDialog = async (result) => {
+        if (result === 'ok') {
+            const templateType = document.getElementById('typeSelect').value;
+
+            for (const guideId of selectedGuides) {
+                await set(ref(database, `users/${currentUser.uid}/guides/${guideId}/templateType`), templateType);
+            }
+
+            toggleSelectMode();
+            populateHomePage();
+        }
+
+        overlay.classList.remove('show');
+        setTimeout(() => document.body.removeChild(overlay), 200);
+    };
+
+    dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
+        btn.addEventListener('click', () => closeDialog(btn.dataset.result));
+    });
+});
+
 // Delete selected guides
 document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => {
     if (selectedGuides.size === 0) {
