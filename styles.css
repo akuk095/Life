@@ -576,12 +576,14 @@
 		body.dark-mode .skill-card.sticky-style { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important; }
 		body.dark-mode .skill-card.sticky-style.sticky-blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important; }
 		body.dark-mode .skill-card.sticky-style.sticky-pink { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%) !important; }
+		body.dark-mode .skill-card.sticky-style.sticky-white { background: white !important; }
+		body.dark-mode .skill-card.sticky-style { border-bottom: none !important; }
 		body.dark-mode .skill-card.sticky-style .skill-title,
 		body.dark-mode .skill-card.sticky-style .checklist-text,
 		body.dark-mode .skill-card.sticky-style .add-item-btn { color: #374151 !important; }
-		body.dark-mode .content-area { background: var(--bg-primary); }
 		
 		body.dark-mode .nav-tab { background: var(--bg-tertiary); color: var(--text-secondary); }
+		body.dark-mode .nav-tab.active { background: var(--primary-color, #3498db); color: white; }
 		body.dark-mode .nav-tab:hover { background: var(--bg-secondary); }
 		body.dark-mode .nav-tabs { background: var(--bg-primary); border-bottom: 1px solid var(--border-color-light); }
 		
