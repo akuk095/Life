@@ -1,7 +1,23 @@
 	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 	import { getDatabase, ref, set, get, update, remove, onValue, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 	import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-	
+
+	// Initialize Dark Mode IMMEDIATELY (before page renders)
+	(function() {
+	    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+	    if (isDarkMode) {
+	        document.documentElement.classList.add('dark-mode');
+	        // Also add to body when it's available
+	        if (document.body) {
+	            document.body.classList.add('dark-mode');
+	        } else {
+	            document.addEventListener('DOMContentLoaded', function() {
+	                document.body.classList.add('dark-mode');
+	            }, { once: true });
+	        }
+	    }
+	})();
+
 	// Initialize Firebase
 	const firebaseConfig = {
 	  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
@@ -6399,28 +6415,18 @@ async function backupContent() {
     // Dark Mode Toggle
     const darkModeCheckbox = document.getElementById('darkModeCheckbox');
 
-    // Initialize dark mode from localStorage
-    function initDarkMode() {
-        const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-            if (darkModeCheckbox) {
-                darkModeCheckbox.checked = true;
-            }
-        }
-    }
-
     // Toggle dark mode
     function toggleDarkMode() {
         const isDarkMode = document.body.classList.toggle('dark-mode');
         localStorage.setItem('darkMode', isDarkMode);
     }
 
-    // Initialize on load
-    initDarkMode();
-
     // Add event listener to checkbox
     if (darkModeCheckbox) {
         darkModeCheckbox.addEventListener('change', toggleDarkMode);
+
+        // Sync checkbox with current dark mode state
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        darkModeCheckbox.checked = isDarkMode;
     }
-	
+});
