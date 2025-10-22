@@ -6395,4 +6395,32 @@ async function backupContent() {
 	            restoreFileInput.value = '';
 	        });
 	    }
+
+    // Dark Mode Toggle
+    const darkModeCheckbox = document.getElementById('darkModeCheckbox');
+
+    // Initialize dark mode from localStorage
+    function initDarkMode() {
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            if (darkModeCheckbox) {
+                darkModeCheckbox.checked = true;
+            }
+        }
+    }
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+        const isDarkMode = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+    }
+
+    // Initialize on load
+    initDarkMode();
+
+    // Add event listener to checkbox
+    if (darkModeCheckbox) {
+        darkModeCheckbox.addEventListener('change', toggleDarkMode);
+    }
 	
