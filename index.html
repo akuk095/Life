@@ -330,6 +330,20 @@
         <div class="home-divider" style="margin: 20px 0;"></div>
         
         <div class="settings-actions">
+            <button class="settings-action-item" id="darkModeToggleBtn" style="cursor: default;">
+                <div class="dark-mode-toggle-container">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <span>Dark mode</span>
+                    </div>
+                    <label class="dark-mode-toggle">
+                        <input type="checkbox" id="darkModeCheckbox">
+                        <span class="dark-mode-slider"></span>
+                    </label>
+                </div>
+            </button>
             <button class="settings-action-item" id="settingsBackupBtn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
