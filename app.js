@@ -418,14 +418,20 @@ document.addEventListener('DOMContentLoaded', () => {
         filterItem.addEventListener('click', () => {
             const filterValue = filterItem.dataset.filter;
 
-            // Update selected filter
-            selectedFilter = filterValue;
+            // Toggle filter: if clicking the active filter, deselect it
+            if (selectedFilter === filterValue) {
+                selectedFilter = 'all'; // 'all' means no filter, show everything
+                filterItem.classList.remove('active');
+            } else {
+                // Select new filter
+                selectedFilter = filterValue;
 
-            // Update active state
-            document.querySelectorAll('.home-filter-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            filterItem.classList.add('active');
+                // Update active state
+                document.querySelectorAll('.home-filter-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                filterItem.classList.add('active');
+            }
 
             // Re-populate guides with new filter
             populateHomePage();
@@ -2052,7 +2058,7 @@ function createNewGuide() {
         categories: [],
         themeColor: '#3498db',
         checkedItems: {},
-        templateType: 'all'
+        templateType: 'guide'
     };
     
     set(ref(database, `users/${currentUser.uid}/guides/${newId}`), newGuideData).then(() => {
@@ -3449,7 +3455,7 @@ async function populateHomePage() {
         icon: guides[id].appIcon || '📄',
         color: guides[id].themeColor || '#3498db',
         collectionId: guides[id].collectionId || null,
-        templateType: guides[id].templateType || 'all'
+        templateType: guides[id].templateType || 'guide'
     }));
 
     // Filter by selected collection
@@ -3460,18 +3466,17 @@ async function populateHomePage() {
 
     // Show/hide filter items based on what's in the selected collection
     const availableTypes = new Set(collectionGuidesArray.map(g => g.templateType));
-    availableTypes.add('all'); // "Guides" is always shown
 
-    // If current filter is not available in this collection, reset to 'all'
-    if (selectedCollection && !availableTypes.has(selectedFilter)) {
+    // If current filter is not available in this collection, reset to 'all' (no filter)
+    if (selectedFilter !== 'all' && selectedCollection && !availableTypes.has(selectedFilter)) {
         selectedFilter = 'all';
     }
 
     document.querySelectorAll('.home-filter-item').forEach(filterItem => {
         const filterType = filterItem.dataset.filter;
 
-        // For "All files", show all filter types
-        // For specific collections, only show types that exist in that collection
+        // For "All files" collection, show all filter types
+        // For specific collections, only show filter types that exist in that collection
         if (selectedCollection && !availableTypes.has(filterType)) {
             filterItem.style.display = 'none';
         } else {
@@ -3479,7 +3484,8 @@ async function populateHomePage() {
         }
 
         // Set active state based on selectedFilter
-        if (filterType === selectedFilter) {
+        // If selectedFilter is 'all', no filter should be active
+        if (filterType === selectedFilter && selectedFilter !== 'all') {
             filterItem.classList.add('active');
         } else {
             filterItem.classList.remove('active');
@@ -3487,6 +3493,7 @@ async function populateHomePage() {
     });
 
     // Filter by selected template type
+    // 'all' means no filter - show all guides
     if (selectedFilter !== 'all') {
         guidesArray = collectionGuidesArray.filter(g => g.templateType === selectedFilter);
     } else {
@@ -6352,7 +6359,7 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
         <div class="custom-dialog-title">Change Type</div>
         <div class="custom-dialog-message">Select a type for ${selectedGuides.size} guide${selectedGuides.size > 1 ? 's' : ''}</div>
         <select id="typeSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
-            <option value="all">Guide</option>
+            <option value="guide">Guide</option>
             <option value="short-notes">Short notes</option>
             <option value="reminders">Reminders</option>
             <option value="routines">Routines</option>
