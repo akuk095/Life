@@ -6429,4 +6429,5 @@ async function backupContent() {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
         darkModeCheckbox.checked = isDarkMode;
     }
-});
+
+
