@@ -556,6 +556,8 @@
 		body.dark-mode .bottom-nav { background: var(--bg-secondary); box-shadow: 0 -2px 12px var(--shadow); }
 		body.dark-mode .bottom-nav-item svg { stroke: var(--text-tertiary); }
 		body.dark-mode .bottom-nav-item span { color: var(--text-tertiary); }
+		body.dark-mode .bottom-nav-item.active svg { stroke: var(--primary-color); }
+		body.dark-mode .bottom-nav-item.active span { color: var(--primary-color); }
 		
 		body.dark-mode .checkbox { border-color: var(--border-color); background: var(--bg-tertiary); }
 		body.dark-mode .checkbox-menu { background: var(--card-bg); box-shadow: 0 4px 12px var(--shadow); }
@@ -567,9 +569,17 @@
 		body.dark-mode .checklist-item:active { background: var(--bg-tertiary); }
 		body.dark-mode .checklist-text { color: var(--text-secondary); }
 		
-		body.dark-mode .skill-card { background: var(--card-bg); box-shadow: 0 4px 8px var(--shadow); border-bottom: 1px solid var(--border-color); }
+		body.dark-mode .skill-card { background: var(--bg-tertiary); box-shadow: 0 4px 8px var(--shadow); border-bottom: 1px solid var(--border-color); }
 		body.dark-mode .skill-card:hover { box-shadow: 0 4px 20px var(--shadow-hover); }
 		body.dark-mode .skill-title { color: var(--text-primary); }
+		body.dark-mode .menu-trigger-btn { color: white !important; }
+		body.dark-mode .skill-card.sticky-style { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important; }
+		body.dark-mode .skill-card.sticky-style.sticky-blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important; }
+		body.dark-mode .skill-card.sticky-style.sticky-pink { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%) !important; }
+		body.dark-mode .skill-card.sticky-style .skill-title,
+		body.dark-mode .skill-card.sticky-style .checklist-text,
+		body.dark-mode .skill-card.sticky-style .add-item-btn { color: #374151 !important; }
+		body.dark-mode .content-area { background: var(--bg-primary); }
 		
 		body.dark-mode .nav-tab { background: var(--bg-tertiary); color: var(--text-secondary); }
 		body.dark-mode .nav-tab:hover { background: var(--bg-secondary); }
@@ -610,6 +620,8 @@
 		
 		body.dark-mode .profile-page { background: var(--bg-primary); }
 		body.dark-mode .profile-title { color: var(--text-primary); }
+		body.dark-mode .editable:hover { background: rgba(52, 152, 219, 0.15); }
+		body.dark-mode .editable:focus { background: var(--bg-secondary); color: var(--text-primary); }
 		body.dark-mode .profile-label { color: var(--text-tertiary); }
 		body.dark-mode .profile-value { color: var(--text-primary); }
 		body.dark-mode .profile-divider { background: var(--border-color); }
