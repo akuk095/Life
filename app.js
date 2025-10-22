@@ -3471,12 +3471,6 @@ async function populateHomePage() {
             .filter(t => t !== null)  // Only count typed guides for filter visibility
     );
 
-    // Check if there are any untyped guides (show 'file' filter if yes)
-    const hasUntypedGuides = collectionGuidesArray.some(g => g.templateType === null);
-    if (hasUntypedGuides) {
-        availableTypes.add('file');  // Show 'file' filter if there are untyped guides
-    }
-
     // If current filter is not available in this collection, reset to 'all' (no filter)
     if (selectedFilter !== 'all' && selectedCollection && !availableTypes.has(selectedFilter)) {
         selectedFilter = 'all';
@@ -3503,16 +3497,13 @@ async function populateHomePage() {
     });
 
     // Filter by selected template type
-    // 'all' means no filter - show all guides
+    // 'all' means no filter - show all guides (including untyped)
     if (selectedFilter !== 'all') {
-        if (selectedFilter === 'file') {
-            // 'file' filter shows untyped guides (templateType is null)
-            guidesArray = collectionGuidesArray.filter(g => g.templateType === null);
-        } else {
-            // Other filters show guides with that specific type
-            guidesArray = collectionGuidesArray.filter(g => g.templateType === selectedFilter);
-        }
+        // When a specific filter is selected, only show guides with that exact type
+        // Untyped guides (null) will NOT show in any specific filter
+        guidesArray = collectionGuidesArray.filter(g => g.templateType === selectedFilter);
     } else {
+        // No filter selected - show all guides including untyped ones
         guidesArray = collectionGuidesArray;
     }
 
@@ -6375,7 +6366,8 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
         <div class="custom-dialog-title">Change Type</div>
         <div class="custom-dialog-message">Select a type for ${selectedGuides.size} guide${selectedGuides.size > 1 ? 's' : ''}</div>
         <select id="typeSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
-            <option value="file">File</option>
+            <option value="">No type</option>
+            <option value="values">Values</option>
             <option value="short-notes">Short notes</option>
             <option value="reminders">Reminders</option>
             <option value="routines">Routines</option>
@@ -6399,15 +6391,23 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
             // Update all selected guides with the new type
             const updatePromises = [];
             for (const guideId of selectedGuides) {
-                updatePromises.push(
-                    set(ref(database, `users/${currentUser.uid}/guides/${guideId}/templateType`), templateType)
-                );
+                if (templateType === '') {
+                    // Remove type - set to "No type"
+                    updatePromises.push(
+                        remove(ref(database, `users/${currentUser.uid}/guides/${guideId}/templateType`))
+                    );
+                } else {
+                    // Set specific type
+                    updatePromises.push(
+                        set(ref(database, `users/${currentUser.uid}/guides/${guideId}/templateType`), templateType)
+                    );
+                }
             }
 
             // Wait for all updates to complete
             await Promise.all(updatePromises);
 
-            console.log(`Changed ${selectedGuides.size} guide(s) to type: ${templateType}`);
+            console.log(`Changed ${selectedGuides.size} guide(s) to type: ${templateType || 'No type'}`);
 
             // Exit select mode and refresh
             toggleSelectMode();
