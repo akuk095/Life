@@ -3462,15 +3462,23 @@ async function populateHomePage() {
     const availableTypes = new Set(collectionGuidesArray.map(g => g.templateType));
     availableTypes.add('all'); // "Guides" is always shown
 
+    // If current filter is not available in this collection, reset to 'all'
+    if (selectedCollection && !availableTypes.has(selectedFilter)) {
+        selectedFilter = 'all';
+    }
+
     document.querySelectorAll('.home-filter-item').forEach(filterItem => {
         const filterType = filterItem.dataset.filter;
+
+        // For "All files", show all filter types
+        // For specific collections, only show types that exist in that collection
         if (selectedCollection && !availableTypes.has(filterType)) {
             filterItem.style.display = 'none';
         } else {
             filterItem.style.display = 'block';
         }
 
-        // Set active state
+        // Set active state based on selectedFilter
         if (filterType === selectedFilter) {
             filterItem.classList.add('active');
         } else {
@@ -3484,6 +3492,9 @@ async function populateHomePage() {
     } else {
         guidesArray = collectionGuidesArray;
     }
+
+    console.log('Selected filter:', selectedFilter);
+    console.log('Guides after filtering:', guidesArray.map(g => ({ title: g.title, type: g.templateType })));
     
     guidesList.innerHTML = '';
     
@@ -6362,12 +6373,22 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
         if (result === 'ok') {
             const templateType = document.getElementById('typeSelect').value;
 
+            // Update all selected guides with the new type
+            const updatePromises = [];
             for (const guideId of selectedGuides) {
-                await set(ref(database, `users/${currentUser.uid}/guides/${guideId}/templateType`), templateType);
+                updatePromises.push(
+                    set(ref(database, `users/${currentUser.uid}/guides/${guideId}/templateType`), templateType)
+                );
             }
 
+            // Wait for all updates to complete
+            await Promise.all(updatePromises);
+
+            console.log(`Changed ${selectedGuides.size} guide(s) to type: ${templateType}`);
+
+            // Exit select mode and refresh
             toggleSelectMode();
-            populateHomePage();
+            await populateHomePage();
         }
 
         overlay.classList.remove('show');
