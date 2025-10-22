@@ -413,6 +413,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Filter items event listeners
+    document.querySelectorAll('.home-filter-item').forEach(filterItem => {
+        filterItem.addEventListener('click', () => {
+            const filterValue = filterItem.dataset.filter;
+
+            // Update selected filter
+            selectedFilter = filterValue;
+
+            // Update active state
+            document.querySelectorAll('.home-filter-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            filterItem.classList.add('active');
+
+            // Re-populate guides with new filter
+            populateHomePage();
+        });
+    });
+
     const homeMenuBtn = document.getElementById('homeMenuBtn');
     const homeDropdownMenu = document.getElementById('homeDropdownMenu');
     const homeSelectMenuBtn = document.getElementById('homeSelectMenuBtn');
@@ -552,7 +571,8 @@ let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
 let headerImage = null; 
 let wallpaperUrl = '';
-let selectedCollection = null; // Currently selected collection ID
+// Load last selected collection from localStorage, default to null ("All files")
+let selectedCollection = localStorage.getItem('selectedCollection') || null;
 let selectedFilter = 'all'; // 'all' means no filter active
 	
 // Drag and drop state
@@ -2621,7 +2641,7 @@ async function populateCollections() {
         createdAt: collections[id].createdAt || 0
     })).sort((a, b) => a.createdAt - b.createdAt);
     
-    // Always show "All files" as the first item (selected by default)
+    // "All files" collection (shown at the end)
     const allFilesHTML = `
         <div class="home-collection-item ${selectedCollection === null ? 'active' : ''}" data-collection-id="">
             <div class="home-collection-circle">
@@ -2641,20 +2661,22 @@ async function populateCollections() {
         </div>
     `).join('');
     
-    collectionsNav.innerHTML = allFilesHTML + collectionsHTML;  // ← KEEP ONLY THIS ONE
+    collectionsNav.innerHTML = collectionsHTML + allFilesHTML;  // "All files" at the end
     
     // Add click handlers
     document.querySelectorAll('.home-collection-item').forEach(item => {
         item.addEventListener('click', () => {
             const collectionId = item.dataset.collectionId;
-            
+
             // Always select - can't deselect collections
             if (collectionId === '') {
                 selectedCollection = null;  // "All files"
+                localStorage.removeItem('selectedCollection');
             } else {
                 selectedCollection = collectionId;  // Specific collection
+                localStorage.setItem('selectedCollection', collectionId);
             }
-            
+
             populateHomePage();
         });
 
@@ -3422,15 +3444,38 @@ async function populateHomePage() {
         collectionId: guides[id].collectionId || null,
         templateType: guides[id].templateType || 'all'
     }));
-    
+
     // Filter by selected collection
+    let collectionGuidesArray = guidesArray;
     if (selectedCollection) {
-        guidesArray = guidesArray.filter(g => g.collectionId === selectedCollection);
+        collectionGuidesArray = guidesArray.filter(g => g.collectionId === selectedCollection);
     }
-    
+
+    // Show/hide filter items based on what's in the selected collection
+    const availableTypes = new Set(collectionGuidesArray.map(g => g.templateType));
+    availableTypes.add('all'); // "Guides" is always shown
+
+    document.querySelectorAll('.home-filter-item').forEach(filterItem => {
+        const filterType = filterItem.dataset.filter;
+        if (selectedCollection && !availableTypes.has(filterType)) {
+            filterItem.style.display = 'none';
+        } else {
+            filterItem.style.display = 'block';
+        }
+
+        // Set active state
+        if (filterType === selectedFilter) {
+            filterItem.classList.add('active');
+        } else {
+            filterItem.classList.remove('active');
+        }
+    });
+
     // Filter by selected template type
     if (selectedFilter !== 'all') {
-        guidesArray = guidesArray.filter(g => g.templateType === selectedFilter);
+        guidesArray = collectionGuidesArray.filter(g => g.templateType === selectedFilter);
+    } else {
+        guidesArray = collectionGuidesArray;
     }
     
     guidesList.innerHTML = '';
