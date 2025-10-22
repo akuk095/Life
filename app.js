@@ -2052,7 +2052,7 @@ function createNewGuide() {
     const newId = `guide_${timestamp}`;
     
     const newGuideData = {
-        appTitle: 'New Guide',
+        appTitle: 'New Page',
         appSubtitle: 'Tap to add description',
         appIcon: '📝',
         categories: [],
@@ -2091,7 +2091,7 @@ function createGuideFromTemplate(templateType) {
     const newId = `guide_${timestamp}`;
     
     let templateData = {
-        appTitle: 'New Guide',
+        appTitle: 'New Page',
         appSubtitle: 'Tap to add description',
         appIcon: '📝',
         categories: [],
@@ -2207,7 +2207,7 @@ function createGuideFromTemplate(templateType) {
         }, 100);
     }).catch((error) => {
         console.error('Error creating template:', error);
-        customAlert('Failed to create guide: ' + error.message, 'Error');
+        customAlert('Failed to create page: ' + error.message, 'Error');
     });
 }
 
@@ -2706,7 +2706,7 @@ async function populateCollections() {
                     e.preventDefault();
                     const collectionName = item.querySelector('.home-collection-name').textContent;
                     
-                    if (await customConfirm(`Delete collection "${collectionName}"? The guides inside will not be deleted.`, 'Delete Collection', 'Delete')) {
+                    if (await customConfirm(`Delete collection "${collectionName}"? The pages inside will not be deleted.`, 'Delete Collection', 'Delete')) {
                         await remove(ref(database, `users/${currentUser.uid}/collections/${collectionId}`));
                         
                         // Remove collection reference from guides
@@ -2740,7 +2740,7 @@ async function populateCollections() {
                     e.preventDefault();
                     const collectionName = item.querySelector('.home-collection-name').textContent;
                     
-                    if (await customConfirm(`Delete collection "${collectionName}"? The guides inside will not be deleted.`, 'Delete Collection', 'Delete')) {
+                    if (await customConfirm(`Delete collection "${collectionName}"? The pages inside will not be deleted.`, 'Delete Collection', 'Delete')) {
                         await remove(ref(database, `users/${currentUser.uid}/collections/${collectionId}`));
                         
                         // Remove collection reference from guides
@@ -2950,10 +2950,10 @@ function duplicateGuide() {
 async function deleteGuide() {
     if (!currentUser) return;
     if (currentGuideId === 'defaultGuide') {
-        await customAlert("The default guide cannot be deleted.", "Cannot Delete");
+        await customAlert("The default page cannot be deleted.", "Cannot Delete");
         return;
     }
-    if (await customConfirm("This will permanently delete this guide and all its content. This cannot be undone.", "Delete Guide")) {
+    if (await customConfirm("This will permanently delete this page and all its content. This cannot be undone.", "Delete Page")) {
         remove(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}`));
         currentGuideId = 'defaultGuide';
         localStorage.setItem('currentGuideId', 'defaultGuide');
@@ -3516,8 +3516,8 @@ async function populateHomePage() {
         guidesList.innerHTML = `
             <div class="home-empty">
                 <div class="home-empty-icon">📚</div>
-                <div class="home-empty-text">No guides found</div>
-                <div class="home-empty-subtext">${selectedCollection ? 'This collection is empty' : 'Create your first guide to get started'}</div>
+                <div class="home-empty-text">No pages found</div>
+                <div class="home-empty-subtext">${selectedCollection ? 'This collection is empty' : 'Create your first page to get started'}</div>
             </div>
         `;
         return;
@@ -6284,7 +6284,7 @@ document.querySelectorAll('.template-preset-item').forEach(item => {
 
 document.getElementById('homeMoveBtn')?.addEventListener('click', async () => {
     if (selectedGuides.size === 0) {
-        await customAlert('Please select at least one guide', 'No Selection');
+        await customAlert('Please select at least one page', 'No Selection');
         return;
     }
     
@@ -6309,7 +6309,7 @@ document.getElementById('homeMoveBtn')?.addEventListener('click', async () => {
     dialog.className = 'custom-dialog';
     dialog.innerHTML = `
         <div class="custom-dialog-title">Move to Collection</div>
-        <div class="custom-dialog-message">Select a collection for ${selectedGuides.size} guide${selectedGuides.size > 1 ? 's' : ''}</div>
+        <div class="custom-dialog-message">Select a collection for ${selectedGuides.size} page${selectedGuides.size > 1 ? 's' : ''}</div>
         <select id="collectionSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
             <option value="">Remove from collection</option>
             ${collectionOptions}
@@ -6352,7 +6352,7 @@ document.getElementById('homeMoveBtn')?.addEventListener('click', async () => {
 // Change type of selected guides
 document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async () => {
     if (selectedGuides.size === 0) {
-        await customAlert('Please select at least one guide', 'No Selection');
+        await customAlert('Please select at least one page', 'No Selection');
         return;
     }
 
@@ -6364,7 +6364,7 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
     dialog.className = 'custom-dialog';
     dialog.innerHTML = `
         <div class="custom-dialog-title">Change Type</div>
-        <div class="custom-dialog-message">Select a type for ${selectedGuides.size} guide${selectedGuides.size > 1 ? 's' : ''}</div>
+        <div class="custom-dialog-message">Select a type for ${selectedGuides.size} page${selectedGuides.size > 1 ? 's' : ''}</div>
         <select id="typeSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
             <option value="">No type</option>
             <option value="values">Values</option>
@@ -6426,7 +6426,7 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
 // Delete selected guides
 document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => {
     if (selectedGuides.size === 0) {
-        await customAlert('Please select at least one guide', 'No Selection');
+        await customAlert('Please select at least one page', 'No Selection');
         return;
     }
     
@@ -6439,7 +6439,7 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
         const guideName = guides[guideId]?.appTitle || 'Untitled';
         message = `Delete "${guideName}"? This cannot be undone.`;
     } else {
-        message = `Delete ${selectedGuides.size} guides? This cannot be undone.`;
+        message = `Delete ${selectedGuides.size} pages? This cannot be undone.`;
     }
     
     if (await customConfirm(message, 'Delete', 'Delete')) {
@@ -6452,7 +6452,7 @@ document.getElementById('homeDeleteBtn')?.addEventListener('click', async () => 
         
         toggleSelectMode();
         populateHomePage();
-        await customAlert('Guides deleted successfully!', 'Success');
+        await customAlert('Pages deleted successfully!', 'Success');
     }
 });	
 
