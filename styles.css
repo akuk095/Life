@@ -63,7 +63,6 @@
 		.checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 12px; cursor: default; transition: all 0.2s ease; border: 1px solid transparent; position: relative; -webkit-tap-highlight-color: transparent; will-change: transform; }
 		.checklist-item.no-background { background: transparent !important; border: none !important; border-radius: 0 !important; padding: 14px 0 !important; }
 		.checklist-item.no-background:hover { background: transparent !important; border: none !important; }
-		.checklist-item.no-padding { padding: 0 !important; }
 		.checklist-item:active { transform: scale(0.98); background: #e8f4f8; }
 		.checklist-item.checked { opacity: 0.7; }
 		.checklist-item.checked .checkbox { background: var(--secondary-color, #27ae60); border-color: var(--secondary-color, #27ae60); position: relative; }
