@@ -1,24 +1,64 @@
-	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-	import { getDatabase, ref, set, get, update, remove, onValue, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-	import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+	// ============================================================================
+	// SECTION 1: FIREBASE IMPORTS & DEPENDENCIES
+	// ============================================================================
+	// Why: Using CDN imports instead of npm packages to avoid build step complexity
+	// This keeps the app deployable as a simple static site without requiring Node.js
 
-	// Initialize Dark Mode IMMEDIATELY (before page renders)
-	(function() {
+	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+	import {
+	    getDatabase,
+	    ref,
+	    set,
+	    get,
+	    update,
+	    remove,
+	    onValue,
+	    child
+	} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+	import {
+	    getAuth,
+	    signInWithEmailAndPassword,
+	    createUserWithEmailAndPassword,
+	    signInWithPopup,
+	    GoogleAuthProvider,
+	    onAuthStateChanged,
+	    signOut,
+	    sendEmailVerification
+	} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+	// ============================================================================
+	// SECTION 2: IMMEDIATE DARK MODE INITIALIZATION
+	// ============================================================================
+	// Why: Dark mode must be applied BEFORE the page renders to prevent flash of wrong theme
+	// This IIFE runs synchronously before any HTML is parsed to avoid the "white flash"
+	// that occurs when switching from default light mode to dark mode after page load
+	(function initializeDarkMode() {
 	    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+
 	    if (isDarkMode) {
+	        // Apply to documentElement first (available immediately in <head>)
 	        document.documentElement.classList.add('dark-mode');
-	        // Also add to body when it's available
+
+	        // Also apply to body - it may not exist yet since we're in <head>
+	        // Why: Some CSS selectors target body.dark-mode specifically
 	        if (document.body) {
 	            document.body.classList.add('dark-mode');
 	        } else {
-	            document.addEventListener('DOMContentLoaded', function() {
+	            // Wait for body to be available, but only listen once to avoid memory leaks
+	            document.addEventListener('DOMContentLoaded', function applyDarkModeToBody() {
 	                document.body.classList.add('dark-mode');
 	            }, { once: true });
 	        }
 	    }
 	})();
 
-	// Initialize Firebase
+	// ============================================================================
+	// SECTION 3: FIREBASE CONFIGURATION
+	// ============================================================================
+	// Why: Firebase config is stored here instead of environment variables because:
+	// 1. These are public identifiers (safe to expose in client-side code)
+	// 2. Security is handled by Firebase Security Rules, not by hiding these values
+	// 3. Simplifies deployment as a static site without needing a build process
 	const firebaseConfig = {
 	  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
 	  authDomain: "life-akuk095.firebaseapp.com",
@@ -29,7 +69,19 @@
 	  appId: "1:80383828301:web:7c001b7375f63fc5055704",
 	};
 
-	// Custom dialog functions to replace alert, confirm, and prompt
+	// ============================================================================
+	// SECTION 4: CUSTOM DIALOG UTILITIES
+	// ============================================================================
+	// Why: Replacing browser's native alert/confirm/prompt with custom dialogs because:
+	// 1. Native dialogs block the entire browser and can't be styled
+	// 2. They don't support dark mode or our app's theme
+	// 3. Custom dialogs provide better UX with animations and consistent design
+	// 4. They return Promises for better async/await compatibility
+
+	/**
+	 * Custom alert dialog - replaces window.alert()
+	 * Why async: Returns a Promise so callers can await the user's acknowledgment
+	 */
 function customAlert(message, title = '') {
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
@@ -50,144 +102,193 @@ function customAlert(message, title = '') {
         dialog.innerHTML = html;
         overlay.appendChild(dialog);
         document.body.appendChild(overlay);
-        
+
+        // Why 10ms delay: Allows browser to render the element before adding 'show' class
+        // This enables CSS transitions to work properly (can't transition from non-existent to visible)
         setTimeout(() => overlay.classList.add('show'), 10);
-        
+
         const closeDialog = () => {
             overlay.classList.remove('show');
+
+            // Why 200ms delay: Matches CSS transition duration for fade-out animation
+            // Removing from DOM immediately would skip the closing animation
             setTimeout(() => {
                 document.body.removeChild(overlay);
                 resolve();
             }, 200);
         };
-        
+
         dialog.querySelector('.custom-dialog-button').addEventListener('click', closeDialog);
+
+        // Why allow overlay click to close: Standard UX pattern - clicking outside dismisses modal
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) closeDialog();
         });
     });
 }
 
-function customConfirm(message, title = '', confirmText = 'OK') {
-    return new Promise((resolve) => {
-        const overlay = document.createElement('div');
-        overlay.className = 'custom-dialog-overlay';
-        
-        const dialog = document.createElement('div');
-        dialog.className = 'custom-dialog';
-        
-        let html = '';
-        if (title) {
-            html += `<div class="custom-dialog-title">${title}</div>`;
-        }
-        html += `<div class="custom-dialog-message">${message}</div>`;
-        
-        // Use destructive class only if confirmText suggests danger
-        const isDangerous = confirmText.toLowerCase().includes('delete') || confirmText.toLowerCase().includes('remove');
-        const buttonClass = isDangerous ? 'destructive' : 'primary';
-        
-        html += `<div class="custom-dialog-buttons">
-            <button class="custom-dialog-button" data-result="false">Cancel</button>
-            <button class="custom-dialog-button ${buttonClass}" data-result="true">${confirmText}</button>
-        </div>`;
-        
-        dialog.innerHTML = html;
-        overlay.appendChild(dialog);
-        document.body.appendChild(overlay);
-        
-        setTimeout(() => overlay.classList.add('show'), 10);
-        
-        const closeDialog = (result) => {
-            overlay.classList.remove('show');
-            setTimeout(() => {
-                document.body.removeChild(overlay);
-                resolve(result);
-            }, 200);
-        };
-        
-        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                closeDialog(btn.dataset.result === 'true');
-            });
-        });
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeDialog(false);
-        });
-    });
-}
+	/**
+	 * Custom confirm dialog - replaces window.confirm()
+	 * Why customizable button text: Allows context-specific actions like "Delete" instead of generic "OK"
+	 * Returns: Promise<boolean> - true if confirmed, false if cancelled
+	 */
+	function customConfirm(message, title = '', confirmText = 'OK') {
+	    return new Promise((resolve) => {
+	        const overlay = document.createElement('div');
+	        overlay.className = 'custom-dialog-overlay';
 
-function customPrompt(message, defaultValue = '', title = '') {
-    return new Promise((resolve) => {
-        const overlay = document.createElement('div');
-        overlay.className = 'custom-dialog-overlay';
-        
-        const dialog = document.createElement('div');
-        dialog.className = 'custom-dialog';
-        
-        let html = '';
-        if (title) {
-            html += `<div class="custom-dialog-title">${title}</div>`;
-        }
-        html += `<div class="custom-dialog-message">${message}</div>`;
-        html += `<input type="text" class="custom-dialog-input" value="${defaultValue}" placeholder="${defaultValue}">`;
-        html += `<div class="custom-dialog-buttons">
-            <button class="custom-dialog-button" data-result="cancel">Cancel</button>
-            <button class="custom-dialog-button primary" data-result="ok">OK</button>
-        </div>`;
-        
-        dialog.innerHTML = html;
-        overlay.appendChild(dialog);
-        document.body.appendChild(overlay);
-        
-        const input = dialog.querySelector('.custom-dialog-input');
-        
-        setTimeout(() => {
-            overlay.classList.add('show');
-            input.focus();
-            input.select();
-        }, 10);
-        
-        const closeDialog = (result) => {
-            overlay.classList.remove('show');
-            setTimeout(() => {
-                document.body.removeChild(overlay);
-                resolve(result);
-            }, 200);
-        };
-        
-        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (btn.dataset.result === 'ok') {
-                    closeDialog(input.value || null);
-                } else {
-                    closeDialog(null);
-                }
-            });
-        });
-        
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                closeDialog(input.value || null);
-            } else if (e.key === 'Escape') {
-                closeDialog(null);
-            }
-        });
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeDialog(null);
-        });
-    });
-}
+	        const dialog = document.createElement('div');
+	        dialog.className = 'custom-dialog';
+
+	        let html = '';
+	        if (title) {
+	            html += `<div class="custom-dialog-title">${title}</div>`;
+	        }
+	        html += `<div class="custom-dialog-message">${message}</div>`;
+
+	        // Why check confirmText for dangerous words: Automatically applies red 'destructive' styling
+	        // to warn users about potentially dangerous actions like deleting data
+	        const isDangerous = confirmText.toLowerCase().includes('delete') || confirmText.toLowerCase().includes('remove');
+	        const buttonClass = isDangerous ? 'destructive' : 'primary';
+
+	        html += `<div class="custom-dialog-buttons">
+	            <button class="custom-dialog-button" data-result="false">Cancel</button>
+	            <button class="custom-dialog-button ${buttonClass}" data-result="true">${confirmText}</button>
+	        </div>`;
+
+	        dialog.innerHTML = html;
+	        overlay.appendChild(dialog);
+	        document.body.appendChild(overlay);
+
+	        setTimeout(() => overlay.classList.add('show'), 10);
+
+	        const closeDialog = (result) => {
+	            overlay.classList.remove('show');
+	            setTimeout(() => {
+	                document.body.removeChild(overlay);
+	                resolve(result);
+	            }, 200);
+	        };
+
+	        // Why use data-result attribute: Cleanly maps button clicks to boolean results
+	        // without needing separate handlers for each button
+	        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
+	            btn.addEventListener('click', () => {
+	                closeDialog(btn.dataset.result === 'true');
+	            });
+	        });
+
+	        // Why overlay click returns false: Clicking outside should cancel, not confirm
+	        // Prevents accidental confirmations of destructive actions
+	        overlay.addEventListener('click', (e) => {
+	            if (e.target === overlay) closeDialog(false);
+	        });
+	    });
+	}
+
+	/**
+	 * Custom prompt dialog - replaces window.prompt()
+	 * Why include defaultValue: Pre-fills input for editing existing values
+	 * Returns: Promise<string|null> - user input or null if cancelled
+	 */
+	function customPrompt(message, defaultValue = '', title = '') {
+	    return new Promise((resolve) => {
+	        const overlay = document.createElement('div');
+	        overlay.className = 'custom-dialog-overlay';
+
+	        const dialog = document.createElement('div');
+	        dialog.className = 'custom-dialog';
+
+	        let html = '';
+	        if (title) {
+	            html += `<div class="custom-dialog-title">${title}</div>`;
+	        }
+	        html += `<div class="custom-dialog-message">${message}</div>`;
+	        html += `<input type="text" class="custom-dialog-input" value="${defaultValue}" placeholder="${defaultValue}">`;
+	        html += `<div class="custom-dialog-buttons">
+	            <button class="custom-dialog-button" data-result="cancel">Cancel</button>
+	            <button class="custom-dialog-button primary" data-result="ok">OK</button>
+	        </div>`;
+
+	        dialog.innerHTML = html;
+	        overlay.appendChild(dialog);
+	        document.body.appendChild(overlay);
+
+	        const input = dialog.querySelector('.custom-dialog-input');
+
+	        // Why focus and select in setTimeout: Ensures input is ready in DOM before manipulating it
+	        // Why select(): Auto-selects text so user can immediately start typing to replace it
+	        setTimeout(() => {
+	            overlay.classList.add('show');
+	            input.focus();
+	            input.select();
+	        }, 10);
+
+	        const closeDialog = (result) => {
+	            overlay.classList.remove('show');
+	            setTimeout(() => {
+	                document.body.removeChild(overlay);
+	                resolve(result);
+	            }, 200);
+	        };
+
+	        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
+	            btn.addEventListener('click', () => {
+	                if (btn.dataset.result === 'ok') {
+	                    // Why return null for empty input: Matches native prompt() behavior
+	                    // Allows callers to distinguish between cancelled and empty input
+	                    closeDialog(input.value || null);
+	                } else {
+	                    closeDialog(null);
+	                }
+	            });
+	        });
+
+	        // Why keyboard shortcuts: Standard UX - Enter submits, Escape cancels
+	        // Allows power users to complete actions without mouse
+	        input.addEventListener('keydown', (e) => {
+	            if (e.key === 'Enter') {
+	                closeDialog(input.value || null);
+	            } else if (e.key === 'Escape') {
+	                closeDialog(null);
+	            }
+	        });
+
+	        // Why overlay click returns null: Clicking outside = cancellation
+	        overlay.addEventListener('click', (e) => {
+	            if (e.target === overlay) closeDialog(null);
+	        });
+	    });
+	}
+	// ============================================================================
+	// SECTION 5: FIREBASE INITIALIZATION
+	// ============================================================================
 	const app = initializeApp(firebaseConfig);
 	const database = getDatabase(app);
 	const auth = getAuth(app);
-	let currentUser = null;
+
+	// ============================================================================
+	// SECTION 6: GLOBAL STATE MANAGEMENT
+	// ============================================================================
+	// Why global variables: Shared state across multiple functions and event handlers
+	// Alternative would be a state management library, but that adds complexity for a single-page app
+
+	// Authentication state
+	let currentUser = null;  // Populated by onAuthStateChanged listener
+
+	// Guide/Document state
+	// Why localStorage for currentGuideId: Persists which guide is open across page refreshes
 	let currentGuideId = localStorage.getItem('currentGuideId') || null;
-	let skillReminders = {}; // Format: { 'catIndex-skillIndex': { enabled: true, items: { 'itemIndex': 'HH:MM' } } }
+
+	// Reminder & Timer state
+	// Why object format for skillReminders: Allows O(1) lookup by 'catIndex-skillIndex' key
+	// Format: { 'catIndex-skillIndex': { enabled: true, items: { 'itemIndex': 'HH:MM' } } }
+	let skillReminders = {};
+	let itemTimers = {};  // Stores active setTimeout references for clearing
+
+	// Journal state
 	let currentJournalEntryId = null;
-	let currentJournalData = {};
-	let itemTimers = {};
+	let currentJournalData = {};  // Temporary storage while editing
 	
 	// Default data structure
 	let categories = [
@@ -549,32 +650,61 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-let checkedItems = {};
-let editMode = false;
-let activeTabIndex = 0;
-let appIcon = "📚"; 
+// App/Guide UI state
+let checkedItems = {};  // Tracks which checklist items are checked
+let editMode = false;  // Whether user is in edit mode (can reorder/delete items)
+let activeTabIndex = 0;  // Currently active category tab
+
+// Guide appearance settings (loaded from Firebase for each guide)
+let appIcon = "📚";
 let appTitle = "Short note";
 let appSubtitle = "Double tap to add description";
-let themeColor = '#607d8b'; // Default grey
-let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
-let stickyMode = 'white'; // 'yellow', 'blue', 'pink', or 'white' (original)
+
+// Why default grey (#607d8b): Neutral color that works well in both light and dark mode
+let themeColor = '#607d8b';
+
+// Layout & Display options
+// Why three layout modes: Provides flexibility for different use cases
+// 'vertical' = stacked cards, 'horizontal' = side-by-side, 'headings' = list view
+let layoutMode = 'vertical';
+
+// Why sticky mode: Mimics physical sticky notes for visual familiarity
+let stickyMode = 'white';  // Options: 'yellow', 'blue', 'pink', 'white'
+
+// Auto-refresh feature
+// Why auto-refresh: Allows daily checklists to reset automatically at a specific time
 let autoRefreshEnabled = false;
-let autoRefreshTime = "00:00"; // Default midnight
-let headerImage = null; 
-let wallpaperUrl = '';
-// Load last selected collection from localStorage, default to null ("All files")
+let autoRefreshTime = "00:00";  // 24-hour format (HH:MM)
+
+// Visual customization
+let headerImage = null;  // Base64 or URL for header background image
+let wallpaperUrl = '';  // Background wallpaper URL
+
+// Collection/Filter state
+// Why localStorage: Remembers user's last selected collection filter across sessions
 let selectedCollection = localStorage.getItem('selectedCollection') || null;
-let selectedFilter = 'all'; // 'all' means no filter active
-	
-// Drag and drop state
-let draggedCard = null;
-let draggedCatIndex = null;
-let draggedSkillIndex = null;
-let draggedElement = null;
-let placeholder = null;
-let draggedTab = null;
-let draggedTabIndex = null;
-	
+let selectedFilter = 'all';  // Filter type: 'all', 'completed', 'incomplete'
+
+// ============================================================================
+// Drag and Drop State
+// ============================================================================
+// Why separate drag state variables: Needed to track what's being dragged,
+// from where, and where it can be dropped during reordering operations
+let draggedCard = null;  // The DOM element being dragged
+let draggedCatIndex = null;  // Source category index
+let draggedSkillIndex = null;  // Source skill index within category
+let draggedElement = null;  // Current draggable element reference
+let placeholder = null;  // Visual placeholder showing drop position
+let draggedTab = null;  // For tab reordering
+let draggedTabIndex = null;  // Source tab index
+
+// ============================================================================
+// SECTION 7: APP CONSTANTS & THEME DATA
+// ============================================================================
+
+// Color Theme Presets
+// Why predefined themes: Provides curated color combinations that look professional
+// and work well together, rather than requiring users to pick colors manually
 const colorThemes = [
     { name: 'Forest', primary: '#27ae60', secondary: '#f39c12' },          // Green + Amber
     { name: 'Cherry', primary: '#e74c3c', secondary: '#c0392b' },          // Red + Dark Red
@@ -594,9 +724,13 @@ const colorThemes = [
     { name: 'Steel Blue', primary: '#607D8B', secondary: '#455A64' },
 	{ name: 'Charcoal', primary: '#5C6B73', secondary: '#3D4A52' },
 	{ name: 'Dark', primary: '#0A0A0A', secondary: '#000000' }
-]; 
+];
 
-		const svgIcons = [
+// SVG Icon Library
+// Why SVG paths instead of icon fonts: SVGs are more reliable, don't require font loading,
+// and can be styled/animated with CSS. Each path is a 24x24 viewBox coordinate system
+// Why categorized: Organized by theme to help users find relevant icons quickly
+const svgIcons = [
     { name: 'Night', path: 'M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z' },
     { name: 'Water', path: 'M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8z' },
     { name: 'Location', path: 'M12 2C8 2 5 5.13 5 9c0 5 7 13 7 13s7-8 7-13c0-3.87-3-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z' },
@@ -851,12 +985,22 @@ document.addEventListener('drop', (e) => {
 });
 
 		
+// ============================================================================
+// DATA LOADING & PERSISTENCE
+// ============================================================================
+
+/**
+ * Load user's guide data from Firebase
+ * Why async: Firebase operations are asynchronous, so we need to wait for data
+ */
 async function loadUserData(userId) {
-    // Hide container initially
+    // Why hide container initially: Prevents flickering/layout shifts while data loads
+    // Better to show smooth fade-in with complete data than partial content appearing
     document.querySelector('.container').classList.remove('loaded');
 	document.querySelector('.container').style.opacity = '0';
-    
-    // Check if guide exists for this user
+
+    // Why check if guide exists: First-time users or new guides need default data
+    // This ensures every user has a working guide even if they've never saved before
     get(ref(database, `users/${userId}/guides/${currentGuideId}`)).then((snapshot) => {
         if (!snapshot.exists()) {
             set(ref(database, `users/${userId}/guides/${currentGuideId}`), {
@@ -864,9 +1008,10 @@ async function loadUserData(userId) {
             });
         }
     });
-    
-	    // Use Promise.all to wait for all data to load
-	    Promise.all([
+
+    // Why Promise.all: Load all guide data in parallel instead of sequentially
+    // This is much faster than loading one field at a time (hundreds of ms saved)
+    Promise.all([
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/categories`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/checkedItems`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/appTitle`)),
@@ -920,7 +1065,7 @@ async function loadUserData(userId) {
         if (layoutSnap.val()) {
             layoutMode = layoutSnap.val();
         }
-             
+
         // Load auto-refresh settings
         if (autoRefreshEnabledSnap.val() !== null) {
             autoRefreshEnabled = autoRefreshEnabledSnap.val();
@@ -1001,86 +1146,119 @@ async function loadUserData(userId) {
     });
 }
 
+/**
+ * Switch to a different guide/document
+ * @param {string} guideId - The unique identifier of the guide to switch to
+ *
+ * What: Changes the currently active guide and loads its data
+ * Why: Users can have multiple guides (checklists, journals, etc.) and need to switch between them
+ * How: Updates global state, persists to localStorage, reloads data from Firebase
+ */
 function switchGuide(guideId) {
+    // Update global current guide reference
     currentGuideId = guideId;
+
+    // Why localStorage: Remembers which guide user was viewing if they refresh the page
     localStorage.setItem('currentGuideId', guideId);
-    localStorage.setItem('currentPage', 'guides'); // Keep as 'guides' so home stays active
+
+    // Why set to 'guides': Keeps the home/guides tab highlighted in bottom navigation
+    // even when viewing a specific guide (maintains navigation context)
+    localStorage.setItem('currentPage', 'guides');
+
+    // Load all data for this guide from Firebase
     loadUserData(currentUser.uid);
-    
-    // Show back button when viewing a guide
+
+    // Why 100ms delay: Ensures DOM is ready before manipulating back button
+    // The guide view needs to render before we can access its header elements
     setTimeout(() => {
         const backBtn = document.getElementById('headerBackBtn');
         if (backBtn) {
+            // Show back button to allow returning to guide list
             backBtn.style.display = 'flex';
         }
     }, 100);
 }
 	
+// ============================================================================
+// THEME & COLOR MANAGEMENT
+// ============================================================================
+
+/**
+ * Apply the current theme color to the entire app
+ * Why this function exists: Centralizes all theme-related styling so changing
+ * the theme only requires calling this one function
+ */
 function applyTheme() {
     const theme = colorThemes.find(t => t.primary === themeColor);
     let primaryColor, secondaryColor;
-    
+
+    // Why check preset vs custom: Preset themes have carefully chosen color pairs,
+    // but we also support custom colors by auto-generating a complementary secondary color
     if (theme) {
-        // Use preset theme
+        // Use curated preset theme with designer-chosen color pairs
         primaryColor = theme.primary;
         secondaryColor = theme.secondary;
-        
+
     } else {
-        // Custom color - calculate darker and lighter shades
+        // Custom color selected - auto-generate secondary color
         primaryColor = themeColor;
         const hex = themeColor.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
-        
+
+        // Why subtract 30 from RGB: Creates a slightly darker shade for depth
+        // Not too dark (would look black), not too subtle (wouldn't show contrast)
         const darkerR = Math.max(0, r - 30);
         const darkerG = Math.max(0, g - 30);
         const darkerB = Math.max(0, b - 30);
-        
+
         secondaryColor = '#' + [darkerR, darkerG, darkerB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
     }
-    
+
     // Determine if the theme is light
     const isLight = isLightColor(primaryColor);
-    
-    // For light themes, make secondary much darker for better contrast
+
+    // Why special handling for light themes: Light colors need much darker secondaries
+    // for sufficient contrast (WCAG accessibility). 30-point darker isn't enough.
     if (isLight) {
         const hex = primaryColor.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
-        
+
+        // Why multiply by 0.7: Creates 30% darker color for readable text on light backgrounds
         const darkerR = Math.max(0, Math.floor(r * 0.7));
         const darkerG = Math.max(0, Math.floor(g * 0.7));
         const darkerB = Math.max(0, Math.floor(b * 0.7));
-        
+
         secondaryColor = '#' + [darkerR, darkerG, darkerB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
     }
-    
-    // Set CSS variables
+
+    // Why CSS variables: Allows entire app to react to theme changes without
+    // manually updating every element. CSS can reference these variables.
     document.documentElement.style.setProperty('--primary-color', primaryColor);
     document.documentElement.style.setProperty('--secondary-color', secondaryColor);
-       
-    // Set shadow with secondary color at 30% opacity
+
+    // Why 30% opacity for shadows: Subtle depth without being too heavy or distracting
     const hex = secondaryColor.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
     document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, ${b}, 0.3)`);
-    
-    // Set tab active color - use secondary for light themes
+
+    // Why use secondary for light themes: Primary color would be too light for active indicators
     document.documentElement.style.setProperty('--tab-active-color', isLight ? secondaryColor : primaryColor);
-    
-    // Set save button color - use secondary for light themes
+
     document.documentElement.style.setProperty('--save-btn-color', isLight ? secondaryColor : primaryColor);
-    
-    // Apply background color only if no wallpaper exists
+
+    // Why check for wallpaper: Background should be transparent when wallpaper is set,
+    // otherwise wallpaper wouldn't show through
     if (!wallpaperUrl) {
         document.body.style.background = '#f0f2f5';
     } else {
-        // Keep transparent background when wallpaper is active
         document.body.style.background = 'transparent';
     }        
        
@@ -1114,24 +1292,53 @@ function applyTheme() {
     }
 }
 	
+/**
+ * Toggle the color picker menu visibility
+ * @param {Event} e - Click event
+ *
+ * What: Shows or hides the custom color picker interface
+ * Why: Allows users to choose custom colors beyond the preset themes
+ */
 function toggleColorPicker(e) {
+    // Why stopPropagation: Prevents click from bubbling to document body
+    // which would immediately close the menu we're trying to open
     e.stopPropagation();
+
     const picker = document.getElementById('colorPickerMenu');
     picker.classList.toggle('show');
-    
+
+    // Why initialize on show: Color picker canvas needs to be visible in DOM
+    // before we can draw on it and position indicators correctly
     if (picker.classList.contains('show')) {
         setTimeout(() => initColorPicker(), 10);
     }
 }
 
+/**
+ * Apply a selected color as the theme
+ * @param {string} color - Hex color code (e.g., '#ff5733')
+ *
+ * What: Sets a new theme color and saves it to Firebase
+ * Why: Updates the entire app's appearance when user selects a color
+ */
 function selectColor(color) {
+    // Update global theme color variable
     themeColor = color;
+
+    // Why check currentUser: Don't try to save to Firebase if not logged in
     if (!currentUser) return;
+
+    // Persist color choice to Firebase so it's saved across sessions
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/themeColor`), themeColor);
+
+    // Apply the new theme to all UI elements
     applyTheme();
+
+    // Re-render header to show new color in theme button/indicators
     renderHeader();
-    
-    // Close both color picker and dropdown menu
+
+    // Why close both menus: Selecting a color completes the action,
+    // no need to keep menus open (better UX)
     document.getElementById('colorPickerMenu').classList.remove('show');
     document.getElementById('dropdownMenu').classList.remove('show');
 }
@@ -1294,65 +1501,132 @@ function updateHue(clientX) {
     });
 }
 
-// Helper functions
+// ============================================================================
+// COLOR CONVERSION UTILITIES
+// ============================================================================
+// Why these exist: Color picker needs to convert between color formats
+// (HEX for storage, RGB for math, HSL for the color picker interface)
+
+/**
+ * Convert hexadecimal color to RGB
+ * @param {string} hex - Hex color code (e.g., '#ff5733' or 'ff5733')
+ * @returns {Object|null} RGB object with r, g, b properties (0-255) or null if invalid
+ *
+ * What: Parses hex string and extracts red, green, blue values
+ * Why: Need RGB values for color calculations and conversions to HSL
+ */
 function hexToRgb(hex) {
+    // Regex captures 3 groups of 2 hex digits (RR GG BB)
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+    // Why return null if no match: Caller can check if conversion failed
     return result ? {
-        r: parseInt(result[1], 16),
+        r: parseInt(result[1], 16), // Parse hex digits as base-16 numbers
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16)
     } : null;
 }
 
+/**
+ * Convert RGB to HSL color space
+ * @param {number} r - Red value (0-255)
+ * @param {number} g - Green value (0-255)
+ * @param {number} b - Blue value (0-255)
+ * @returns {Object} HSL object with h (0-360), s (0-100), l (0-100)
+ *
+ * What: Converts RGB color values to Hue, Saturation, Lightness format
+ * Why HSL: Color picker UI uses HSL because it's more intuitive for users
+ * (hue = color wheel, saturation = intensity, lightness = brightness)
+ */
 function rgbToHsl(r, g, b) {
+    // Normalize RGB values to 0-1 range for calculation
     r /= 255; g /= 255; b /= 255;
+
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-    
+    let h, s, l = (max + min) / 2; // Lightness is average of max and min
+
     if (max === min) {
+        // Grayscale color (no hue or saturation)
         h = s = 0;
     } else {
-        const d = max - min;
+        const d = max - min; // Delta for saturation calculation
+
+        // Why different formulas: Saturation formula changes based on lightness
+        // to maintain perceptual uniformity
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+        // Calculate hue based on which RGB component is dominant
+        // Why switch: Hue position depends on which color channel is strongest
         switch (max) {
-            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-            case g: h = ((b - r) / d + 2) / 6; break;
-            case b: h = ((r - g) / d + 4) / 6; break;
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break; // Red dominant
+            case g: h = ((b - r) / d + 2) / 6; break; // Green dominant
+            case b: h = ((r - g) / d + 4) / 6; break; // Blue dominant
         }
     }
-    
+
+    // Convert to standard ranges: H in degrees (0-360), S and L in percent (0-100)
     return { h: h * 360, s: s * 100, l: l * 100 };
 }
 
+/**
+ * Convert HSL to hexadecimal color
+ * @param {number} h - Hue (0-360)
+ * @param {number} s - Saturation (0-100)
+ * @param {number} l - Lightness (0-100)
+ * @returns {string} Hex color code (e.g., '#ff5733')
+ *
+ * What: Converts HSL values back to hex format for storage/CSS
+ * Why: Need hex format to save to Firebase and apply to CSS properties
+ */
 function hslToHex(h, s, l) {
+    // Normalize saturation and lightness to 0-1 range
     s /= 100; l /= 100;
+
+    // Calculate chroma (color intensity) and intermediate values
     const c = (1 - Math.abs(2 * l - 1)) * s;
     const x = c * (1 - Math.abs((h / 60) % 2 - 1));
     const m = l - c / 2;
     let r = 0, g = 0, b = 0;
-    
+
+    // Determine RGB values based on hue sector (color wheel divided into 6 sections)
+    // Why 60-degree sections: Color wheel has 6 primary/secondary color regions
     if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
     else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
     else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
     else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
     else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
     else if (h >= 300 && h < 360) { r = c; g = 0; b = x; }
-    
+
+    // Convert 0-1 values to 0-255 range and then to 2-digit hex
     const toHex = (n) => {
         const hex = Math.round((n + m) * 255).toString(16);
+        // Why pad: Ensure always 2 digits (e.g., '0f' not 'f')
         return hex.length === 1 ? '0' + hex : hex;
     };
-    
+
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+/**
+ * Determine if a color is light or dark
+ * @param {string} hex - Hex color code
+ * @returns {boolean} True if color is light, false if dark
+ *
+ * What: Calculates perceived brightness of a color
+ * Why: Need to determine whether to use light or dark text on the color
+ * (accessibility - need sufficient contrast for readability)
+ */
 function isLightColor(hex) {
     const rgb = hexToRgb(hex);
     if (!rgb) return false;
-    
-    // Calculate relative luminance
+
+    // Why these coefficients: Based on human eye sensitivity to different colors
+    // Eyes are most sensitive to green, least to blue (standard WCAG formula)
     const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-    return luminance > 0.6; // Returns true if color is light
+
+    // Why 0.6 threshold: Empirically determined value that works well
+    // for choosing text color (lower = dark color, higher = light color)
+    return luminance > 0.6;
 }
 
 
@@ -1397,13 +1671,22 @@ function selectCustomColor(color) {
 }
 
 
+/**
+ * Apply custom color from hex input field
+ *
+ * What: Validates and applies user-entered hex color code
+ * Why: Allows users to enter specific color codes directly instead of using picker
+ */
 async function applyCustomColor() {
     const hexInput = document.getElementById('hexInput');
     const color = hexInput.value;
-    
+
+    // Why validate hex: Prevents invalid colors that would break CSS
+    // Regex checks for exactly 6 hex digits after #
     if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
         selectCustomColor(color);
-        // Close the color picker
+
+        // Close menus - user's action is complete
         document.getElementById('colorPickerMenu').classList.remove('show');
         document.getElementById('dropdownMenu').classList.remove('show');
     } else {
@@ -1411,25 +1694,44 @@ async function applyCustomColor() {
     }
 }
 
+// ============================================================================
+// HEADER IMAGE MANAGEMENT
+// ============================================================================
+// Why separate from theme: Header images override theme gradients
+// but theme colors still apply to other UI elements
+
+/**
+ * Save header image to Firebase
+ *
+ * What: Persists header image data (base64 or URL) to user's database
+ * Why: User's custom header image needs to persist across sessions
+ */
 function saveHeaderImage() {
     if (!currentUser) return;
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/headerImage`), headerImage);
 }
 
+/**
+ * Apply header image to the guide header
+ *
+ * What: Sets header background to custom image and adjusts text colors
+ * Why: Custom images provide personalization; text color must adapt to image brightness
+ */
 function applyHeaderImage() {
     const header = document.querySelector('.header');
     if (!header) {
         console.log('Header not found, cannot apply image');
         return;
     }
-      
+
     if (headerImage) {
         console.log('Applying header image');
-        // Apply image as background (replaces theme gradient)
+
+        // Why replace gradient: Image provides visual interest, gradient would obscure it
         header.style.backgroundImage = `url("${headerImage}")`;
-        header.style.backgroundSize = 'cover';
-        header.style.backgroundPosition = 'center';
-        header.style.backgroundRepeat = 'no-repeat';
+        header.style.backgroundSize = 'cover';      // Fill entire header
+        header.style.backgroundPosition = 'center';  // Center the image
+        header.style.backgroundRepeat = 'no-repeat'; // Don't tile the image
         
         // Detect image brightness and set text color
 	detectImageBrightness(headerImage, (isLight, avgR, avgG, avgB) => {
@@ -1636,12 +1938,21 @@ function closeDrawer() {
     document.body.style.overflow = '';
 }
 
-// Touch swipe to close drawer
+// ============================================================================
+// TOUCH & GESTURE HANDLERS
+// ============================================================================
+// Why separate touch handlers: Mobile users need touch-based interactions
+// for swipe-to-delete, drawer gestures, and card manipulation
+
+// Drawer swipe state
+// Why track X position: Enables horizontal swipe gesture to close drawer menu
 let touchStartX = 0;
 let touchCurrentX = 0;
 let isDragging = false;
 
-// Swipe to delete checklist items (horizontal only)
+// Item swipe-to-delete state
+// Why track both X and Y: Distinguishes horizontal swipe (delete) from vertical scroll
+// Prevents accidental deletions while scrolling through list
 let itemTouchStartX = 0;
 let itemTouchStartY = 0;
 let itemTouchCurrentX = 0;
@@ -2031,6 +2342,16 @@ document.addEventListener('touchend', async (e) => {
     currentSwipedCard = null;
 });
 
+// ============================================================================
+// GUIDE & DOCUMENT MANAGEMENT
+// ============================================================================
+// Why guides: Core feature that allows users to create multiple independent documents/checklists
+// Each guide has its own categories, items, theme, and settings
+
+/**
+ * Create a new blank guide
+ * Why timestamp-based ID: Ensures unique IDs without server round-trip
+ */
 function createNewGuide() {
     if (!currentUser) return;
     const timestamp = Date.now();
@@ -2937,55 +3258,76 @@ function toggleMenu(e) {
 }
 
 // Authentication functions
+// ============================================================================
+// AUTHENTICATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Email/password login
+ * Why check email verification: Prevents spam accounts and ensures users own their email
+ */
 async function login(email, password) {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         currentUser = userCredential.user;
-        
-        // Check if email is verified
+
+        // Why enforce email verification: Security measure to confirm user owns the email address
+        // Prevents someone from creating accounts with other people's emails
         if (!currentUser.emailVerified) {
             await customAlert('Please verify your email before logging in. Check your inbox for the verification link.', 'Email Not Verified');
+            // Why sign out unverified users: Forces verification before granting access
             await signOut(auth);
             currentUser = null;
             return;
         }
-        
+
         loadUserData(currentUser.uid);
     } catch (error) {
         await customAlert(error.message, 'Login Failed');
     }
 }
 
-
+/**
+ * Create new account with email/password
+ * Why send verification email: Confirms user owns the email and reduces spam/fake accounts
+ */
 async function signup(email, password) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         currentUser = userCredential.user;
-        
+
         // Send verification email
         await sendEmailVerification(currentUser);
         await customAlert('A verification email has been sent to ' + email + '. Please check your inbox and verify your email before logging in.', 'Verify Your Email');
-        
-        // Sign out the user so they must verify before using the app
+
+        // Why sign out immediately after signup: Forces user to verify email before accessing app
+        // Prevents using the app with unverified accounts
         await signOut(auth);
         currentUser = null;
-        
-        // Go back to login screen
+
         backToLogin();
     } catch (error) {
         await customAlert(error.message, 'Signup Failed');
     }
 }
 
+/**
+ * Google OAuth login
+ * Why use Google login: Provides secure, passwordless authentication with existing Google accounts
+ */
 async function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
+
+    // Why 'select_account' prompt: Always shows account picker even if user is logged into one account
+    // Allows users to choose which Google account to use for this app
     provider.setCustomParameters({
         prompt: 'select_account'
     });
-    
+
     try {
         const result = await signInWithPopup(auth, provider);
         currentUser = result.user;
+        // Note: Google accounts are pre-verified, no email verification check needed
         loadUserData(currentUser.uid);
     } catch (error) {
         console.error('Google login error:', error);
@@ -2993,10 +3335,14 @@ async function loginWithGoogle() {
     }
 }
 
+/**
+ * Sign out current user
+ * Why clear categories: Prevents showing previous user's data after logout
+ */
 function logout() {
     signOut(auth).then(() => {
         currentUser = null;
-        categories = [];
+        categories = [];  // Clear local data for privacy
     });
 }
 
@@ -3103,9 +3449,19 @@ function saveHeader() {
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appSubtitle`), appSubtitle);
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appIcon`), appIcon);
   renderHeader();
-  
+
 }
 
+// ============================================================================
+// UI RENDERING FUNCTIONS
+// ============================================================================
+// Why separate rendering functions: Keeps DOM manipulation organized and reusable
+// Any state change can trigger a re-render without duplicating UI code
+
+/**
+ * Render the guide header with title, subtitle, and theme controls
+ * Why async: Loads header image from Firebase if it exists
+ */
 async function renderHeader() {
     const header = document.querySelector('.header');
     
@@ -3137,6 +3493,7 @@ colorThemes.forEach(theme => {
 	    <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
 	    <div class="dropdown-menu" id="dropdownMenu">
 	        <button id="editModeMenuBtn">Edit</button>
+	        <button id="singlePageViewBtn">${categories[activeTabIndex]?.singlePageMode ? '✓ ' : ''}Single Page View</button>
 	        <button id="duplicateGuideBtn">Duplicate</button>
 	        <button id="deleteGuideBtn">Delete</button>
 	        <button id="headerImageBtn">Header Image</button>
@@ -3220,6 +3577,7 @@ colorThemes.forEach(theme => {
     const saveBtn = document.getElementById('saveBtn');
     const menuBtn = document.getElementById('menuBtn');
     const editModeMenuBtn = document.getElementById('editModeMenuBtn');
+    const singlePageViewBtn = document.getElementById('singlePageViewBtn');
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
@@ -3267,6 +3625,7 @@ colorThemes.forEach(theme => {
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
 	if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
 	if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
+	if (singlePageViewBtn) singlePageViewBtn.addEventListener('click', toggleSinglePageView);
 	if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
 	if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
 	if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
@@ -4273,18 +4632,47 @@ function showEmojiPicker(target, callback) {
     }, 100);
 }
 
-	
+// ============================================================================
+// DATA PERSISTENCE FUNCTIONS
+// ============================================================================
+// Why separate save functions: Each data type can be saved independently
+// Avoids unnecessary writes to Firebase (only save what changed)
+
+/**
+ * Save categories array to Firebase
+ *
+ * What: Persists entire categories structure (tabs, skills, items) to database
+ * Why called frequently: Any edit to categories, skills, or items triggers this
+ * (adding, deleting, reordering, renaming)
+ */
 function saveCategories() {
+    // Why check currentUser: Prevent errors if user logs out mid-session
     if (!currentUser) return;
+
+    // Save entire categories array (includes all tabs, skills, and items)
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/categories`), categories);
 }
-// Save checked items to Firebase
+
+/**
+ * Save checked items state to Firebase
+ *
+ * What: Persists which checklist items are checked/unchecked
+ * Why separate from categories: Checking items is frequent, categories change less often
+ * (reduces database writes = better performance and lower costs)
+ */
 function saveCheckedItems() {
     if (!currentUser) return;
+
+    // checkedItems format: { 'catIndex-skillIndex-itemIndex': true/false }
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/checkedItems`), checkedItems);
 }
 
-// Save auto-refresh settings to Firebase
+/**
+ * Save auto-refresh configuration to Firebase
+ *
+ * What: Persists auto-refresh enabled state and scheduled time
+ * Why: Users expect auto-refresh settings to persist across sessions
+ */
 function saveAutoRefreshSettings() {
     if (!currentUser) return;
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/autoRefreshEnabled`), autoRefreshEnabled);
@@ -4345,17 +4733,26 @@ async function clearAllChecks() {
     }
 }
 
+/**
+ * Toggle auto-refresh feature for daily checklists
+ * Why auto-refresh: Useful for daily habit trackers or todo lists that reset each day
+ * User can set a specific time (e.g., midnight) when all checkmarks auto-clear
+ */
 async function toggleAutoRefresh() {
     const enabled = await customConfirm(
-    autoRefreshEnabled 
-        ? 'This will disable the automatic daily refresh.' 
+    autoRefreshEnabled
+        ? 'This will disable the automatic daily refresh.'
         : `This will clear all checkmarks at ${autoRefreshTime} each day.`,
     autoRefreshEnabled ? 'Disable Auto-Refresh' : 'Enable Auto-Refresh'
 );
 
 if (enabled) {
     if (!autoRefreshEnabled) {
+        // Enabling: Prompt for time
         const time = await customPrompt('Enter time in 24-hour format', autoRefreshTime, 'Set Refresh Time');
+
+            // Why validate time format: Prevents invalid times that would break the feature
+            // Regex checks for valid 24-hour format: 00:00 to 23:59
             if (time && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
                 autoRefreshTime = time;
                 autoRefreshEnabled = true;
@@ -4364,24 +4761,39 @@ if (enabled) {
                 return;
             }
         } else {
+            // Disabling: Just turn it off
             autoRefreshEnabled = false;
         }
         saveAutoRefreshSettings();
-        renderHeader(); // Update menu display
+        renderHeader(); // Update menu to reflect new state
     }
 }
 
-      
+/**
+ * Render category tabs navigation
+ *
+ * What: Generates the horizontal tab bar showing all categories
+ * Why: Users need to switch between categories; tabs provide visual navigation
+ * Called: After any category change (add, delete, rename, reorder)
+ */
 function renderTabs() {
     const navTabs = document.getElementById('navTabs');
+
+    // Always show tabs
+    navTabs.style.display = 'flex';
+
+    // Why clear innerHTML: Start fresh to avoid duplicate tabs from previous render
     navTabs.innerHTML = '';
-    
-    
+
+    // Generate a tab for each category
     categories.forEach((cat, i) => {
         const tab = document.createElement('div');
+
+        // Why conditional class: Active tab needs different styling to show which is selected
         tab.className = 'nav-tab' + (activeTabIndex === i ? ' active' : '');
-        
-        // Make tab editable in edit mode
+
+        // Why different rendering in edit mode: Allow editing tab names and icons
+        // Users can only modify tabs when explicitly in edit mode (prevents accidental changes)
         if (editMode) {
             const hasTabIcon = cat.icon && cat.icon !== "";
             let tabIconToShow;
@@ -4459,12 +4871,14 @@ function renderTabs() {
             
         } else {
             // Need to render SVG icons properly
-            let displayIcon = cat.icon;
+            let displayIcon = '';
             if (cat.icon && cat.icon.startsWith('svg:')) {
                 const iconData = JSON.parse(cat.icon.substring(4));
                 displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+            } else if (cat.icon) {
+                displayIcon = cat.icon;
             }
-            tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
+            tab.innerHTML = `${displayIcon ? `<span class="tab-icon-display">${displayIcon}</span> ` : ''}<span class="tab-name-display">${cat.name}</span>`;
             
             const nameSpan = tab.querySelector('.tab-name-display');
             
@@ -4849,25 +5263,217 @@ function toggleItemBackground(catIndex, skillIndex) {
     saveCategories();
     renderContent();
 }
-	
-	
-function renderContent() { 
-    const contentArea = document.getElementById('contentArea'); 
-    contentArea.innerHTML = ''; 
-    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
-    
-    categories.forEach((cat, catIndex) => { 
-        const catDiv = document.createElement('div'); 
+/**
+ * Render single-page editor view (like Notion)
+ *
+ * What: Converts all categories and skills into a single editable document
+ * Why: Provides continuous writing experience instead of separate cards
+ * How: Uses contenteditable div with markdown-like formatting
+ */
+function renderSinglePageEditor() {
+    const contentArea = document.getElementById('contentArea');
+    contentArea.className = 'content-area single-page-mode';
+    // Remove all padding from content area
+    contentArea.style.cssText = `
+        padding: 0;
+        margin: 0;
+    `;
+
+    // Create main editor container
+    const editorContainer = document.createElement('div');
+    editorContainer.className = 'single-page-editor';
+    editorContainer.style.cssText = `
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: var(--card-bg);
+        min-height: calc(100vh - 120px);
+    `;
+
+    // Create editable content area
+    const editorContent = document.createElement('div');
+    editorContent.className = 'single-page-content';
+    editorContent.contentEditable = 'true';
+    editorContent.style.cssText = `
+        outline: none;
+        font-size: 16px;
+        line-height: 1.6;
+        color: var(--text-primary);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        padding: 16px;
+        min-height: calc(100vh - 120px);
+    `;
+
+    // Convert current category's skills to markdown-like text
+    let content = '';
+    const currentCategory = categories[activeTabIndex];
+
+    if (currentCategory) {
+        // Skills as headings with items (no need for category heading since it's in the tab)
+        currentCategory.skills.forEach((skill, skillIndex) => {
+            content += `# ${skill.title}\n\n`;
+
+            if (skill.items && skill.items.length > 0) {
+                skill.items.forEach(item => {
+                    content += `• ${item}\n`;
+                });
+                content += '\n';
+            }
+        });
+    }
+
+    editorContent.textContent = content;
+
+    // Auto-save on blur or after typing pause
+    let saveTimeout;
+    editorContent.addEventListener('input', () => {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            saveFromSinglePageEditor(editorContent.textContent);
+        }, 1000); // Save 1 second after user stops typing
+    });
+
+    editorContent.addEventListener('blur', () => {
+        saveFromSinglePageEditor(editorContent.textContent);
+    });
+
+    // Add placeholder text if empty
+    if (!content.trim()) {
+        editorContent.innerHTML = '<span style="color: var(--text-tertiary);">Start writing...</span>';
+        editorContent.addEventListener('focus', function clearPlaceholder() {
+            if (editorContent.textContent === 'Start writing...') {
+                editorContent.textContent = '';
+            }
+            editorContent.removeEventListener('focus', clearPlaceholder);
+        });
+    }
+
+    editorContainer.appendChild(editorContent);
+    contentArea.appendChild(editorContainer);
+}
+
+/**
+ * Save content from single-page editor back to current category
+ *
+ * What: Parses markdown-like text and converts it back to skills/items for current category
+ * Why: Keeps data structure consistent for when user switches back to card view
+ */
+function saveFromSinglePageEditor(content) {
+    const currentCategory = categories[activeTabIndex];
+    if (!currentCategory) return;
+
+    const lines = content.split('\n');
+    const newSkills = [];
+    let currentSkill = null;
+
+    lines.forEach(line => {
+        const trimmedLine = line.trim();
+
+        if (!trimmedLine) return;
+
+        // Skill heading (# Title)
+        if (trimmedLine.startsWith('# ')) {
+            // Save previous skill if exists
+            if (currentSkill) {
+                newSkills.push(currentSkill);
+            }
+
+            // Start new skill
+            currentSkill = {
+                title: trimmedLine.substring(2).trim(),
+                items: []
+            };
+        }
+        // List item (• or - or *)
+        else if (trimmedLine.match(/^[•\-\*]\s+/)) {
+            const itemText = trimmedLine.substring(2).trim();
+            if (!currentSkill) {
+                // Item without a skill - create a default skill
+                currentSkill = {
+                    title: 'Notes',
+                    items: []
+                };
+            }
+            currentSkill.items.push(itemText);
+        }
+        // Regular text - treat as item in current skill
+        else {
+            if (!currentSkill) {
+                currentSkill = {
+                    title: 'Notes',
+                    items: []
+                };
+            }
+            currentSkill.items.push(trimmedLine);
+        }
+    });
+
+    // Add final skill
+    if (currentSkill) {
+        newSkills.push(currentSkill);
+    }
+
+    // Only update current category's skills if there's actual content
+    if (newSkills.length > 0) {
+        currentCategory.skills = newSkills;
+        saveCategories();
+    }
+}
+
+/**
+ * Render main content area with all skills and items
+ *
+ * What: Generates the entire skills/checklist display for the active guide
+ * Why: Core UI function - displays all user content (cards, items, checklists)
+ * Called: After any content change (add/delete skill, check item, change layout, etc.)
+ *
+ * Performance: Rebuilds entire DOM each time (simple but works well for typical data sizes)
+ * Alternative approach would be virtual DOM or incremental updates (more complex)
+ */
+function renderContent() {
+    const contentArea = document.getElementById('contentArea');
+
+    // Why clear innerHTML: Complete re-render ensures UI matches data state
+    // Simpler than tracking individual DOM changes (fewer bugs)
+    contentArea.innerHTML = '';
+
+    // Why check single-page mode: Switch between card view and single-page editor for current tab
+    const currentCategory = categories[activeTabIndex];
+    if (currentCategory && currentCategory.singlePageMode) {
+        renderSinglePageEditor();
+        return;
+    }
+
+    // Reset content area styling for card view
+    contentArea.style.cssText = '';
+
+    // Why add edit-mode class: Enables CSS styling for edit state (drag handles, delete buttons, etc.)
+    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : '');
+
+    // Render each category (only active one is visible via CSS)
+    categories.forEach((cat, catIndex) => {
+        const catDiv = document.createElement('div');
+
+        // Why active class: Only the active category is visible, others are display:none
+        // (could use single category render, but this allows smooth CSS transitions)
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
-        
-        const grid = document.createElement('div'); 
-        grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : ''); 
-        
-        cat.skills.forEach((skill, skillIndex) => { 
-            const card = document.createElement('div'); 
+
+        const grid = document.createElement('div');
+
+        // Why conditional class: Horizontal layout changes CSS grid to side-by-side display
+        grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : '');
+
+        // Render each skill card within the category
+        cat.skills.forEach((skill, skillIndex) => {
+            const card = document.createElement('div');
+
+            // Why sticky color: Mimics physical sticky notes (yellow, blue, pink, white)
             const stickyColor = skill.stickyColor || 'white';
 			card.className = 'skill-card' + (stickyColor !== 'white' ? ' sticky-style' : '') + (stickyColor === 'blue' ? ' sticky-blue' : '') + (stickyColor === 'pink' ? ' sticky-pink' : '');
-            // Set border color based on theme
+
+            // Why theme-based border: Maintains visual consistency with app theme
+            // Light themes need darker borders for contrast
             const isLight = isLightColor(themeColor);
             card.style.borderLeftColor = isLight ? 'var(--secondary-color)' : 'var(--primary-color)';
             card.dataset.catIndex = catIndex;
@@ -5762,33 +6368,57 @@ hideHeadingBtn.addEventListener('click', (e) => {
 	    setTimeout(() => applyWallpaper(), 50);
 }
 	
-function switchTab(index) { 
-    activeTabIndex = index; 
+/**
+ * Switch to a different category tab
+ * @param {number} index - Index of the category to switch to
+ *
+ * What: Changes active category and updates UI to show its content
+ * Why: Users need to navigate between different categories of skills/checklists
+ */
+function switchTab(index) {
+    // Update active tab index
+    activeTabIndex = index;
+
+    // Re-render tabs to update active state styling
     renderTabs();
-    const cats = document.querySelectorAll('.category'); 
-    cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); 
-    
-    // Scroll the active tab to center
+
+    // Update category visibility (toggle 'active' class)
+    const cats = document.querySelectorAll('.category');
+    cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex));
+
+    // Why scroll active tab to center: Improves UX on mobile where tabs may overflow
+    // Centers the active tab in viewport for better visibility
     setTimeout(() => {
         const navTabs = document.querySelector('.nav-tabs');
         const activeTab = navTabs.children[index];
         if (activeTab && navTabs) {
+            // Calculate scroll position to center the active tab
             const tabCenter = activeTab.offsetLeft + (activeTab.offsetWidth / 2);
             const containerCenter = navTabs.offsetWidth / 2;
             const scrollPosition = tabCenter - containerCenter;
-            
+
+            // Why smooth: Better UX than instant jump
             navTabs.scrollTo({
                 left: scrollPosition,
                 behavior: 'smooth'
             });
         }
-    }, 50);
+    }, 50); // Small delay ensures DOM is ready
 }
-	
-function toggleCheck(itemId) { 
-    if (editMode) return; 
-    
-    // Store expanded state before re-render
+
+/**
+ * Toggle checkbox state for a checklist item
+ * @param {string} itemId - Format: 'catIndex-skillIndex-itemIndex'
+ *
+ * What: Checks or unchecks a checklist item
+ * Why: Core interaction - users need to mark tasks as complete/incomplete
+ */
+function toggleCheck(itemId) {
+    // Why block in edit mode: Prevent accidental checks while rearranging items
+    if (editMode) return;
+
+    // Why preserve expanded state: Re-rendering would collapse all cards
+    // User expects their expanded cards to stay open after checking an item
     const expandedCards = [];
     document.querySelectorAll('.skill-card.expanded').forEach(card => {
         expandedCards.push({
@@ -5808,41 +6438,114 @@ function toggleCheck(itemId) {
     });
 }
 
-function toggleEditMode() { 
+/**
+ * Toggle edit mode on/off
+ *
+ * What: Switches between viewing mode and editing mode
+ * Why editing mode: Allows users to modify structure (add/delete/reorder items)
+ *      without accidentally doing so during normal use
+ * Why separate mode: Prevents accidental modifications (like iOS's "Edit" button)
+ *
+ * In edit mode:
+ * - Can reorder items via drag & drop
+ * - Can delete items via swipe or button
+ * - Can edit names inline
+ * - Checkboxes are disabled (can't check items)
+ * - Layout button is hidden (prevent conflicts)
+ * - "Done" button replaces menu button
+ */
+function toggleEditMode() {
     const menu = document.getElementById('dropdownMenu');
-    if (menu) menu.classList.remove('show'); 
-    
-    editMode = !editMode; 
-    
-    // Toggle class on body to hide/show floating button
+
+    // Why close menu: User selected "Edit", no need to keep menu open
+    if (menu) menu.classList.remove('show');
+
+    // Toggle the global edit mode state
+    editMode = !editMode;
+
+    // Why body class: CSS can style entire page differently in edit mode
+    // (e.g., show drag handles, change cursor, hide certain elements)
     if (editMode) {
         document.body.classList.add('edit-mode-active');
     } else {
         document.body.classList.remove('edit-mode-active');
     }
-    
-    // Hide/show floating layout button
+
+    // Why hide layout button in edit mode: Prevents UI conflicts
+    // (drag handles would overlap with layout button)
     const floatingBtn = document.getElementById('layoutBtn');
     if (floatingBtn) {
         floatingBtn.style.display = editMode ? 'none' : 'flex';
     }
-    
+
+    // Re-render all UI sections to show/hide edit controls
     renderHeader();
     renderTabs();
     renderContent();
-    
-    // Toggle between Done button and 3-dots menu
+
+    // Why swap buttons: "Done" button provides clear exit from edit mode
+    // Menu button only needed in normal viewing mode
     const saveBtn = document.getElementById('saveBtn');
     const menuBtn = document.getElementById('menuBtn');
     if (saveBtn && menuBtn) {
         if (editMode) {
-            saveBtn.style.display = 'block';
-            menuBtn.style.display = 'none';
+            saveBtn.style.display = 'block';   // Show "Done"
+            menuBtn.style.display = 'none';    // Hide menu (⋮)
         } else {
-            saveBtn.style.display = 'none';
-            menuBtn.style.display = 'block';
+            saveBtn.style.display = 'none';    // Hide "Done"
+            menuBtn.style.display = 'block';   // Show menu (⋮)
         }
     }
+}
+
+/**
+ * Toggle between card view and single-page editor view for the current tab
+ * Why: Provides a Notion-like editing experience where all content is in a single page
+ * instead of separate cards, allowing for continuous writing and editing
+ */
+async function toggleSinglePageView() {
+    const menu = document.getElementById('dropdownMenu');
+
+    // Why close menu: User selected toggle, no need to keep menu open
+    if (menu) menu.classList.remove('show');
+
+    const currentCategory = categories[activeTabIndex];
+    if (!currentCategory) return;
+
+    // Warn user when switching TO single-page mode
+    if (!currentCategory.singlePageMode) {
+        const confirmed = await customConfirm(
+            'Switching to Single Page View will clear all existing cards and data in this tab. This action cannot be undone. Do you want to continue?',
+            'Warning'
+        );
+
+        if (!confirmed) {
+            return; // User cancelled, don't toggle
+        }
+
+        // Clear only the current category's data
+        currentCategory.skills = [{
+            title: 'Notes',
+            items: []
+        }];
+    }
+
+    // Toggle the single page mode state for this category only
+    currentCategory.singlePageMode = !currentCategory.singlePageMode;
+
+    // Why hide layout button in single page mode: Layout options don't apply to single-page view
+    const floatingBtn = document.getElementById('layoutBtn');
+    if (floatingBtn) {
+        floatingBtn.style.display = currentCategory.singlePageMode ? 'none' : 'flex';
+    }
+
+    // Save to Firebase
+    saveCategories();
+
+    // Re-render UI to show either cards or single-page editor
+    renderHeader();  // Update checkmark in menu
+    renderTabs();     // Tabs remain visible
+    renderContent();  // Switch between card view and editor
 }
 
 function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
@@ -5978,24 +6681,54 @@ function enableQuickEditHeader(element, type) {
     element.addEventListener('keydown', keyHandler);
 }
 
+/**
+ * Edit the app icon (header emoji)
+ * @param {HTMLElement} el - Element that triggered the icon picker
+ *
+ * What: Opens emoji picker to change the guide's header icon
+ * Why: Visual customization - users can personalize each guide
+ */
 function editAppIcon(el) {
     showEmojiPicker(el, (emoji) => {
         appIcon = emoji;
-        saveHeader();
+        saveHeader(); // Persist to Firebase
     });
 }
 
-function addSkill(catIndex) { 
-    categories[catIndex].skills.push({ 
-        title: "New Skill", 
-        icon: "✨", 
-        items: ["New item - click to edit"] 
-    }); 
-    saveCategories();
-    renderContent();
-    
+// ============================================================================
+// SKILL/CARD MANAGEMENT
+// ============================================================================
+// Why "skills": Original concept was life skills checklist,
+// but now used for any card-based content (checklists, notes, etc.)
+
+/**
+ * Add a new skill card to a category
+ * @param {number} catIndex - Category index to add skill to
+ *
+ * What: Creates a new blank skill card with default content
+ * Why: Users need to add cards to organize their content
+ */
+function addSkill(catIndex) {
+    // Why default values: Provides starting template that user can immediately edit
+    categories[catIndex].skills.push({
+        title: "New Skill",
+        icon: "✨",
+        items: ["New item - click to edit"]
+    });
+
+    saveCategories();  // Persist to Firebase
+    renderContent();   // Show new card immediately
 }
 
+/**
+ * Edit a skill card's icon
+ * @param {number} catIndex - Category index
+ * @param {number} skillIndex - Skill index within category
+ * @param {HTMLElement} el - Element that triggered picker
+ *
+ * What: Opens emoji picker to change a card's icon
+ * Why: Visual distinction - icons help identify cards quickly
+ */
 function editSkillIcon(catIndex, skillIndex, el) {
     showEmojiPicker(el, (emoji) => {
         categories[catIndex].skills[skillIndex].icon = emoji;
@@ -6004,28 +6737,54 @@ function editSkillIcon(catIndex, skillIndex, el) {
     });
 }
 
-async function deleteSkill(catIndex, skillIndex) { 
-    if (await customConfirm('Are you sure you want to delete this card?')) { 
-        categories[catIndex].skills.splice(skillIndex, 1); 
+/**
+ * Delete a skill card
+ * @param {number} catIndex - Category index
+ * @param {number} skillIndex - Skill index to delete
+ *
+ * What: Removes a skill card and all its items
+ * Why async: Need to wait for user confirmation before deletion
+ * Why confirm: Destructive action - prevent accidental deletions
+ */
+async function deleteSkill(catIndex, skillIndex) {
+    if (await customConfirm('Are you sure you want to delete this card?')) {
+        // splice: Remove 1 item at skillIndex position
+        categories[catIndex].skills.splice(skillIndex, 1);
         saveCategories();
         renderContent();
-        
-    } 
-}
-
-async function deleteItem(catIndex, skillIndex, itemIndex) {
-    if (await customConfirm('Are you sure you want to delete this item?')) {
-        categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
-        saveCategories();
-        renderContent();
-        
     }
 }
 
-function addItem(catIndex, skillIndex) { 
-    categories[catIndex].skills[skillIndex].items.push("New item"); 
+/**
+ * Delete a checklist item
+ * @param {number} catIndex - Category index
+ * @param {number} skillIndex - Skill index
+ * @param {number} itemIndex - Item index to delete
+ *
+ * What: Removes a single item from a skill's checklist
+ * Why confirm: Prevents accidental deletions of individual items
+ */
+async function deleteItem(catIndex, skillIndex, itemIndex) {
+    if (await customConfirm('Are you sure you want to delete this item?')) {
+        categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
+        saveCategories();
+        renderContent();
+    }
+}
+
+/**
+ * Add a new item to a skill's checklist
+ * @param {number} catIndex - Category index
+ * @param {number} skillIndex - Skill index to add item to
+ *
+ * What: Appends a new blank item to the skill's item list
+ * Why: Users need to add items to their checklists
+ */
+function addItem(catIndex, skillIndex) {
+    // Default text is editable via quick-edit (double-tap)
+    categories[catIndex].skills[skillIndex].items.push("New item");
     saveCategories();
-    renderContent(); 
+    renderContent();
 }
 
 function addCategory() {
@@ -6057,6 +6816,10 @@ function editCategoryIcon(catIndex, el) {
 	
 function toggleLayout() {
     if (!currentUser) return;
+    // Disable layout toggle in single-page mode
+    const currentCategory = categories[activeTabIndex];
+    if (currentCategory && currentCategory.singlePageMode) return;
+
     if (layoutMode === 'vertical') {
         layoutMode = 'horizontal';
     } else {
@@ -6065,7 +6828,7 @@ function toggleLayout() {
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/layoutMode`), layoutMode);
     renderContent();
     updateLayoutButton();
-    
+
 }
 
 function updateLayoutButton() {
