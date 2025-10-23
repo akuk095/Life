@@ -514,30 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Filter items event listeners
-    document.querySelectorAll('.home-filter-item').forEach(filterItem => {
-        filterItem.addEventListener('click', () => {
-            const filterValue = filterItem.dataset.filter;
-
-            // Toggle filter: if clicking the active filter, deselect it
-            if (selectedFilter === filterValue) {
-                selectedFilter = 'all'; // 'all' means no filter, show everything
-                filterItem.classList.remove('active');
-            } else {
-                // Select new filter
-                selectedFilter = filterValue;
-
-                // Update active state
-                document.querySelectorAll('.home-filter-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                filterItem.classList.add('active');
-            }
-
-            // Re-populate guides with new filter
-            populateHomePage();
-        });
-    });
+    // Filter items event listeners are now added dynamically in populateFilterNavigation()
 
     const homeMenuBtn = document.getElementById('homeMenuBtn');
     const homeDropdownMenu = document.getElementById('homeDropdownMenu');
@@ -568,6 +545,14 @@ document.addEventListener('DOMContentLoaded', () => {
         homeCreateCollectionMenuBtn.addEventListener('click', async () => {
             homeDropdownMenu.classList.remove('show');
             await createNewCollection();
+        });
+    }
+
+    const homeCreateTypeMenuBtn = document.getElementById('homeCreateTypeMenuBtn');
+    if (homeCreateTypeMenuBtn) {
+        homeCreateTypeMenuBtn.addEventListener('click', async () => {
+            homeDropdownMenu.classList.remove('show');
+            await createNewType();
         });
     }
 
@@ -2941,16 +2926,167 @@ function closeJournalEditor() {
 async function createNewCollection() {
     const collectionName = await customPrompt('Enter collection name:', 'New Collection', 'Create Collection');
     if (!collectionName || !currentUser) return;
-    
+
     const timestamp = Date.now();
     const collectionId = `collection_${timestamp}`;
-    
+
     await set(ref(database, `users/${currentUser.uid}/collections/${collectionId}`), {
         name: collectionName,
         createdAt: timestamp
     });
-    
+
     populateHomePage();
+}
+
+// Create new type
+async function createNewType() {
+    const typeName = await customPrompt('Enter type name:', 'My Type', 'Create Type');
+    if (!typeName || !currentUser) return;
+
+    const timestamp = Date.now();
+    const typeId = `type_${timestamp}`;
+
+    await set(ref(database, `users/${currentUser.uid}/customTypes/${typeId}`), {
+        name: typeName,
+        createdAt: timestamp
+    });
+
+    populateHomePage();
+}
+
+// Populate filter navigation with built-in and custom types
+async function populateFilterNavigation(availableTypes) {
+    if (!currentUser) return;
+
+    const filterNav = document.querySelector('.home-filter-nav');
+    if (!filterNav) return;
+
+    // Built-in types (from templates)
+    const builtInTypes = [
+        { id: 'values', name: 'Values' },
+        { id: 'short-notes', name: 'Short notes' },
+        { id: 'reminders', name: 'Reminders' },
+        { id: 'routines', name: 'Routines' },
+        { id: 'trackers', name: 'Trackers' },
+        { id: 'journals', name: 'Journals' }
+    ];
+
+    // Fetch custom types from database
+    const customTypesSnapshot = await get(ref(database, `users/${currentUser.uid}/customTypes`));
+    const customTypes = customTypesSnapshot.val() || {};
+
+    const customTypesArray = Object.keys(customTypes).map(id => ({
+        id: id,
+        name: customTypes[id].name || 'Untitled Type',
+        createdAt: customTypes[id].createdAt || 0,
+        isCustom: true
+    })).sort((a, b) => a.createdAt - b.createdAt);
+
+    // Combine built-in and custom types
+    const allTypes = [...builtInTypes, ...customTypesArray];
+
+    // Render filter items
+    filterNav.innerHTML = allTypes.map(type => {
+        const shouldHide = availableTypes && !availableTypes.has(type.id);
+        const isActive = selectedFilter === type.id;
+        return `
+            <div class="home-filter-item ${isActive ? 'active' : ''}"
+                 data-filter="${type.id}"
+                 data-is-custom="${type.isCustom ? 'true' : 'false'}"
+                 style="${shouldHide ? 'display: none;' : ''}">
+                ${type.name}
+            </div>
+        `;
+    }).join('');
+
+    // Add click handlers for filter items
+    document.querySelectorAll('.home-filter-item').forEach(filterItem => {
+        filterItem.addEventListener('click', () => {
+            const filterValue = filterItem.dataset.filter;
+
+            // Toggle filter: if clicking the active filter, deselect it
+            if (selectedFilter === filterValue) {
+                selectedFilter = 'all';
+                filterItem.classList.remove('active');
+            } else {
+                // Select new filter
+                selectedFilter = filterValue;
+
+                // Update active state
+                document.querySelectorAll('.home-filter-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                filterItem.classList.add('active');
+            }
+
+            // Re-populate guides with new filter
+            populateHomePage();
+        });
+
+        // Long press to delete custom type (only for custom types)
+        const isCustom = filterItem.dataset.isCustom === 'true';
+        const typeId = filterItem.dataset.filter;
+
+        if (isCustom) {
+            let longPressTimer;
+            let longPressTriggered = false;
+
+            filterItem.addEventListener('touchstart', (e) => {
+                longPressTriggered = false;
+                longPressTimer = setTimeout(async () => {
+                    longPressTriggered = true;
+                    e.preventDefault();
+                    const typeName = filterItem.textContent.trim();
+
+                    if (await customConfirm(`Delete type "${typeName}"? Pages with this type will not be deleted.`, 'Delete Type', 'Delete')) {
+                        await remove(ref(database, `users/${currentUser.uid}/customTypes/${typeId}`));
+
+                        // If the deleted type was selected, reset filter
+                        if (selectedFilter === typeId) {
+                            selectedFilter = 'all';
+                        }
+
+                        populateHomePage();
+                    }
+                }, 500);
+            });
+
+            filterItem.addEventListener('touchend', () => {
+                clearTimeout(longPressTimer);
+            }, { passive: true });
+
+            filterItem.addEventListener('touchmove', () => {
+                clearTimeout(longPressTimer);
+            }, { passive: true });
+
+            filterItem.addEventListener('mousedown', (e) => {
+                longPressTriggered = false;
+                longPressTimer = setTimeout(async () => {
+                    longPressTriggered = true;
+                    const typeName = filterItem.textContent.trim();
+
+                    if (await customConfirm(`Delete type "${typeName}"? Pages with this type will not be deleted.`, 'Delete Type', 'Delete')) {
+                        await remove(ref(database, `users/${currentUser.uid}/customTypes/${typeId}`));
+
+                        // If the deleted type was selected, reset filter
+                        if (selectedFilter === typeId) {
+                            selectedFilter = 'all';
+                        }
+
+                        populateHomePage();
+                    }
+                }, 500);
+            });
+
+            filterItem.addEventListener('mouseup', () => {
+                clearTimeout(longPressTimer);
+            }, { passive: true });
+
+            filterItem.addEventListener('mouseleave', () => {
+                clearTimeout(longPressTimer);
+            }, { passive: true });
+        }
+    });
 }
 
 // Populate collections navigation
@@ -3835,25 +3971,8 @@ async function populateHomePage() {
         selectedFilter = 'all';
     }
 
-    document.querySelectorAll('.home-filter-item').forEach(filterItem => {
-        const filterType = filterItem.dataset.filter;
-
-        // For "All files" collection, show all filter types
-        // For specific collections, only show filter types that exist in that collection
-        if (selectedCollection && !availableTypes.has(filterType)) {
-            filterItem.style.display = 'none';
-        } else {
-            filterItem.style.display = 'block';
-        }
-
-        // Set active state based on selectedFilter
-        // If selectedFilter is 'all', no filter should be active
-        if (filterType === selectedFilter && selectedFilter !== 'all') {
-            filterItem.classList.add('active');
-        } else {
-            filterItem.classList.remove('active');
-        }
-    });
+    // Populate filter navigation with built-in and custom types
+    await populateFilterNavigation(selectedCollection ? availableTypes : null);
 
     // Filter by selected template type
     // 'all' means no filter - show all guides (including untyped)
@@ -7119,6 +7238,32 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
         return;
     }
 
+    // Fetch custom types from database
+    const customTypesSnapshot = await get(ref(database, `users/${currentUser.uid}/customTypes`));
+    const customTypes = customTypesSnapshot.val() || {};
+
+    const customTypesArray = Object.keys(customTypes).map(id => ({
+        id: id,
+        name: customTypes[id].name || 'Untitled Type',
+        createdAt: customTypes[id].createdAt || 0
+    })).sort((a, b) => a.createdAt - b.createdAt);
+
+    // Build options for select dropdown
+    let typeOptions = `
+        <option value="">No type</option>
+        <option value="values">Values</option>
+        <option value="short-notes">Short notes</option>
+        <option value="reminders">Reminders</option>
+        <option value="routines">Routines</option>
+        <option value="trackers">Trackers</option>
+        <option value="journals">Journals</option>
+    `;
+
+    // Add custom types
+    customTypesArray.forEach(type => {
+        typeOptions += `<option value="${type.id}">${type.name}</option>`;
+    });
+
     // Show type selection dialog
     const overlay = document.createElement('div');
     overlay.className = 'custom-dialog-overlay';
@@ -7129,13 +7274,7 @@ document.getElementById('homeChangeTypeBtn')?.addEventListener('click', async ()
         <div class="custom-dialog-title">Change Type</div>
         <div class="custom-dialog-message">Select a type for ${selectedGuides.size} page${selectedGuides.size > 1 ? 's' : ''}</div>
         <select id="typeSelect" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
-            <option value="">No type</option>
-            <option value="values">Values</option>
-            <option value="short-notes">Short notes</option>
-            <option value="reminders">Reminders</option>
-            <option value="routines">Routines</option>
-            <option value="trackers">Trackers</option>
-            <option value="journals">Journals</option>
+            ${typeOptions}
         </select>
         <div class="custom-dialog-buttons">
             <button class="custom-dialog-button" data-result="cancel">Cancel</button>
