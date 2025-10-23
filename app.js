@@ -3569,7 +3569,6 @@ colorThemes.forEach(theme => {
 	    <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
 	    <div class="dropdown-menu" id="dropdownMenu">
 	        <button id="editModeMenuBtn">Edit</button>
-	        <button id="singlePageViewBtn">${categories[activeTabIndex]?.singlePageMode ? '✓ ' : ''}Single Page View</button>
 	        <button id="duplicateGuideBtn">Duplicate</button>
 	        <button id="deleteGuideBtn">Delete</button>
 	        <button id="headerImageBtn">Header Image</button>
@@ -3653,7 +3652,6 @@ colorThemes.forEach(theme => {
     const saveBtn = document.getElementById('saveBtn');
     const menuBtn = document.getElementById('menuBtn');
     const editModeMenuBtn = document.getElementById('editModeMenuBtn');
-    const singlePageViewBtn = document.getElementById('singlePageViewBtn');
     const duplicateGuideBtn = document.getElementById('duplicateGuideBtn');
     const deleteGuideBtn = document.getElementById('deleteGuideBtn');
     const toggleColorBtn = document.getElementById('toggleColorBtn');
@@ -3701,7 +3699,6 @@ colorThemes.forEach(theme => {
     if (saveBtn) saveBtn.addEventListener('click', saveAndExitEdit);
 	if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
 	if (editModeMenuBtn) editModeMenuBtn.addEventListener('click', toggleEditMode);
-	if (singlePageViewBtn) singlePageViewBtn.addEventListener('click', toggleSinglePageView);
 	if (duplicateGuideBtn) duplicateGuideBtn.addEventListener('click', duplicateGuide);
 	if (deleteGuideBtn) deleteGuideBtn.addEventListener('click', deleteGuide);
 	if (toggleColorBtn) toggleColorBtn.addEventListener('click', toggleColorPicker);
