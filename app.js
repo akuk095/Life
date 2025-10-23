@@ -683,10 +683,6 @@ let themeColor = '#607d8b';
 // 'vertical' = stacked cards, 'horizontal' = side-by-side, 'headings' = list view
 let layoutMode = 'vertical';
 
-// Single Page View mode
-// Why single page view: Provides a Notion-like editing experience with all content in one view
-let singlePageMode = false;  // Toggle between card view and single-page editor
-
 // Why sticky mode: Mimics physical sticky notes for visual familiarity
 let stickyMode = 'white';  // Options: 'yellow', 'blue', 'pink', 'white'
 
@@ -1045,8 +1041,7 @@ async function loadUserData(userId) {
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/wallpaper`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/skillReminders`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/itemTimers`)),
-		get(ref(database, `users/${userId}/guides/${currentGuideId}/singlePageMode`)),
-	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap, timersSnap, singlePageModeSnap]) => {
+	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap, timersSnap]) => {
 
 			
 		// Load categories
@@ -1084,11 +1079,6 @@ async function loadUserData(userId) {
         // Load layout mode
         if (layoutSnap.val()) {
             layoutMode = layoutSnap.val();
-        }
-
-        // Load single-page mode preference
-        if (singlePageModeSnap.val() !== null) {
-            singlePageMode = singlePageModeSnap.val();
         }
 
         // Load auto-refresh settings
@@ -1734,15 +1724,6 @@ async function applyCustomColor() {
 function saveHeaderImage() {
     if (!currentUser) return;
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/headerImage`), headerImage);
-}
-
-/**
- * Save single-page mode preference to Firebase
- * Why: Persists user's view preference for each guide individually
- */
-function saveSinglePageMode() {
-    if (!currentUser) return;
-    set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/singlePageMode`), singlePageMode);
 }
 
 /**
@@ -3376,7 +3357,7 @@ colorThemes.forEach(theme => {
 	    <button class="edit-btn" id="menuBtn" style="display: block;">⋮</button>
 	    <div class="dropdown-menu" id="dropdownMenu">
 	        <button id="editModeMenuBtn">Edit</button>
-	        <button id="singlePageViewBtn">${singlePageMode ? '✓ ' : ''}Single Page View</button>
+	        <button id="singlePageViewBtn">${categories[activeTabIndex]?.singlePageMode ? '✓ ' : ''}Single Page View</button>
 	        <button id="duplicateGuideBtn">Duplicate</button>
 	        <button id="deleteGuideBtn">Delete</button>
 	        <button id="headerImageBtn">Header Image</button>
@@ -4771,12 +4752,14 @@ function renderTabs() {
             
         } else {
             // Need to render SVG icons properly
-            let displayIcon = cat.icon;
+            let displayIcon = '';
             if (cat.icon && cat.icon.startsWith('svg:')) {
                 const iconData = JSON.parse(cat.icon.substring(4));
                 displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+            } else if (cat.icon) {
+                displayIcon = cat.icon;
             }
-            tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
+            tab.innerHTML = `${displayIcon ? `<span class="tab-icon-display">${displayIcon}</span> ` : ''}<span class="tab-name-display">${cat.name}</span>`;
             
             const nameSpan = tab.querySelector('.tab-name-display');
             
@@ -5171,6 +5154,11 @@ function toggleItemBackground(catIndex, skillIndex) {
 function renderSinglePageEditor() {
     const contentArea = document.getElementById('contentArea');
     contentArea.className = 'content-area single-page-mode';
+    // Remove all padding from content area
+    contentArea.style.cssText = `
+        padding: 0;
+        margin: 0;
+    `;
 
     // Create main editor container
     const editorContainer = document.createElement('div');
@@ -5178,9 +5166,9 @@ function renderSinglePageEditor() {
     editorContainer.style.cssText = `
         width: 100%;
         margin: 0;
-        padding: 40px 0 0 0;
+        padding: 0;
         background: var(--card-bg);
-        min-height: calc(100vh - 140px);
+        min-height: calc(100vh - 120px);
     `;
 
     // Create editable content area
@@ -5194,19 +5182,18 @@ function renderSinglePageEditor() {
         color: var(--text-primary);
         white-space: pre-wrap;
         word-wrap: break-word;
-        padding: 0 16px 60px 16px;
-        min-height: calc(100vh - 180px);
+        padding: 16px;
+        min-height: calc(100vh - 120px);
     `;
 
-    // Convert all categories and skills to markdown-like text
+    // Convert current category's skills to markdown-like text
     let content = '';
-    categories.forEach((cat, catIndex) => {
-        // Category as heading
-        content += `# ${cat.name}\n\n`;
+    const currentCategory = categories[activeTabIndex];
 
-        // Skills as subheadings with items
-        cat.skills.forEach((skill, skillIndex) => {
-            content += `## ${skill.title}\n\n`;
+    if (currentCategory) {
+        // Skills as headings with items (no need for category heading since it's in the tab)
+        currentCategory.skills.forEach((skill, skillIndex) => {
+            content += `# ${skill.title}\n\n`;
 
             if (skill.items && skill.items.length > 0) {
                 skill.items.forEach(item => {
@@ -5215,9 +5202,7 @@ function renderSinglePageEditor() {
                 content += '\n';
             }
         });
-
-        content += '\n';
-    });
+    }
 
     editorContent.textContent = content;
 
@@ -5250,15 +5235,17 @@ function renderSinglePageEditor() {
 }
 
 /**
- * Save content from single-page editor back to categories structure
+ * Save content from single-page editor back to current category
  *
- * What: Parses markdown-like text and converts it back to categories/skills/items
+ * What: Parses markdown-like text and converts it back to skills/items for current category
  * Why: Keeps data structure consistent for when user switches back to card view
  */
 function saveFromSinglePageEditor(content) {
+    const currentCategory = categories[activeTabIndex];
+    if (!currentCategory) return;
+
     const lines = content.split('\n');
-    const newCategories = [];
-    let currentCategory = null;
+    const newSkills = [];
     let currentSkill = null;
 
     lines.forEach(line => {
@@ -5266,62 +5253,33 @@ function saveFromSinglePageEditor(content) {
 
         if (!trimmedLine) return;
 
-        // Category heading (# Title)
+        // Skill heading (# Title)
         if (trimmedLine.startsWith('# ')) {
-            if (currentCategory && currentSkill) {
-                currentCategory.skills.push(currentSkill);
-            }
-            if (currentCategory) {
-                newCategories.push(currentCategory);
+            // Save previous skill if exists
+            if (currentSkill) {
+                newSkills.push(currentSkill);
             }
 
-            currentCategory = {
-                name: trimmedLine.substring(2).trim(),
-                skills: []
-            };
-            currentSkill = null;
-        }
-        // Skill heading (## Title)
-        else if (trimmedLine.startsWith('## ')) {
-            if (currentSkill && currentCategory) {
-                currentCategory.skills.push(currentSkill);
-            }
-
+            // Start new skill
             currentSkill = {
-                title: trimmedLine.substring(3).trim(),
+                title: trimmedLine.substring(2).trim(),
                 items: []
             };
         }
         // List item (• or - or *)
         else if (trimmedLine.match(/^[•\-\*]\s+/)) {
             const itemText = trimmedLine.substring(2).trim();
-            if (currentSkill) {
-                currentSkill.items.push(itemText);
-            } else {
+            if (!currentSkill) {
                 // Item without a skill - create a default skill
-                if (!currentCategory) {
-                    currentCategory = {
-                        name: 'General',
-                        skills: []
-                    };
-                }
-                if (!currentSkill) {
-                    currentSkill = {
-                        title: 'Notes',
-                        items: []
-                    };
-                }
-                currentSkill.items.push(itemText);
+                currentSkill = {
+                    title: 'Notes',
+                    items: []
+                };
             }
+            currentSkill.items.push(itemText);
         }
         // Regular text - treat as item in current skill
         else {
-            if (!currentCategory) {
-                currentCategory = {
-                    name: 'General',
-                    skills: []
-                };
-            }
             if (!currentSkill) {
                 currentSkill = {
                     title: 'Notes',
@@ -5332,17 +5290,14 @@ function saveFromSinglePageEditor(content) {
         }
     });
 
-    // Add final items
-    if (currentSkill && currentCategory) {
-        currentCategory.skills.push(currentSkill);
-    }
-    if (currentCategory) {
-        newCategories.push(currentCategory);
+    // Add final skill
+    if (currentSkill) {
+        newSkills.push(currentSkill);
     }
 
-    // Only update if there's actual content
-    if (newCategories.length > 0) {
-        categories = newCategories;
+    // Only update current category's skills if there's actual content
+    if (newSkills.length > 0) {
+        currentCategory.skills = newSkills;
         saveCategories();
     }
 }
@@ -5364,11 +5319,15 @@ function renderContent() {
     // Simpler than tracking individual DOM changes (fewer bugs)
     contentArea.innerHTML = '';
 
-    // Why check single-page mode: Switch between card view and single-page editor
-    if (singlePageMode) {
+    // Why check single-page mode: Switch between card view and single-page editor for current tab
+    const currentCategory = categories[activeTabIndex];
+    if (currentCategory && currentCategory.singlePageMode) {
         renderSinglePageEditor();
         return;
     }
+
+    // Reset content area styling for card view
+    contentArea.style.cssText = '';
 
     // Why add edit-mode class: Enables CSS styling for edit state (drag handles, delete buttons, etc.)
     contentArea.className = 'content-area' + (editMode ? ' edit-mode' : '');
@@ -6421,31 +6380,52 @@ function toggleEditMode() {
 }
 
 /**
- * Toggle between card view and single-page editor view
+ * Toggle between card view and single-page editor view for the current tab
  * Why: Provides a Notion-like editing experience where all content is in a single page
  * instead of separate cards, allowing for continuous writing and editing
  */
-function toggleSinglePageView() {
+async function toggleSinglePageView() {
     const menu = document.getElementById('dropdownMenu');
 
     // Why close menu: User selected toggle, no need to keep menu open
     if (menu) menu.classList.remove('show');
 
-    // Toggle the single page mode state
-    singlePageMode = !singlePageMode;
+    const currentCategory = categories[activeTabIndex];
+    if (!currentCategory) return;
+
+    // Warn user when switching TO single-page mode
+    if (!currentCategory.singlePageMode) {
+        const confirmed = await customConfirm(
+            'Switching to Single Page View will clear all existing cards and data in this tab. This action cannot be undone. Do you want to continue?',
+            'Warning'
+        );
+
+        if (!confirmed) {
+            return; // User cancelled, don't toggle
+        }
+
+        // Clear only the current category's data
+        currentCategory.skills = [{
+            title: 'Notes',
+            items: []
+        }];
+    }
+
+    // Toggle the single page mode state for this category only
+    currentCategory.singlePageMode = !currentCategory.singlePageMode;
 
     // Why hide layout button in single page mode: Layout options don't apply to single-page view
     const floatingBtn = document.getElementById('layoutBtn');
     if (floatingBtn) {
-        floatingBtn.style.display = singlePageMode ? 'none' : 'flex';
+        floatingBtn.style.display = currentCategory.singlePageMode ? 'none' : 'flex';
     }
 
-    // Save preference to Firebase for persistence
-    saveSinglePageMode();
+    // Save to Firebase
+    saveCategories();
 
     // Re-render UI to show either cards or single-page editor
     renderHeader();  // Update checkmark in menu
-    renderTabs();     // Hide tabs in single-page mode
+    renderTabs();     // Tabs remain visible
     renderContent();  // Switch between card view and editor
 }
 
@@ -6717,6 +6697,10 @@ function editCategoryIcon(catIndex, el) {
 	
 function toggleLayout() {
     if (!currentUser) return;
+    // Disable layout toggle in single-page mode
+    const currentCategory = categories[activeTabIndex];
+    if (currentCategory && currentCategory.singlePageMode) return;
+
     if (layoutMode === 'vertical') {
         layoutMode = 'horizontal';
     } else {
@@ -6725,7 +6709,7 @@ function toggleLayout() {
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/layoutMode`), layoutMode);
     renderContent();
     updateLayoutButton();
-    
+
 }
 
 function updateLayoutButton() {
