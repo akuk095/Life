@@ -4771,12 +4771,14 @@ function renderTabs() {
             
         } else {
             // Need to render SVG icons properly
-            let displayIcon = cat.icon;
+            let displayIcon = '';
             if (cat.icon && cat.icon.startsWith('svg:')) {
                 const iconData = JSON.parse(cat.icon.substring(4));
                 displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
+            } else if (cat.icon) {
+                displayIcon = cat.icon;
             }
-            tab.innerHTML = `<span class="tab-icon-display">${displayIcon}</span> <span class="tab-name-display">${cat.name}</span>`;
+            tab.innerHTML = `${displayIcon ? `<span class="tab-icon-display">${displayIcon}</span> ` : ''}<span class="tab-name-display">${cat.name}</span>`;
             
             const nameSpan = tab.querySelector('.tab-name-display');
             
@@ -5171,6 +5173,11 @@ function toggleItemBackground(catIndex, skillIndex) {
 function renderSinglePageEditor() {
     const contentArea = document.getElementById('contentArea');
     contentArea.className = 'content-area single-page-mode';
+    // Remove all padding from content area
+    contentArea.style.cssText = `
+        padding: 0;
+        margin: 0;
+    `;
 
     // Create main editor container
     const editorContainer = document.createElement('div');
@@ -5178,9 +5185,9 @@ function renderSinglePageEditor() {
     editorContainer.style.cssText = `
         width: 100%;
         margin: 0;
-        padding: 40px 0 0 0;
+        padding: 0;
         background: var(--card-bg);
-        min-height: calc(100vh - 140px);
+        min-height: calc(100vh - 120px);
     `;
 
     // Create editable content area
@@ -5194,8 +5201,8 @@ function renderSinglePageEditor() {
         color: var(--text-primary);
         white-space: pre-wrap;
         word-wrap: break-word;
-        padding: 0 16px 60px 16px;
-        min-height: calc(100vh - 180px);
+        padding: 16px;
+        min-height: calc(100vh - 120px);
     `;
 
     // Convert all categories and skills to markdown-like text
@@ -5369,6 +5376,9 @@ function renderContent() {
         renderSinglePageEditor();
         return;
     }
+
+    // Reset content area styling for card view
+    contentArea.style.cssText = '';
 
     // Why add edit-mode class: Enables CSS styling for edit state (drag handles, delete buttons, etc.)
     contentArea.className = 'content-area' + (editMode ? ' edit-mode' : '');
@@ -6425,11 +6435,35 @@ function toggleEditMode() {
  * Why: Provides a Notion-like editing experience where all content is in a single page
  * instead of separate cards, allowing for continuous writing and editing
  */
-function toggleSinglePageView() {
+async function toggleSinglePageView() {
     const menu = document.getElementById('dropdownMenu');
 
     // Why close menu: User selected toggle, no need to keep menu open
     if (menu) menu.classList.remove('show');
+
+    // Warn user when switching TO single-page mode
+    if (!singlePageMode) {
+        const confirmed = await customConfirm(
+            'Switching to Single Page View will clear all existing cards and data. This action cannot be undone. Do you want to continue?',
+            'Warning'
+        );
+
+        if (!confirmed) {
+            return; // User cancelled, don't toggle
+        }
+
+        // Clear all categories and create a fresh start
+        categories = [{
+            name: 'General',
+            skills: [{
+                title: 'Notes',
+                items: []
+            }]
+        }];
+        activeTabIndex = 0;
+        checkedItems = {};
+        saveCategories();
+    }
 
     // Toggle the single page mode state
     singlePageMode = !singlePageMode;
@@ -6445,7 +6479,7 @@ function toggleSinglePageView() {
 
     // Re-render UI to show either cards or single-page editor
     renderHeader();  // Update checkmark in menu
-    renderTabs();     // Hide tabs in single-page mode
+    renderTabs();     // Show/hide tabs based on mode
     renderContent();  // Switch between card view and editor
 }
 
@@ -6717,6 +6751,9 @@ function editCategoryIcon(catIndex, el) {
 	
 function toggleLayout() {
     if (!currentUser) return;
+    // Disable layout toggle in single-page mode
+    if (singlePageMode) return;
+
     if (layoutMode === 'vertical') {
         layoutMode = 'horizontal';
     } else {
@@ -6725,7 +6762,7 @@ function toggleLayout() {
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/layoutMode`), layoutMode);
     renderContent();
     updateLayoutButton();
-    
+
 }
 
 function updateLayoutButton() {
