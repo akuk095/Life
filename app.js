@@ -1,24 +1,64 @@
-	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-	import { getDatabase, ref, set, get, update, remove, onValue, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-	import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+	// ============================================================================
+	// SECTION 1: FIREBASE IMPORTS & DEPENDENCIES
+	// ============================================================================
+	// Why: Using CDN imports instead of npm packages to avoid build step complexity
+	// This keeps the app deployable as a simple static site without requiring Node.js
 
-	// Initialize Dark Mode IMMEDIATELY (before page renders)
-	(function() {
+	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+	import {
+	    getDatabase,
+	    ref,
+	    set,
+	    get,
+	    update,
+	    remove,
+	    onValue,
+	    child
+	} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+	import {
+	    getAuth,
+	    signInWithEmailAndPassword,
+	    createUserWithEmailAndPassword,
+	    signInWithPopup,
+	    GoogleAuthProvider,
+	    onAuthStateChanged,
+	    signOut,
+	    sendEmailVerification
+	} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+	// ============================================================================
+	// SECTION 2: IMMEDIATE DARK MODE INITIALIZATION
+	// ============================================================================
+	// Why: Dark mode must be applied BEFORE the page renders to prevent flash of wrong theme
+	// This IIFE runs synchronously before any HTML is parsed to avoid the "white flash"
+	// that occurs when switching from default light mode to dark mode after page load
+	(function initializeDarkMode() {
 	    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+
 	    if (isDarkMode) {
+	        // Apply to documentElement first (available immediately in <head>)
 	        document.documentElement.classList.add('dark-mode');
-	        // Also add to body when it's available
+
+	        // Also apply to body - it may not exist yet since we're in <head>
+	        // Why: Some CSS selectors target body.dark-mode specifically
 	        if (document.body) {
 	            document.body.classList.add('dark-mode');
 	        } else {
-	            document.addEventListener('DOMContentLoaded', function() {
+	            // Wait for body to be available, but only listen once to avoid memory leaks
+	            document.addEventListener('DOMContentLoaded', function applyDarkModeToBody() {
 	                document.body.classList.add('dark-mode');
 	            }, { once: true });
 	        }
 	    }
 	})();
 
-	// Initialize Firebase
+	// ============================================================================
+	// SECTION 3: FIREBASE CONFIGURATION
+	// ============================================================================
+	// Why: Firebase config is stored here instead of environment variables because:
+	// 1. These are public identifiers (safe to expose in client-side code)
+	// 2. Security is handled by Firebase Security Rules, not by hiding these values
+	// 3. Simplifies deployment as a static site without needing a build process
 	const firebaseConfig = {
 	  apiKey: "AIzaSyA5k5pOZjWTrV3b1f51-aWH2AgDUY-p5hE",
 	  authDomain: "life-akuk095.firebaseapp.com",
@@ -29,7 +69,19 @@
 	  appId: "1:80383828301:web:7c001b7375f63fc5055704",
 	};
 
-	// Custom dialog functions to replace alert, confirm, and prompt
+	// ============================================================================
+	// SECTION 4: CUSTOM DIALOG UTILITIES
+	// ============================================================================
+	// Why: Replacing browser's native alert/confirm/prompt with custom dialogs because:
+	// 1. Native dialogs block the entire browser and can't be styled
+	// 2. They don't support dark mode or our app's theme
+	// 3. Custom dialogs provide better UX with animations and consistent design
+	// 4. They return Promises for better async/await compatibility
+
+	/**
+	 * Custom alert dialog - replaces window.alert()
+	 * Why async: Returns a Promise so callers can await the user's acknowledgment
+	 */
 function customAlert(message, title = '') {
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
@@ -50,144 +102,193 @@ function customAlert(message, title = '') {
         dialog.innerHTML = html;
         overlay.appendChild(dialog);
         document.body.appendChild(overlay);
-        
+
+        // Why 10ms delay: Allows browser to render the element before adding 'show' class
+        // This enables CSS transitions to work properly (can't transition from non-existent to visible)
         setTimeout(() => overlay.classList.add('show'), 10);
-        
+
         const closeDialog = () => {
             overlay.classList.remove('show');
+
+            // Why 200ms delay: Matches CSS transition duration for fade-out animation
+            // Removing from DOM immediately would skip the closing animation
             setTimeout(() => {
                 document.body.removeChild(overlay);
                 resolve();
             }, 200);
         };
-        
+
         dialog.querySelector('.custom-dialog-button').addEventListener('click', closeDialog);
+
+        // Why allow overlay click to close: Standard UX pattern - clicking outside dismisses modal
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) closeDialog();
         });
     });
 }
 
-function customConfirm(message, title = '', confirmText = 'OK') {
-    return new Promise((resolve) => {
-        const overlay = document.createElement('div');
-        overlay.className = 'custom-dialog-overlay';
-        
-        const dialog = document.createElement('div');
-        dialog.className = 'custom-dialog';
-        
-        let html = '';
-        if (title) {
-            html += `<div class="custom-dialog-title">${title}</div>`;
-        }
-        html += `<div class="custom-dialog-message">${message}</div>`;
-        
-        // Use destructive class only if confirmText suggests danger
-        const isDangerous = confirmText.toLowerCase().includes('delete') || confirmText.toLowerCase().includes('remove');
-        const buttonClass = isDangerous ? 'destructive' : 'primary';
-        
-        html += `<div class="custom-dialog-buttons">
-            <button class="custom-dialog-button" data-result="false">Cancel</button>
-            <button class="custom-dialog-button ${buttonClass}" data-result="true">${confirmText}</button>
-        </div>`;
-        
-        dialog.innerHTML = html;
-        overlay.appendChild(dialog);
-        document.body.appendChild(overlay);
-        
-        setTimeout(() => overlay.classList.add('show'), 10);
-        
-        const closeDialog = (result) => {
-            overlay.classList.remove('show');
-            setTimeout(() => {
-                document.body.removeChild(overlay);
-                resolve(result);
-            }, 200);
-        };
-        
-        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                closeDialog(btn.dataset.result === 'true');
-            });
-        });
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeDialog(false);
-        });
-    });
-}
+	/**
+	 * Custom confirm dialog - replaces window.confirm()
+	 * Why customizable button text: Allows context-specific actions like "Delete" instead of generic "OK"
+	 * Returns: Promise<boolean> - true if confirmed, false if cancelled
+	 */
+	function customConfirm(message, title = '', confirmText = 'OK') {
+	    return new Promise((resolve) => {
+	        const overlay = document.createElement('div');
+	        overlay.className = 'custom-dialog-overlay';
 
-function customPrompt(message, defaultValue = '', title = '') {
-    return new Promise((resolve) => {
-        const overlay = document.createElement('div');
-        overlay.className = 'custom-dialog-overlay';
-        
-        const dialog = document.createElement('div');
-        dialog.className = 'custom-dialog';
-        
-        let html = '';
-        if (title) {
-            html += `<div class="custom-dialog-title">${title}</div>`;
-        }
-        html += `<div class="custom-dialog-message">${message}</div>`;
-        html += `<input type="text" class="custom-dialog-input" value="${defaultValue}" placeholder="${defaultValue}">`;
-        html += `<div class="custom-dialog-buttons">
-            <button class="custom-dialog-button" data-result="cancel">Cancel</button>
-            <button class="custom-dialog-button primary" data-result="ok">OK</button>
-        </div>`;
-        
-        dialog.innerHTML = html;
-        overlay.appendChild(dialog);
-        document.body.appendChild(overlay);
-        
-        const input = dialog.querySelector('.custom-dialog-input');
-        
-        setTimeout(() => {
-            overlay.classList.add('show');
-            input.focus();
-            input.select();
-        }, 10);
-        
-        const closeDialog = (result) => {
-            overlay.classList.remove('show');
-            setTimeout(() => {
-                document.body.removeChild(overlay);
-                resolve(result);
-            }, 200);
-        };
-        
-        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (btn.dataset.result === 'ok') {
-                    closeDialog(input.value || null);
-                } else {
-                    closeDialog(null);
-                }
-            });
-        });
-        
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                closeDialog(input.value || null);
-            } else if (e.key === 'Escape') {
-                closeDialog(null);
-            }
-        });
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeDialog(null);
-        });
-    });
-}
+	        const dialog = document.createElement('div');
+	        dialog.className = 'custom-dialog';
+
+	        let html = '';
+	        if (title) {
+	            html += `<div class="custom-dialog-title">${title}</div>`;
+	        }
+	        html += `<div class="custom-dialog-message">${message}</div>`;
+
+	        // Why check confirmText for dangerous words: Automatically applies red 'destructive' styling
+	        // to warn users about potentially dangerous actions like deleting data
+	        const isDangerous = confirmText.toLowerCase().includes('delete') || confirmText.toLowerCase().includes('remove');
+	        const buttonClass = isDangerous ? 'destructive' : 'primary';
+
+	        html += `<div class="custom-dialog-buttons">
+	            <button class="custom-dialog-button" data-result="false">Cancel</button>
+	            <button class="custom-dialog-button ${buttonClass}" data-result="true">${confirmText}</button>
+	        </div>`;
+
+	        dialog.innerHTML = html;
+	        overlay.appendChild(dialog);
+	        document.body.appendChild(overlay);
+
+	        setTimeout(() => overlay.classList.add('show'), 10);
+
+	        const closeDialog = (result) => {
+	            overlay.classList.remove('show');
+	            setTimeout(() => {
+	                document.body.removeChild(overlay);
+	                resolve(result);
+	            }, 200);
+	        };
+
+	        // Why use data-result attribute: Cleanly maps button clicks to boolean results
+	        // without needing separate handlers for each button
+	        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
+	            btn.addEventListener('click', () => {
+	                closeDialog(btn.dataset.result === 'true');
+	            });
+	        });
+
+	        // Why overlay click returns false: Clicking outside should cancel, not confirm
+	        // Prevents accidental confirmations of destructive actions
+	        overlay.addEventListener('click', (e) => {
+	            if (e.target === overlay) closeDialog(false);
+	        });
+	    });
+	}
+
+	/**
+	 * Custom prompt dialog - replaces window.prompt()
+	 * Why include defaultValue: Pre-fills input for editing existing values
+	 * Returns: Promise<string|null> - user input or null if cancelled
+	 */
+	function customPrompt(message, defaultValue = '', title = '') {
+	    return new Promise((resolve) => {
+	        const overlay = document.createElement('div');
+	        overlay.className = 'custom-dialog-overlay';
+
+	        const dialog = document.createElement('div');
+	        dialog.className = 'custom-dialog';
+
+	        let html = '';
+	        if (title) {
+	            html += `<div class="custom-dialog-title">${title}</div>`;
+	        }
+	        html += `<div class="custom-dialog-message">${message}</div>`;
+	        html += `<input type="text" class="custom-dialog-input" value="${defaultValue}" placeholder="${defaultValue}">`;
+	        html += `<div class="custom-dialog-buttons">
+	            <button class="custom-dialog-button" data-result="cancel">Cancel</button>
+	            <button class="custom-dialog-button primary" data-result="ok">OK</button>
+	        </div>`;
+
+	        dialog.innerHTML = html;
+	        overlay.appendChild(dialog);
+	        document.body.appendChild(overlay);
+
+	        const input = dialog.querySelector('.custom-dialog-input');
+
+	        // Why focus and select in setTimeout: Ensures input is ready in DOM before manipulating it
+	        // Why select(): Auto-selects text so user can immediately start typing to replace it
+	        setTimeout(() => {
+	            overlay.classList.add('show');
+	            input.focus();
+	            input.select();
+	        }, 10);
+
+	        const closeDialog = (result) => {
+	            overlay.classList.remove('show');
+	            setTimeout(() => {
+	                document.body.removeChild(overlay);
+	                resolve(result);
+	            }, 200);
+	        };
+
+	        dialog.querySelectorAll('.custom-dialog-button').forEach(btn => {
+	            btn.addEventListener('click', () => {
+	                if (btn.dataset.result === 'ok') {
+	                    // Why return null for empty input: Matches native prompt() behavior
+	                    // Allows callers to distinguish between cancelled and empty input
+	                    closeDialog(input.value || null);
+	                } else {
+	                    closeDialog(null);
+	                }
+	            });
+	        });
+
+	        // Why keyboard shortcuts: Standard UX - Enter submits, Escape cancels
+	        // Allows power users to complete actions without mouse
+	        input.addEventListener('keydown', (e) => {
+	            if (e.key === 'Enter') {
+	                closeDialog(input.value || null);
+	            } else if (e.key === 'Escape') {
+	                closeDialog(null);
+	            }
+	        });
+
+	        // Why overlay click returns null: Clicking outside = cancellation
+	        overlay.addEventListener('click', (e) => {
+	            if (e.target === overlay) closeDialog(null);
+	        });
+	    });
+	}
+	// ============================================================================
+	// SECTION 5: FIREBASE INITIALIZATION
+	// ============================================================================
 	const app = initializeApp(firebaseConfig);
 	const database = getDatabase(app);
 	const auth = getAuth(app);
-	let currentUser = null;
+
+	// ============================================================================
+	// SECTION 6: GLOBAL STATE MANAGEMENT
+	// ============================================================================
+	// Why global variables: Shared state across multiple functions and event handlers
+	// Alternative would be a state management library, but that adds complexity for a single-page app
+
+	// Authentication state
+	let currentUser = null;  // Populated by onAuthStateChanged listener
+
+	// Guide/Document state
+	// Why localStorage for currentGuideId: Persists which guide is open across page refreshes
 	let currentGuideId = localStorage.getItem('currentGuideId') || null;
-	let skillReminders = {}; // Format: { 'catIndex-skillIndex': { enabled: true, items: { 'itemIndex': 'HH:MM' } } }
+
+	// Reminder & Timer state
+	// Why object format for skillReminders: Allows O(1) lookup by 'catIndex-skillIndex' key
+	// Format: { 'catIndex-skillIndex': { enabled: true, items: { 'itemIndex': 'HH:MM' } } }
+	let skillReminders = {};
+	let itemTimers = {};  // Stores active setTimeout references for clearing
+
+	// Journal state
 	let currentJournalEntryId = null;
-	let currentJournalData = {};
-	let itemTimers = {};
+	let currentJournalData = {};  // Temporary storage while editing
 	
 	// Default data structure
 	let categories = [
@@ -564,32 +665,61 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-let checkedItems = {};
-let editMode = false;
-let activeTabIndex = 0;
-let appIcon = "📚"; 
+// App/Guide UI state
+let checkedItems = {};  // Tracks which checklist items are checked
+let editMode = false;  // Whether user is in edit mode (can reorder/delete items)
+let activeTabIndex = 0;  // Currently active category tab
+
+// Guide appearance settings (loaded from Firebase for each guide)
+let appIcon = "📚";
 let appTitle = "Short note";
 let appSubtitle = "Double tap to add description";
-let themeColor = '#607d8b'; // Default grey
-let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
-let stickyMode = 'white'; // 'yellow', 'blue', 'pink', or 'white' (original)
+
+// Why default grey (#607d8b): Neutral color that works well in both light and dark mode
+let themeColor = '#607d8b';
+
+// Layout & Display options
+// Why three layout modes: Provides flexibility for different use cases
+// 'vertical' = stacked cards, 'horizontal' = side-by-side, 'headings' = list view
+let layoutMode = 'vertical';
+
+// Why sticky mode: Mimics physical sticky notes for visual familiarity
+let stickyMode = 'white';  // Options: 'yellow', 'blue', 'pink', 'white'
+
+// Auto-refresh feature
+// Why auto-refresh: Allows daily checklists to reset automatically at a specific time
 let autoRefreshEnabled = false;
-let autoRefreshTime = "00:00"; // Default midnight
-let headerImage = null; 
-let wallpaperUrl = '';
-// Load last selected collection from localStorage, default to null ("All files")
+let autoRefreshTime = "00:00";  // 24-hour format (HH:MM)
+
+// Visual customization
+let headerImage = null;  // Base64 or URL for header background image
+let wallpaperUrl = '';  // Background wallpaper URL
+
+// Collection/Filter state
+// Why localStorage: Remembers user's last selected collection filter across sessions
 let selectedCollection = localStorage.getItem('selectedCollection') || null;
-let selectedFilter = 'all'; // 'all' means no filter active
-	
-// Drag and drop state
-let draggedCard = null;
-let draggedCatIndex = null;
-let draggedSkillIndex = null;
-let draggedElement = null;
-let placeholder = null;
-let draggedTab = null;
-let draggedTabIndex = null;
-	
+let selectedFilter = 'all';  // Filter type: 'all', 'completed', 'incomplete'
+
+// ============================================================================
+// Drag and Drop State
+// ============================================================================
+// Why separate drag state variables: Needed to track what's being dragged,
+// from where, and where it can be dropped during reordering operations
+let draggedCard = null;  // The DOM element being dragged
+let draggedCatIndex = null;  // Source category index
+let draggedSkillIndex = null;  // Source skill index within category
+let draggedElement = null;  // Current draggable element reference
+let placeholder = null;  // Visual placeholder showing drop position
+let draggedTab = null;  // For tab reordering
+let draggedTabIndex = null;  // Source tab index
+
+// ============================================================================
+// SECTION 7: APP CONSTANTS & THEME DATA
+// ============================================================================
+
+// Color Theme Presets
+// Why predefined themes: Provides curated color combinations that look professional
+// and work well together, rather than requiring users to pick colors manually
 const colorThemes = [
     { name: 'Forest', primary: '#27ae60', secondary: '#f39c12' },          // Green + Amber
     { name: 'Cherry', primary: '#e74c3c', secondary: '#c0392b' },          // Red + Dark Red
@@ -609,9 +739,13 @@ const colorThemes = [
     { name: 'Steel Blue', primary: '#607D8B', secondary: '#455A64' },
 	{ name: 'Charcoal', primary: '#5C6B73', secondary: '#3D4A52' },
 	{ name: 'Dark', primary: '#0A0A0A', secondary: '#000000' }
-]; 
+];
 
-		const svgIcons = [
+// SVG Icon Library
+// Why SVG paths instead of icon fonts: SVGs are more reliable, don't require font loading,
+// and can be styled/animated with CSS. Each path is a 24x24 viewBox coordinate system
+// Why categorized: Organized by theme to help users find relevant icons quickly
+const svgIcons = [
     { name: 'Night', path: 'M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z' },
     { name: 'Water', path: 'M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8z' },
     { name: 'Location', path: 'M12 2C8 2 5 5.13 5 9c0 5 7 13 7 13s7-8 7-13c0-3.87-3-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z' },
@@ -866,12 +1000,22 @@ document.addEventListener('drop', (e) => {
 });
 
 		
+// ============================================================================
+// DATA LOADING & PERSISTENCE
+// ============================================================================
+
+/**
+ * Load user's guide data from Firebase
+ * Why async: Firebase operations are asynchronous, so we need to wait for data
+ */
 async function loadUserData(userId) {
-    // Hide container initially
+    // Why hide container initially: Prevents flickering/layout shifts while data loads
+    // Better to show smooth fade-in with complete data than partial content appearing
     document.querySelector('.container').classList.remove('loaded');
 	document.querySelector('.container').style.opacity = '0';
-    
-    // Check if guide exists for this user
+
+    // Why check if guide exists: First-time users or new guides need default data
+    // This ensures every user has a working guide even if they've never saved before
     get(ref(database, `users/${userId}/guides/${currentGuideId}`)).then((snapshot) => {
         if (!snapshot.exists()) {
             set(ref(database, `users/${userId}/guides/${currentGuideId}`), {
@@ -879,9 +1023,10 @@ async function loadUserData(userId) {
             });
         }
     });
-    
-	    // Use Promise.all to wait for all data to load
-	    Promise.all([
+
+    // Why Promise.all: Load all guide data in parallel instead of sequentially
+    // This is much faster than loading one field at a time (hundreds of ms saved)
+    Promise.all([
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/categories`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/checkedItems`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/appTitle`)),
@@ -1031,71 +1176,86 @@ function switchGuide(guideId) {
     }, 100);
 }
 	
+// ============================================================================
+// THEME & COLOR MANAGEMENT
+// ============================================================================
+
+/**
+ * Apply the current theme color to the entire app
+ * Why this function exists: Centralizes all theme-related styling so changing
+ * the theme only requires calling this one function
+ */
 function applyTheme() {
     const theme = colorThemes.find(t => t.primary === themeColor);
     let primaryColor, secondaryColor;
-    
+
+    // Why check preset vs custom: Preset themes have carefully chosen color pairs,
+    // but we also support custom colors by auto-generating a complementary secondary color
     if (theme) {
-        // Use preset theme
+        // Use curated preset theme with designer-chosen color pairs
         primaryColor = theme.primary;
         secondaryColor = theme.secondary;
-        
+
     } else {
-        // Custom color - calculate darker and lighter shades
+        // Custom color selected - auto-generate secondary color
         primaryColor = themeColor;
         const hex = themeColor.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
-        
+
+        // Why subtract 30 from RGB: Creates a slightly darker shade for depth
+        // Not too dark (would look black), not too subtle (wouldn't show contrast)
         const darkerR = Math.max(0, r - 30);
         const darkerG = Math.max(0, g - 30);
         const darkerB = Math.max(0, b - 30);
-        
+
         secondaryColor = '#' + [darkerR, darkerG, darkerB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
     }
-    
+
     // Determine if the theme is light
     const isLight = isLightColor(primaryColor);
-    
-    // For light themes, make secondary much darker for better contrast
+
+    // Why special handling for light themes: Light colors need much darker secondaries
+    // for sufficient contrast (WCAG accessibility). 30-point darker isn't enough.
     if (isLight) {
         const hex = primaryColor.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
-        
+
+        // Why multiply by 0.7: Creates 30% darker color for readable text on light backgrounds
         const darkerR = Math.max(0, Math.floor(r * 0.7));
         const darkerG = Math.max(0, Math.floor(g * 0.7));
         const darkerB = Math.max(0, Math.floor(b * 0.7));
-        
+
         secondaryColor = '#' + [darkerR, darkerG, darkerB]
             .map(x => x.toString(16).padStart(2, '0')).join('');
     }
-    
-    // Set CSS variables
+
+    // Why CSS variables: Allows entire app to react to theme changes without
+    // manually updating every element. CSS can reference these variables.
     document.documentElement.style.setProperty('--primary-color', primaryColor);
     document.documentElement.style.setProperty('--secondary-color', secondaryColor);
-       
-    // Set shadow with secondary color at 30% opacity
+
+    // Why 30% opacity for shadows: Subtle depth without being too heavy or distracting
     const hex = secondaryColor.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
     document.documentElement.style.setProperty('--shadow-color', `rgba(${r}, ${g}, ${b}, 0.3)`);
-    
-    // Set tab active color - use secondary for light themes
+
+    // Why use secondary for light themes: Primary color would be too light for active indicators
     document.documentElement.style.setProperty('--tab-active-color', isLight ? secondaryColor : primaryColor);
-    
-    // Set save button color - use secondary for light themes
+
     document.documentElement.style.setProperty('--save-btn-color', isLight ? secondaryColor : primaryColor);
-    
-    // Apply background color only if no wallpaper exists
+
+    // Why check for wallpaper: Background should be transparent when wallpaper is set,
+    // otherwise wallpaper wouldn't show through
     if (!wallpaperUrl) {
         document.body.style.background = '#f0f2f5';
     } else {
-        // Keep transparent background when wallpaper is active
         document.body.style.background = 'transparent';
     }        
        
@@ -1651,12 +1811,21 @@ function closeDrawer() {
     document.body.style.overflow = '';
 }
 
-// Touch swipe to close drawer
+// ============================================================================
+// TOUCH & GESTURE HANDLERS
+// ============================================================================
+// Why separate touch handlers: Mobile users need touch-based interactions
+// for swipe-to-delete, drawer gestures, and card manipulation
+
+// Drawer swipe state
+// Why track X position: Enables horizontal swipe gesture to close drawer menu
 let touchStartX = 0;
 let touchCurrentX = 0;
 let isDragging = false;
 
-// Swipe to delete checklist items (horizontal only)
+// Item swipe-to-delete state
+// Why track both X and Y: Distinguishes horizontal swipe (delete) from vertical scroll
+// Prevents accidental deletions while scrolling through list
 let itemTouchStartX = 0;
 let itemTouchStartY = 0;
 let itemTouchCurrentX = 0;
@@ -2046,6 +2215,16 @@ document.addEventListener('touchend', async (e) => {
     currentSwipedCard = null;
 });
 
+// ============================================================================
+// GUIDE & DOCUMENT MANAGEMENT
+// ============================================================================
+// Why guides: Core feature that allows users to create multiple independent documents/checklists
+// Each guide has its own categories, items, theme, and settings
+
+/**
+ * Create a new blank guide
+ * Why timestamp-based ID: Ensures unique IDs without server round-trip
+ */
 function createNewGuide() {
     if (!currentUser) return;
     const timestamp = Date.now();
@@ -2801,55 +2980,76 @@ function toggleMenu(e) {
 }
 
 // Authentication functions
+// ============================================================================
+// AUTHENTICATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Email/password login
+ * Why check email verification: Prevents spam accounts and ensures users own their email
+ */
 async function login(email, password) {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         currentUser = userCredential.user;
-        
-        // Check if email is verified
+
+        // Why enforce email verification: Security measure to confirm user owns the email address
+        // Prevents someone from creating accounts with other people's emails
         if (!currentUser.emailVerified) {
             await customAlert('Please verify your email before logging in. Check your inbox for the verification link.', 'Email Not Verified');
+            // Why sign out unverified users: Forces verification before granting access
             await signOut(auth);
             currentUser = null;
             return;
         }
-        
+
         loadUserData(currentUser.uid);
     } catch (error) {
         await customAlert(error.message, 'Login Failed');
     }
 }
 
-
+/**
+ * Create new account with email/password
+ * Why send verification email: Confirms user owns the email and reduces spam/fake accounts
+ */
 async function signup(email, password) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         currentUser = userCredential.user;
-        
+
         // Send verification email
         await sendEmailVerification(currentUser);
         await customAlert('A verification email has been sent to ' + email + '. Please check your inbox and verify your email before logging in.', 'Verify Your Email');
-        
-        // Sign out the user so they must verify before using the app
+
+        // Why sign out immediately after signup: Forces user to verify email before accessing app
+        // Prevents using the app with unverified accounts
         await signOut(auth);
         currentUser = null;
-        
-        // Go back to login screen
+
         backToLogin();
     } catch (error) {
         await customAlert(error.message, 'Signup Failed');
     }
 }
 
+/**
+ * Google OAuth login
+ * Why use Google login: Provides secure, passwordless authentication with existing Google accounts
+ */
 async function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
+
+    // Why 'select_account' prompt: Always shows account picker even if user is logged into one account
+    // Allows users to choose which Google account to use for this app
     provider.setCustomParameters({
         prompt: 'select_account'
     });
-    
+
     try {
         const result = await signInWithPopup(auth, provider);
         currentUser = result.user;
+        // Note: Google accounts are pre-verified, no email verification check needed
         loadUserData(currentUser.uid);
     } catch (error) {
         console.error('Google login error:', error);
@@ -2857,10 +3057,14 @@ async function loginWithGoogle() {
     }
 }
 
+/**
+ * Sign out current user
+ * Why clear categories: Prevents showing previous user's data after logout
+ */
 function logout() {
     signOut(auth).then(() => {
         currentUser = null;
-        categories = [];
+        categories = [];  // Clear local data for privacy
     });
 }
 
@@ -2967,9 +3171,19 @@ function saveHeader() {
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appSubtitle`), appSubtitle);
   set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/appIcon`), appIcon);
   renderHeader();
-  
+
 }
 
+// ============================================================================
+// UI RENDERING FUNCTIONS
+// ============================================================================
+// Why separate rendering functions: Keeps DOM manipulation organized and reusable
+// Any state change can trigger a re-render without duplicating UI code
+
+/**
+ * Render the guide header with title, subtitle, and theme controls
+ * Why async: Loads header image from Firebase if it exists
+ */
 async function renderHeader() {
     const header = document.querySelector('.header');
     
@@ -4226,17 +4440,26 @@ async function clearAllChecks() {
     }
 }
 
+/**
+ * Toggle auto-refresh feature for daily checklists
+ * Why auto-refresh: Useful for daily habit trackers or todo lists that reset each day
+ * User can set a specific time (e.g., midnight) when all checkmarks auto-clear
+ */
 async function toggleAutoRefresh() {
     const enabled = await customConfirm(
-    autoRefreshEnabled 
-        ? 'This will disable the automatic daily refresh.' 
+    autoRefreshEnabled
+        ? 'This will disable the automatic daily refresh.'
         : `This will clear all checkmarks at ${autoRefreshTime} each day.`,
     autoRefreshEnabled ? 'Disable Auto-Refresh' : 'Enable Auto-Refresh'
 );
 
 if (enabled) {
     if (!autoRefreshEnabled) {
+        // Enabling: Prompt for time
         const time = await customPrompt('Enter time in 24-hour format', autoRefreshTime, 'Set Refresh Time');
+
+            // Why validate time format: Prevents invalid times that would break the feature
+            // Regex checks for valid 24-hour format: 00:00 to 23:59
             if (time && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
                 autoRefreshTime = time;
                 autoRefreshEnabled = true;
@@ -4245,10 +4468,11 @@ if (enabled) {
                 return;
             }
         } else {
+            // Disabling: Just turn it off
             autoRefreshEnabled = false;
         }
         saveAutoRefreshSettings();
-        renderHeader(); // Update menu display
+        renderHeader(); // Update menu to reflect new state
     }
 }
 
