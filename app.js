@@ -441,15 +441,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const homeMenuBtn = document.getElementById('homeMenuBtn');
     const homeDropdownMenu = document.getElementById('homeDropdownMenu');
     const homeSelectMenuBtn = document.getElementById('homeSelectMenuBtn');
+    const homeCreatePageMenuBtn = document.getElementById('homeCreatePageMenuBtn');
     const homeCreateCollectionMenuBtn = document.getElementById('homeCreateCollectionMenuBtn');
 
     if (homeMenuBtn && homeDropdownMenu) {
         homeMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             homeDropdownMenu.classList.toggle('show');
-            
+
             if (homeSelectMenuBtn) {
-                homeSelectMenuBtn.innerHTML = homeSelectMode 
+                homeSelectMenuBtn.innerHTML = homeSelectMode
                     ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancel`
                     : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Select`;
             }
@@ -460,6 +461,13 @@ document.addEventListener('DOMContentLoaded', () => {
         homeSelectMenuBtn.addEventListener('click', () => {
             toggleSelectMode();
             homeDropdownMenu.classList.remove('show');
+        });
+    }
+
+    if (homeCreatePageMenuBtn) {
+        homeCreatePageMenuBtn.addEventListener('click', () => {
+            homeDropdownMenu.classList.remove('show');
+            createNewGuide();
         });
     }
 
@@ -575,8 +583,9 @@ let layoutMode = 'vertical'; // 'vertical', 'horizontal', or 'headings'
 let stickyMode = 'white'; // 'yellow', 'blue', 'pink', or 'white' (original)
 let autoRefreshEnabled = false;
 let autoRefreshTime = "00:00"; // Default midnight
-let headerImage = null; 
+let headerImage = null;
 let wallpaperUrl = '';
+let noPaddingMode = false; // Toggle for removing card padding
 // Load last selected collection from localStorage, default to null ("All files")
 let selectedCollection = localStorage.getItem('selectedCollection') || null;
 let selectedFilter = 'all'; // 'all' means no filter active
@@ -896,7 +905,8 @@ async function loadUserData(userId) {
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/wallpaper`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/skillReminders`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/itemTimers`)),
-	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap, timersSnap]) => {
+			get(ref(database, `users/${userId}/guides/${currentGuideId}/noPaddingMode`)),
+	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap, timersSnap, noPaddingSnap]) => {
 
 			
 		// Load categories
@@ -970,6 +980,11 @@ async function loadUserData(userId) {
 		// Load item timers
 		if (timersSnap.val()) {
 		    itemTimers = timersSnap.val();
+		}
+
+		// Load no padding mode
+		if (noPaddingSnap.val() !== null) {
+		    noPaddingMode = noPaddingSnap.val();
 		}
 			
 		// Check if we need to auto-refresh
@@ -3048,6 +3063,16 @@ colorThemes.forEach(theme => {
 	                ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh Daily'}
 	            </button>
 	        </div>
+	        <button id="paddingOptionsBtn">Card Padding</button>
+	        <div class="checkbox-menu" id="paddingMenu" style="padding: 12px 16px;">
+	            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+	                <span style="font-size: 14px; color: #2c3e50; font-weight: 500;">Remove Padding</span>
+	                <label class="dark-mode-toggle" style="margin: 0;">
+	                    <input type="checkbox" id="noPaddingCheckbox">
+	                    <span class="dark-mode-slider"></span>
+	                </label>
+	            </div>
+	        </div>
 	    </div>
 	</div>
 	<h1>
@@ -3101,6 +3126,8 @@ colorThemes.forEach(theme => {
 	const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
 	const clearChecksBtn = document.getElementById('clearChecksBtn');
 	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+	const paddingOptionsBtn = document.getElementById("paddingOptionsBtn");
+	const noPaddingCheckbox = document.getElementById("noPaddingCheckbox");
 	// Back button handler
     setTimeout(() => {
         const backBtn = document.getElementById('headerBackBtn');
@@ -3335,6 +3362,37 @@ if (autoRefreshBtn) {
         const dropdownMenu = document.getElementById('dropdownMenu');
         if (checkboxMenu) checkboxMenu.classList.remove('show');
         if (dropdownMenu) dropdownMenu.classList.remove('show');
+    });
+}
+
+// Padding options button
+if (paddingOptionsBtn) {
+    paddingOptionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const paddingMenu = document.getElementById('paddingMenu');
+        const colorMenu = document.getElementById('colorPickerMenu');
+        const checkboxMenu = document.getElementById('checkboxMenu');
+        
+        // Close other menus
+        if (colorMenu) colorMenu.classList.remove('show');
+        if (checkboxMenu) checkboxMenu.classList.remove('show');
+        
+        if (paddingMenu) {
+            paddingMenu.classList.toggle('show');
+        }
+    });
+}
+
+// No padding checkbox
+if (noPaddingCheckbox) {
+    noPaddingCheckbox.checked = noPaddingMode;
+    
+    noPaddingCheckbox.addEventListener('change', () => {
+        noPaddingMode = noPaddingCheckbox.checked;
+        if (currentUser && currentGuideId) {
+            set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/noPaddingMode`), noPaddingMode);
+        }
+        renderContent(); // Re-render to apply/remove padding
     });
 }
     
@@ -3589,44 +3647,50 @@ function createGuideElement(guide, isInFolder) {
     // Long press support
     let longPressTimer;
     let longPressTriggered = false;
-    
+
     item.addEventListener('touchstart', (e) => {
         longPressTriggered = false;
-        longPressTimer = setTimeout(() => {
+        longPressTimer = setTimeout(async () => {
             longPressTriggered = true;
-            if (!homeSelectMode) {
-                toggleSelectMode();
+            e.preventDefault();
+            const pageTitle = guide.title;
+
+            if (await customConfirm(`Delete page "${pageTitle}"?`, 'Delete Page', 'Delete')) {
+                await remove(ref(database, `users/${currentUser.uid}/guides/${guide.id}`));
+                populateHomePage();
             }
-            toggleGuideSelection(guide.id, checkbox);
         }, 500);
     });
-    
+
     item.addEventListener('touchend', () => {
         clearTimeout(longPressTimer);
-    });
-    
+    }, { passive: true });
+
     item.addEventListener('touchmove', () => {
         clearTimeout(longPressTimer);
-    });
-    
+    }, { passive: true });
+
     item.addEventListener('mousedown', (e) => {
         longPressTriggered = false;
-        longPressTimer = setTimeout(() => {
+        longPressTimer = setTimeout(async () => {
             longPressTriggered = true;
-            if (!homeSelectMode) {
-                toggleSelectMode();
+            e.preventDefault();
+            const pageTitle = guide.title;
+
+            if (await customConfirm(`Delete page "${pageTitle}"?`, 'Delete Page', 'Delete')) {
+                await remove(ref(database, `users/${currentUser.uid}/guides/${guide.id}`));
+                populateHomePage();
             }
-            toggleGuideSelection(guide.id, checkbox);
         }, 500);
     });
-    
+
     item.addEventListener('mouseup', () => {
         clearTimeout(longPressTimer);
-    });
-    
+    }, { passive: true });
+
     item.addEventListener('mouseleave', () => {
         clearTimeout(longPressTimer);
-    });
+    }, { passive: true });
     
     item.addEventListener('click', (e) => {
         if (longPressTriggered) {
@@ -5166,10 +5230,10 @@ hideHeadingBtn.addEventListener('click', (e) => {
 			    }
 			});
 			
-            skill.items.forEach((item, itemIndex) => { 
-                const itemId = `${catIndex}-${skillIndex}-${itemIndex}`; 
-                const checkItem = document.createElement('div'); 
-                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : '') + (skill.hideItemBackground ? ' no-background' : '');
+            skill.items.forEach((item, itemIndex) => {
+                const itemId = `${catIndex}-${skillIndex}-${itemIndex}`;
+                const checkItem = document.createElement('div');
+                checkItem.className = 'checklist-item' + (checkedItems[itemId] ? ' checked' : '') + (skill.hideItemBackground ? ' no-background' : '') + (noPaddingMode ? ' no-padding' : '');
                 checkItem.dataset.catIndex = catIndex;
                 checkItem.dataset.skillIndex = skillIndex;
                 checkItem.dataset.itemIndex = itemIndex;
