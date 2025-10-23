@@ -1161,16 +1161,34 @@ async function loadUserData(userId) {
     });
 }
 
+/**
+ * Switch to a different guide/document
+ * @param {string} guideId - The unique identifier of the guide to switch to
+ *
+ * What: Changes the currently active guide and loads its data
+ * Why: Users can have multiple guides (checklists, journals, etc.) and need to switch between them
+ * How: Updates global state, persists to localStorage, reloads data from Firebase
+ */
 function switchGuide(guideId) {
+    // Update global current guide reference
     currentGuideId = guideId;
+
+    // Why localStorage: Remembers which guide user was viewing if they refresh the page
     localStorage.setItem('currentGuideId', guideId);
-    localStorage.setItem('currentPage', 'guides'); // Keep as 'guides' so home stays active
+
+    // Why set to 'guides': Keeps the home/guides tab highlighted in bottom navigation
+    // even when viewing a specific guide (maintains navigation context)
+    localStorage.setItem('currentPage', 'guides');
+
+    // Load all data for this guide from Firebase
     loadUserData(currentUser.uid);
-    
-    // Show back button when viewing a guide
+
+    // Why 100ms delay: Ensures DOM is ready before manipulating back button
+    // The guide view needs to render before we can access its header elements
     setTimeout(() => {
         const backBtn = document.getElementById('headerBackBtn');
         if (backBtn) {
+            // Show back button to allow returning to guide list
             backBtn.style.display = 'flex';
         }
     }, 100);
@@ -1289,24 +1307,53 @@ function applyTheme() {
     }
 }
 	
+/**
+ * Toggle the color picker menu visibility
+ * @param {Event} e - Click event
+ *
+ * What: Shows or hides the custom color picker interface
+ * Why: Allows users to choose custom colors beyond the preset themes
+ */
 function toggleColorPicker(e) {
+    // Why stopPropagation: Prevents click from bubbling to document body
+    // which would immediately close the menu we're trying to open
     e.stopPropagation();
+
     const picker = document.getElementById('colorPickerMenu');
     picker.classList.toggle('show');
-    
+
+    // Why initialize on show: Color picker canvas needs to be visible in DOM
+    // before we can draw on it and position indicators correctly
     if (picker.classList.contains('show')) {
         setTimeout(() => initColorPicker(), 10);
     }
 }
 
+/**
+ * Apply a selected color as the theme
+ * @param {string} color - Hex color code (e.g., '#ff5733')
+ *
+ * What: Sets a new theme color and saves it to Firebase
+ * Why: Updates the entire app's appearance when user selects a color
+ */
 function selectColor(color) {
+    // Update global theme color variable
     themeColor = color;
+
+    // Why check currentUser: Don't try to save to Firebase if not logged in
     if (!currentUser) return;
+
+    // Persist color choice to Firebase so it's saved across sessions
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/themeColor`), themeColor);
+
+    // Apply the new theme to all UI elements
     applyTheme();
+
+    // Re-render header to show new color in theme button/indicators
     renderHeader();
-    
-    // Close both color picker and dropdown menu
+
+    // Why close both menus: Selecting a color completes the action,
+    // no need to keep menus open (better UX)
     document.getElementById('colorPickerMenu').classList.remove('show');
     document.getElementById('dropdownMenu').classList.remove('show');
 }
@@ -1469,65 +1516,132 @@ function updateHue(clientX) {
     });
 }
 
-// Helper functions
+// ============================================================================
+// COLOR CONVERSION UTILITIES
+// ============================================================================
+// Why these exist: Color picker needs to convert between color formats
+// (HEX for storage, RGB for math, HSL for the color picker interface)
+
+/**
+ * Convert hexadecimal color to RGB
+ * @param {string} hex - Hex color code (e.g., '#ff5733' or 'ff5733')
+ * @returns {Object|null} RGB object with r, g, b properties (0-255) or null if invalid
+ *
+ * What: Parses hex string and extracts red, green, blue values
+ * Why: Need RGB values for color calculations and conversions to HSL
+ */
 function hexToRgb(hex) {
+    // Regex captures 3 groups of 2 hex digits (RR GG BB)
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+    // Why return null if no match: Caller can check if conversion failed
     return result ? {
-        r: parseInt(result[1], 16),
+        r: parseInt(result[1], 16), // Parse hex digits as base-16 numbers
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16)
     } : null;
 }
 
+/**
+ * Convert RGB to HSL color space
+ * @param {number} r - Red value (0-255)
+ * @param {number} g - Green value (0-255)
+ * @param {number} b - Blue value (0-255)
+ * @returns {Object} HSL object with h (0-360), s (0-100), l (0-100)
+ *
+ * What: Converts RGB color values to Hue, Saturation, Lightness format
+ * Why HSL: Color picker UI uses HSL because it's more intuitive for users
+ * (hue = color wheel, saturation = intensity, lightness = brightness)
+ */
 function rgbToHsl(r, g, b) {
+    // Normalize RGB values to 0-1 range for calculation
     r /= 255; g /= 255; b /= 255;
+
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-    
+    let h, s, l = (max + min) / 2; // Lightness is average of max and min
+
     if (max === min) {
+        // Grayscale color (no hue or saturation)
         h = s = 0;
     } else {
-        const d = max - min;
+        const d = max - min; // Delta for saturation calculation
+
+        // Why different formulas: Saturation formula changes based on lightness
+        // to maintain perceptual uniformity
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+        // Calculate hue based on which RGB component is dominant
+        // Why switch: Hue position depends on which color channel is strongest
         switch (max) {
-            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-            case g: h = ((b - r) / d + 2) / 6; break;
-            case b: h = ((r - g) / d + 4) / 6; break;
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break; // Red dominant
+            case g: h = ((b - r) / d + 2) / 6; break; // Green dominant
+            case b: h = ((r - g) / d + 4) / 6; break; // Blue dominant
         }
     }
-    
+
+    // Convert to standard ranges: H in degrees (0-360), S and L in percent (0-100)
     return { h: h * 360, s: s * 100, l: l * 100 };
 }
 
+/**
+ * Convert HSL to hexadecimal color
+ * @param {number} h - Hue (0-360)
+ * @param {number} s - Saturation (0-100)
+ * @param {number} l - Lightness (0-100)
+ * @returns {string} Hex color code (e.g., '#ff5733')
+ *
+ * What: Converts HSL values back to hex format for storage/CSS
+ * Why: Need hex format to save to Firebase and apply to CSS properties
+ */
 function hslToHex(h, s, l) {
+    // Normalize saturation and lightness to 0-1 range
     s /= 100; l /= 100;
+
+    // Calculate chroma (color intensity) and intermediate values
     const c = (1 - Math.abs(2 * l - 1)) * s;
     const x = c * (1 - Math.abs((h / 60) % 2 - 1));
     const m = l - c / 2;
     let r = 0, g = 0, b = 0;
-    
+
+    // Determine RGB values based on hue sector (color wheel divided into 6 sections)
+    // Why 60-degree sections: Color wheel has 6 primary/secondary color regions
     if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
     else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
     else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
     else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
     else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
     else if (h >= 300 && h < 360) { r = c; g = 0; b = x; }
-    
+
+    // Convert 0-1 values to 0-255 range and then to 2-digit hex
     const toHex = (n) => {
         const hex = Math.round((n + m) * 255).toString(16);
+        // Why pad: Ensure always 2 digits (e.g., '0f' not 'f')
         return hex.length === 1 ? '0' + hex : hex;
     };
-    
+
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+/**
+ * Determine if a color is light or dark
+ * @param {string} hex - Hex color code
+ * @returns {boolean} True if color is light, false if dark
+ *
+ * What: Calculates perceived brightness of a color
+ * Why: Need to determine whether to use light or dark text on the color
+ * (accessibility - need sufficient contrast for readability)
+ */
 function isLightColor(hex) {
     const rgb = hexToRgb(hex);
     if (!rgb) return false;
-    
-    // Calculate relative luminance
+
+    // Why these coefficients: Based on human eye sensitivity to different colors
+    // Eyes are most sensitive to green, least to blue (standard WCAG formula)
     const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-    return luminance > 0.6; // Returns true if color is light
+
+    // Why 0.6 threshold: Empirically determined value that works well
+    // for choosing text color (lower = dark color, higher = light color)
+    return luminance > 0.6;
 }
 
 
@@ -1572,13 +1686,22 @@ function selectCustomColor(color) {
 }
 
 
+/**
+ * Apply custom color from hex input field
+ *
+ * What: Validates and applies user-entered hex color code
+ * Why: Allows users to enter specific color codes directly instead of using picker
+ */
 async function applyCustomColor() {
     const hexInput = document.getElementById('hexInput');
     const color = hexInput.value;
-    
+
+    // Why validate hex: Prevents invalid colors that would break CSS
+    // Regex checks for exactly 6 hex digits after #
     if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
         selectCustomColor(color);
-        // Close the color picker
+
+        // Close menus - user's action is complete
         document.getElementById('colorPickerMenu').classList.remove('show');
         document.getElementById('dropdownMenu').classList.remove('show');
     } else {
@@ -1586,25 +1709,44 @@ async function applyCustomColor() {
     }
 }
 
+// ============================================================================
+// HEADER IMAGE MANAGEMENT
+// ============================================================================
+// Why separate from theme: Header images override theme gradients
+// but theme colors still apply to other UI elements
+
+/**
+ * Save header image to Firebase
+ *
+ * What: Persists header image data (base64 or URL) to user's database
+ * Why: User's custom header image needs to persist across sessions
+ */
 function saveHeaderImage() {
     if (!currentUser) return;
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/headerImage`), headerImage);
 }
 
+/**
+ * Apply header image to the guide header
+ *
+ * What: Sets header background to custom image and adjusts text colors
+ * Why: Custom images provide personalization; text color must adapt to image brightness
+ */
 function applyHeaderImage() {
     const header = document.querySelector('.header');
     if (!header) {
         console.log('Header not found, cannot apply image');
         return;
     }
-      
+
     if (headerImage) {
         console.log('Applying header image');
-        // Apply image as background (replaces theme gradient)
+
+        // Why replace gradient: Image provides visual interest, gradient would obscure it
         header.style.backgroundImage = `url("${headerImage}")`;
-        header.style.backgroundSize = 'cover';
-        header.style.backgroundPosition = 'center';
-        header.style.backgroundRepeat = 'no-repeat';
+        header.style.backgroundSize = 'cover';      // Fill entire header
+        header.style.backgroundPosition = 'center';  // Center the image
+        header.style.backgroundRepeat = 'no-repeat'; // Don't tile the image
         
         // Detect image brightness and set text color
 	detectImageBrightness(headerImage, (isLight, avgR, avgG, avgB) => {
@@ -4368,18 +4510,47 @@ function showEmojiPicker(target, callback) {
     }, 100);
 }
 
-	
+// ============================================================================
+// DATA PERSISTENCE FUNCTIONS
+// ============================================================================
+// Why separate save functions: Each data type can be saved independently
+// Avoids unnecessary writes to Firebase (only save what changed)
+
+/**
+ * Save categories array to Firebase
+ *
+ * What: Persists entire categories structure (tabs, skills, items) to database
+ * Why called frequently: Any edit to categories, skills, or items triggers this
+ * (adding, deleting, reordering, renaming)
+ */
 function saveCategories() {
+    // Why check currentUser: Prevent errors if user logs out mid-session
     if (!currentUser) return;
+
+    // Save entire categories array (includes all tabs, skills, and items)
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/categories`), categories);
 }
-// Save checked items to Firebase
+
+/**
+ * Save checked items state to Firebase
+ *
+ * What: Persists which checklist items are checked/unchecked
+ * Why separate from categories: Checking items is frequent, categories change less often
+ * (reduces database writes = better performance and lower costs)
+ */
 function saveCheckedItems() {
     if (!currentUser) return;
+
+    // checkedItems format: { 'catIndex-skillIndex-itemIndex': true/false }
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/checkedItems`), checkedItems);
 }
 
-// Save auto-refresh settings to Firebase
+/**
+ * Save auto-refresh configuration to Firebase
+ *
+ * What: Persists auto-refresh enabled state and scheduled time
+ * Why: Users expect auto-refresh settings to persist across sessions
+ */
 function saveAutoRefreshSettings() {
     if (!currentUser) return;
     set(ref(database, `users/${currentUser.uid}/guides/${currentGuideId}/autoRefreshEnabled`), autoRefreshEnabled);
@@ -4476,17 +4647,28 @@ if (enabled) {
     }
 }
 
-      
+/**
+ * Render category tabs navigation
+ *
+ * What: Generates the horizontal tab bar showing all categories
+ * Why: Users need to switch between categories; tabs provide visual navigation
+ * Called: After any category change (add, delete, rename, reorder)
+ */
 function renderTabs() {
     const navTabs = document.getElementById('navTabs');
+
+    // Why clear innerHTML: Start fresh to avoid duplicate tabs from previous render
     navTabs.innerHTML = '';
-    
-    
+
+    // Generate a tab for each category
     categories.forEach((cat, i) => {
         const tab = document.createElement('div');
+
+        // Why conditional class: Active tab needs different styling to show which is selected
         tab.className = 'nav-tab' + (activeTabIndex === i ? ' active' : '');
-        
-        // Make tab editable in edit mode
+
+        // Why different rendering in edit mode: Allow editing tab names and icons
+        // Users can only modify tabs when explicitly in edit mode (prevents accidental changes)
         if (editMode) {
             const hasTabIcon = cat.icon && cat.icon !== "";
             let tabIconToShow;
@@ -4954,25 +5136,49 @@ function toggleItemBackground(catIndex, skillIndex) {
     saveCategories();
     renderContent();
 }
-	
-	
-function renderContent() { 
-    const contentArea = document.getElementById('contentArea'); 
-    contentArea.innerHTML = ''; 
-    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : ''); 
-    
-    categories.forEach((cat, catIndex) => { 
-        const catDiv = document.createElement('div'); 
+/**
+ * Render main content area with all skills and items
+ *
+ * What: Generates the entire skills/checklist display for the active guide
+ * Why: Core UI function - displays all user content (cards, items, checklists)
+ * Called: After any content change (add/delete skill, check item, change layout, etc.)
+ *
+ * Performance: Rebuilds entire DOM each time (simple but works well for typical data sizes)
+ * Alternative approach would be virtual DOM or incremental updates (more complex)
+ */
+function renderContent() {
+    const contentArea = document.getElementById('contentArea');
+
+    // Why clear innerHTML: Complete re-render ensures UI matches data state
+    // Simpler than tracking individual DOM changes (fewer bugs)
+    contentArea.innerHTML = '';
+
+    // Why add edit-mode class: Enables CSS styling for edit state (drag handles, delete buttons, etc.)
+    contentArea.className = 'content-area' + (editMode ? ' edit-mode' : '');
+
+    // Render each category (only active one is visible via CSS)
+    categories.forEach((cat, catIndex) => {
+        const catDiv = document.createElement('div');
+
+        // Why active class: Only the active category is visible, others are display:none
+        // (could use single category render, but this allows smooth CSS transitions)
         catDiv.className = 'category' + (catIndex === activeTabIndex ? ' active' : '');
-        
-        const grid = document.createElement('div'); 
-        grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : ''); 
-        
-        cat.skills.forEach((skill, skillIndex) => { 
-            const card = document.createElement('div'); 
+
+        const grid = document.createElement('div');
+
+        // Why conditional class: Horizontal layout changes CSS grid to side-by-side display
+        grid.className = 'skill-grid' + (layoutMode === 'horizontal' ? ' horizontal' : '');
+
+        // Render each skill card within the category
+        cat.skills.forEach((skill, skillIndex) => {
+            const card = document.createElement('div');
+
+            // Why sticky color: Mimics physical sticky notes (yellow, blue, pink, white)
             const stickyColor = skill.stickyColor || 'white';
 			card.className = 'skill-card' + (stickyColor !== 'white' ? ' sticky-style' : '') + (stickyColor === 'blue' ? ' sticky-blue' : '') + (stickyColor === 'pink' ? ' sticky-pink' : '');
-            // Set border color based on theme
+
+            // Why theme-based border: Maintains visual consistency with app theme
+            // Light themes need darker borders for contrast
             const isLight = isLightColor(themeColor);
             card.style.borderLeftColor = isLight ? 'var(--secondary-color)' : 'var(--primary-color)';
             card.dataset.catIndex = catIndex;
@@ -5867,33 +6073,57 @@ hideHeadingBtn.addEventListener('click', (e) => {
 	    setTimeout(() => applyWallpaper(), 50);
 }
 	
-function switchTab(index) { 
-    activeTabIndex = index; 
+/**
+ * Switch to a different category tab
+ * @param {number} index - Index of the category to switch to
+ *
+ * What: Changes active category and updates UI to show its content
+ * Why: Users need to navigate between different categories of skills/checklists
+ */
+function switchTab(index) {
+    // Update active tab index
+    activeTabIndex = index;
+
+    // Re-render tabs to update active state styling
     renderTabs();
-    const cats = document.querySelectorAll('.category'); 
-    cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex)); 
-    
-    // Scroll the active tab to center
+
+    // Update category visibility (toggle 'active' class)
+    const cats = document.querySelectorAll('.category');
+    cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex));
+
+    // Why scroll active tab to center: Improves UX on mobile where tabs may overflow
+    // Centers the active tab in viewport for better visibility
     setTimeout(() => {
         const navTabs = document.querySelector('.nav-tabs');
         const activeTab = navTabs.children[index];
         if (activeTab && navTabs) {
+            // Calculate scroll position to center the active tab
             const tabCenter = activeTab.offsetLeft + (activeTab.offsetWidth / 2);
             const containerCenter = navTabs.offsetWidth / 2;
             const scrollPosition = tabCenter - containerCenter;
-            
+
+            // Why smooth: Better UX than instant jump
             navTabs.scrollTo({
                 left: scrollPosition,
                 behavior: 'smooth'
             });
         }
-    }, 50);
+    }, 50); // Small delay ensures DOM is ready
 }
-	
-function toggleCheck(itemId) { 
-    if (editMode) return; 
-    
-    // Store expanded state before re-render
+
+/**
+ * Toggle checkbox state for a checklist item
+ * @param {string} itemId - Format: 'catIndex-skillIndex-itemIndex'
+ *
+ * What: Checks or unchecks a checklist item
+ * Why: Core interaction - users need to mark tasks as complete/incomplete
+ */
+function toggleCheck(itemId) {
+    // Why block in edit mode: Prevent accidental checks while rearranging items
+    if (editMode) return;
+
+    // Why preserve expanded state: Re-rendering would collapse all cards
+    // User expects their expanded cards to stay open after checking an item
     const expandedCards = [];
     document.querySelectorAll('.skill-card.expanded').forEach(card => {
         expandedCards.push({
@@ -5913,39 +6143,62 @@ function toggleCheck(itemId) {
     });
 }
 
-function toggleEditMode() { 
+/**
+ * Toggle edit mode on/off
+ *
+ * What: Switches between viewing mode and editing mode
+ * Why editing mode: Allows users to modify structure (add/delete/reorder items)
+ *      without accidentally doing so during normal use
+ * Why separate mode: Prevents accidental modifications (like iOS's "Edit" button)
+ *
+ * In edit mode:
+ * - Can reorder items via drag & drop
+ * - Can delete items via swipe or button
+ * - Can edit names inline
+ * - Checkboxes are disabled (can't check items)
+ * - Layout button is hidden (prevent conflicts)
+ * - "Done" button replaces menu button
+ */
+function toggleEditMode() {
     const menu = document.getElementById('dropdownMenu');
-    if (menu) menu.classList.remove('show'); 
-    
-    editMode = !editMode; 
-    
-    // Toggle class on body to hide/show floating button
+
+    // Why close menu: User selected "Edit", no need to keep menu open
+    if (menu) menu.classList.remove('show');
+
+    // Toggle the global edit mode state
+    editMode = !editMode;
+
+    // Why body class: CSS can style entire page differently in edit mode
+    // (e.g., show drag handles, change cursor, hide certain elements)
     if (editMode) {
         document.body.classList.add('edit-mode-active');
     } else {
         document.body.classList.remove('edit-mode-active');
     }
-    
-    // Hide/show floating layout button
+
+    // Why hide layout button in edit mode: Prevents UI conflicts
+    // (drag handles would overlap with layout button)
     const floatingBtn = document.getElementById('layoutBtn');
     if (floatingBtn) {
         floatingBtn.style.display = editMode ? 'none' : 'flex';
     }
-    
+
+    // Re-render all UI sections to show/hide edit controls
     renderHeader();
     renderTabs();
     renderContent();
-    
-    // Toggle between Done button and 3-dots menu
+
+    // Why swap buttons: "Done" button provides clear exit from edit mode
+    // Menu button only needed in normal viewing mode
     const saveBtn = document.getElementById('saveBtn');
     const menuBtn = document.getElementById('menuBtn');
     if (saveBtn && menuBtn) {
         if (editMode) {
-            saveBtn.style.display = 'block';
-            menuBtn.style.display = 'none';
+            saveBtn.style.display = 'block';   // Show "Done"
+            menuBtn.style.display = 'none';    // Hide menu (⋮)
         } else {
-            saveBtn.style.display = 'none';
-            menuBtn.style.display = 'block';
+            saveBtn.style.display = 'none';    // Hide "Done"
+            menuBtn.style.display = 'block';   // Show menu (⋮)
         }
     }
 }
@@ -6083,24 +6336,54 @@ function enableQuickEditHeader(element, type) {
     element.addEventListener('keydown', keyHandler);
 }
 
+/**
+ * Edit the app icon (header emoji)
+ * @param {HTMLElement} el - Element that triggered the icon picker
+ *
+ * What: Opens emoji picker to change the guide's header icon
+ * Why: Visual customization - users can personalize each guide
+ */
 function editAppIcon(el) {
     showEmojiPicker(el, (emoji) => {
         appIcon = emoji;
-        saveHeader();
+        saveHeader(); // Persist to Firebase
     });
 }
 
-function addSkill(catIndex) { 
-    categories[catIndex].skills.push({ 
-        title: "New Skill", 
-        icon: "✨", 
-        items: ["New item - click to edit"] 
-    }); 
-    saveCategories();
-    renderContent();
-    
+// ============================================================================
+// SKILL/CARD MANAGEMENT
+// ============================================================================
+// Why "skills": Original concept was life skills checklist,
+// but now used for any card-based content (checklists, notes, etc.)
+
+/**
+ * Add a new skill card to a category
+ * @param {number} catIndex - Category index to add skill to
+ *
+ * What: Creates a new blank skill card with default content
+ * Why: Users need to add cards to organize their content
+ */
+function addSkill(catIndex) {
+    // Why default values: Provides starting template that user can immediately edit
+    categories[catIndex].skills.push({
+        title: "New Skill",
+        icon: "✨",
+        items: ["New item - click to edit"]
+    });
+
+    saveCategories();  // Persist to Firebase
+    renderContent();   // Show new card immediately
 }
 
+/**
+ * Edit a skill card's icon
+ * @param {number} catIndex - Category index
+ * @param {number} skillIndex - Skill index within category
+ * @param {HTMLElement} el - Element that triggered picker
+ *
+ * What: Opens emoji picker to change a card's icon
+ * Why: Visual distinction - icons help identify cards quickly
+ */
 function editSkillIcon(catIndex, skillIndex, el) {
     showEmojiPicker(el, (emoji) => {
         categories[catIndex].skills[skillIndex].icon = emoji;
@@ -6109,28 +6392,54 @@ function editSkillIcon(catIndex, skillIndex, el) {
     });
 }
 
-async function deleteSkill(catIndex, skillIndex) { 
-    if (await customConfirm('Are you sure you want to delete this card?')) { 
-        categories[catIndex].skills.splice(skillIndex, 1); 
+/**
+ * Delete a skill card
+ * @param {number} catIndex - Category index
+ * @param {number} skillIndex - Skill index to delete
+ *
+ * What: Removes a skill card and all its items
+ * Why async: Need to wait for user confirmation before deletion
+ * Why confirm: Destructive action - prevent accidental deletions
+ */
+async function deleteSkill(catIndex, skillIndex) {
+    if (await customConfirm('Are you sure you want to delete this card?')) {
+        // splice: Remove 1 item at skillIndex position
+        categories[catIndex].skills.splice(skillIndex, 1);
         saveCategories();
         renderContent();
-        
-    } 
-}
-
-async function deleteItem(catIndex, skillIndex, itemIndex) {
-    if (await customConfirm('Are you sure you want to delete this item?')) {
-        categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1); 
-        saveCategories();
-        renderContent();
-        
     }
 }
 
-function addItem(catIndex, skillIndex) { 
-    categories[catIndex].skills[skillIndex].items.push("New item"); 
+/**
+ * Delete a checklist item
+ * @param {number} catIndex - Category index
+ * @param {number} skillIndex - Skill index
+ * @param {number} itemIndex - Item index to delete
+ *
+ * What: Removes a single item from a skill's checklist
+ * Why confirm: Prevents accidental deletions of individual items
+ */
+async function deleteItem(catIndex, skillIndex, itemIndex) {
+    if (await customConfirm('Are you sure you want to delete this item?')) {
+        categories[catIndex].skills[skillIndex].items.splice(itemIndex, 1);
+        saveCategories();
+        renderContent();
+    }
+}
+
+/**
+ * Add a new item to a skill's checklist
+ * @param {number} catIndex - Category index
+ * @param {number} skillIndex - Skill index to add item to
+ *
+ * What: Appends a new blank item to the skill's item list
+ * Why: Users need to add items to their checklists
+ */
+function addItem(catIndex, skillIndex) {
+    // Default text is editable via quick-edit (double-tap)
+    categories[catIndex].skills[skillIndex].items.push("New item");
     saveCategories();
-    renderContent(); 
+    renderContent();
 }
 
 function addCategory() {
