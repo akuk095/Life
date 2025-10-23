@@ -4679,14 +4679,8 @@ if (enabled) {
 function renderTabs() {
     const navTabs = document.getElementById('navTabs');
 
-    // Why hide tabs in single-page mode: Tabs are for navigating between categories in card view
-    // Single-page view shows all content at once, so tabs are unnecessary
-    if (singlePageMode) {
-        navTabs.style.display = 'none';
-        return;
-    } else {
-        navTabs.style.display = 'flex';
-    }
+    // Always show tabs
+    navTabs.style.display = 'flex';
 
     // Why clear innerHTML: Start fresh to avoid duplicate tabs from previous render
     navTabs.innerHTML = '';
@@ -5182,13 +5176,11 @@ function renderSinglePageEditor() {
     const editorContainer = document.createElement('div');
     editorContainer.className = 'single-page-editor';
     editorContainer.style.cssText = `
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 40px 24px;
+        width: 100%;
+        margin: 0;
+        padding: 40px 0 0 0;
         background: var(--card-bg);
-        min-height: 500px;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px var(--shadow);
+        min-height: calc(100vh - 140px);
     `;
 
     // Create editable content area
@@ -5202,6 +5194,8 @@ function renderSinglePageEditor() {
         color: var(--text-primary);
         white-space: pre-wrap;
         word-wrap: break-word;
+        padding: 0 16px 60px 16px;
+        min-height: calc(100vh - 180px);
     `;
 
     // Convert all categories and skills to markdown-like text
