@@ -990,10 +990,57 @@ document.addEventListener('drop', (e) => {
 // ============================================================================
 
 /**
+ * Retry a Firebase operation with exponential backoff
+ * @param {Function} operation - The async operation to retry
+ * @param {number} maxRetries - Maximum number of retry attempts (default: 3)
+ * @param {number} baseDelay - Base delay in milliseconds (default: 1000)
+ * @returns {Promise} - Result of the operation
+ */
+async function retryOperation(operation, maxRetries = 3, baseDelay = 1000) {
+    let lastError;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await operation();
+        } catch (error) {
+            lastError = error;
+            if (attempt < maxRetries) {
+                // Exponential backoff: 1s, 2s, 4s
+                const delay = baseDelay * Math.pow(2, attempt);
+                console.log(`Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    throw lastError;
+}
+
+/**
+ * Check if user is online
+ * @returns {boolean} - True if online, false otherwise
+ */
+function isOnline() {
+    return navigator.onLine;
+}
+
+/**
  * Load user's guide data from Firebase
  * Why async: Firebase operations are asynchronous, so we need to wait for data
  */
 async function loadUserData(userId) {
+    // Check internet connectivity first
+    if (!isOnline()) {
+        await customAlert('No internet connection detected. Please check your network and try again.', 'Connection Error');
+        // Still try to show the app with default data
+        applyTheme();
+        renderHeader();
+        renderTabs();
+        renderContent();
+        updateLayoutButton();
+        setTimeout(() => applyHeaderImage(), 50);
+        document.querySelector('.container').classList.add('loaded');
+        return;
+    }
+
     // Why hide container initially: Prevents flickering/layout shifts while data loads
     // Better to show smooth fade-in with complete data than partial content appearing
     document.querySelector('.container').classList.remove('loaded');
@@ -1001,17 +1048,23 @@ async function loadUserData(userId) {
 
     // Why check if guide exists: First-time users or new guides need default data
     // This ensures every user has a working guide even if they've never saved before
-    get(ref(database, `users/${userId}/guides/${currentGuideId}`)).then((snapshot) => {
+    try {
+        const snapshot = await retryOperation(() => get(ref(database, `users/${userId}/guides/${currentGuideId}`)));
         if (!snapshot.exists()) {
-            set(ref(database, `users/${userId}/guides/${currentGuideId}`), {
+            await retryOperation(() => set(ref(database, `users/${userId}/guides/${currentGuideId}`), {
                 appTitle, appSubtitle, appIcon, categories, checkedItems, themeColor
-            });
+            }));
         }
-    });
+    } catch (error) {
+        console.error('Error checking/creating guide:', error);
+        // Continue to try loading data even if this fails
+    }
 
     // Why Promise.all: Load all guide data in parallel instead of sequentially
     // This is much faster than loading one field at a time (hundreds of ms saved)
-    Promise.all([
+    // Wrap with retry logic to handle temporary network issues
+    try {
+        const results = await retryOperation(() => Promise.all([
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/categories`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/checkedItems`)),
 	        get(ref(database, `users/${userId}/guides/${currentGuideId}/appTitle`)),
@@ -1026,7 +1079,9 @@ async function loadUserData(userId) {
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/wallpaper`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/skillReminders`)),
 			get(ref(database, `users/${userId}/guides/${currentGuideId}/itemTimers`)),
-	    ]).then(([categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap, timersSnap]) => {
+	    ]));
+
+        const [categoriesSnap, checkedSnap, titleSnap, subtitleSnap, iconSnap, themeSnap, layoutSnap, autoRefreshEnabledSnap, autoRefreshTimeSnap, lastRefreshSnap, headerImageSnap, wallpaperSnap, remindersSnap, timersSnap] = results;
 
 			
 		// Load categories
@@ -1102,39 +1157,60 @@ async function loadUserData(userId) {
 		    itemTimers = timersSnap.val();
 		}
 			
-		// Check if we need to auto-refresh
-		checkAndAutoRefresh(lastRefreshSnap.val());
-		
-		// Apply theme (now knows if headerImage and wallpaper exist)
-		applyTheme();
-		
-		// Render everything
-		renderHeader();
-		renderTabs();
-		renderContent();
-		updateLayoutButton();
-		
-		// Apply header image AFTER header is rendered
-		setTimeout(() => applyHeaderImage(), 50);
-		
-		// Apply wallpaper AFTER content area is rendered
-		setTimeout(() => applyWallpaper(), 50);
+        // Check if we need to auto-refresh
+        checkAndAutoRefresh(lastRefreshSnap.val());
 
-		// Show container with loaded data
-		setTimeout(() => {
-		    document.querySelector('.container').style.opacity = '1';
-		}, 100);
-			
+        // Apply theme (now knows if headerImage and wallpaper exist)
+        applyTheme();
+
+        // Render everything
+        renderHeader();
+        renderTabs();
+        renderContent();
+        updateLayoutButton();
+
+        // Apply header image AFTER header is rendered
+        setTimeout(() => applyHeaderImage(), 50);
+
+        // Apply wallpaper AFTER content area is rendered
+        setTimeout(() => applyWallpaper(), 50);
+
+        // Show container with loaded data
+        setTimeout(() => {
+            document.querySelector('.container').style.opacity = '1';
+        }, 100);
+
         // Hide spinner
-		const spinner = document.getElementById('refreshSpinner');
-		if (spinner) spinner.classList.remove('show');
-    	}).catch(async (error) => {
-    	console.error('Error loading user data:', error);
-        
-        // Show error message to user
-        await customAlert('Failed to load your data. Please check your internet connection and try refreshing the page.', 'Connection Error');
+        const spinner = document.getElementById('refreshSpinner');
+        if (spinner) spinner.classList.remove('show');
 
-		await loadItemTimers();
+    } catch (error) {
+        console.error('Error loading user data:', error);
+
+        // Determine error type and show appropriate message
+        let errorMessage = 'Failed to load your data. ';
+        let errorTitle = 'Connection Error';
+
+        if (!isOnline()) {
+            errorMessage += 'Your internet connection appears to be offline. Please check your network and try refreshing the page.';
+        } else if (error.code === 'PERMISSION_DENIED') {
+            errorMessage += 'Access denied. Please check your Firebase security rules or re-authenticate.';
+            errorTitle = 'Permission Error';
+        } else if (error.code === 'UNAVAILABLE' || error.message?.includes('network')) {
+            errorMessage += 'The server is temporarily unavailable. Please try again in a moment.';
+        } else {
+            errorMessage += 'An unexpected error occurred. Please try refreshing the page. If the problem persists, contact support.';
+        }
+
+        // Show error message to user
+        await customAlert(errorMessage, errorTitle);
+
+        try {
+            await loadItemTimers();
+        } catch (timerError) {
+            console.error('Error loading timers:', timerError);
+        }
+
         // Still try to show the app with default data
         applyTheme();
         renderHeader();
@@ -1143,7 +1219,7 @@ async function loadUserData(userId) {
         updateLayoutButton();
         setTimeout(() => applyHeaderImage(), 50);
         document.querySelector('.container').classList.add('loaded');
-    });
+    }
 }
 
 /**
