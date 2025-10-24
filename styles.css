@@ -818,20 +818,23 @@ body.dark-mode .auth-footer-text {
 /* Single page view mode styles */
 .single-page-view-active .content-area {
     padding: 0 !important;
+    min-height: 100vh !important;
 }
 
 .single-page-view-active .skill-grid {
     padding: 0 !important;
     margin: 0 !important;
     gap: 0 !important;
+    min-height: 100vh !important;
 }
 
 .single-page-view-active .skill-card {
     margin: 0 !important;
     border-radius: 0 !important;
-    min-height: calc(100vh - 180px);
+    min-height: calc(100vh - 60px) !important;
     box-shadow: none !important;
     border: none !important;
+    padding-bottom: 60px !important;
 }
 
 .single-page-view-active .floating-layout-btn {
