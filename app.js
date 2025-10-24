@@ -3616,6 +3616,9 @@ colorThemes.forEach(theme => {
 	                ${autoRefreshEnabled ? `✓ Auto-refresh (${autoRefreshTime})` : 'Auto-refresh Daily'}
 	            </button>
 	        </div>
+	        <button id="singlePageViewBtn" class="${categories[activeTabIndex] && categories[activeTabIndex].skills && categories[activeTabIndex].skills.length === 1 ? '' : 'disabled'}">
+	            ${categories[activeTabIndex] && categories[activeTabIndex].singlePageViewEnabled ? '✓ ' : ''}Single Page View
+	        </button>
 	    </div>
 	</div>
 	<h1>
@@ -3669,6 +3672,7 @@ colorThemes.forEach(theme => {
 	const checkboxOptionsBtn = document.getElementById('checkboxOptionsBtn');
 	const clearChecksBtn = document.getElementById('clearChecksBtn');
 	const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+	const singlePageViewBtn = document.getElementById('singlePageViewBtn');
 	// Back button handler
     setTimeout(() => {
         const backBtn = document.getElementById('headerBackBtn');
@@ -3705,7 +3709,8 @@ colorThemes.forEach(theme => {
 	if (clearChecksBtn) clearChecksBtn.addEventListener('click', clearAllChecks);
 	if (autoRefreshBtn) autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
 	if (applyColorBtn) applyColorBtn.addEventListener('click', applyCustomColor);
-	
+	if (singlePageViewBtn) singlePageViewBtn.addEventListener('click', toggleSinglePageView);
+
     // Header image event listeners
     if (headerImageBtn) {
 	    headerImageBtn.addEventListener('click', (e) => {
@@ -5518,6 +5523,16 @@ function renderContent() {
         return;
     }
 
+    // Check if single page view is enabled (new feature)
+    const isSinglePageViewActive = currentCategory && currentCategory.singlePageViewEnabled;
+
+    // Add or remove single-page-view-active class to body
+    if (isSinglePageViewActive) {
+        document.body.classList.add('single-page-view-active');
+    } else {
+        document.body.classList.remove('single-page-view-active');
+    }
+
     // Reset content area styling for card view
     contentArea.style.cssText = '';
 
@@ -6459,6 +6474,24 @@ function switchTab(index) {
     const cats = document.querySelectorAll('.category');
     cats.forEach((cat, i) => cat.classList.toggle('active', i === activeTabIndex));
 
+    // Update single page view class for the new active tab
+    const currentCategory = categories[activeTabIndex];
+    const isSinglePageViewActive = currentCategory && currentCategory.singlePageViewEnabled;
+    if (isSinglePageViewActive) {
+        document.body.classList.add('single-page-view-active');
+    } else {
+        document.body.classList.remove('single-page-view-active');
+    }
+
+    // Update floating button visibility
+    const floatingBtn = document.getElementById('layoutBtn');
+    if (floatingBtn && currentCategory) {
+        floatingBtn.style.display = isSinglePageViewActive ? 'none' : 'flex';
+    }
+
+    // Re-render header to update menu button states
+    renderHeader();
+
     // Why scroll active tab to center: Improves UX on mobile where tabs may overflow
     // Centers the active tab in viewport for better visibility
     setTimeout(() => {
@@ -6578,47 +6611,64 @@ function toggleEditMode() {
  */
 async function toggleSinglePageView() {
     const menu = document.getElementById('dropdownMenu');
-
-    // Why close menu: User selected toggle, no need to keep menu open
-    if (menu) menu.classList.remove('show');
-
     const currentCategory = categories[activeTabIndex];
     if (!currentCategory) return;
 
-    // Warn user when switching TO single-page mode
-    if (!currentCategory.singlePageMode) {
-        const confirmed = await customConfirm(
-            'Switching to Single Page View will clear all existing cards and data in this tab. This action cannot be undone. Do you want to continue?',
-            'Warning'
-        );
+    // Check if there's only 1 card in the current tab
+    const cardCount = currentCategory.skills ? currentCategory.skills.length : 0;
 
-        if (!confirmed) {
-            return; // User cancelled, don't toggle
-        }
-
-        // Clear only the current category's data
-        currentCategory.skills = [{
-            title: 'Notes',
-            items: []
-        }];
+    if (cardCount !== 1) {
+        // Show temporary message when trying to activate with more than 1 card
+        showTemporaryMessage('Active with 1 card in tab only');
+        return;
     }
 
-    // Toggle the single page mode state for this category only
-    currentCategory.singlePageMode = !currentCategory.singlePageMode;
+    // Close menu
+    if (menu) menu.classList.remove('show');
 
-    // Why hide layout button in single page mode: Layout options don't apply to single-page view
+    // Toggle the single page view state for this category only
+    currentCategory.singlePageViewEnabled = !currentCategory.singlePageViewEnabled;
+
+    // Hide/show the floating layout button
     const floatingBtn = document.getElementById('layoutBtn');
     if (floatingBtn) {
-        floatingBtn.style.display = currentCategory.singlePageMode ? 'none' : 'flex';
+        floatingBtn.style.display = currentCategory.singlePageViewEnabled ? 'none' : 'flex';
     }
 
     // Save to Firebase
     saveCategories();
 
-    // Re-render UI to show either cards or single-page editor
+    // Re-render UI
     renderHeader();  // Update checkmark in menu
-    renderTabs();     // Tabs remain visible
-    renderContent();  // Switch between card view and editor
+    renderContent();  // Apply single page view styling
+}
+
+// Helper function to show temporary messages
+function showTemporaryMessage(message) {
+    // Remove any existing message
+    const existingMessage = document.querySelector('.temporary-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+
+    // Create message element
+    const messageEl = document.createElement('div');
+    messageEl.className = 'temporary-message';
+    messageEl.textContent = message;
+    document.body.appendChild(messageEl);
+
+    // Fade in
+    setTimeout(() => {
+        messageEl.classList.add('show');
+    }, 10);
+
+    // Remove after 2 seconds
+    setTimeout(() => {
+        messageEl.classList.remove('show');
+        setTimeout(() => {
+            messageEl.remove();
+        }, 300);
+    }, 2000);
 }
 
 function enableQuickEdit(element, catIndex, skillIndex, itemIndex = null) {
@@ -6791,6 +6841,7 @@ function addSkill(catIndex) {
 
     saveCategories();  // Persist to Firebase
     renderContent();   // Show new card immediately
+    renderHeader();    // Update menu button states (e.g., single page view availability)
 }
 
 /**
@@ -6823,8 +6874,15 @@ async function deleteSkill(catIndex, skillIndex) {
     if (await customConfirm('Are you sure you want to delete this card?')) {
         // splice: Remove 1 item at skillIndex position
         categories[catIndex].skills.splice(skillIndex, 1);
+
+        // If single page view was enabled and we just deleted the last card, disable it
+        if (categories[catIndex].singlePageViewEnabled && categories[catIndex].skills.length !== 1) {
+            categories[catIndex].singlePageViewEnabled = false;
+        }
+
         saveCategories();
         renderContent();
+        renderHeader();    // Update menu button states (e.g., single page view availability)
     }
 }
 
