@@ -4611,7 +4611,7 @@ function showEmojiPicker(target, callback) {
         iconBtn.style.transition = 'all 0.2s';
         iconBtn.title = icon.name;
         
-        iconBtn.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${icon.path}"/></svg>`;
+        iconBtn.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon.path}</svg>`;
         
         iconBtn.addEventListener('mouseover', () => {
             iconBtn.style.transform = 'scale(1.1)';
@@ -5697,7 +5697,7 @@ function renderContent() {
             if (hasIcon) {
                 if (skill.icon.startsWith('svg:')) {
                     const iconData = JSON.parse(skill.icon.substring(4));
-                    iconToShow = `<span style="display: inline-flex; width: 24px; height: 24px; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${iconData.path}"/></svg></span>`;
+                    iconToShow = `<span style="display: inline-flex; width: 24px; height: 24px; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconData.path}</svg></span>`;
                 } else {
                     iconToShow = skill.icon;
                 }
