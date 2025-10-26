@@ -4877,11 +4877,12 @@ function renderTabs() {
             let tabIconToShow;
             if (hasTabIcon) {
                 if (cat.icon.startsWith('svg:')) {
-                    const iconData = JSON.parse(cat.icon.substring(4));
-                    tabIconToShow = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-                } else {
-                    tabIconToShow = cat.icon;
-                }
+				    const iconData = JSON.parse(cat.icon.substring(4));
+				    const scaledSvg = iconData.svg.replace('<svg', '<svg width="14" height="14"').replace(/stroke="currentColor"/g, 'stroke="white"').replace(/fill="currentColor"/g, 'fill="white"');
+				    tabIconToShow = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;">${scaledSvg}</span>`;
+				} else {
+				    tabIconToShow = cat.icon;
+				}
             } else {
                 tabIconToShow = "+";
             }
@@ -4950,12 +4951,13 @@ function renderTabs() {
         } else {
             // Need to render SVG icons properly
             let displayIcon = '';
-            if (cat.icon && cat.icon.startsWith('svg:')) {
-                const iconData = JSON.parse(cat.icon.substring(4));
-                displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="${iconData.path}"/></svg></span>`;
-            } else if (cat.icon) {
-                displayIcon = cat.icon;
-            }
+				if (cat.icon && cat.icon.startsWith('svg:')) {
+				    const iconData = JSON.parse(cat.icon.substring(4));
+				    const scaledSvg = iconData.svg.replace('<svg', '<svg width="14" height="14"').replace(/stroke="currentColor"/g, 'stroke="white"').replace(/fill="currentColor"/g, 'fill="white"');
+				    displayIcon = `<span style="display: inline-flex; width: 20px; height: 20px; background: ${iconData.bg}; border-radius: 4px; align-items: center; justify-content: center;">${scaledSvg}</span>`;
+				} else if (cat.icon) {
+				    displayIcon = cat.icon;
+				}
             tab.innerHTML = `${displayIcon ? `<span class="tab-icon-display">${displayIcon}</span> ` : ''}<span class="tab-name-display">${cat.name}</span>`;
             
             const nameSpan = tab.querySelector('.tab-name-display');
@@ -7613,5 +7615,6 @@ async function backupContent() {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
         darkModeCheckbox.checked = isDarkMode;
     }
+
 
 
